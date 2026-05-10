@@ -58,6 +58,7 @@ describe("OpenAI tool schemas", () => {
       "cypher_lsp_diagnostics",
       "cypher_prove",
       "cypher_agent_feedback",
+      "cypher_compatibility_catalog",
       "cypher_eval",
       "cypher_scorecard",
       "cypher_benchmark_gate",
@@ -218,6 +219,14 @@ describe("OpenAI tool schemas", () => {
     assert.equal(feedback.nextAction.kind, "apply-deterministic-repairs");
     assert.equal(feedback.proof.version, "cypher-llm-proof/v1");
     assert.equal(feedback.repairPlan.version, "cypher-llm-repair-plan/v1");
+
+    const compatibility = (await executeCypherCompilerTool("cypher_compatibility_catalog", {})) as {
+      version: string;
+      contracts: { version: string }[];
+    };
+
+    assert.equal(compatibility.version, "cypher-llm-compatibility-catalog/v1");
+    assert.ok(compatibility.contracts.some((contract) => contract.version === "cypher-llm-ir/v1"));
 
     const evalReport = (await executeCypherCompilerTool("cypher_eval", {
       dataset: {

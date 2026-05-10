@@ -1,5 +1,6 @@
 import { buildCypherAgentFeedback } from "./agent-feedback.js";
 import { buildBenchmarkGateReport } from "./benchmark-gate.js";
+import { buildCompatibilityCatalog } from "./compatibility.js";
 import { buildDatasetGovernanceReport } from "./dataset-governance.js";
 import type { EvalAttemptSet, EvalDataset, EvalOptions, EvalReport } from "./evals.js";
 import { evaluateAttempts } from "./evals.js";
@@ -43,6 +44,7 @@ export type CypherCompilerToolName =
   | "cypher_lsp_diagnostics"
   | "cypher_prove"
   | "cypher_agent_feedback"
+  | "cypher_compatibility_catalog"
   | "cypher_eval"
   | "cypher_scorecard"
   | "cypher_benchmark_gate"
@@ -487,6 +489,12 @@ export const CYPHER_COMPILER_TOOLS: readonly CypherCompilerToolDefinition[] = [
     })
   },
   {
+    name: "cypher_compatibility_catalog",
+    description:
+      "Return the machine-readable compatibility catalog: contract versions, stability levels, release gates, certification gates, and deprecation policy.",
+    inputSchema: objectSchema([], {})
+  },
+  {
     name: "cypher_eval",
     description: "Score offline text2cypher or IR attempts against a Cypher LLM eval dataset.",
     inputSchema: objectSchema(["dataset", "attempts"], {
@@ -680,6 +688,9 @@ export async function executeCypherCompilerTool(name: string, input: unknown): P
         optionalParams(args),
         proofOptions(args)
       );
+    }
+    case "cypher_compatibility_catalog": {
+      return buildCompatibilityCatalog();
     }
     case "cypher_eval": {
       return evaluateAttempts(

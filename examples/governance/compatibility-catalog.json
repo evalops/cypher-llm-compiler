@@ -1,0 +1,481 @@
+{
+  "version": "cypher-llm-compatibility-catalog/v1",
+  "generatedAt": "2026-05-10",
+  "packageName": "@evalops/cypher-llm-compiler",
+  "packageVersion": "0.1.0",
+  "levels": [
+    {
+      "level": "stable",
+      "title": "Stable Contract",
+      "changePolicy": "No breaking structural changes inside the same contract version.",
+      "consumerGuidance": "Safe for agent runtimes, CI gates, examples, and integrations to depend on."
+    },
+    {
+      "level": "preview",
+      "title": "Preview Contract",
+      "changePolicy": "Compatible additions are preferred, but documented reshaping may occur before promotion to stable.",
+      "consumerGuidance": "Safe for experiments and guarded integrations that pin package versions."
+    },
+    {
+      "level": "experimental",
+      "title": "Experimental Contract",
+      "changePolicy": "Shape and semantics may change while the workstream is being discovered.",
+      "consumerGuidance": "Use for fixtures, research, and opt-in trials; do not assume long-lived compatibility."
+    }
+  ],
+  "contracts": [
+    {
+      "id": "cypher-query-ir",
+      "version": "cypher-llm-ir/v1",
+      "category": "ir",
+      "level": "stable",
+      "ownerWorkstreamId": "semantic-proof-repair",
+      "schemaPath": "schemas/cypher-query.schema.json",
+      "examplePaths": [
+        "examples/tool-hash.query.json"
+      ],
+      "evidencePaths": [
+        "src/ir.ts",
+        "src/render.ts",
+        "test/render.test.ts"
+      ],
+      "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
+    },
+    {
+      "id": "schema-contract",
+      "version": "cypher-llm-schema/v1",
+      "category": "schema",
+      "level": "stable",
+      "ownerWorkstreamId": "semantic-proof-repair",
+      "schemaPath": "schemas/cypher-schema-contract.schema.json",
+      "examplePaths": [
+        "examples/tool-hash.schema.json"
+      ],
+      "evidencePaths": [
+        "src/ir.ts",
+        "src/schema.ts",
+        "test/compiler-loop.test.ts"
+      ],
+      "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
+    },
+    {
+      "id": "diagnostic-shape",
+      "version": "cypher-llm-diagnostic/v1",
+      "category": "diagnostic",
+      "level": "stable",
+      "ownerWorkstreamId": "ecosystem-ux",
+      "examplePaths": [
+        "examples/lsp/tool-hash.lsp.json",
+        "examples/proofs/tool-hash.proof.json"
+      ],
+      "evidencePaths": [
+        "src/diagnostics.ts",
+        "src/validate.ts",
+        "docs/COMPATIBILITY.md"
+      ],
+      "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
+    },
+    {
+      "id": "eval-dataset",
+      "version": "cypher-llm-eval-dataset/v1",
+      "category": "eval",
+      "level": "stable",
+      "ownerWorkstreamId": "public-cypherbench",
+      "schemaPath": "schemas/eval-dataset.schema.json",
+      "examplePaths": [
+        "examples/eval-dataset.json"
+      ],
+      "evidencePaths": [
+        "src/evals.ts",
+        "test/evals.test.ts"
+      ],
+      "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
+    },
+    {
+      "id": "eval-attempts",
+      "version": "cypher-llm-eval-attempts/v1",
+      "category": "eval",
+      "level": "stable",
+      "ownerWorkstreamId": "public-cypherbench",
+      "schemaPath": "schemas/eval-attempts.schema.json",
+      "examplePaths": [
+        "examples/eval-attempts.json"
+      ],
+      "evidencePaths": [
+        "src/evals.ts",
+        "test/evals.test.ts"
+      ],
+      "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
+    },
+    {
+      "id": "dialect-profile",
+      "version": "cypher-llm-dialect-profile/v1",
+      "category": "dialect",
+      "level": "stable",
+      "ownerWorkstreamId": "dialect-certification",
+      "schemaPath": "schemas/dialect-profile.schema.json",
+      "examplePaths": [
+        "profiles/neo4j-cypher-25.json",
+        "profiles/opencypher-9.json",
+        "profiles/gql.json"
+      ],
+      "evidencePaths": [
+        "src/dialects.ts",
+        "test/dialects.test.ts"
+      ],
+      "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
+    },
+    {
+      "id": "dialect-certification",
+      "version": "cypher-llm-dialect-certification/v1",
+      "category": "dialect",
+      "level": "stable",
+      "ownerWorkstreamId": "dialect-certification",
+      "schemaPath": "schemas/dialect-certification.schema.json",
+      "examplePaths": [
+        "examples/certification/dialect-certification.json"
+      ],
+      "evidencePaths": [
+        "src/dialect-certification.ts",
+        "test/dialect-certification.test.ts"
+      ],
+      "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
+    },
+    {
+      "id": "proof",
+      "version": "cypher-llm-proof/v1",
+      "category": "proof",
+      "level": "stable",
+      "ownerWorkstreamId": "semantic-proof-repair",
+      "schemaPath": "schemas/cypher-proof.schema.json",
+      "examplePaths": [
+        "examples/proofs/tool-hash.proof.json"
+      ],
+      "evidencePaths": [
+        "src/proof.ts",
+        "test/proof.test.ts"
+      ],
+      "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
+    },
+    {
+      "id": "repair-plan",
+      "version": "cypher-llm-repair-plan/v1",
+      "category": "repair",
+      "level": "stable",
+      "ownerWorkstreamId": "semantic-proof-repair",
+      "schemaPath": "schemas/repair-plan.schema.json",
+      "examplePaths": [
+        "examples/proofs/tool-hash.repair-plan.json"
+      ],
+      "evidencePaths": [
+        "src/repair-plan.ts",
+        "test/repair-plan.test.ts"
+      ],
+      "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
+    },
+    {
+      "id": "agent-feedback",
+      "version": "cypher-llm-agent-feedback/v1",
+      "category": "agent-feedback",
+      "level": "stable",
+      "ownerWorkstreamId": "ecosystem-ux",
+      "schemaPath": "schemas/agent-feedback.schema.json",
+      "examplePaths": [
+        "examples/proofs/tool-hash.agent-feedback.json"
+      ],
+      "evidencePaths": [
+        "src/agent-feedback.ts",
+        "test/agent-feedback.test.ts"
+      ],
+      "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
+    },
+    {
+      "id": "policy-report",
+      "version": "cypher-llm-policy-report/v1",
+      "category": "policy",
+      "level": "stable",
+      "ownerWorkstreamId": "cost-safety-policy",
+      "schemaPath": "schemas/policy-report.schema.json",
+      "examplePaths": [
+        "examples/policy/tool-hash.policy.json"
+      ],
+      "evidencePaths": [
+        "src/policy.ts",
+        "test/policy.test.ts"
+      ],
+      "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
+    },
+    {
+      "id": "policy-profile-catalog",
+      "version": "cypher-llm-policy-profile-catalog/v1",
+      "category": "policy",
+      "level": "stable",
+      "ownerWorkstreamId": "cost-safety-policy",
+      "schemaPath": "schemas/policy-profile.schema.json",
+      "examplePaths": [
+        "examples/policy/policy-profiles.json"
+      ],
+      "evidencePaths": [
+        "src/policy-profile.ts",
+        "test/policy-profile.test.ts"
+      ],
+      "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
+    },
+    {
+      "id": "policy-rules",
+      "version": "cypher-llm-policy-rules/v1",
+      "category": "policy",
+      "level": "stable",
+      "ownerWorkstreamId": "cost-safety-policy",
+      "schemaPath": "schemas/policy-rules.schema.json",
+      "examplePaths": [
+        "examples/policy/tool-hash.policy-rules.json"
+      ],
+      "evidencePaths": [
+        "src/policy-rules.ts",
+        "test/policy.test.ts"
+      ],
+      "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
+    },
+    {
+      "id": "planner-estimate",
+      "version": "cypher-llm-planner-estimate/v1",
+      "category": "policy",
+      "level": "stable",
+      "ownerWorkstreamId": "cost-safety-policy",
+      "schemaPath": "schemas/planner-estimate.schema.json",
+      "examplePaths": [
+        "examples/policy/tool-hash.planner-estimate.json"
+      ],
+      "evidencePaths": [
+        "src/planner-estimate.ts",
+        "test/planner-estimate.test.ts"
+      ],
+      "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
+    },
+    {
+      "id": "schema-statistics",
+      "version": "cypher-llm-schema-statistics/v1",
+      "category": "policy",
+      "level": "stable",
+      "ownerWorkstreamId": "cost-safety-policy",
+      "schemaPath": "schemas/schema-statistics.schema.json",
+      "examplePaths": [
+        "examples/policy/tool-hash.schema-statistics.json"
+      ],
+      "evidencePaths": [
+        "src/schema-statistics.ts",
+        "test/schema-statistics.test.ts"
+      ],
+      "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
+    },
+    {
+      "id": "lsp-diagnostics",
+      "version": "cypher-llm-lsp-diagnostics/v1",
+      "category": "integration",
+      "level": "stable",
+      "ownerWorkstreamId": "ecosystem-ux",
+      "schemaPath": "schemas/lsp-diagnostics.schema.json",
+      "examplePaths": [
+        "examples/lsp/tool-hash.lsp.json"
+      ],
+      "evidencePaths": [
+        "src/lsp.ts",
+        "test/lsp.test.ts"
+      ],
+      "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
+    },
+    {
+      "id": "lossless-parse",
+      "version": "cypher-llm-lossless-parse/v1",
+      "category": "integration",
+      "level": "stable",
+      "ownerWorkstreamId": "lossless-parser-ast",
+      "schemaPath": "schemas/lossless-parse.schema.json",
+      "examplePaths": [
+        "examples/lossless/tool-hash.lossless.json"
+      ],
+      "evidencePaths": [
+        "src/lossless-parser.ts",
+        "test/lossless-parser.test.ts"
+      ],
+      "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
+    },
+    {
+      "id": "scorecard",
+      "version": "cypher-llm-cypherbench-scorecard/v1",
+      "category": "benchmark",
+      "level": "stable",
+      "ownerWorkstreamId": "public-cypherbench",
+      "schemaPath": "schemas/cypherbench-scorecard.schema.json",
+      "examplePaths": [
+        "examples/benchmarks/tool-hash.scorecard.json"
+      ],
+      "evidencePaths": [
+        "src/scorecard.ts",
+        "test/scorecard.test.ts"
+      ],
+      "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
+    },
+    {
+      "id": "benchmark-gate",
+      "version": "cypher-llm-benchmark-gate/v1",
+      "category": "benchmark",
+      "level": "stable",
+      "ownerWorkstreamId": "public-cypherbench",
+      "schemaPath": "schemas/benchmark-gate.schema.json",
+      "examplePaths": [
+        "examples/benchmarks/tool-hash.benchmark-gate.json"
+      ],
+      "evidencePaths": [
+        "src/benchmark-gate.ts",
+        "test/benchmark-gate.test.ts"
+      ],
+      "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
+    },
+    {
+      "id": "dataset-governance",
+      "version": "cypher-llm-dataset-governance/v1",
+      "category": "benchmark",
+      "level": "stable",
+      "ownerWorkstreamId": "public-cypherbench",
+      "schemaPath": "schemas/dataset-governance.schema.json",
+      "examplePaths": [
+        "examples/benchmarks/tool-hash.dataset-governance.json"
+      ],
+      "evidencePaths": [
+        "src/dataset-governance.ts",
+        "test/dataset-governance.test.ts"
+      ],
+      "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
+    },
+    {
+      "id": "service-manifest",
+      "version": "cypher-llm-service-manifest/v1",
+      "category": "service",
+      "level": "stable",
+      "ownerWorkstreamId": "compiler-service",
+      "schemaPath": "schemas/service-manifest.schema.json",
+      "examplePaths": [
+        "examples/service/service-manifest.json"
+      ],
+      "evidencePaths": [
+        "src/service-manifest.ts",
+        "test/service-manifest.test.ts"
+      ],
+      "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
+    },
+    {
+      "id": "years-roadmap",
+      "version": "cypher-llm-years-roadmap/v1",
+      "category": "governance",
+      "level": "stable",
+      "ownerWorkstreamId": "governance-standards",
+      "schemaPath": "schemas/years-roadmap.schema.json",
+      "examplePaths": [
+        "examples/roadmap/cypher-llm-years-roadmap.json"
+      ],
+      "evidencePaths": [
+        "src/years-roadmap.ts",
+        "test/years-roadmap.test.ts"
+      ],
+      "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
+    },
+    {
+      "id": "compatibility-catalog",
+      "version": "cypher-llm-compatibility-catalog/v1",
+      "category": "governance",
+      "level": "stable",
+      "ownerWorkstreamId": "governance-standards",
+      "schemaPath": "schemas/compatibility-catalog.schema.json",
+      "examplePaths": [
+        "examples/governance/compatibility-catalog.json"
+      ],
+      "evidencePaths": [
+        "src/compatibility.ts",
+        "test/compatibility.test.ts"
+      ],
+      "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
+    }
+  ],
+  "releaseGates": [
+    {
+      "id": "unit-and-schema-suite",
+      "title": "Unit, integration, and checked-in schema examples pass",
+      "command": "npm test",
+      "evidencePaths": [
+        "package.json",
+        "test/evals.test.ts"
+      ]
+    },
+    {
+      "id": "package-dry-run",
+      "title": "Published package contents include public contracts",
+      "command": "npm run verify:pack",
+      "evidencePaths": [
+        "package.json"
+      ]
+    },
+    {
+      "id": "roadmap-integrity",
+      "title": "Roadmap capability metadata remains internally consistent",
+      "command": "cypher-llm roadmap --integrity",
+      "evidencePaths": [
+        "src/years-roadmap.ts",
+        "schemas/years-roadmap.schema.json"
+      ]
+    }
+  ],
+  "certificationGates": [
+    {
+      "id": "dialect-certification",
+      "title": "Dialect profile claims are executable",
+      "command": "cypher-llm certify-dialects --fail-on-fail",
+      "evidencePaths": [
+        "src/dialect-certification.ts",
+        "examples/certification/dialect-certification.json"
+      ]
+    },
+    {
+      "id": "compatibility-integrity",
+      "title": "Compatibility catalog has no duplicate or orphan contract metadata",
+      "command": "cypher-llm compatibility --integrity",
+      "evidencePaths": [
+        "src/compatibility.ts",
+        "examples/governance/compatibility-catalog.json"
+      ]
+    }
+  ],
+  "deprecationPolicy": {
+    "minimumNotice": "one-minor-release",
+    "requiresMigrationNote": true,
+    "requiresReplacementContract": true,
+    "appliesToLevels": [
+      "stable",
+      "preview"
+    ]
+  }
+}

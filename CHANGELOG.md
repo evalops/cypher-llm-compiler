@@ -14,6 +14,7 @@
 - Extended proof and repair-plan artifacts to consume planner estimates, schema statistics, policy thresholds, and policy rules as cost/safety evidence.
 - Added compact `policyEvidence` summaries to proof and repair-plan outputs so agents can explain policy status without re-running policy checks.
 - Added `cypher-llm-agent-feedback/v1` packets that combine proof, repair plan, policy evidence, diagnostics, and next-action guidance for LLM clients.
+- Added a machine-readable compatibility catalog with stability levels, public contract evidence, release gates, certification gates, JSON Schema, CLI/tool/service output, and a checked-in governance artifact.
 - Added a compiler service manifest plus optional bearer auth, redacted audit events, body-limit reporting, JSON Schema, CLI output, and checked-in service manifest artifact.
 - Added a JSON HTTP compiler service over the shared tool dispatcher with health, metadata, tool, roadmap, and dialect certification routes.
 - Added static cost and safety policy reports for broad scans, traversal risk, high limits, cartesian patterns, and writes, including CLI/tool/service output and checked-in policy artifact.

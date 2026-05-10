@@ -260,7 +260,9 @@
       "firstArtifacts": [
         "docs/COMPATIBILITY.md",
         "CHANGELOG.md",
-        "schemas/years-roadmap.schema.json"
+        "src/compatibility.ts",
+        "schemas/years-roadmap.schema.json",
+        "schemas/compatibility-catalog.schema.json"
       ],
       "acceptanceGates": [
         "Every public workstream links to a GitHub issue.",
@@ -612,6 +614,21 @@
       ],
       "workstreamIds": [
         "governance-standards"
+      ]
+    },
+    {
+      "id": "compatibility-catalog",
+      "title": "Machine-Readable Compatibility Catalog",
+      "status": "partial",
+      "evidence": [
+        "src/compatibility.ts",
+        "schemas/compatibility-catalog.schema.json",
+        "test/compatibility.test.ts"
+      ],
+      "workstreamIds": [
+        "governance-standards",
+        "ecosystem-ux",
+        "compiler-service"
       ]
     }
   ]

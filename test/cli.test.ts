@@ -940,6 +940,31 @@ describe("cli", () => {
     assert.ok(writes.get("out/roadmap.json")?.includes("cypher-llm-roadmap-integrity/v1"));
   });
 
+  it("prints and writes the compatibility catalog", async () => {
+    const writes = new Map<string, string>();
+    let stdout = "";
+    let stderr = "";
+    const io: CliIO = {
+      stdout: { write: (chunk: string | Uint8Array) => ((stdout += String(chunk)), true) },
+      stderr: { write: (chunk: string | Uint8Array) => ((stderr += String(chunk)), true) },
+      readFile: async () => "",
+      writeFile: async (path, data) => {
+        writes.set(path, data);
+      },
+      mkdir: async () => undefined
+    };
+
+    const jsonCode = await runCli(["compatibility", "--integrity", "--fail-on-error", "--catalog-out", "out/compatibility.json"], io);
+    const markdownCode = await runCli(["compatibility", "--format", "markdown"], io);
+
+    assert.equal(jsonCode, 0);
+    assert.equal(markdownCode, 0);
+    assert.equal(stderr, "");
+    assert.ok(stdout.includes("cypher-llm-compatibility-catalog/v1"));
+    assert.ok(stdout.includes("# Compatibility Catalog"));
+    assert.ok(writes.get("out/compatibility.json")?.includes("cypher-llm-compatibility-integrity/v1"));
+  });
+
   it("prints and writes the dialect certification report", async () => {
     const writes = new Map<string, string>();
     let stdout = "";

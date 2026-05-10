@@ -5,6 +5,11 @@ import process from "node:process";
 import type { CypherQuery, CypherSchemaContract, JsonLiteral } from "./ir.js";
 import { buildCypherAgentFeedback } from "./agent-feedback.js";
 import { buildBenchmarkGateReport } from "./benchmark-gate.js";
+import {
+  buildCompatibilityCatalog,
+  compatibilityIntegrityReport,
+  renderCompatibilityCatalogMarkdown
+} from "./compatibility.js";
 import { buildDatasetGovernanceReport } from "./dataset-governance.js";
 import { certifyDialectProfiles, renderDialectCertificationMarkdown } from "./dialect-certification.js";
 import type { EvalAttemptSet, EvalDataset, EvalReport } from "./evals.js";
@@ -125,6 +130,9 @@ export async function runCli(argv: string[], io: CliIO = defaultIo()): Promise<n
         return 0;
       case "roadmap":
         await roadmapCommand(args, io);
+        return 0;
+      case "compatibility":
+        await compatibilityCommand(args, io);
         return 0;
       case "certify-dialects":
         await certifyDialectsCommand(args, io);
@@ -631,6 +639,22 @@ async function roadmapCommand(args: Map<string, string | boolean>, io: CliIO) {
   io.stdout.write(output);
 }
 
+async function compatibilityCommand(args: Map<string, string | boolean>, io: CliIO) {
+  const catalog = buildCompatibilityCatalog();
+  const includeIntegrity = args.get("integrity") === true;
+  const format = args.get("format") === "markdown" ? "markdown" : "json";
+  const output = format === "markdown"
+    ? renderCompatibilityCatalogMarkdown(catalog)
+    : `${JSON.stringify(includeIntegrity ? { catalog, integrity: compatibilityIntegrityReport(catalog) } : catalog, null, 2)}\n`;
+  if (typeof args.get("catalog-out") === "string") {
+    await writeTextFile(io, args.get("catalog-out") as string, output);
+  }
+  io.stdout.write(output);
+  if (args.get("fail-on-error") === true && !compatibilityIntegrityReport(catalog).ok) {
+    throw new Error("Compatibility catalog integrity failed.");
+  }
+}
+
 async function certifyDialectsCommand(args: Map<string, string | boolean>, io: CliIO) {
   const report = certifyDialectProfiles();
   const format = args.get("format") === "markdown" ? "markdown" : "json";
@@ -941,6 +965,7 @@ Commands:
   agent-feedback --schema schema.json --query query.json [--params params.json] [--feedback-out feedback.json] [--fail-on-blocked] [--default-limit 25] [--default-max-hops 5] [--planner-estimate estimate.json] [--schema-statistics stats.json] [--policy-rules rules.json] [--no-require-limit] [--max-return-limit 100] [--max-relationship-hops 5] [--allow-writes] [--approved] [--parser-mode syntax|lint] [--no-parser]
   introspect-neo4j --uri bolt://localhost:7687 --user neo4j --password password [--schema-out schema.json] [--sample-limit 1000] [--no-procedures]
   roadmap    [--format json|markdown] [--integrity] [--roadmap-out path]
+  compatibility [--format json|markdown] [--integrity] [--fail-on-error] [--catalog-out path]
   certify-dialects [--format json|markdown] [--report-out path] [--fail-on-fail]
   service-manifest [--manifest-out path] [--max-body-bytes 1000000] [--require-auth] [--audit-enabled]
   mcp

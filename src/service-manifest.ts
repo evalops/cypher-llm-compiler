@@ -14,6 +14,7 @@ export const COMPILER_HTTP_TOOL_ROUTES = {
   "/v1/lsp-diagnostics": "cypher_lsp_diagnostics",
   "/v1/prove": "cypher_prove",
   "/v1/agent-feedback": "cypher_agent_feedback",
+  "/v1/compatibility": "cypher_compatibility_catalog",
   "/v1/eval": "cypher_eval",
   "/v1/scorecard": "cypher_scorecard",
   "/v1/benchmark-gate": "cypher_benchmark_gate",
@@ -113,6 +114,7 @@ export function buildCompilerServiceManifest(options: CompilerServiceManifestOpt
       { method: "GET", path: "/v1/tools", operation: "tool_metadata", authRequired },
       { method: "GET", path: "/v1/roadmap", operation: "years_roadmap", authRequired },
       { method: "GET", path: "/v1/dialect-certification", operation: "dialect_certification", authRequired },
+      { method: "GET", path: "/v1/compatibility", operation: "compatibility_catalog", authRequired },
       ...Object.entries(COMPILER_HTTP_TOOL_ROUTES).map(
         ([path, operation]): CompilerServiceRoute => ({ method: "POST", path, operation, authRequired })
       )

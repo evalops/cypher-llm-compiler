@@ -72,6 +72,12 @@
       "authRequired": false
     },
     {
+      "method": "GET",
+      "path": "/v1/compatibility",
+      "operation": "compatibility_catalog",
+      "authRequired": false
+    },
+    {
       "method": "POST",
       "path": "/v1/render",
       "operation": "cypher_render",
@@ -135,6 +141,12 @@
       "method": "POST",
       "path": "/v1/agent-feedback",
       "operation": "cypher_agent_feedback",
+      "authRequired": false
+    },
+    {
+      "method": "POST",
+      "path": "/v1/compatibility",
+      "operation": "cypher_compatibility_catalog",
       "authRequired": false
     },
     {

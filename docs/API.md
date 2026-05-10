@@ -177,6 +177,17 @@ The packet includes:
 - `policyEvidence`: compact policy status and finding-code summary.
 - `nextAction`: one of `execute`, `apply-deterministic-repairs`, `regenerate-query`, `request-approval`, or `blocked`.
 
+## `buildCompatibilityCatalog()`
+
+Produces a `cypher-llm-compatibility-catalog/v1` object for governance and release automation.
+
+The catalog includes:
+
+- Compatibility levels: `stable`, `preview`, and `experimental`.
+- Public contract entries with category, owner workstream, schema path, examples, evidence, breaking-change policy, and deprecation policy.
+- Release gates and certification gates with concrete commands.
+- A shared deprecation policy for stable and preview contracts.
+
 ## `assessCypherPolicy(query, schema, options?)`
 
 Produces a `cypher-llm-policy-report/v1` object for static cost, cardinality, and safety checks.
@@ -378,6 +389,7 @@ Returns OpenAI Responses API function-tool definitions for:
 - `cypher_lsp_diagnostics`
 - `cypher_prove`
 - `cypher_agent_feedback`
+- `cypher_compatibility_catalog`
 - `cypher_eval`
 - `cypher_scorecard`
 - `cypher_benchmark_gate`
@@ -426,6 +438,8 @@ Routes:
 - `POST /v1/lsp-diagnostics`
 - `POST /v1/prove`
 - `POST /v1/agent-feedback`
+- `GET /v1/compatibility`
+- `POST /v1/compatibility`
 - `POST /v1/eval`
 - `POST /v1/scorecard`
 - `POST /v1/benchmark-gate`

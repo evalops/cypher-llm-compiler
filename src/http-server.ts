@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import process from "node:process";
+import { buildCompatibilityCatalog } from "./compatibility.js";
 import { certifyDialectProfiles } from "./dialect-certification.js";
 import { CYPHER_COMPILER_TOOLS, executeCypherCompilerTool, type CypherCompilerToolName } from "./tools.js";
 import { getYearsRoadmap } from "./years-roadmap.js";
@@ -135,6 +136,11 @@ export async function handleCompilerHttpRequest(
 
   if (request.method === "GET" && url.pathname === "/v1/dialect-certification") {
     await finish(200, certifyDialectProfiles());
+    return;
+  }
+
+  if (request.method === "GET" && url.pathname === "/v1/compatibility") {
+    await finish(200, buildCompatibilityCatalog());
     return;
   }
 

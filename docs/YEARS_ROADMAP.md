@@ -29,6 +29,12 @@ Generate a markdown view:
 cypher-llm roadmap --format markdown
 ```
 
+The compatibility catalog is exported from `src/compatibility.ts`, validated by `schemas/compatibility-catalog.schema.json`, and checked in at `examples/governance/compatibility-catalog.json`.
+
+```bash
+cypher-llm compatibility --integrity --fail-on-error
+```
+
 Lossless parse reports are the first executable parser/AST compatibility lane. They are exported from `src/lossless-parser.ts`, validated by `schemas/lossless-parse.schema.json`, and checked in at `examples/lossless/tool-hash.lossless.json`.
 
 ```bash

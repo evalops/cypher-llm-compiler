@@ -300,7 +300,13 @@ export const yearsRoadmap = {
         "Machine-readable roadmap and capability status.",
         "CI validation for roadmap and capability metadata."
       ],
-      firstArtifacts: ["docs/COMPATIBILITY.md", "CHANGELOG.md", "schemas/years-roadmap.schema.json"],
+      firstArtifacts: [
+        "docs/COMPATIBILITY.md",
+        "CHANGELOG.md",
+        "src/compatibility.ts",
+        "schemas/years-roadmap.schema.json",
+        "schemas/compatibility-catalog.schema.json"
+      ],
       acceptanceGates: [
         "Every public workstream links to a GitHub issue.",
         "Roadmap JSON validates against schema.",
@@ -492,6 +498,13 @@ export const yearsRoadmap = {
       status: "partial",
       evidence: ["src/years-roadmap.ts", "schemas/years-roadmap.schema.json", "docs/YEARS_ROADMAP.md"],
       workstreamIds: ["governance-standards"]
+    },
+    {
+      id: "compatibility-catalog",
+      title: "Machine-Readable Compatibility Catalog",
+      status: "partial",
+      evidence: ["src/compatibility.ts", "schemas/compatibility-catalog.schema.json", "test/compatibility.test.ts"],
+      workstreamIds: ["governance-standards", "ecosystem-ux", "compiler-service"]
     }
   ]
 } as const satisfies YearsRoadmap;

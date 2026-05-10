@@ -26,8 +26,19 @@ Stable public contracts:
 - `cypher-llm-repair-plan/v1`
 - `cypher-llm-agent-feedback/v1`
 - `cypher-llm-service-manifest/v1`
+- `cypher-llm-compatibility-catalog/v1`
 
 JSON Schema artifacts live under `schemas/` and should be treated as the source of truth for model/tool input validation.
+
+## Compatibility Catalog
+
+Run:
+
+```bash
+cypher-llm compatibility --integrity --fail-on-error --catalog-out examples/governance/compatibility-catalog.json
+```
+
+Compatibility catalogs are the machine-readable governance contract for public versions. They define stability levels, contract categories, schema and example evidence, release gates, certification gates, and deprecation policy. JSON output validates against `schemas/compatibility-catalog.schema.json`.
 
 ## Dialect Profiles
 

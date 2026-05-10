@@ -1,0 +1,136 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evalops.dev/schemas/cypher-llm/compatibility-catalog/v1.json",
+  "title": "Cypher LLM Compatibility Catalog",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "generatedAt",
+    "packageName",
+    "packageVersion",
+    "levels",
+    "contracts",
+    "releaseGates",
+    "certificationGates",
+    "deprecationPolicy"
+  ],
+  "properties": {
+    "version": { "const": "cypher-llm-compatibility-catalog/v1" },
+    "generatedAt": { "type": "string", "minLength": 1 },
+    "packageName": { "type": "string", "minLength": 1 },
+    "packageVersion": { "type": "string", "minLength": 1 },
+    "levels": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/level" },
+      "minItems": 1
+    },
+    "contracts": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/contract" },
+      "minItems": 1
+    },
+    "releaseGates": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/gate" },
+      "minItems": 1
+    },
+    "certificationGates": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/gate" },
+      "minItems": 1
+    },
+    "deprecationPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["minimumNotice", "requiresMigrationNote", "requiresReplacementContract", "appliesToLevels"],
+      "properties": {
+        "minimumNotice": { "type": "string", "minLength": 1 },
+        "requiresMigrationNote": { "type": "boolean" },
+        "requiresReplacementContract": { "type": "boolean" },
+        "appliesToLevels": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/compatibilityLevel" },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      }
+    }
+  },
+  "$defs": {
+    "compatibilityLevel": {
+      "enum": ["stable", "preview", "experimental"]
+    },
+    "category": {
+      "enum": [
+        "agent-feedback",
+        "benchmark",
+        "diagnostic",
+        "dialect",
+        "eval",
+        "governance",
+        "integration",
+        "ir",
+        "policy",
+        "proof",
+        "repair",
+        "schema",
+        "service"
+      ]
+    },
+    "stringList": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "minItems": 1
+    },
+    "level": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["level", "title", "changePolicy", "consumerGuidance"],
+      "properties": {
+        "level": { "$ref": "#/$defs/compatibilityLevel" },
+        "title": { "type": "string", "minLength": 1 },
+        "changePolicy": { "type": "string", "minLength": 1 },
+        "consumerGuidance": { "type": "string", "minLength": 1 }
+      }
+    },
+    "contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version",
+        "category",
+        "level",
+        "ownerWorkstreamId",
+        "examplePaths",
+        "evidencePaths",
+        "breakingChangePolicy",
+        "deprecationPolicy"
+      ],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "version": { "type": "string", "minLength": 1 },
+        "category": { "$ref": "#/$defs/category" },
+        "level": { "$ref": "#/$defs/compatibilityLevel" },
+        "ownerWorkstreamId": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "schemaPath": { "type": "string", "minLength": 1 },
+        "examplePaths": { "$ref": "#/$defs/stringList" },
+        "evidencePaths": { "$ref": "#/$defs/stringList" },
+        "breakingChangePolicy": { "type": "string", "minLength": 1 },
+        "deprecationPolicy": { "type": "string", "minLength": 1 }
+      }
+    },
+    "gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "command", "evidencePaths"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "title": { "type": "string", "minLength": 1 },
+        "command": { "type": "string", "minLength": 1 },
+        "evidencePaths": { "$ref": "#/$defs/stringList" }
+      }
+    }
+  }
+}
