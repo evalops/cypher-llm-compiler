@@ -135,6 +135,38 @@ export const llmFailureCorpus: LlmFailureCase[] = [
       ]
     },
     expectedDiagnosticCodes: ["unbounded-variable-length-path"]
+  },
+  {
+    id: "ambiguous-aggregation-expression",
+    source: "semantic aggregation drift",
+    problem: "The model combines an aggregate and a scalar variable reference in the same projection expression.",
+    schema: toolHashSchema,
+    query: {
+      version: "cypher-llm-ir/v1",
+      profile: "llm-safe-readonly",
+      clauses: [
+        {
+          kind: "match",
+          patterns: [{ segments: [{ variable: "tool", labels: ["Tool"] }] }]
+        },
+        {
+          kind: "return",
+          items: [
+            {
+              expression: {
+                kind: "binary",
+                op: "+",
+                left: { kind: "prop", object: { kind: "var", name: "tool" }, key: "name" },
+                right: { kind: "function", name: "count", arguments: [{ kind: "var", name: "tool" }] }
+              },
+              alias: "mixed"
+            }
+          ],
+          limit: { kind: "literal", value: 10 }
+        }
+      ]
+    },
+    expectedDiagnosticCodes: ["ambiguous-aggregation-expression"]
   }
 ];
 

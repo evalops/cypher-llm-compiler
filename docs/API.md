@@ -34,6 +34,8 @@ Validation currently covers:
 - Unknown properties when variable ownership can be inferred.
 - Unknown parameters.
 - Variables referenced out of scope.
+- Aggregate functions in pre-aggregation `MATCH WHERE` clauses.
+- Ambiguous aggregate/scalar projection expressions.
 - Relationship direction against declared endpoints.
 - Missing `LIMIT` in LLM-safe read mode.
 - Unbounded variable-length paths.

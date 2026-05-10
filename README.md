@@ -184,6 +184,8 @@ Current diagnostic codes include:
 - `missing-limit`
 - `missing-return`
 - `relationship-direction-mismatch`
+- `aggregate-in-match-where`
+- `ambiguous-aggregation-expression`
 - `unbounded-variable-length-path`
 - `raw-cypher-escape-hatch`
 - `raw-expression-escape-hatch`

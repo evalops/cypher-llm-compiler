@@ -199,6 +199,17 @@ function validateMatch(
     validatePath(pattern, scope, schema, diagnostics, `/clauses/${index}/patterns/${patternIndex}`, options)
   );
   if (clause.where) {
+    if (containsAggregateFunction(clause.where)) {
+      diagnostics.push(
+        diagnostic({
+          code: "aggregate-in-match-where",
+          severity: "error",
+          message: "MATCH WHERE cannot contain aggregate functions because it is evaluated before aggregation.",
+          path: `/clauses/${index}/where`,
+          suggestion: "Move the aggregate into a WITH or RETURN projection, alias it, then filter on that alias."
+        })
+      );
+    }
     validateExpression(clause.where, scope, schema, diagnostics, `/clauses/${index}/where`, options);
   }
 }
@@ -298,6 +309,17 @@ function validateProjectionItem(
   path: string,
   options: Required<ValidationOptions>
 ) {
+  if (hasAmbiguousAggregation(item.expression)) {
+    diagnostics.push(
+      diagnostic({
+        code: "ambiguous-aggregation-expression",
+        severity: "error",
+        message: "Projection expression mixes aggregate and non-aggregate variable references.",
+        path: `${path}/expression`,
+        suggestion: "Project grouping keys and aggregate values as separate WITH/RETURN items, then combine aliases later."
+      })
+    );
+  }
   validateExpression(item.expression, scope, schema, diagnostics, `${path}/expression`, options);
 }
 
@@ -661,6 +683,78 @@ function inferExpressionBinding(expression: Expression, scope: Scope): VariableB
     return scope.get(expression.name) ?? { kind: "unknown" };
   }
   return { kind: "unknown" };
+}
+
+const AGGREGATE_FUNCTIONS = new Set([
+  "avg",
+  "collect",
+  "count",
+  "max",
+  "min",
+  "percentilecont",
+  "percentiledisc",
+  "stdev",
+  "stdevp",
+  "sum"
+]);
+
+interface AggregationShape {
+  hasAggregate: boolean;
+  hasVariableReference: boolean;
+  ambiguous: boolean;
+}
+
+function containsAggregateFunction(expression: Expression): boolean {
+  return aggregationShape(expression).hasAggregate;
+}
+
+function hasAmbiguousAggregation(expression: Expression): boolean {
+  return aggregationShape(expression).ambiguous;
+}
+
+function aggregationShape(expression: Expression): AggregationShape {
+  switch (expression.kind) {
+    case "var":
+    case "prop":
+      return { hasAggregate: false, hasVariableReference: true, ambiguous: false };
+    case "param":
+    case "literal":
+    case "raw":
+      return { hasAggregate: false, hasVariableReference: false, ambiguous: false };
+    case "function":
+      if (isAggregateFunction(expression.name)) {
+        return { hasAggregate: true, hasVariableReference: false, ambiguous: false };
+      }
+      return mergeAggregationShapes(expression.arguments.map(aggregationShape));
+    case "binary":
+      return mergeAggregationShapes([aggregationShape(expression.left), aggregationShape(expression.right)]);
+    case "unary":
+      return aggregationShape(expression.expression);
+    case "list":
+      return mergeAggregationShapes(expression.items.map(aggregationShape));
+    case "map":
+      return mergeAggregationShapes(Object.values(expression.entries).map(aggregationShape));
+    case "case":
+      return mergeAggregationShapes([
+        ...(expression.expression ? [aggregationShape(expression.expression)] : []),
+        ...expression.cases.flatMap((branch) => [aggregationShape(branch.when), aggregationShape(branch.then)]),
+        ...(expression.else ? [aggregationShape(expression.else)] : [])
+      ]);
+  }
+}
+
+function mergeAggregationShapes(shapes: AggregationShape[]): AggregationShape {
+  const hasAggregate = shapes.some((shape) => shape.hasAggregate);
+  const hasVariableReference = shapes.some((shape) => shape.hasVariableReference);
+  return {
+    hasAggregate,
+    hasVariableReference,
+    ambiguous: shapes.some((shape) => shape.ambiguous) || (hasAggregate && hasVariableReference)
+  };
+}
+
+function isAggregateFunction(name: string): boolean {
+  return AGGREGATE_FUNCTIONS.has(name.replaceAll(".", "").toLowerCase());
 }
 
 function endpointMatch(labels: string[], allowed: string[]): boolean {

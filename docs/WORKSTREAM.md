@@ -45,7 +45,7 @@ Artifacts:
 - Dialect-specific rendering and validation.
 - Property and parameter type checks.
 
-This is where LLM failures become precise repair instructions instead of broad invalid-query reports.
+Status: started with aggregation diagnostics for `MATCH WHERE` aggregate placement and ambiguous aggregate/scalar projection expressions. This is where LLM failures become precise repair instructions instead of broad invalid-query reports.
 
 ## 5. Agent Integrations
 

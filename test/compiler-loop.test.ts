@@ -21,6 +21,47 @@ const schema: CypherSchemaContract = {
 };
 
 describe("validation and repair", () => {
+  it("reports aggregate placement mistakes with stable diagnostics", () => {
+    const query: CypherQuery = {
+      version: "cypher-llm-ir/v1",
+      profile: "llm-safe-readonly",
+      clauses: [
+        {
+          kind: "match",
+          patterns: [{ segments: [{ variable: "tool", labels: ["Tool"] }] }],
+          where: {
+            kind: "binary",
+            op: ">",
+            left: { kind: "function", name: "count", arguments: [{ kind: "var", name: "tool" }] },
+            right: { kind: "literal", value: 1 }
+          }
+        },
+        {
+          kind: "return",
+          items: [
+            {
+              expression: {
+                kind: "binary",
+                op: "+",
+                left: { kind: "prop", object: { kind: "var", name: "tool" }, key: "name" },
+                right: { kind: "function", name: "count", arguments: [{ kind: "var", name: "tool" }] }
+              },
+              alias: "badMix"
+            }
+          ],
+          limit: { kind: "literal", value: 10 }
+        }
+      ]
+    };
+
+    const result = validateQuery(query, normalizeSchema(schema));
+    const codes = result.diagnostics.map((item) => item.code);
+
+    assert.equal(result.ok, false);
+    assert.ok(codes.includes("aggregate-in-match-where"));
+    assert.ok(codes.includes("ambiguous-aggregation-expression"));
+  });
+
   it("reports scope, limit, direction, and traversal diagnostics with stable codes", () => {
     const query: CypherQuery = {
       version: "cypher-llm-ir/v1",
