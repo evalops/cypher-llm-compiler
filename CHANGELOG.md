@@ -8,3 +8,6 @@
 - Added dialect profiles for Neo4j Cypher 25, openCypher 9, and a GQL-oriented target.
 - Added raw Cypher lifting, schema introspection, CypherBench comparison/repair-loop artifacts, semantic type diagnostics, function/procedure argument checks, and dialect feature validation.
 - Added years-scale public roadmap governance with GitHub issue-backed workstreams, capability status, JSON Schema, CLI output, and checked-in roadmap artifact.
+- Added dialect certification reports with profile metadata, renderer, parser, semantic feature-gate, known-limitation checks, JSON Schema, CLI output, and checked-in certification artifact.
+- Added proof-carrying compile output with repair, parser, diagnostics, execution-policy claims, JSON Schema, CLI/tool output, and checked-in proof artifact.
+- Added a JSON HTTP compiler service over the shared tool dispatcher with health, metadata, tool, roadmap, and dialect certification routes.

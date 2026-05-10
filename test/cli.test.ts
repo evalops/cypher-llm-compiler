@@ -270,6 +270,66 @@ describe("cli", () => {
     assert.deepEqual(output.diagnostics, []);
   });
 
+  it("emits proof-carrying compile output", async () => {
+    const files = new Map<string, string>([
+      [
+        "schema.json",
+        JSON.stringify({
+          version: "cypher-llm-schema/v1",
+          dialect: "neo4j-cypher-25",
+          nodes: [
+            { name: "Tool", properties: { name: { type: "STRING" } } },
+            { name: "Hash", properties: { value: { type: "STRING" } } }
+          ],
+          relationships: [{ type: "has MD5 hash", from: "Tool", to: "Hash" }]
+        })
+      ],
+      [
+        "query.json",
+        JSON.stringify({
+          version: "cypher-llm-ir/v1",
+          profile: "llm-safe-readonly",
+          clauses: [
+            {
+              kind: "match",
+              patterns: [
+                {
+                  segments: [
+                    { variable: "tool", labels: ["Tool"] },
+                    { rel: { types: ["has MD5 hash"], direction: "out" }, node: { variable: "hash", labels: ["Hash"] } }
+                  ]
+                }
+              ]
+            },
+            { kind: "return", items: [{ expression: { kind: "var", name: "hash" } }] }
+          ]
+        })
+      ]
+    ]);
+    const writes = new Map<string, string>();
+    let stdout = "";
+    let stderr = "";
+    const io: CliIO = {
+      stdout: { write: (chunk: string | Uint8Array) => ((stdout += String(chunk)), true) },
+      stderr: { write: (chunk: string | Uint8Array) => ((stderr += String(chunk)), true) },
+      readFile: async (path) => files.get(String(path)) ?? "",
+      writeFile: async (path, data) => {
+        writes.set(path, data);
+      },
+      mkdir: async () => undefined
+    };
+
+    const code = await runCli(
+      ["prove", "--schema", "schema.json", "--query", "query.json", "--proof-out", "out/proof.json", "--default-limit", "25"],
+      io
+    );
+
+    assert.equal(code, 0);
+    assert.equal(stderr, "");
+    assert.ok(stdout.includes("cypher-llm-proof/v1"));
+    assert.ok(writes.get("out/proof.json")?.includes("parser-preflight"));
+  });
+
   it("lifts raw Cypher and evaluates raw-lift attempts", async () => {
     const schema = {
       version: "cypher-llm-schema/v1",
@@ -352,6 +412,31 @@ describe("cli", () => {
     assert.ok(stdout.includes("cypher-llm-years-roadmap/v1"));
     assert.ok(stdout.includes("# Years-Scale Roadmap"));
     assert.ok(writes.get("out/roadmap.json")?.includes("cypher-llm-roadmap-integrity/v1"));
+  });
+
+  it("prints and writes the dialect certification report", async () => {
+    const writes = new Map<string, string>();
+    let stdout = "";
+    let stderr = "";
+    const io: CliIO = {
+      stdout: { write: (chunk: string | Uint8Array) => ((stdout += String(chunk)), true) },
+      stderr: { write: (chunk: string | Uint8Array) => ((stderr += String(chunk)), true) },
+      readFile: async () => "",
+      writeFile: async (path, data) => {
+        writes.set(path, data);
+      },
+      mkdir: async () => undefined
+    };
+
+    const jsonCode = await runCli(["certify-dialects", "--fail-on-fail", "--report-out", "out/certification.json"], io);
+    const markdownCode = await runCli(["certify-dialects", "--format", "markdown"], io);
+
+    assert.equal(jsonCode, 0);
+    assert.equal(markdownCode, 0);
+    assert.equal(stderr, "");
+    assert.ok(stdout.includes("cypher-llm-dialect-certification/v1"));
+    assert.ok(stdout.includes("# Dialect Certification"));
+    assert.ok(writes.get("out/certification.json")?.includes("\"failedChecks\": 0"));
   });
 
   it("imports text2cypher CSV fixtures to dataset and attempt files", async () => {

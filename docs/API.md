@@ -119,6 +119,25 @@ Produces a `SafeExecutionPlan`:
 
 No database is touched. A real adapter can run `preflightCypher`, then use `canExecute` and `requiresApproval` to decide what to do next.
 
+## `buildCypherProof(query, schema, params?, options?)`
+
+Produces a `cypher-llm-proof/v1` object for agent feedback loops:
+
+```ts
+{
+  status: "accepted" | "accepted-with-warnings" | "repaired" | "blocked";
+  cypher: string;
+  preflightCypher: string;
+  canExecute: boolean;
+  requiresApproval: boolean;
+  repairKinds: string[];
+  diagnosticCodes: string[];
+  claims: CypherProofClaim[];
+}
+```
+
+Proof claims cover deterministic repairs, compiler diagnostics, execution policy, and parser preflight unless `includeParser` is false.
+
 ## `validateRenderedQueryWithParser(query, schema, options?)`
 
 Renders a structured query and validates the resulting Cypher with Neo4j's `@neo4j-cypher/language-support` package.
@@ -227,6 +246,7 @@ Returns OpenAI Responses API function-tool definitions for:
 - `cypher_validate`
 - `cypher_repair`
 - `cypher_parse_check`
+- `cypher_prove`
 - `cypher_eval`
 
 ## `getOpenAiChatTools()`
@@ -251,6 +271,26 @@ const output = await executeCypherCompilerTool("cypher_render", {
 Starts a stdio MCP server that supports `initialize`, `ping`, `tools/list`, and `tools/call`.
 
 The package also exposes a `cypher-llm-mcp` binary and `cypher-llm mcp` CLI command.
+
+## `createCompilerHttpServer(options?)`
+
+Starts a JSON HTTP service over the same compiler tool dispatcher.
+
+Routes:
+
+- `GET /healthz`
+- `GET /v1/tools`
+- `POST /v1/render`
+- `POST /v1/validate`
+- `POST /v1/repair`
+- `POST /v1/parse-check`
+- `POST /v1/prove`
+- `POST /v1/eval`
+- `POST /v1/tools/:toolName`
+- `GET /v1/roadmap`
+- `GET /v1/dialect-certification`
+
+The CLI equivalent is `cypher-llm serve --host 127.0.0.1 --port 8787`.
 
 ## `createLangChainCypherAdapter(schema, options?)`
 

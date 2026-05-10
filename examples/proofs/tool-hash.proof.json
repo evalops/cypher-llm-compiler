@@ -1,0 +1,57 @@
+{
+  "version": "cypher-llm-proof/v1",
+  "status": "repaired",
+  "dialect": "neo4j-cypher-25",
+  "mode": "explain",
+  "cypher": "MATCH (tool:`Tool` {`name`: $toolName})-[:`has MD5 hash`]->(hash:`Hash`)\nRETURN hash.`value` AS md5\nLIMIT 25",
+  "preflightCypher": "EXPLAIN\nMATCH (tool:`Tool` {`name`: $toolName})-[:`has MD5 hash`]->(hash:`Hash`)\nRETURN hash.`value` AS md5\nLIMIT 25",
+  "canExecute": true,
+  "requiresApproval": false,
+  "repairKinds": [
+    "canonicalize-identifier",
+    "fix-direction",
+    "add-limit"
+  ],
+  "diagnosticCodes": [],
+  "claims": [
+    {
+      "id": "deterministic-repair",
+      "title": "Deterministic compiler repairs are recorded before rendering",
+      "status": "warning",
+      "evidence": [
+        "src/repair.ts",
+        "src/safety.ts"
+      ],
+      "diagnostics": []
+    },
+    {
+      "id": "compiler-diagnostics",
+      "title": "Compiler diagnostics have no blocking errors",
+      "status": "passed",
+      "evidence": [
+        "src/validate.ts",
+        "src/safety.ts"
+      ],
+      "diagnostics": []
+    },
+    {
+      "id": "execution-policy",
+      "title": "Execution policy allows this plan to run",
+      "status": "passed",
+      "evidence": [
+        "src/safety.ts",
+        "docs/LLM_SAFE_PROFILE.md"
+      ],
+      "diagnostics": []
+    },
+    {
+      "id": "parser-preflight",
+      "title": "Rendered Cypher is accepted by parser preflight",
+      "status": "passed",
+      "evidence": [
+        "src/parser-validation.ts"
+      ],
+      "diagnostics": []
+    }
+  ]
+}

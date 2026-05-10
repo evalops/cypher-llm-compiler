@@ -91,7 +91,13 @@ export const yearsRoadmap = {
         "Profile claims become CI-gated capabilities, not prose.",
         "Known dialect limitations are visible before an agent emits a query."
       ],
-      firstArtifacts: ["profiles/neo4j-cypher-25.json", "profiles/opencypher-9.json", "profiles/gql.json", "test/dialects.test.ts"],
+      firstArtifacts: [
+        "profiles/neo4j-cypher-25.json",
+        "profiles/opencypher-9.json",
+        "profiles/gql.json",
+        "src/dialect-certification.ts",
+        "test/dialects.test.ts"
+      ],
       acceptanceGates: [
         "Every stable profile claim has a passing fixture.",
         "Preview and experimental claims report unsupported or rendering-limitation diagnostics.",
@@ -139,7 +145,7 @@ export const yearsRoadmap = {
         "Minimal IR patches split into deterministic, model-required, and unsafe repair classes.",
         "Repair plans attach source spans, IR paths, and benchmark evidence."
       ],
-      firstArtifacts: ["src/validate.ts", "src/repair.ts", "src/failure-corpus.ts", "docs/FAILURE_CORPUS.md"],
+      firstArtifacts: ["src/validate.ts", "src/repair.ts", "src/proof.ts", "src/failure-corpus.ts", "docs/FAILURE_CORPUS.md"],
       acceptanceGates: [
         "Every accepted query can emit a compact proof summary.",
         "Every failed query can emit a bounded repair plan or a clear refusal.",
@@ -163,7 +169,7 @@ export const yearsRoadmap = {
         "Tenant/schema isolation, redaction, audit logs, and observability.",
         "Versioned service contracts and deployment guidance."
       ],
-      firstArtifacts: ["src/tools.ts", "src/mcp-server.ts", "src/cli.ts", "docs/INTEGRATIONS.md"],
+      firstArtifacts: ["src/tools.ts", "src/mcp-server.ts", "src/http-server.ts", "src/cli.ts", "docs/INTEGRATIONS.md"],
       acceptanceGates: [
         "Service contracts are schema-validated and backwards compatible.",
         "Operational metrics cover diagnostics, repairs, retries, and live database outcomes.",
@@ -269,7 +275,7 @@ export const yearsRoadmap = {
       id: "dialect-profiles",
       title: "Dialect Profiles And Validation",
       status: "partial",
-      evidence: ["src/dialects.ts", "profiles/opencypher-9.json", "test/dialects.test.ts"],
+      evidence: ["src/dialects.ts", "src/dialect-certification.ts", "profiles/opencypher-9.json", "test/dialects.test.ts"],
       workstreamIds: ["dialect-certification"]
     },
     {
@@ -303,15 +309,15 @@ export const yearsRoadmap = {
     {
       id: "compiler-service",
       title: "Long-Running Compiler Service",
-      status: "planned",
-      evidence: ["src/tools.ts", "src/mcp-server.ts", "docs/INTEGRATIONS.md"],
+      status: "partial",
+      evidence: ["src/tools.ts", "src/mcp-server.ts", "src/http-server.ts", "test/http-server.test.ts", "docs/INTEGRATIONS.md"],
       workstreamIds: ["compiler-service", "ecosystem-ux"]
     },
     {
       id: "proof-objects",
       title: "Proof-Carrying Validation And Repair Plans",
-      status: "planned",
-      evidence: ["src/validate.ts", "src/repair.ts", "src/failure-corpus.ts"],
+      status: "partial",
+      evidence: ["src/proof.ts", "schemas/cypher-proof.schema.json", "test/proof.test.ts"],
       workstreamIds: ["semantic-proof-repair", "cost-safety-policy"]
     },
     {

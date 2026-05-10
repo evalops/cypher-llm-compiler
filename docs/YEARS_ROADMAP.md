@@ -29,6 +29,18 @@ Generate a markdown view:
 cypher-llm roadmap --format markdown
 ```
 
+Dialect certification is the first executable certification lane under this program. It is exported from `src/dialect-certification.ts`, validated by `schemas/dialect-certification.schema.json`, and checked in at `examples/certification/dialect-certification.json`.
+
+```bash
+cypher-llm certify-dialects --fail-on-fail
+```
+
+Proof-carrying compile output is the first semantic-proof lane. It is exported from `src/proof.ts`, validated by `schemas/cypher-proof.schema.json`, and checked in at `examples/proofs/tool-hash.proof.json`.
+
+```bash
+cypher-llm prove --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json --params examples/tool-hash.params.json --default-limit 25
+```
+
 ## Operating Rule
 
 Years-scale work should still land as small verticals. Each vertical should add at least one of:

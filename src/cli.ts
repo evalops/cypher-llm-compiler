@@ -3,6 +3,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 import type { CypherQuery, CypherSchemaContract, JsonLiteral } from "./ir.js";
+import { certifyDialectProfiles, renderDialectCertificationMarkdown } from "./dialect-certification.js";
 import type { EvalAttemptSet, EvalDataset, EvalReport } from "./evals.js";
 import { compareEvalReports } from "./eval-compare.js";
 import { evaluateAttempts } from "./evals.js";
@@ -20,6 +21,7 @@ import { evaluateRepairLoop } from "./repair-loop.js";
 import { renderQuery } from "./render.js";
 import { createSafeExecutionPlan } from "./safety.js";
 import { validateCypherTextWithParser } from "./parser-validation.js";
+import { buildCypherProof } from "./proof.js";
 import { evaluateRawLiftAttempts, liftRawCypherToIr } from "./raw-lift.js";
 import { normalizeSchema } from "./schema.js";
 import { validateQuery } from "./validate.js";
@@ -69,14 +71,23 @@ export async function runCli(argv: string[], io: CliIO = defaultIo()): Promise<n
       case "parse-check":
         await parseCheckCommand(args, io);
         return 0;
+      case "prove":
+        await proveCommand(args, io);
+        return 0;
       case "introspect-neo4j":
         await introspectNeo4jCommand(args, io);
         return 0;
       case "roadmap":
         await roadmapCommand(args, io);
         return 0;
+      case "certify-dialects":
+        await certifyDialectsCommand(args, io);
+        return 0;
       case "mcp":
         await mcpCommand();
+        return 0;
+      case "serve":
+        await serveCommand(args, io);
         return 0;
       case "import-text2cypher":
         await importText2CypherCommand(args, io);
@@ -245,6 +256,39 @@ async function parseCheckCommand(args: Map<string, string | boolean>, io: CliIO)
   });
 }
 
+async function proveCommand(args: Map<string, string | boolean>, io: CliIO) {
+  const schema = normalizeSchema(await readSchema(args, io)).original;
+  const query = await readQuery(args, io);
+  const params = await readParams(args, io);
+  const defaultLimit = optionalNumber(args.get("default-limit"));
+  const defaultMaxHops = optionalNumber(args.get("default-max-hops"));
+  const proofOptions: Parameters<typeof buildCypherProof>[3] = {};
+  if (defaultLimit !== undefined) {
+    proofOptions.defaultLimit = defaultLimit;
+  }
+  if (defaultMaxHops !== undefined) {
+    proofOptions.defaultMaxHops = defaultMaxHops;
+  }
+  if (args.get("allow-writes") === true) {
+    proofOptions.allowWrites = true;
+  }
+  if (args.get("approved") === true) {
+    proofOptions.approved = true;
+  }
+  if (args.get("no-parser") === true) {
+    proofOptions.includeParser = false;
+  }
+  proofOptions.parserMode = args.get("parser-mode") === "lint" ? "lint" : "syntax";
+  const proof = buildCypherProof(query, schema, params, proofOptions);
+  if (typeof args.get("proof-out") === "string") {
+    await writeJsonFile(io, args.get("proof-out") as string, proof);
+  }
+  writeJson(io, proof);
+  if (args.get("fail-on-blocked") === true && proof.status === "blocked") {
+    throw new Error("Cypher proof is blocked.");
+  }
+}
+
 async function importText2CypherCommand(args: Map<string, string | boolean>, io: CliIO) {
   const csv = await io.readFile(stringArg(args, "csv"), "utf8");
   const imported = importText2CypherCsv(csv, importOptions(args, "text2cypher-import"));
@@ -299,9 +343,31 @@ async function roadmapCommand(args: Map<string, string | boolean>, io: CliIO) {
   io.stdout.write(output);
 }
 
+async function certifyDialectsCommand(args: Map<string, string | boolean>, io: CliIO) {
+  const report = certifyDialectProfiles();
+  const format = args.get("format") === "markdown" ? "markdown" : "json";
+  const output = format === "markdown" ? renderDialectCertificationMarkdown(report) : `${JSON.stringify(report, null, 2)}\n`;
+  if (typeof args.get("report-out") === "string") {
+    await writeTextFile(io, args.get("report-out") as string, output);
+  }
+  io.stdout.write(output);
+  if (args.get("fail-on-fail") === true && report.summary.failedChecks > 0) {
+    throw new Error(`Dialect certification found ${report.summary.failedChecks} failing check(s).`);
+  }
+}
+
 async function mcpCommand() {
   const { runMcpServer } = await import("./mcp-server.js");
   await runMcpServer(process.stdin, process.stdout);
+}
+
+async function serveCommand(args: Map<string, string | boolean>, io: CliIO) {
+  const { createCompilerHttpServer } = await import("./http-server.js");
+  const host = typeof args.get("host") === "string" ? (args.get("host") as string) : "127.0.0.1";
+  const port = optionalNumber(args.get("port")) ?? 8787;
+  const server = createCompilerHttpServer();
+  await new Promise<void>((resolve) => server.listen(port, host, resolve));
+  io.stderr.write(`cypher-llm compiler service listening on http://${host}:${port}\n`);
 }
 
 async function readSchema(args: Map<string, string | boolean>, io: CliIO): Promise<CypherSchemaContract> {
@@ -428,9 +494,12 @@ Commands:
   repair-loop --dataset dataset.json --attempts attempts.json [--feedback-out feedback.json] [--report-out report.json] [--raw-cypher-can-execute] [--default-limit 25] [--default-max-hops 5]
   lift-raw-eval --dataset dataset.json --attempts attempts.json [--summary-out summary.json]
   parse-check --schema schema.json (--query query.json | --cypher "MATCH ...") [--mode lint|syntax] [--default-limit 25] [--default-max-hops 5]
+  prove       --schema schema.json --query query.json [--params params.json] [--proof-out proof.json] [--fail-on-blocked] [--default-limit 25] [--default-max-hops 5] [--allow-writes] [--approved] [--parser-mode syntax|lint] [--no-parser]
   introspect-neo4j --uri bolt://localhost:7687 --user neo4j --password password [--schema-out schema.json] [--sample-limit 1000] [--no-procedures]
   roadmap    [--format json|markdown] [--integrity] [--roadmap-out path]
+  certify-dialects [--format json|markdown] [--report-out path] [--fail-on-fail]
   mcp
+  serve      [--host 127.0.0.1] [--port 8787]
   import-text2cypher --csv rows.csv --dataset-out dataset.json --attempts-out attempts.json [--summary-out summary.json] [--dataset-name name] [--source name] [--model name] [--limit 10] [--indexes 0,2,39]
   import-functional-cypher --json rows.json --dataset-out dataset.json --attempts-out attempts.json [--summary-out summary.json] [--dataset-name name] [--source name] [--limit 10]
   import-opencypher-tck --feature feature.file --dataset-out dataset.json --attempts-out attempts.json [--summary-out summary.json] [--dataset-name name] [--source name] [--limit 10]

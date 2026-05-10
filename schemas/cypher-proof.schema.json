@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evalops.dev/schemas/cypher-llm/proof/v1.json",
+  "title": "Cypher LLM Proof",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "status",
+    "mode",
+    "cypher",
+    "preflightCypher",
+    "canExecute",
+    "requiresApproval",
+    "repairKinds",
+    "diagnosticCodes",
+    "claims"
+  ],
+  "properties": {
+    "version": { "const": "cypher-llm-proof/v1" },
+    "status": { "enum": ["accepted", "accepted-with-warnings", "repaired", "blocked"] },
+    "dialect": { "type": "string", "minLength": 1 },
+    "mode": { "type": "string", "minLength": 1 },
+    "cypher": { "type": "string", "minLength": 1 },
+    "preflightCypher": { "type": "string", "minLength": 1 },
+    "canExecute": { "type": "boolean" },
+    "requiresApproval": { "type": "boolean" },
+    "repairKinds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "diagnosticCodes": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "claims": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/claim" },
+      "minItems": 1
+    }
+  },
+  "$defs": {
+    "claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "status", "evidence", "diagnostics"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "title": { "type": "string", "minLength": 1 },
+        "status": { "enum": ["passed", "warning", "failed"] },
+        "evidence": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 1
+        },
+        "diagnostics": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/diagnostic" }
+        }
+      }
+    },
+    "diagnostic": {
+      "type": "object",
+      "required": ["code", "severity", "message"],
+      "additionalProperties": true,
+      "properties": {
+        "code": { "type": "string", "minLength": 1 },
+        "severity": { "enum": ["error", "warning", "info"] },
+        "message": { "type": "string", "minLength": 1 },
+        "path": { "type": "string" },
+        "suggestion": { "type": "string" },
+        "repair": { "type": "object", "additionalProperties": true }
+      }
+    }
+  }
+}

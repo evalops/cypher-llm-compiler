@@ -1,0 +1,293 @@
+{
+  "version": "cypher-llm-dialect-certification/v1",
+  "generatedAt": "2026-05-10",
+  "summary": {
+    "profiles": 3,
+    "passedProfiles": 2,
+    "warningProfiles": 1,
+    "failedProfiles": 0,
+    "checks": 18,
+    "passedChecks": 17,
+    "warningChecks": 1,
+    "failedChecks": 0
+  },
+  "profiles": [
+    {
+      "profileId": "neo4j-cypher-25",
+      "displayName": "Neo4j Cypher 25",
+      "profileStatus": "stable",
+      "status": "passed",
+      "checks": [
+        {
+          "id": "profile-metadata",
+          "title": "Profile records status, notes, and unsupported patterns",
+          "kind": "profile",
+          "status": "passed",
+          "expected": "Profile metadata is explicit enough for LLM clients to inspect before generating Cypher.",
+          "observed": "metadata present",
+          "evidence": [
+            "profiles/neo4j-cypher-25.json",
+            "src/dialects.ts"
+          ],
+          "diagnostics": []
+        },
+        {
+          "id": "renderer-escapes-schema-identifiers",
+          "title": "Renderer escapes schema identifiers that LLMs commonly break",
+          "kind": "renderer",
+          "status": "passed",
+          "expected": "Rendered Cypher backtick-escapes labels and properties with spaces.",
+          "observed": "schema identifiers escaped",
+          "evidence": [
+            "src/render.ts",
+            "test/render.test.ts"
+          ],
+          "diagnostics": [],
+          "cypher": "MATCH (tool:`Tool Hash` {`hash value`: 'abc'})\nRETURN tool\nLIMIT 1"
+        },
+        {
+          "id": "parser-accepts-rendered-read",
+          "title": "Parser accepts renderer output for a bounded read query",
+          "kind": "parser",
+          "status": "passed",
+          "expected": "Rendered read query is syntactically accepted by the parser adapter.",
+          "observed": "parser accepted rendered query",
+          "evidence": [
+            "src/parser-validation.ts",
+            "test/parser-validation.test.ts"
+          ],
+          "diagnostics": [],
+          "cypher": "MATCH (tool:`Tool`)-[:`HAS_HASH`]->(hash:`Hash`)\nRETURN hash\nLIMIT 10"
+        },
+        {
+          "id": "semantic-let-feature",
+          "title": "Semantic validation enforces LET feature support",
+          "kind": "semantic",
+          "status": "passed",
+          "expected": "LET is accepted for this profile.",
+          "observed": "LET did not produce dialect-unsupported-feature",
+          "evidence": [
+            "src/validate.ts",
+            "test/dialects.test.ts"
+          ],
+          "diagnostics": []
+        },
+        {
+          "id": "semantic-path-mode-feature",
+          "title": "Semantic validation enforces path mode and shortest path support",
+          "kind": "semantic",
+          "status": "passed",
+          "expected": "Path modes and shortest path modifiers are accepted for this profile.",
+          "observed": "0 unsupported feature diagnostic(s)",
+          "evidence": [
+            "src/validate.ts",
+            "test/dialects.test.ts"
+          ],
+          "diagnostics": []
+        },
+        {
+          "id": "renderer-relationship-range-style",
+          "title": "Renderer relationship range style is certified or explicitly limited",
+          "kind": "renderer",
+          "status": "passed",
+          "expected": "Legacy star relationship ranges render without dialect warnings.",
+          "observed": "no rendering limitation emitted",
+          "evidence": [
+            "src/render.ts",
+            "src/validate.ts",
+            "docs/COMPATIBILITY.md"
+          ],
+          "diagnostics": [],
+          "cypher": "MATCH (tool:`Tool`)-[:`HAS_HASH`*1..3]->(hash:`Hash`)\nRETURN hash\nLIMIT 1"
+        }
+      ]
+    },
+    {
+      "profileId": "opencypher-9",
+      "displayName": "openCypher 9",
+      "profileStatus": "preview",
+      "status": "passed",
+      "checks": [
+        {
+          "id": "profile-metadata",
+          "title": "Profile records status, notes, and unsupported patterns",
+          "kind": "profile",
+          "status": "passed",
+          "expected": "Profile metadata is explicit enough for LLM clients to inspect before generating Cypher.",
+          "observed": "metadata present",
+          "evidence": [
+            "profiles/opencypher-9.json",
+            "src/dialects.ts"
+          ],
+          "diagnostics": []
+        },
+        {
+          "id": "renderer-escapes-schema-identifiers",
+          "title": "Renderer escapes schema identifiers that LLMs commonly break",
+          "kind": "renderer",
+          "status": "passed",
+          "expected": "Rendered Cypher backtick-escapes labels and properties with spaces.",
+          "observed": "schema identifiers escaped",
+          "evidence": [
+            "src/render.ts",
+            "test/render.test.ts"
+          ],
+          "diagnostics": [],
+          "cypher": "MATCH (tool:`Tool Hash` {`hash value`: 'abc'})\nRETURN tool\nLIMIT 1"
+        },
+        {
+          "id": "parser-accepts-rendered-read",
+          "title": "Parser accepts renderer output for a bounded read query",
+          "kind": "parser",
+          "status": "passed",
+          "expected": "Rendered read query is syntactically accepted by the parser adapter.",
+          "observed": "parser accepted rendered query",
+          "evidence": [
+            "src/parser-validation.ts",
+            "test/parser-validation.test.ts"
+          ],
+          "diagnostics": [],
+          "cypher": "MATCH (tool:`Tool`)-[:`HAS_HASH`]->(hash:`Hash`)\nRETURN hash\nLIMIT 10"
+        },
+        {
+          "id": "semantic-let-feature",
+          "title": "Semantic validation enforces LET feature support",
+          "kind": "semantic",
+          "status": "passed",
+          "expected": "LET is rejected for this profile.",
+          "observed": "LET produced dialect-unsupported-feature",
+          "evidence": [
+            "src/validate.ts",
+            "test/dialects.test.ts"
+          ],
+          "diagnostics": [
+            "dialect-unsupported-feature"
+          ]
+        },
+        {
+          "id": "semantic-path-mode-feature",
+          "title": "Semantic validation enforces path mode and shortest path support",
+          "kind": "semantic",
+          "status": "passed",
+          "expected": "Unsupported path modes or shortest path modifiers are rejected for this profile.",
+          "observed": "2 unsupported feature diagnostic(s)",
+          "evidence": [
+            "src/validate.ts",
+            "test/dialects.test.ts"
+          ],
+          "diagnostics": [
+            "dialect-unsupported-feature",
+            "dialect-unsupported-feature"
+          ]
+        },
+        {
+          "id": "renderer-relationship-range-style",
+          "title": "Renderer relationship range style is certified or explicitly limited",
+          "kind": "renderer",
+          "status": "passed",
+          "expected": "Legacy star relationship ranges render without dialect warnings.",
+          "observed": "no rendering limitation emitted",
+          "evidence": [
+            "src/render.ts",
+            "src/validate.ts",
+            "docs/COMPATIBILITY.md"
+          ],
+          "diagnostics": [],
+          "cypher": "MATCH (tool:`Tool`)-[:`HAS_HASH`*1..3]->(hash:`Hash`)\nRETURN hash\nLIMIT 1"
+        }
+      ]
+    },
+    {
+      "profileId": "gql",
+      "displayName": "GQL-Oriented Profile",
+      "profileStatus": "experimental",
+      "status": "warning",
+      "checks": [
+        {
+          "id": "profile-metadata",
+          "title": "Profile records status, notes, and unsupported patterns",
+          "kind": "profile",
+          "status": "passed",
+          "expected": "Profile metadata is explicit enough for LLM clients to inspect before generating Cypher.",
+          "observed": "metadata present",
+          "evidence": [
+            "profiles/gql.json",
+            "src/dialects.ts"
+          ],
+          "diagnostics": []
+        },
+        {
+          "id": "renderer-escapes-schema-identifiers",
+          "title": "Renderer escapes schema identifiers that LLMs commonly break",
+          "kind": "renderer",
+          "status": "passed",
+          "expected": "Rendered Cypher backtick-escapes labels and properties with spaces.",
+          "observed": "schema identifiers escaped",
+          "evidence": [
+            "src/render.ts",
+            "test/render.test.ts"
+          ],
+          "diagnostics": [],
+          "cypher": "MATCH (tool:`Tool Hash` {`hash value`: 'abc'})\nRETURN tool\nLIMIT 1"
+        },
+        {
+          "id": "parser-accepts-rendered-read",
+          "title": "Parser accepts renderer output for a bounded read query",
+          "kind": "parser",
+          "status": "passed",
+          "expected": "Rendered read query is syntactically accepted by the parser adapter.",
+          "observed": "parser accepted rendered query",
+          "evidence": [
+            "src/parser-validation.ts",
+            "test/parser-validation.test.ts"
+          ],
+          "diagnostics": [],
+          "cypher": "MATCH (tool:`Tool`)-[:`HAS_HASH`]->(hash:`Hash`)\nRETURN hash\nLIMIT 10"
+        },
+        {
+          "id": "semantic-let-feature",
+          "title": "Semantic validation enforces LET feature support",
+          "kind": "semantic",
+          "status": "passed",
+          "expected": "LET is accepted for this profile.",
+          "observed": "LET did not produce dialect-unsupported-feature",
+          "evidence": [
+            "src/validate.ts",
+            "test/dialects.test.ts"
+          ],
+          "diagnostics": []
+        },
+        {
+          "id": "semantic-path-mode-feature",
+          "title": "Semantic validation enforces path mode and shortest path support",
+          "kind": "semantic",
+          "status": "passed",
+          "expected": "Path modes and shortest path modifiers are accepted for this profile.",
+          "observed": "0 unsupported feature diagnostic(s)",
+          "evidence": [
+            "src/validate.ts",
+            "test/dialects.test.ts"
+          ],
+          "diagnostics": []
+        },
+        {
+          "id": "renderer-relationship-range-style",
+          "title": "Renderer relationship range style is certified or explicitly limited",
+          "kind": "renderer",
+          "status": "warning",
+          "expected": "Non-legacy relationship range preference is surfaced as a known renderer limitation.",
+          "observed": "dialect-rendering-limitation emitted",
+          "evidence": [
+            "src/render.ts",
+            "src/validate.ts",
+            "docs/COMPATIBILITY.md"
+          ],
+          "diagnostics": [
+            "dialect-rendering-limitation"
+          ],
+          "cypher": "MATCH (tool:`Tool`)-[:`HAS_HASH`*1..3]->(hash:`Hash`)\nRETURN hash\nLIMIT 1"
+        }
+      ]
+    }
+  ]
+}

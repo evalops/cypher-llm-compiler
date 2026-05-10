@@ -1,11 +1,12 @@
 # Agent Integrations
 
-The compiler exposes the same five operations across OpenAI tool schemas, MCP, LangChain-shaped adapters, and the CLI:
+The compiler exposes the same six operations across OpenAI tool schemas, MCP, HTTP, LangChain-shaped adapters, and the CLI:
 
 - `cypher_render`: repair IR, validate, and return a `SafeExecutionPlan`.
 - `cypher_validate`: return stable compiler diagnostics for IR.
 - `cypher_repair`: repair structured IR or narrow legacy raw Cypher failures.
 - `cypher_parse_check`: run Neo4j language-support parser validation.
+- `cypher_prove`: return proof-carrying compile output with repairs, diagnostics, parser preflight, and execution-policy claims.
 - `cypher_eval`: score model attempts against an eval dataset.
 
 ## OpenAI Tools
@@ -91,6 +92,30 @@ Example `tools/call` request:
   }
 }
 ```
+
+## HTTP Service
+
+Run the local JSON service:
+
+```bash
+cypher-llm serve --host 127.0.0.1 --port 8787
+```
+
+Routes:
+
+- `GET /healthz`
+- `GET /v1/tools`
+- `POST /v1/render`
+- `POST /v1/validate`
+- `POST /v1/repair`
+- `POST /v1/parse-check`
+- `POST /v1/prove`
+- `POST /v1/eval`
+- `POST /v1/tools/:toolName`
+- `GET /v1/roadmap`
+- `GET /v1/dialect-certification`
+
+Use this when an agent runtime needs a process boundary instead of an in-process TypeScript import or stdio MCP server.
 
 ## LangChain
 

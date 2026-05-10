@@ -3,6 +3,7 @@ import { evaluateAttempts } from "./evals.js";
 import type { CypherQuery, CypherSchemaContract, JsonLiteral } from "./ir.js";
 import type { ParserValidationOptions } from "./parser-validation.js";
 import { validateCypherTextWithParser } from "./parser-validation.js";
+import { buildCypherProof } from "./proof.js";
 import type { RepairOptions } from "./repair.js";
 import { repairQuery, repairRawCypher } from "./repair.js";
 import { renderQuery } from "./render.js";
@@ -18,6 +19,7 @@ export type CypherCompilerToolName =
   | "cypher_validate"
   | "cypher_repair"
   | "cypher_parse_check"
+  | "cypher_prove"
   | "cypher_eval";
 
 export interface CypherCompilerToolDefinition {
@@ -191,6 +193,37 @@ export const CYPHER_COMPILER_TOOLS: readonly CypherCompilerToolDefinition[] = [
     })
   },
   {
+    name: "cypher_prove",
+    description:
+      "Compile Cypher IR into proof-carrying output: rendered Cypher, repairs, diagnostics, parser preflight, execution-policy status, and blocking reasons.",
+    inputSchema: objectSchema(["schema", "query"], {
+      schema: schemaContractSchema,
+      query: cypherQuerySchema,
+      params: paramsSchema,
+      ...repairOptionProperties,
+      allowWrites: {
+        type: "boolean",
+        description: "Allow write clauses to pass validation. Use only after an external approval step."
+      },
+      approved: {
+        type: "boolean",
+        description: "Mark a write query as externally approved when allowWrites is also true."
+      },
+      mode: {
+        enum: ["explain", "readonly", "write-requires-approval"],
+        description: "Execution mode metadata for the returned proof."
+      },
+      parserMode: {
+        enum: ["lint", "syntax"],
+        description: "Parser preflight mode for the rendered Cypher."
+      },
+      includeParser: {
+        type: "boolean",
+        description: "Set false to skip parser preflight in constrained environments."
+      }
+    })
+  },
+  {
     name: "cypher_eval",
     description: "Score offline text2cypher or IR attempts against a Cypher LLM eval dataset.",
     inputSchema: objectSchema(["dataset", "attempts"], {
@@ -283,6 +316,14 @@ export async function executeCypherCompilerTool(name: string, input: unknown): P
         repairs: repaired.applied,
         compilerDiagnostics: repaired.diagnostics
       };
+    }
+    case "cypher_prove": {
+      return buildCypherProof(
+        requiredObject<CypherQuery>(args, "query"),
+        requiredObject<CypherSchemaContract>(args, "schema"),
+        optionalParams(args),
+        proofOptions(args)
+      );
     }
     case "cypher_eval": {
       return evaluateAttempts(
@@ -393,6 +434,25 @@ function safeExecutionOptions(args: Record<string, unknown>): SafeExecutionOptio
       throw new Error("Expected 'mode' to be explain, readonly, or write-requires-approval.");
     }
     options.mode = mode;
+  }
+  return options;
+}
+
+function proofOptions(args: Record<string, unknown>) {
+  const options = safeExecutionOptions(args) as ReturnType<typeof safeExecutionOptions> & {
+    parserMode?: ParserValidationOptions["mode"];
+    includeParser?: boolean;
+  };
+  const parserMode = optionalString(args, "parserMode");
+  const includeParser = optionalBoolean(args, "includeParser");
+  if (parserMode !== undefined) {
+    if (parserMode !== "lint" && parserMode !== "syntax") {
+      throw new Error("Expected 'parserMode' to be lint or syntax.");
+    }
+    options.parserMode = parserMode;
+  }
+  if (includeParser !== undefined) {
+    options.includeParser = includeParser;
   }
   return options;
 }

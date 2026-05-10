@@ -46,7 +46,7 @@ describe("OpenAI tool schemas", () => {
     const chatTools = getOpenAiChatTools();
     const names = responseTools.map((tool) => tool.name);
 
-    assert.deepEqual(names, ["cypher_render", "cypher_validate", "cypher_repair", "cypher_parse_check", "cypher_eval"]);
+    assert.deepEqual(names, ["cypher_render", "cypher_validate", "cypher_repair", "cypher_parse_check", "cypher_prove", "cypher_eval"]);
     assert.equal(chatTools[0]?.function.name, "cypher_render");
     assert.equal(responseTools.every((tool) => tool.type === "function" && tool.parameters.type === "object"), true);
   });
@@ -76,6 +76,18 @@ describe("OpenAI tool schemas", () => {
 
     assert.equal(parsed.ok, true);
     assert.deepEqual(parsed.diagnostics, []);
+
+    const proof = (await executeCypherCompilerTool("cypher_prove", {
+      schema,
+      query: repairableQuery,
+      defaultLimit: 25,
+      defaultMaxHops: 3,
+      parserMode: "syntax"
+    })) as { status: string; canExecute: boolean; claims: { id: string }[] };
+
+    assert.equal(proof.status, "repaired");
+    assert.equal(proof.canExecute, true);
+    assert.ok(proof.claims.some((claim) => claim.id === "parser-preflight"));
   });
 });
 

@@ -48,6 +48,7 @@
         "profiles/neo4j-cypher-25.json",
         "profiles/opencypher-9.json",
         "profiles/gql.json",
+        "src/dialect-certification.ts",
         "test/dialects.test.ts"
       ],
       "acceptanceGates": [
@@ -107,6 +108,7 @@
       "firstArtifacts": [
         "src/validate.ts",
         "src/repair.ts",
+        "src/proof.ts",
         "src/failure-corpus.ts",
         "docs/FAILURE_CORPUS.md"
       ],
@@ -138,6 +140,7 @@
       "firstArtifacts": [
         "src/tools.ts",
         "src/mcp-server.ts",
+        "src/http-server.ts",
         "src/cli.ts",
         "docs/INTEGRATIONS.md"
       ],
@@ -284,6 +287,7 @@
       "status": "partial",
       "evidence": [
         "src/dialects.ts",
+        "src/dialect-certification.ts",
         "profiles/opencypher-9.json",
         "test/dialects.test.ts"
       ],
@@ -348,10 +352,12 @@
     {
       "id": "compiler-service",
       "title": "Long-Running Compiler Service",
-      "status": "planned",
+      "status": "partial",
       "evidence": [
         "src/tools.ts",
         "src/mcp-server.ts",
+        "src/http-server.ts",
+        "test/http-server.test.ts",
         "docs/INTEGRATIONS.md"
       ],
       "workstreamIds": [
@@ -362,11 +368,11 @@
     {
       "id": "proof-objects",
       "title": "Proof-Carrying Validation And Repair Plans",
-      "status": "planned",
+      "status": "partial",
       "evidence": [
-        "src/validate.ts",
-        "src/repair.ts",
-        "src/failure-corpus.ts"
+        "src/proof.ts",
+        "schemas/cypher-proof.schema.json",
+        "test/proof.test.ts"
       ],
       "workstreamIds": [
         "semantic-proof-repair",
