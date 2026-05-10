@@ -157,7 +157,7 @@ export const yearsRoadmap = {
       id: "compiler-service",
       title: "Compiler Service For Agent Runtimes",
       horizon: "years",
-      status: "planned",
+      status: "seeded",
       issue: {
         number: 14,
         url: "https://github.com/evalops/cypher-llm-compiler/issues/14"
@@ -181,7 +181,7 @@ export const yearsRoadmap = {
       id: "cost-safety-policy",
       title: "Cost, Cardinality, And Safety Policy Planning",
       horizon: "years",
-      status: "planned",
+      status: "seeded",
       issue: {
         number: 15,
         url: "https://github.com/evalops/cypher-llm-compiler/issues/15"
