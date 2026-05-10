@@ -1,4 +1,5 @@
 export * from "./ir.js";
+export * from "./benchmark-gate.js";
 export * from "./diagnostics.js";
 export * from "./dataset-governance.js";
 export * from "./dialect-certification.js";

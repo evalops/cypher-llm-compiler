@@ -311,6 +311,66 @@ describe("cli", () => {
     assert.ok(writes.get("out/scorecard.md")?.includes("# cli-scorecard"));
   });
 
+  it("emits CypherBench benchmark gates from eval reports", async () => {
+    const report = {
+      version: "cypher-llm-eval-report/v1",
+      datasetName: "cli-gate",
+      metrics: {
+        totalTasks: 1,
+        attemptedTasks: 1,
+        missingAttempts: 0,
+        passedTasks: 1,
+        failedTasks: 0,
+        irAttempts: 1,
+        rawAttempts: 0,
+        noCypherAttempts: 0,
+        timeoutAttempts: 0,
+        executablePlans: 1,
+        repairApplied: 0,
+        expectedCypherMatches: 1,
+        expectedDiagnosticMatches: 0,
+        observedSyntaxErrors: 0,
+        observedTimeouts: 0,
+        observedNoCypher: 0,
+        observedReturnsResults: 0,
+        expectedAnswerTasks: 0,
+        diagnosticsByCode: {},
+        passRate: 1,
+        executableRate: 1,
+        repairRate: 0
+      },
+      results: []
+    };
+    const files = new Map<string, string>([
+      ["baseline.json", JSON.stringify(report)],
+      ["candidate.json", JSON.stringify(report)]
+    ]);
+    const writes = new Map<string, string>();
+    let stdout = "";
+    let stderr = "";
+    const io: CliIO = {
+      stdout: { write: (chunk: string | Uint8Array) => ((stdout += String(chunk)), true) },
+      stderr: { write: (chunk: string | Uint8Array) => ((stderr += String(chunk)), true) },
+      readFile: async (path) => files.get(String(path)) ?? "",
+      writeFile: async (path, data) => {
+        writes.set(path, data);
+      },
+      mkdir: async () => undefined
+    };
+
+    const code = await runCli(
+      ["benchmark-gate", "--baseline", "baseline.json", "--candidate", "candidate.json", "--gate-out", "out/gate.json", "--fail-on-fail", "--min-pass-rate", "1"],
+      io
+    );
+    const output = JSON.parse(stdout) as { version: string; status: string };
+
+    assert.equal(code, 0);
+    assert.equal(stderr, "");
+    assert.equal(output.version, "cypher-llm-benchmark-gate/v1");
+    assert.equal(output.status, "passed");
+    assert.ok(writes.get("out/gate.json")?.includes("cypher-llm-benchmark-gate/v1"));
+  });
+
   it("audits dataset governance from dataset files", async () => {
     const dataset = {
       version: "cypher-llm-eval-dataset/v1",

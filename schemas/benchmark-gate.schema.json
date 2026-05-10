@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evalops.dev/schemas/cypher-llm/benchmark-gate/v1.json",
+  "title": "CypherBench Benchmark Gate",
+  "type": "object",
+  "required": ["version", "status", "baseline", "candidate", "thresholds", "checks", "comparison", "summary"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": "cypher-llm-benchmark-gate/v1" },
+    "status": { "enum": ["passed", "failed"] },
+    "baseline": { "$ref": "#/$defs/reportSummary" },
+    "candidate": { "$ref": "#/$defs/reportSummary" },
+    "thresholds": {
+      "type": "object",
+      "required": ["tolerance", "metricRegressionsAllowed", "failOnDiagnosticRegression"],
+      "additionalProperties": false,
+      "properties": {
+        "tolerance": { "type": "number" },
+        "metricRegressionsAllowed": { "const": 0 },
+        "failOnDiagnosticRegression": { "type": "boolean" },
+        "minPassRate": { "type": "number" },
+        "minExecutableRate": { "type": "number" }
+      }
+    },
+    "checks": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/check" }
+    },
+    "comparison": {
+      "type": "object",
+      "required": ["version", "summary"],
+      "additionalProperties": true,
+      "properties": {
+        "version": { "const": "cypher-llm-eval-comparison/v1" },
+        "summary": { "type": "object", "additionalProperties": true }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": ["checks", "passed", "failed", "metricRegressions", "diagnosticRegressions"],
+      "additionalProperties": false,
+      "properties": {
+        "checks": { "type": "integer", "minimum": 0 },
+        "passed": { "type": "integer", "minimum": 0 },
+        "failed": { "type": "integer", "minimum": 0 },
+        "metricRegressions": { "type": "integer", "minimum": 0 },
+        "diagnosticRegressions": { "type": "integer", "minimum": 0 }
+      }
+    }
+  },
+  "$defs": {
+    "reportSummary": {
+      "type": "object",
+      "required": ["datasetName"],
+      "additionalProperties": false,
+      "properties": {
+        "datasetName": { "type": "string" },
+        "model": { "type": "string" },
+        "prompt": { "type": "string" }
+      }
+    },
+    "check": {
+      "type": "object",
+      "required": ["id", "status", "expected", "actual", "message"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "status": { "enum": ["passed", "failed"] },
+        "expected": {},
+        "actual": {},
+        "message": { "type": "string" }
+      }
+    }
+  }
+}

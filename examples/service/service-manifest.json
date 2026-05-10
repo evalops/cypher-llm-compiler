@@ -139,6 +139,12 @@
     },
     {
       "method": "POST",
+      "path": "/v1/benchmark-gate",
+      "operation": "cypher_benchmark_gate",
+      "authRequired": false
+    },
+    {
+      "method": "POST",
       "path": "/v1/dataset-governance",
       "operation": "cypher_dataset_governance",
       "authRequired": false

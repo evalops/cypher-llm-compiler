@@ -19,7 +19,7 @@ The gap is not "LLMs need a better prompt." The gap is a missing compiler bounda
 
 ## What This Implements
 
-This package implements eighteen concrete improvements:
+This package implements nineteen concrete improvements:
 
 1. **Official JSON IR**: Agents can emit a small, typed Cypher AST instead of brittle text.
 2. **LLM-safe profile**: The renderer emits conservative Cypher with escaped schema identifiers, explicit projections, bounded path recommendations, and deterministic formatting.
@@ -39,6 +39,7 @@ This package implements eighteen concrete improvements:
 16. **Dataset governance reports**: Benchmark datasets can be audited for provenance, split assignment, redaction findings, duplicate ids, and public-release diagnostics.
 17. **Ranked repair plans**: Agents can receive deterministic patches, model-required fixes, and unsafe blockers as separate ranked plan steps.
 18. **Service manifest and controls**: Agent runtimes can discover HTTP routes, auth posture, request limits, audit redaction, and data-boundary guarantees.
+19. **Benchmark gates**: CI can publish pass/fail CypherBench gates over metric regressions, pass-rate floors, executable-rate floors, and optional diagnostic regressions.
 
 ## Quick Start
 
@@ -141,6 +142,7 @@ cypher-llm corpus
 cypher-llm eval --dataset examples/eval-dataset.json --attempts examples/eval-attempts.json --default-limit 25
 cypher-llm compare-evals --baseline baseline.report.json --candidate candidate.report.json
 cypher-llm scorecard --reports baseline.report.json,candidate.report.json --markdown-out scorecard.md
+cypher-llm benchmark-gate --baseline baseline.report.json --candidate candidate.report.json --min-pass-rate 0.95 --fail-on-fail
 cypher-llm dataset-governance --dataset examples/eval-dataset.json --report-out governance.json
 cypher-llm repair-loop --dataset examples/eval-dataset.json --attempts examples/eval-attempts.json --default-limit 25
 cypher-llm lift-raw-eval --dataset examples/imported/text2cypher-gpt4o-sample.dataset.json --attempts examples/imported/text2cypher-gpt4o-sample.attempts.json
@@ -176,6 +178,8 @@ npm run test:live:neo4j
 
 `scorecard` emits a `cypher-llm-cypherbench-scorecard/v1` JSON report or markdown table from one or more eval reports.
 
+`benchmark-gate` emits a `cypher-llm-benchmark-gate/v1` pass/fail report for CI regression gates over eval comparisons and configured metric floors.
+
 `dataset-governance` emits a `cypher-llm-dataset-governance/v1` report covering provenance, split assignment, redaction findings, duplicate ids, and stable diagnostics.
 
 `repair-loop` emits model-targeted repair packets from eval diagnostics and failed expectations.
@@ -204,7 +208,7 @@ npm run test:live:neo4j
 
 `mcp` starts a stdio MCP server exposing the same render, validate, repair, parse-lossless, parse-check, policy, proof, LSP, and eval operations to agent clients.
 
-`serve` starts a local JSON HTTP service exposing `/healthz`, `/v1/service-manifest`, `/v1/tools`, `/v1/render`, `/v1/validate`, `/v1/repair`, `/v1/repair-plan`, `/v1/parse-lossless`, `/v1/parse-check`, `/v1/policy`, `/v1/lsp-diagnostics`, `/v1/prove`, `/v1/eval`, `/v1/scorecard`, `/v1/dataset-governance`, `/v1/roadmap`, and `/v1/dialect-certification`. Set `--require-auth` with `--auth-token` or `CYPHER_LLM_HTTP_TOKEN` to require bearer auth for runtime routes; `--audit-log` writes JSONL audit events without request or response payloads.
+`serve` starts a local JSON HTTP service exposing `/healthz`, `/v1/service-manifest`, `/v1/tools`, `/v1/render`, `/v1/validate`, `/v1/repair`, `/v1/repair-plan`, `/v1/parse-lossless`, `/v1/parse-check`, `/v1/policy`, `/v1/lsp-diagnostics`, `/v1/prove`, `/v1/eval`, `/v1/scorecard`, `/v1/benchmark-gate`, `/v1/dataset-governance`, `/v1/roadmap`, and `/v1/dialect-certification`. Set `--require-auth` with `--auth-token` or `CYPHER_LLM_HTTP_TOKEN` to require bearer auth for runtime routes; `--audit-log` writes JSONL audit events without request or response payloads.
 
 `test:live:neo4j` runs the optional Docker-backed Neo4j `EXPLAIN` fixture when `CYPHER_LLM_NEO4J_URI` and `CYPHER_LLM_NEO4J_PASSWORD` are set.
 
@@ -343,6 +347,7 @@ Those are deliberate boundaries. The repo is the missing LLM compiler surface, n
 - `src/failure-corpus.ts`: Runnable corpus of LLM failure cases.
 - `src/eval-compare.ts`: CypherBench report comparison and regression detection.
 - `src/scorecard.ts`: CypherBench JSON and markdown scorecard generation.
+- `src/benchmark-gate.ts`: CI-friendly benchmark gate reports over comparisons and metric floors.
 - `src/repair-loop.ts`: Eval-driven repair feedback packets for model retry loops.
 - `src/dialect-certification.ts`: Executable dialect certification checks for profile claims.
 - `src/proof.ts`: Proof-carrying compile output for agent feedback loops.
@@ -362,7 +367,7 @@ Those are deliberate boundaries. The repo is the missing LLM compiler surface, n
 - `docs/`: Design notes and LLM integration guidance, including `docs/LOSSLESS_PARSE.md`, `docs/RAW_LIFT.md`, and `docs/YEARS_ROADMAP.md`.
 - `docker-compose.neo4j.yml`: Optional local Neo4j fixture for live `EXPLAIN` tests.
 - `examples/`: Small schema/query fixtures for CLI smoke tests and agent onboarding.
-- `examples/benchmarks/`: CypherBench raw-vs-IR reports, comparisons, scorecards, and repair-loop artifacts.
+- `examples/benchmarks/`: CypherBench raw-vs-IR reports, comparisons, scorecards, gates, and repair-loop artifacts.
 - `examples/certification/`: Checked-in dialect certification report.
 - `examples/imported/`: Imported text2cypher/openCypher fixture samples and baseline reports.
 - `examples/lossless/`: Checked-in lossless parse report.
@@ -372,7 +377,7 @@ Those are deliberate boundaries. The repo is the missing LLM compiler surface, n
 - `examples/roadmap/`: Machine-readable years-scale roadmap snapshot.
 - `examples/service/`: Checked-in compiler service manifest.
 - `profiles/`: Versioned dialect profiles for Neo4j Cypher 25, openCypher 9, and GQL-oriented output.
-- `schemas/`: JSON Schema contracts for IR, graph schema, repair plans, service manifests, lossless parse reports, dataset governance, eval datasets, and eval attempts.
+- `schemas/`: JSON Schema contracts for IR, graph schema, repair plans, service manifests, benchmark gates, lossless parse reports, dataset governance, eval datasets, and eval attempts.
 - `test/`: Node test-runner coverage for renderer, schema, validation, repair, safety, and corpus behavior.
 
 ## Design Rules

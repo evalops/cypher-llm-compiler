@@ -104,6 +104,11 @@ describe("compiler HTTP service", () => {
       reports: [evalReport],
       name: "http-scorecard"
     }) as { version: string; summary: { reports: number } };
+    const gate = await postJson(`${baseUrl}/v1/benchmark-gate`, {
+      baseline: evalReport,
+      candidate: evalReport,
+      minPassRate: 1
+    }) as { version: string; status: string };
     const governance = await postJson(`${baseUrl}/v1/dataset-governance`, {
       dataset: {
         version: "cypher-llm-eval-dataset/v1",
@@ -127,6 +132,8 @@ describe("compiler HTTP service", () => {
     assert.ok(lsp.codeActions.some((action) => action.title === "Add a bounded LIMIT"));
     assert.equal(scorecard.version, "cypher-llm-cypherbench-scorecard/v1");
     assert.equal(scorecard.summary.reports, 1);
+    assert.equal(gate.version, "cypher-llm-benchmark-gate/v1");
+    assert.equal(gate.status, "passed");
     assert.equal(governance.version, "cypher-llm-dataset-governance/v1");
     assert.equal(governance.ok, true);
   });

@@ -65,6 +65,12 @@ CypherBench scorecards are exported from `src/scorecard.ts`, validated by `schem
 cypher-llm scorecard --reports examples/benchmarks/tool-hash-raw-baseline.report.json,examples/imported/smoke-ir-vs-raw.report.json
 ```
 
+Benchmark gates are exported from `src/benchmark-gate.ts`, validated by `schemas/benchmark-gate.schema.json`, and checked in at `examples/benchmarks/tool-hash.benchmark-gate.json`.
+
+```bash
+cypher-llm benchmark-gate --baseline examples/benchmarks/tool-hash-raw-baseline.report.json --candidate examples/imported/smoke-ir-vs-raw.report.json --min-pass-rate 1 --min-executable-rate 0.3333
+```
+
 Dataset governance reports are exported from `src/dataset-governance.ts`, validated by `schemas/dataset-governance.schema.json`, and checked in at `examples/benchmarks/tool-hash.dataset-governance.json`.
 
 ```bash

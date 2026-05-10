@@ -1,3 +1,4 @@
+import { buildBenchmarkGateReport } from "./benchmark-gate.js";
 import { buildDatasetGovernanceReport } from "./dataset-governance.js";
 import type { EvalAttemptSet, EvalDataset, EvalOptions, EvalReport } from "./evals.js";
 import { evaluateAttempts } from "./evals.js";
@@ -32,6 +33,7 @@ export type CypherCompilerToolName =
   | "cypher_prove"
   | "cypher_eval"
   | "cypher_scorecard"
+  | "cypher_benchmark_gate"
   | "cypher_dataset_governance";
 
 export interface CypherCompilerToolDefinition {
@@ -371,6 +373,31 @@ export const CYPHER_COMPILER_TOOLS: readonly CypherCompilerToolDefinition[] = [
     })
   },
   {
+    name: "cypher_benchmark_gate",
+    description:
+      "Build a CI-friendly CypherBench gate report that fails on directional metric regressions and optional pass/executable-rate floors.",
+    inputSchema: objectSchema(["baseline", "candidate"], {
+      baseline: evalReportSchema,
+      candidate: evalReportSchema,
+      tolerance: {
+        type: "number",
+        description: "Numeric tolerance for metric deltas and floors."
+      },
+      minPassRate: {
+        type: "number",
+        description: "Optional minimum candidate pass rate."
+      },
+      minExecutableRate: {
+        type: "number",
+        description: "Optional minimum candidate executable rate."
+      },
+      failOnDiagnosticRegression: {
+        type: "boolean",
+        description: "Fail when diagnostic-code counts increase."
+      }
+    })
+  },
+  {
     name: "cypher_dataset_governance",
     description:
       "Audit a CypherBench eval dataset for machine-readable provenance, split assignment, redaction findings, duplicate ids, and governance diagnostics.",
@@ -505,6 +532,9 @@ export async function executeCypherCompilerTool(name: string, input: unknown): P
     }
     case "cypher_scorecard": {
       return buildCypherBenchScorecard(requiredArray<EvalReport>(args, "reports"), scorecardOptions(args));
+    }
+    case "cypher_benchmark_gate": {
+      return buildBenchmarkGateReport(requiredObject<EvalReport>(args, "baseline"), requiredObject<EvalReport>(args, "candidate"), benchmarkGateOptions(args));
     }
     case "cypher_dataset_governance": {
       return buildDatasetGovernanceReport(requiredObject<EvalDataset>(args, "dataset"), datasetGovernanceOptions(args));
@@ -803,6 +833,32 @@ function scorecardOptions(args: Record<string, unknown>) {
   }
   if (baselineIndex !== undefined) {
     options.baselineIndex = baselineIndex;
+  }
+  return options;
+}
+
+function benchmarkGateOptions(args: Record<string, unknown>) {
+  const options: {
+    tolerance?: number;
+    minPassRate?: number;
+    minExecutableRate?: number;
+    failOnDiagnosticRegression?: boolean;
+  } = {};
+  const tolerance = optionalNumber(args, "tolerance");
+  const minPassRate = optionalNumber(args, "minPassRate");
+  const minExecutableRate = optionalNumber(args, "minExecutableRate");
+  const failOnDiagnosticRegression = optionalBoolean(args, "failOnDiagnosticRegression");
+  if (tolerance !== undefined) {
+    options.tolerance = tolerance;
+  }
+  if (minPassRate !== undefined) {
+    options.minPassRate = minPassRate;
+  }
+  if (minExecutableRate !== undefined) {
+    options.minExecutableRate = minExecutableRate;
+  }
+  if (failOnDiagnosticRegression !== undefined) {
+    options.failOnDiagnosticRegression = failOnDiagnosticRegression;
   }
   return options;
 }

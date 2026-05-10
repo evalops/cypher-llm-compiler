@@ -3,6 +3,7 @@ import { appendFile, mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 import type { CypherQuery, CypherSchemaContract, JsonLiteral } from "./ir.js";
+import { buildBenchmarkGateReport } from "./benchmark-gate.js";
 import { buildDatasetGovernanceReport } from "./dataset-governance.js";
 import { certifyDialectProfiles, renderDialectCertificationMarkdown } from "./dialect-certification.js";
 import type { EvalAttemptSet, EvalDataset, EvalReport } from "./evals.js";
@@ -77,6 +78,9 @@ export async function runCli(argv: string[], io: CliIO = defaultIo()): Promise<n
         return 0;
       case "scorecard":
         await scorecardCommand(args, io);
+        return 0;
+      case "benchmark-gate":
+        await benchmarkGateCommand(args, io);
         return 0;
       case "dataset-governance":
         await datasetGovernanceCommand(args, io);
@@ -290,6 +294,27 @@ async function scorecardCommand(args: Map<string, string | boolean>, io: CliIO) 
     return;
   }
   writeJson(io, scorecard);
+}
+
+async function benchmarkGateCommand(args: Map<string, string | boolean>, io: CliIO) {
+  const baseline = JSON.parse(await io.readFile(stringArg(args, "baseline"), "utf8")) as EvalReport;
+  const candidate = JSON.parse(await io.readFile(stringArg(args, "candidate"), "utf8")) as EvalReport;
+  const tolerance = optionalNumber(args.get("tolerance"));
+  const minPassRate = optionalNumber(args.get("min-pass-rate"));
+  const minExecutableRate = optionalNumber(args.get("min-executable-rate"));
+  const gate = buildBenchmarkGateReport(baseline, candidate, {
+    ...(tolerance !== undefined ? { tolerance } : {}),
+    ...(minPassRate !== undefined ? { minPassRate } : {}),
+    ...(minExecutableRate !== undefined ? { minExecutableRate } : {}),
+    ...(args.get("fail-on-diagnostic-regression") === true ? { failOnDiagnosticRegression: true } : {})
+  });
+  if (typeof args.get("gate-out") === "string") {
+    await writeJsonFile(io, args.get("gate-out") as string, gate);
+  }
+  writeJson(io, gate);
+  if (args.get("fail-on-fail") === true && gate.status === "failed") {
+    throw new Error(`Benchmark gate failed ${gate.summary.failed} check(s).`);
+  }
 }
 
 async function datasetGovernanceCommand(args: Map<string, string | boolean>, io: CliIO) {
@@ -696,6 +721,7 @@ Commands:
   eval        --dataset dataset.json --attempts attempts.json [--report-out report.json] [--raw-cypher-can-execute] [--default-limit 25] [--default-max-hops 5]
   compare-evals --baseline baseline.report.json --candidate candidate.report.json [--comparison-out comparison.json] [--fail-on-regression] [--tolerance 0.0001]
   scorecard   --reports report-a.json,report-b.json [--name cypherbench] [--scorecard-out scorecard.json] [--markdown-out scorecard.md] [--format json|markdown]
+  benchmark-gate --baseline baseline.report.json --candidate candidate.report.json [--gate-out gate.json] [--fail-on-fail] [--tolerance 0.0001] [--min-pass-rate 0.95] [--min-executable-rate 0.90] [--fail-on-diagnostic-regression]
   dataset-governance --dataset dataset.json [--report-out governance.json] [--default-split smoke] [--fail-on-error]
   repair-loop --dataset dataset.json --attempts attempts.json [--feedback-out feedback.json] [--report-out report.json] [--raw-cypher-can-execute] [--default-limit 25] [--default-max-hops 5]
   lift-raw-eval --dataset dataset.json --attempts attempts.json [--summary-out summary.json]

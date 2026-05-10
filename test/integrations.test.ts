@@ -58,6 +58,7 @@ describe("OpenAI tool schemas", () => {
       "cypher_prove",
       "cypher_eval",
       "cypher_scorecard",
+      "cypher_benchmark_gate",
       "cypher_dataset_governance"
     ]);
     assert.equal(chatTools[0]?.function.name, "cypher_render");
@@ -160,9 +161,16 @@ describe("OpenAI tool schemas", () => {
       reports: [evalReport],
       name: "tool-dispatch-scorecard"
     })) as { version: string; lanes: { id: string }[] };
+    const gate = (await executeCypherCompilerTool("cypher_benchmark_gate", {
+      baseline: evalReport,
+      candidate: evalReport,
+      minPassRate: 1
+    })) as { version: string; status: string };
 
     assert.equal(scorecard.version, "cypher-llm-cypherbench-scorecard/v1");
     assert.equal(scorecard.lanes[0]?.id, "1-tool-dispatch");
+    assert.equal(gate.version, "cypher-llm-benchmark-gate/v1");
+    assert.equal(gate.status, "passed");
 
     const governance = (await executeCypherCompilerTool("cypher_dataset_governance", {
       dataset: {

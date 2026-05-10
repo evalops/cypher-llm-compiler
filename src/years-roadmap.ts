@@ -132,9 +132,11 @@ export const yearsRoadmap = {
         "src/evals.ts",
         "src/eval-compare.ts",
         "src/scorecard.ts",
+        "src/benchmark-gate.ts",
         "src/dataset-governance.ts",
         "src/repair-loop.ts",
         "docs/CYPHERBENCH.md",
+        "examples/benchmarks/tool-hash.benchmark-gate.json",
         "examples/benchmarks/tool-hash.dataset-governance.json",
         "examples/benchmarks/tool-hash.scorecard.json"
       ],
@@ -330,6 +332,13 @@ export const yearsRoadmap = {
       title: "CypherBench JSON And Markdown Scorecards",
       status: "partial",
       evidence: ["src/scorecard.ts", "schemas/cypherbench-scorecard.schema.json", "test/scorecard.test.ts"],
+      workstreamIds: ["public-cypherbench", "governance-standards"]
+    },
+    {
+      id: "benchmark-gates",
+      title: "CypherBench CI Regression Gates",
+      status: "partial",
+      evidence: ["src/benchmark-gate.ts", "schemas/benchmark-gate.schema.json", "test/benchmark-gate.test.ts"],
       workstreamIds: ["public-cypherbench", "governance-standards"]
     },
     {

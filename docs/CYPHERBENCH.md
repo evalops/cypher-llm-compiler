@@ -44,6 +44,22 @@ cypher-llm scorecard \
 
 The scorecard ranks lanes by pass rate, executable rate, and repair rate; aggregates diagnostics; and compares every candidate lane to the baseline report. JSON output validates against `schemas/cypherbench-scorecard.schema.json`, while markdown output is intended for release notes, READMEs, and benchmark dashboards.
 
+## Benchmark Gates
+
+Turn a comparison into a CI-friendly pass/fail artifact:
+
+```bash
+cypher-llm benchmark-gate \
+  --baseline examples/benchmarks/tool-hash-raw-baseline.report.json \
+  --candidate examples/imported/smoke-ir-vs-raw.report.json \
+  --min-pass-rate 1 \
+  --min-executable-rate 0.3333 \
+  --gate-out examples/benchmarks/tool-hash.benchmark-gate.json \
+  --fail-on-fail
+```
+
+The gate fails when directional benchmark metrics regress. It can also enforce pass-rate and executable-rate floors, and `--fail-on-diagnostic-regression` can make diagnostic-code count increases block a lane when the diagnostic set is stable enough for that to be meaningful.
+
 ## Dataset Governance
 
 Audit a dataset before publishing or refreshing a benchmark lane:

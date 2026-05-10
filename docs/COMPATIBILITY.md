@@ -17,6 +17,7 @@ Stable public contracts:
 - `cypher-llm-lsp-diagnostics/v1`
 - `cypher-llm-lossless-parse/v1`
 - `cypher-llm-cypherbench-scorecard/v1`
+- `cypher-llm-benchmark-gate/v1`
 - `cypher-llm-dataset-governance/v1`
 - `cypher-llm-repair-plan/v1`
 - `cypher-llm-service-manifest/v1`
@@ -114,6 +115,16 @@ cypher-llm scorecard --reports baseline.report.json,candidate.report.json --scor
 ```
 
 Scorecards are the public benchmark contract for ranked eval lanes, aggregate diagnostics, and baseline comparisons. JSON scorecards validate against `schemas/cypherbench-scorecard.schema.json`; markdown scorecards are generated from the same object.
+
+## Benchmark Gates
+
+Run:
+
+```bash
+cypher-llm benchmark-gate --baseline baseline.report.json --candidate candidate.report.json --min-pass-rate 0.95 --gate-out gate.json --fail-on-fail
+```
+
+Benchmark gates are the CI contract for blocking regressions. They wrap an eval comparison, directional metric regression checks, optional pass-rate and executable-rate floors, optional diagnostic-regression checks, and a pass/fail summary. JSON gates validate against `schemas/benchmark-gate.schema.json`.
 
 ## Dataset Governance Reports
 
