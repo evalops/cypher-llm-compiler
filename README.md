@@ -32,6 +32,27 @@ This package implements eight concrete improvements:
 
 ## Quick Start
 
+Install dependencies and run the suite:
+
+```bash
+npm install
+npm test
+```
+
+Use the CLI against JSON schema/query files:
+
+```bash
+npm run build
+npx cypher-llm render \
+  --schema examples/tool-hash.schema.json \
+  --query examples/tool-hash.query.json \
+  --params examples/tool-hash.params.json \
+  --default-limit 25 \
+  --default-max-hops 5
+```
+
+Or use the library directly:
+
 ```ts
 import {
   normalizeSchema,
@@ -95,6 +116,96 @@ RETURN hash.`value` AS md5
 LIMIT 25
 ```
 
+## CLI
+
+The CLI is intentionally boring JSON in, JSON out so it can be called by agents, eval harnesses, CI, and editor integrations.
+
+```bash
+cypher-llm render --schema schema.json --query query.json --params params.json --default-limit 25
+cypher-llm validate --schema schema.json --query query.json
+cypher-llm repair-raw --schema schema.json --cypher "MATCH (t:Tool)-[:has MD5 hash]->(h:Hash) RETURN h"
+cypher-llm corpus
+```
+
+`render` returns a `SafeExecutionPlan`:
+
+- `cypher`: canonical Cypher text.
+- `preflightCypher`: the same query prefixed with `EXPLAIN`.
+- `diagnostics`: stable diagnostic objects.
+- `repairs`: deterministic repairs applied before rendering.
+- `requiresApproval`: true for graph mutations without explicit approval.
+- `canExecute`: false if errors remain or approval is required.
+
+## LLM Integration Contract
+
+The recommended agent loop is:
+
+1. Fetch or build a `CypherSchemaContract`.
+2. Ask the LLM for `CypherQuery` JSON, not Cypher text.
+3. Run `repairQuery` with conservative defaults such as `defaultLimit` and `defaultMaxHops`.
+4. Run `validateQuery`.
+5. If diagnostics include errors, send only stable diagnostic codes, paths, messages, and suggestions back to the LLM.
+6. Render with `renderQuery` only after the structured query is acceptable.
+7. Execute `preflightCypher` first when using a real database adapter.
+
+This keeps the model inside a compiler loop instead of a string-generation loop.
+
+## Diagnostic Shape
+
+Diagnostics are stable API objects:
+
+```ts
+{
+  code: "undefined-variable",
+  severity: "error",
+  path: "/clauses/2/items/0/expression",
+  message: "Variable 'tool' is not in scope.",
+  suggestion: "Introduce the variable in MATCH/UNWIND/LET/WITH or project it through WITH.",
+  repair: {
+    kind: "restore-scope",
+    description: "Project the variable through the preceding WITH clause or rename this reference."
+  }
+}
+```
+
+Current diagnostic codes include:
+
+- `unknown-label`
+- `unknown-relationship-type`
+- `unknown-property`
+- `unknown-parameter`
+- `undefined-variable`
+- `missing-limit`
+- `missing-return`
+- `relationship-direction-mismatch`
+- `unbounded-variable-length-path`
+- `raw-cypher-escape-hatch`
+- `raw-expression-escape-hatch`
+- `write-requires-approval`
+- `execution-approval-required`
+- `missing-required-parameter`
+- `no-cypher-output`
+- `sqlism-between`
+- `raw-identifier-quoted`
+
+## Compatibility Strategy
+
+The renderer emits ordinary Cypher. The structured layer exists before the text boundary and can be discarded after rendering. That means existing database drivers, Neo4j deployments, LangChain-style chains, and text2cypher eval harnesses can adopt this incrementally:
+
+- Raw chains can start with `repairRawCypher` and diagnostics.
+- New chains should emit `CypherQuery` IR directly.
+- Evals can compare `normalizeQuery` output instead of brittle free-form strings.
+- Operators can gate writes through `createSafeExecutionPlan`.
+
+## What This Does Not Do Yet
+
+- It does not embed a full Cypher parser.
+- It does not execute against a database.
+- It does not claim semantic equivalence beyond canonical rendering of this IR.
+- It does not make regex raw-query repair broad on purpose.
+
+Those are deliberate boundaries. The repo is the missing LLM compiler surface, not a database driver or a complete reimplementation of Neo4j.
+
 ## Repository Layout
 
 - `src/ir.ts`: Public IR and schema types.
@@ -105,7 +216,9 @@ LIMIT 25
 - `src/normalize.ts`: Stable query normalization and equivalence helpers.
 - `src/safety.ts`: Safe execution planning.
 - `src/failure-corpus.ts`: Runnable corpus of LLM failure cases.
+- `src/cli.ts`: JSON-in/JSON-out CLI for agents and eval harnesses.
 - `docs/`: Design notes and LLM integration guidance.
+- `examples/`: Small schema/query fixtures for CLI smoke tests and agent onboarding.
 - `test/`: Node test-runner coverage for renderer, schema, validation, repair, safety, and corpus behavior.
 
 ## Design Rules
@@ -121,3 +234,13 @@ LIMIT 25
 ## Status
 
 This is an implementation prototype intended to become the LLM-facing compiler layer that Cypher currently lacks. It is deliberately small enough to review, but complete enough to validate the main product claim: LLMs should write structured Cypher programs, receive compiler diagnostics, repair structured programs, and render canonical Cypher only at the boundary.
+
+## Next Hardening Pass
+
+The highest-value next pass is to wire this to a real parser and the openCypher/Neo4j TCK:
+
+- Import openCypher grammar examples as parse/render fixtures.
+- Add a Neo4j adapter that runs `EXPLAIN` and maps server errors back into `Diagnostic`.
+- Grow the failure corpus with `neo4j-labs/text2cypher` syntax-error examples.
+- Add dialect-specific render modes for openCypher 9, Cypher 25, and emerging GQL syntax.
+- Publish JSON Schema files for `CypherSchemaContract` and `CypherQuery`.

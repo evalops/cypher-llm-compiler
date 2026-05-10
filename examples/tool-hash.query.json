@@ -1,0 +1,51 @@
+{
+  "version": "cypher-llm-ir/v1",
+  "profile": "llm-safe-readonly",
+  "clauses": [
+    {
+      "kind": "match",
+      "patterns": [
+        {
+          "segments": [
+            {
+              "variable": "tool",
+              "labels": ["tool"],
+              "properties": {
+                "name": {
+                  "kind": "param",
+                  "name": "toolName"
+                }
+              }
+            },
+            {
+              "rel": {
+                "types": ["md5"],
+                "direction": "in"
+              },
+              "node": {
+                "variable": "hash",
+                "labels": ["Hash"]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "return",
+      "items": [
+        {
+          "expression": {
+            "kind": "prop",
+            "object": {
+              "kind": "var",
+              "name": "hash"
+            },
+            "key": "value"
+          },
+          "alias": "md5"
+        }
+      ]
+    }
+  ]
+}

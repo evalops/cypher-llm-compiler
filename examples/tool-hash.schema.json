@@ -1,0 +1,33 @@
+{
+  "version": "cypher-llm-schema/v1",
+  "dialect": "neo4j-cypher-25",
+  "nodes": [
+    {
+      "name": "Tool",
+      "aliases": ["tool"],
+      "properties": {
+        "name": { "type": "STRING" }
+      }
+    },
+    {
+      "name": "Hash",
+      "properties": {
+        "value": { "type": "STRING" }
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "type": "has MD5 hash",
+      "aliases": ["md5"],
+      "from": "Tool",
+      "to": "Hash"
+    }
+  ],
+  "parameters": {
+    "toolName": {
+      "type": "STRING",
+      "required": true
+    }
+  }
+}
