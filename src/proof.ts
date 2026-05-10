@@ -2,6 +2,7 @@ import type { Diagnostic } from "./diagnostics.js";
 import type { CypherQuery, CypherSchemaContract, JsonLiteral } from "./ir.js";
 import type { ParserValidationOptions } from "./parser-validation.js";
 import { validateCypherTextWithParser } from "./parser-validation.js";
+import type { CypherPolicyOptions } from "./policy.js";
 import { assessCypherPolicy } from "./policy.js";
 import { type SafeExecutionOptions, createSafeExecutionPlan } from "./safety.js";
 
@@ -11,6 +12,17 @@ export type CypherProofClaimStatus = "passed" | "warning" | "failed";
 export interface CypherProofOptions extends SafeExecutionOptions {
   parserMode?: ParserValidationOptions["mode"];
   includeParser?: boolean;
+  requireLimit?: boolean;
+  maxReturnLimit?: number;
+  maxRelationshipHops?: number;
+  maxEstimatedRows?: number;
+  maxDbHits?: number;
+  maxLabelScanRows?: number;
+  maxRelationshipFanout?: number;
+  warnOnPlanOperators?: string[];
+  plannerEstimate?: CypherPolicyOptions["plannerEstimate"];
+  schemaStatistics?: CypherPolicyOptions["schemaStatistics"];
+  policyRules?: CypherPolicyOptions["policyRules"];
 }
 
 export interface CypherProofClaim {
@@ -43,8 +55,7 @@ export function buildCypherProof(
 ): CypherProof {
   const plan = createSafeExecutionPlan(query, schema, params, options);
   const planDiagnostics = plan.diagnostics;
-  const policyOptions = options.allowWrites === undefined ? {} : { allowWrites: options.allowWrites };
-  const policy = assessCypherPolicy(plan.query, schema, policyOptions);
+  const policy = assessCypherPolicy(plan.query, schema, policyOptionsFromProofOptions(options));
   const policyDiagnostics = policy.findings.map((finding) => ({
     code: finding.code,
     severity: finding.severity,
@@ -78,9 +89,9 @@ export function buildCypherProof(
     },
     {
       id: "cost-safety-policy",
-      title: "Static cost and cardinality policy finds no blocking risk",
+      title: "Static cost, cardinality, and rule policy finds no blocking risk",
       status: claimStatus(policyDiagnostics),
-      evidence: ["src/policy.ts", "docs/LLM_SAFE_PROFILE.md"],
+      evidence: ["src/policy.ts", "src/policy-rules.ts", "docs/LLM_SAFE_PROFILE.md"],
       diagnostics: policyDiagnostics
     }
   ];
@@ -111,6 +122,23 @@ export function buildCypherProof(
     repairKinds,
     diagnosticCodes,
     claims
+  };
+}
+
+function policyOptionsFromProofOptions(options: CypherProofOptions): CypherPolicyOptions {
+  return {
+    ...(options.allowWrites !== undefined ? { allowWrites: options.allowWrites } : {}),
+    ...(options.requireLimit !== undefined ? { requireLimit: options.requireLimit } : {}),
+    ...(options.maxReturnLimit !== undefined ? { maxReturnLimit: options.maxReturnLimit } : {}),
+    ...(options.maxRelationshipHops !== undefined ? { maxRelationshipHops: options.maxRelationshipHops } : {}),
+    ...(options.maxEstimatedRows !== undefined ? { maxEstimatedRows: options.maxEstimatedRows } : {}),
+    ...(options.maxDbHits !== undefined ? { maxDbHits: options.maxDbHits } : {}),
+    ...(options.maxLabelScanRows !== undefined ? { maxLabelScanRows: options.maxLabelScanRows } : {}),
+    ...(options.maxRelationshipFanout !== undefined ? { maxRelationshipFanout: options.maxRelationshipFanout } : {}),
+    ...(options.warnOnPlanOperators !== undefined ? { warnOnPlanOperators: options.warnOnPlanOperators } : {}),
+    ...(options.plannerEstimate !== undefined ? { plannerEstimate: options.plannerEstimate } : {}),
+    ...(options.schemaStatistics !== undefined ? { schemaStatistics: options.schemaStatistics } : {}),
+    ...(options.policyRules !== undefined ? { policyRules: options.policyRules } : {})
   };
 }
 

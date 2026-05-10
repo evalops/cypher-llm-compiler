@@ -205,6 +205,7 @@ async function repairPlanCommand(args: Map<string, string | boolean>, io: CliIO)
   if (args.get("approved") === true) {
     options.approved = true;
   }
+  await applyPolicyEvidenceArgs(args, io, options);
   options.params = params;
   options.parserMode = args.get("parser-mode") === "lint" ? "lint" : "syntax";
   const plan = buildCypherRepairPlan(query, schema, options);
@@ -428,6 +429,7 @@ async function proveCommand(args: Map<string, string | boolean>, io: CliIO) {
   if (args.get("no-parser") === true) {
     proofOptions.includeParser = false;
   }
+  await applyPolicyEvidenceArgs(args, io, proofOptions);
   proofOptions.parserMode = args.get("parser-mode") === "lint" ? "lint" : "syntax";
   const proof = buildCypherProof(query, schema, params, proofOptions);
   if (typeof args.get("proof-out") === "string") {
@@ -712,6 +714,68 @@ async function readPolicyRules(args: Map<string, string | boolean>, io: CliIO): 
   return JSON.parse(await io.readFile(rulesPath, "utf8")) as CypherPolicyRuleSet;
 }
 
+async function applyPolicyEvidenceArgs(
+  args: Map<string, string | boolean>,
+  io: CliIO,
+  options: {
+    requireLimit?: boolean | undefined;
+    maxReturnLimit?: number | undefined;
+    maxRelationshipHops?: number | undefined;
+    plannerEstimate?: CypherPlannerEstimate | undefined;
+    schemaStatistics?: CypherSchemaStatistics | undefined;
+    policyRules?: CypherPolicyRuleSet | undefined;
+    maxEstimatedRows?: number | undefined;
+    maxDbHits?: number | undefined;
+    maxLabelScanRows?: number | undefined;
+    maxRelationshipFanout?: number | undefined;
+    warnOnPlanOperators?: string[] | undefined;
+  }
+) {
+  const plannerEstimate = await readPlannerEstimate(args, io);
+  const schemaStatistics = await readSchemaStatistics(args, io);
+  const policyRules = await readPolicyRules(args, io);
+  const maxReturnLimit = optionalNumber(args.get("max-return-limit"));
+  const maxRelationshipHops = optionalNumber(args.get("max-relationship-hops"));
+  const maxEstimatedRows = optionalNumber(args.get("max-estimated-rows"));
+  const maxDbHits = optionalNumber(args.get("max-db-hits"));
+  const maxLabelScanRows = optionalNumber(args.get("max-label-scan-rows"));
+  const maxRelationshipFanout = optionalNumber(args.get("max-relationship-fanout"));
+  const warnOnPlanOperators = optionalCsv(args.get("warn-on-plan-operators"));
+  if (args.get("no-require-limit") === true) {
+    options.requireLimit = false;
+  }
+  if (maxReturnLimit !== undefined) {
+    options.maxReturnLimit = maxReturnLimit;
+  }
+  if (maxRelationshipHops !== undefined) {
+    options.maxRelationshipHops = maxRelationshipHops;
+  }
+  if (plannerEstimate !== undefined) {
+    options.plannerEstimate = plannerEstimate;
+  }
+  if (schemaStatistics !== undefined) {
+    options.schemaStatistics = schemaStatistics;
+  }
+  if (policyRules !== undefined) {
+    options.policyRules = policyRules;
+  }
+  if (maxEstimatedRows !== undefined) {
+    options.maxEstimatedRows = maxEstimatedRows;
+  }
+  if (maxDbHits !== undefined) {
+    options.maxDbHits = maxDbHits;
+  }
+  if (maxLabelScanRows !== undefined) {
+    options.maxLabelScanRows = maxLabelScanRows;
+  }
+  if (maxRelationshipFanout !== undefined) {
+    options.maxRelationshipFanout = maxRelationshipFanout;
+  }
+  if (warnOnPlanOperators !== undefined) {
+    options.warnOnPlanOperators = warnOnPlanOperators;
+  }
+}
+
 function parseArgs(args: string[]): Map<string, string | boolean> {
   const parsed = new Map<string, string | boolean>();
   for (let index = 0; index < args.length; index += 1) {
@@ -820,7 +884,7 @@ Commands:
   render      --schema schema.json --query query.json [--params params.json] [--default-limit 25] [--default-max-hops 5]
   validate    --schema schema.json --query query.json
   repair-raw  --schema schema.json --cypher "MATCH ..."
-  repair-plan --schema schema.json --query query.json [--params params.json] [--plan-out plan.json] [--fail-on-blocked] [--default-limit 25] [--default-max-hops 5] [--allow-writes] [--approved] [--parser-mode syntax|lint]
+  repair-plan --schema schema.json --query query.json [--params params.json] [--plan-out plan.json] [--fail-on-blocked] [--default-limit 25] [--default-max-hops 5] [--planner-estimate estimate.json] [--schema-statistics stats.json] [--policy-rules rules.json] [--no-require-limit] [--max-return-limit 100] [--max-relationship-hops 5] [--allow-writes] [--approved] [--parser-mode syntax|lint]
   lift-raw    --cypher "MATCH ..." [--schema schema.json] [--query-out query.json] [--summary-out summary.json] [--profile raw-compatible|llm-safe-readonly] [--mode syntax|lint]
   parse-lossless --cypher "MATCH ..." [--schema schema.json] [--report-out report.json] [--parser-mode syntax|lint] [--no-ir-preview]
   corpus
@@ -835,7 +899,7 @@ Commands:
   policy-check --schema schema.json --query query.json [--policy-profile-id id | --policy-profile profile.json] [--planner-estimate estimate.json] [--schema-statistics stats.json] [--policy-rules rules.json] [--report-out report.json] [--fail-on-error] [--allow-writes] [--no-require-limit] [--max-return-limit 100] [--max-relationship-hops 5] [--max-estimated-rows 10000] [--max-db-hits 50000] [--max-label-scan-rows 10000] [--max-relationship-fanout 100] [--warn-on-plan-operators CartesianProduct,AllNodesScan]
   policy-profiles [--format json|markdown] [--profiles-out profiles.json]
   lsp-diagnostics --schema schema.json (--query query.json | --cypher "MATCH ...") [--uri file:///query.cypher] [--report-out report.json] [--parser-mode syntax|lint] [--default-limit 25] [--default-max-hops 5]
-  prove       --schema schema.json --query query.json [--params params.json] [--proof-out proof.json] [--fail-on-blocked] [--default-limit 25] [--default-max-hops 5] [--allow-writes] [--approved] [--parser-mode syntax|lint] [--no-parser]
+  prove       --schema schema.json --query query.json [--params params.json] [--proof-out proof.json] [--fail-on-blocked] [--default-limit 25] [--default-max-hops 5] [--planner-estimate estimate.json] [--schema-statistics stats.json] [--policy-rules rules.json] [--no-require-limit] [--max-return-limit 100] [--max-relationship-hops 5] [--allow-writes] [--approved] [--parser-mode syntax|lint] [--no-parser]
   introspect-neo4j --uri bolt://localhost:7687 --user neo4j --password password [--schema-out schema.json] [--sample-limit 1000] [--no-procedures]
   roadmap    [--format json|markdown] [--integrity] [--roadmap-out path]
   certify-dialects [--format json|markdown] [--report-out path] [--fail-on-fail]

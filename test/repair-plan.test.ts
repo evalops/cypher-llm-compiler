@@ -92,6 +92,30 @@ describe("repair plans", () => {
     assert.ok(plan.unsafe.some((step) => step.diagnostics.some((item) => item.code === "policy-write-risk")));
   });
 
+  it("classifies policy-rule blockers as unsafe repair steps", () => {
+    const sensitiveReturnQuery: CypherQuery = {
+      ...repairableQuery,
+      clauses: [
+        repairableQuery.clauses[0]!,
+        { kind: "return", items: [{ expression: { kind: "prop", object: { kind: "var", name: "hash" }, key: "value" } }] }
+      ]
+    };
+    const plan = buildCypherRepairPlan(sensitiveReturnQuery, schema, {
+      defaultLimit: 25,
+      defaultMaxHops: 3,
+      policyRules: {
+        version: "cypher-llm-policy-rules/v1",
+        id: "repair-rules",
+        sensitiveProperties: [{ ownerKind: "node", owner: "Hash", property: "value", severity: "error" }],
+        tenantScopes: [{ label: "Tool", property: "tenantId", parameter: "tenantId", severity: "error" }]
+      }
+    });
+
+    assert.equal(plan.status, "blocked");
+    assert.ok(plan.unsafe.some((step) => step.diagnostics.some((item) => item.code === "policy-missing-tenant-scope")));
+    assert.ok(plan.unsafe.some((step) => step.diagnostics.some((item) => item.code === "policy-sensitive-property-return")));
+  });
+
   it("keeps checked-in repair plan JSON aligned with runtime data", () => {
     const query = readJson<CypherQuery>("examples/tool-hash.query.json");
     const schemaContract = readJson<CypherSchemaContract>("examples/tool-hash.schema.json");

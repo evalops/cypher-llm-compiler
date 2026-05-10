@@ -72,6 +72,32 @@ describe("proof-carrying Cypher compilation", () => {
     assert.equal(proof.claims.find((claim) => claim.id === "execution-policy")?.status, "failed");
   });
 
+  it("feeds policy evidence into proof claims", () => {
+    const proof = buildCypherProof(repairableQuery, schema, {}, {
+      defaultLimit: 25,
+      defaultMaxHops: 3,
+      policyRules: {
+        version: "cypher-llm-policy-rules/v1",
+        id: "proof-rules",
+        sensitiveLabels: [{ label: "Hash", severity: "warning" }],
+        tenantScopes: [{ label: "Tool", property: "tenantId", parameter: "tenantId", severity: "error" }]
+      },
+      schemaStatistics: {
+        version: "cypher-llm-schema-statistics/v1",
+        source: "fixture",
+        nodes: [{ label: "Tool", count: 25_000 }],
+        relationships: [{ type: "has MD5 hash", averageFanout: 250 }]
+      }
+    });
+    const policyClaim = proof.claims.find((claim) => claim.id === "cost-safety-policy");
+
+    assert.equal(proof.status, "blocked");
+    assert.equal(policyClaim?.status, "failed");
+    assert.ok(proof.diagnosticCodes.includes("policy-missing-tenant-scope"));
+    assert.ok(proof.diagnosticCodes.includes("policy-sensitive-label-access"));
+    assert.ok(proof.diagnosticCodes.includes("policy-high-fanout-relationship"));
+  });
+
   it("keeps checked-in proof JSON aligned with runtime data and schema", () => {
     const ajv = new Ajv2020({ allErrors: true, strict: false });
     const proofSchema = readJson("schemas/cypher-proof.schema.json");

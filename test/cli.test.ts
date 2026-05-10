@@ -432,6 +432,14 @@ describe("cli", () => {
             { kind: "return", items: [{ expression: { kind: "var", name: "tool" } }] }
           ]
         })
+      ],
+      [
+        "rules.json",
+        JSON.stringify({
+          version: "cypher-llm-policy-rules/v1",
+          id: "repair-cli-rules",
+          sensitiveLabels: [{ label: "Tool", severity: "warning" }]
+        })
       ]
     ]);
     const writes = new Map<string, string>();
@@ -448,7 +456,21 @@ describe("cli", () => {
     };
 
     const code = await runCli(
-      ["repair-plan", "--schema", "schema.json", "--query", "query.json", "--plan-out", "out/repair-plan.json", "--default-limit", "25"],
+      [
+        "repair-plan",
+        "--schema",
+        "schema.json",
+        "--query",
+        "query.json",
+        "--plan-out",
+        "out/repair-plan.json",
+        "--default-limit",
+        "25",
+        "--max-return-limit",
+        "10",
+        "--policy-rules",
+        "rules.json"
+      ],
       io
     );
     const output = JSON.parse(stdout) as { version: string; deterministic: { patch?: { path: string } }[] };
@@ -457,6 +479,8 @@ describe("cli", () => {
     assert.equal(stderr, "");
     assert.equal(output.version, "cypher-llm-repair-plan/v1");
     assert.ok(output.deterministic.some((step) => step.patch?.path === "/clauses/1/limit"));
+    assert.ok(stdout.includes("policy-high-return-limit"));
+    assert.ok(stdout.includes("policy-sensitive-label-access"));
     assert.ok(writes.get("out/repair-plan.json")?.includes("cypher-llm-repair-plan/v1"));
   });
 
@@ -568,6 +592,14 @@ describe("cli", () => {
             { kind: "return", items: [{ expression: { kind: "var", name: "hash" } }] }
           ]
         })
+      ],
+      [
+        "rules.json",
+        JSON.stringify({
+          version: "cypher-llm-policy-rules/v1",
+          id: "proof-cli-rules",
+          sensitiveLabels: [{ label: "Hash", severity: "warning" }]
+        })
       ]
     ]);
     const writes = new Map<string, string>();
@@ -584,13 +616,29 @@ describe("cli", () => {
     };
 
     const code = await runCli(
-      ["prove", "--schema", "schema.json", "--query", "query.json", "--proof-out", "out/proof.json", "--default-limit", "25"],
+      [
+        "prove",
+        "--schema",
+        "schema.json",
+        "--query",
+        "query.json",
+        "--proof-out",
+        "out/proof.json",
+        "--default-limit",
+        "25",
+        "--max-return-limit",
+        "10",
+        "--policy-rules",
+        "rules.json"
+      ],
       io
     );
 
     assert.equal(code, 0);
     assert.equal(stderr, "");
     assert.ok(stdout.includes("cypher-llm-proof/v1"));
+    assert.ok(stdout.includes("policy-high-return-limit"));
+    assert.ok(stdout.includes("policy-sensitive-label-access"));
     assert.ok(writes.get("out/proof.json")?.includes("parser-preflight"));
   });
 

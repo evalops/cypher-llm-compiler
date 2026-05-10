@@ -1,6 +1,7 @@
 import { diagnostic, type Diagnostic } from "./diagnostics.js";
 import type { CypherQuery, CypherSchemaContract, JsonLiteral } from "./ir.js";
 import { validateCypherTextWithParser } from "./parser-validation.js";
+import type { CypherPolicyOptions } from "./policy.js";
 import { assessCypherPolicy } from "./policy.js";
 import { repairQuery, type RepairAction, type RepairOptions } from "./repair.js";
 import { renderQuery } from "./render.js";
@@ -16,6 +17,17 @@ export interface RepairPlanOptions extends RepairOptions {
   parserMode?: "syntax" | "lint";
   allowWrites?: boolean;
   approved?: boolean;
+  requireLimit?: boolean;
+  maxReturnLimit?: number;
+  maxRelationshipHops?: number;
+  maxEstimatedRows?: number;
+  maxDbHits?: number;
+  maxLabelScanRows?: number;
+  maxRelationshipFanout?: number;
+  warnOnPlanOperators?: string[];
+  plannerEstimate?: CypherPolicyOptions["plannerEstimate"];
+  schemaStatistics?: CypherPolicyOptions["schemaStatistics"];
+  policyRules?: CypherPolicyOptions["policyRules"];
 }
 
 export interface RepairPlanPatch {
@@ -74,7 +86,11 @@ const UNSAFE_CODES = new Set([
   "execution-approval-required",
   "policy-write-risk",
   "policy-unbounded-traversal",
-  "policy-cartesian-pattern-risk"
+  "policy-cartesian-pattern-risk",
+  "policy-sensitive-label-access",
+  "policy-sensitive-relationship-access",
+  "policy-sensitive-property-return",
+  "policy-missing-tenant-scope"
 ]);
 
 export function buildCypherRepairPlan(
@@ -88,7 +104,7 @@ export function buildCypherRepairPlan(
   const repaired = repairQuery(query, normalized, options);
   const plan = createSafeExecutionPlan(repaired.query, normalized, params, options);
   const parser = validateCypherTextWithParser(plan.cypher, normalized, { mode: options.parserMode ?? "syntax" });
-  const policy = assessCypherPolicy(repaired.query, schema, { ...(options.allowWrites !== undefined ? { allowWrites: options.allowWrites } : {}) });
+  const policy = assessCypherPolicy(repaired.query, schema, policyOptionsFromRepairPlanOptions(options));
   const policyDiagnostics = policy.findings.map((finding) =>
     diagnostic({
       code: finding.code,
@@ -126,6 +142,23 @@ export function buildCypherRepairPlan(
       unsafe: unsafe.length,
       diagnostics: diagnostics.length
     }
+  };
+}
+
+function policyOptionsFromRepairPlanOptions(options: RepairPlanOptions): CypherPolicyOptions {
+  return {
+    ...(options.allowWrites !== undefined ? { allowWrites: options.allowWrites } : {}),
+    ...(options.requireLimit !== undefined ? { requireLimit: options.requireLimit } : {}),
+    ...(options.maxReturnLimit !== undefined ? { maxReturnLimit: options.maxReturnLimit } : {}),
+    ...(options.maxRelationshipHops !== undefined ? { maxRelationshipHops: options.maxRelationshipHops } : {}),
+    ...(options.maxEstimatedRows !== undefined ? { maxEstimatedRows: options.maxEstimatedRows } : {}),
+    ...(options.maxDbHits !== undefined ? { maxDbHits: options.maxDbHits } : {}),
+    ...(options.maxLabelScanRows !== undefined ? { maxLabelScanRows: options.maxLabelScanRows } : {}),
+    ...(options.maxRelationshipFanout !== undefined ? { maxRelationshipFanout: options.maxRelationshipFanout } : {}),
+    ...(options.warnOnPlanOperators !== undefined ? { warnOnPlanOperators: options.warnOnPlanOperators } : {}),
+    ...(options.plannerEstimate !== undefined ? { plannerEstimate: options.plannerEstimate } : {}),
+    ...(options.schemaStatistics !== undefined ? { schemaStatistics: options.schemaStatistics } : {}),
+    ...(options.policyRules !== undefined ? { policyRules: options.policyRules } : {})
   };
 }
 

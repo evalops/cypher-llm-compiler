@@ -169,6 +169,57 @@ const repairOptionProperties = {
   }
 } satisfies Record<string, JsonSchema>;
 
+const policyEvidenceProperties = {
+  requireLimit: {
+    type: "boolean",
+    description: "Require RETURN clauses to include LIMIT when assessing policy evidence."
+  },
+  maxReturnLimit: {
+    type: "number",
+    description: "Warn when a RETURN LIMIT exceeds this policy maximum."
+  },
+  maxRelationshipHops: {
+    type: "number",
+    description: "Block or warn when variable-length relationships exceed this policy maximum."
+  },
+  plannerEstimate: {
+    type: "object",
+    description: "Optional cypher-llm-planner-estimate/v1 planner evidence from EXPLAIN or a fixture.",
+    additionalProperties: true
+  },
+  schemaStatistics: {
+    type: "object",
+    description: "Optional cypher-llm-schema-statistics/v1 cardinality and index metadata.",
+    additionalProperties: true
+  },
+  policyRules: {
+    type: "object",
+    description: "Optional cypher-llm-policy-rules/v1 sensitivity and tenant-scoping policy rules.",
+    additionalProperties: true
+  },
+  maxEstimatedRows: {
+    type: "number",
+    description: "Warn when planner-estimated rows exceed this value."
+  },
+  maxDbHits: {
+    type: "number",
+    description: "Warn when planner-estimated db hits exceed this value."
+  },
+  maxLabelScanRows: {
+    type: "number",
+    description: "Warn when unanchored label scans exceed this schema-statistics row count."
+  },
+  maxRelationshipFanout: {
+    type: "number",
+    description: "Warn when relationship average fanout exceeds this schema-statistics value."
+  },
+  warnOnPlanOperators: {
+    type: "array",
+    items: { type: "string" },
+    description: "Planner operator names that should produce warning findings."
+  }
+} satisfies Record<string, JsonSchema>;
+
 export const CYPHER_COMPILER_TOOLS: readonly CypherCompilerToolDefinition[] = [
   {
     name: "cypher_render",
@@ -228,6 +279,7 @@ export const CYPHER_COMPILER_TOOLS: readonly CypherCompilerToolDefinition[] = [
       query: cypherQuerySchema,
       params: paramsSchema,
       ...repairOptionProperties,
+      ...policyEvidenceProperties,
       allowWrites: {
         type: "boolean",
         description: "Allow write clauses in policy assessment."
@@ -377,6 +429,7 @@ export const CYPHER_COMPILER_TOOLS: readonly CypherCompilerToolDefinition[] = [
       query: cypherQuerySchema,
       params: paramsSchema,
       ...repairOptionProperties,
+      ...policyEvidenceProperties,
       allowWrites: {
         type: "boolean",
         description: "Allow write clauses to pass validation. Use only after an external approval step."
@@ -750,6 +803,17 @@ function proofOptions(args: Record<string, unknown>) {
   const options = safeExecutionOptions(args) as ReturnType<typeof safeExecutionOptions> & {
     parserMode?: Required<ParserValidationOptions>["mode"];
     includeParser?: boolean;
+    requireLimit?: boolean;
+    maxReturnLimit?: number;
+    maxRelationshipHops?: number;
+    plannerEstimate?: CypherPlannerEstimate;
+    schemaStatistics?: CypherSchemaStatistics;
+    policyRules?: CypherPolicyRuleSet;
+    maxEstimatedRows?: number;
+    maxDbHits?: number;
+    maxLabelScanRows?: number;
+    maxRelationshipFanout?: number;
+    warnOnPlanOperators?: string[];
   };
   const parserMode = optionalString(args, "parserMode");
   const includeParser = optionalBoolean(args, "includeParser");
@@ -762,6 +826,7 @@ function proofOptions(args: Record<string, unknown>) {
   if (includeParser !== undefined) {
     options.includeParser = includeParser;
   }
+  Object.assign(options, policyEvidenceOptions(args));
   return options;
 }
 
@@ -773,6 +838,17 @@ function repairPlanOptions(args: Record<string, unknown>) {
     allowWrites?: boolean;
     approved?: boolean;
     parserMode?: Required<ParserValidationOptions>["mode"];
+    requireLimit?: boolean;
+    maxReturnLimit?: number;
+    maxRelationshipHops?: number;
+    plannerEstimate?: CypherPlannerEstimate;
+    schemaStatistics?: CypherSchemaStatistics;
+    policyRules?: CypherPolicyRuleSet;
+    maxEstimatedRows?: number;
+    maxDbHits?: number;
+    maxLabelScanRows?: number;
+    maxRelationshipFanout?: number;
+    warnOnPlanOperators?: string[];
   } = { ...repairOptions(args) };
   const params = optionalParams(args);
   const allowWrites = optionalBoolean(args, "allowWrites");
@@ -792,6 +868,68 @@ function repairPlanOptions(args: Record<string, unknown>) {
       throw new Error("Expected 'parserMode' to be lint or syntax.");
     }
     options.parserMode = parserMode;
+  }
+  Object.assign(options, policyEvidenceOptions(args));
+  return options;
+}
+
+function policyEvidenceOptions(args: Record<string, unknown>) {
+  const options: {
+    requireLimit?: boolean;
+    maxReturnLimit?: number;
+    maxRelationshipHops?: number;
+    plannerEstimate?: CypherPlannerEstimate;
+    schemaStatistics?: CypherSchemaStatistics;
+    policyRules?: CypherPolicyRuleSet;
+    maxEstimatedRows?: number;
+    maxDbHits?: number;
+    maxLabelScanRows?: number;
+    maxRelationshipFanout?: number;
+    warnOnPlanOperators?: string[];
+  } = {};
+  const plannerEstimate = optionalObject<CypherPlannerEstimate>(args, "plannerEstimate");
+  const schemaStatistics = optionalObject<CypherSchemaStatistics>(args, "schemaStatistics");
+  const policyRules = optionalObject<CypherPolicyRuleSet>(args, "policyRules");
+  const requireLimit = optionalBoolean(args, "requireLimit");
+  const maxReturnLimit = optionalNumber(args, "maxReturnLimit");
+  const maxRelationshipHops = optionalNumber(args, "maxRelationshipHops");
+  const maxEstimatedRows = optionalNumber(args, "maxEstimatedRows");
+  const maxDbHits = optionalNumber(args, "maxDbHits");
+  const maxLabelScanRows = optionalNumber(args, "maxLabelScanRows");
+  const maxRelationshipFanout = optionalNumber(args, "maxRelationshipFanout");
+  const warnOnPlanOperators = optionalStringArray(args, "warnOnPlanOperators");
+  if (requireLimit !== undefined) {
+    options.requireLimit = requireLimit;
+  }
+  if (maxReturnLimit !== undefined) {
+    options.maxReturnLimit = maxReturnLimit;
+  }
+  if (maxRelationshipHops !== undefined) {
+    options.maxRelationshipHops = maxRelationshipHops;
+  }
+  if (plannerEstimate !== undefined) {
+    options.plannerEstimate = plannerEstimate;
+  }
+  if (schemaStatistics !== undefined) {
+    options.schemaStatistics = schemaStatistics;
+  }
+  if (policyRules !== undefined) {
+    options.policyRules = policyRules;
+  }
+  if (maxEstimatedRows !== undefined) {
+    options.maxEstimatedRows = maxEstimatedRows;
+  }
+  if (maxDbHits !== undefined) {
+    options.maxDbHits = maxDbHits;
+  }
+  if (maxLabelScanRows !== undefined) {
+    options.maxLabelScanRows = maxLabelScanRows;
+  }
+  if (maxRelationshipFanout !== undefined) {
+    options.maxRelationshipFanout = maxRelationshipFanout;
+  }
+  if (warnOnPlanOperators !== undefined) {
+    options.warnOnPlanOperators = warnOnPlanOperators;
   }
   return options;
 }

@@ -376,7 +376,7 @@ export const yearsRoadmap = {
       id: "repair-plans",
       title: "Ranked Deterministic And Model Repair Plans",
       status: "partial",
-      evidence: ["src/repair-plan.ts", "schemas/repair-plan.schema.json", "test/repair-plan.test.ts"],
+      evidence: ["src/repair-plan.ts", "src/policy.ts", "src/policy-rules.ts", "schemas/repair-plan.schema.json", "test/repair-plan.test.ts"],
       workstreamIds: ["semantic-proof-repair", "public-cypherbench"]
     },
     {
@@ -461,7 +461,15 @@ export const yearsRoadmap = {
       id: "proof-objects",
       title: "Proof-Carrying Validation And Repair Plans",
       status: "partial",
-      evidence: ["src/proof.ts", "src/policy.ts", "schemas/cypher-proof.schema.json", "test/proof.test.ts"],
+      evidence: [
+        "src/proof.ts",
+        "src/policy.ts",
+        "src/policy-rules.ts",
+        "src/planner-estimate.ts",
+        "src/schema-statistics.ts",
+        "schemas/cypher-proof.schema.json",
+        "test/proof.test.ts"
+      ],
       workstreamIds: ["semantic-proof-repair", "cost-safety-policy"]
     },
     {

@@ -75,6 +75,8 @@ Builds a `cypher-llm-repair-plan/v1` object that separates:
 
 The report includes `cypherBefore`, `cypherAfter`, ranked steps, diagnostics, and a compact summary.
 
+When supplied, `plannerEstimate`, `schemaStatistics`, policy thresholds, and `policyRules` feed the same policy engine used by `assessCypherPolicy`; blocking policy-rule diagnostics are placed in `unsafe` rather than treated as model-editable repairs.
+
 ## `repairRawCypher(raw, schema)`
 
 Bootstrap bridge for existing text2cypher chains.
@@ -161,7 +163,7 @@ Produces a `cypher-llm-proof/v1` object for agent feedback loops:
 }
 ```
 
-Proof claims cover deterministic repairs, compiler diagnostics, execution policy, static cost/safety policy, and parser preflight unless `includeParser` is false.
+Proof claims cover deterministic repairs, compiler diagnostics, execution policy, static cost/safety policy, and parser preflight unless `includeParser` is false. `plannerEstimate`, `schemaStatistics`, policy thresholds, and `policyRules` can be passed into proof options so the cost/safety claim reflects the same evidence used by policy checks.
 
 ## `assessCypherPolicy(query, schema, options?)`
 
@@ -196,7 +198,7 @@ Pass the completed statistics object to `assessCypherPolicy` as `schemaStatistic
 
 `cypher-llm-policy-rules/v1` objects let applications supply tenant and sensitive-data policy rules at runtime. Rules can mark labels, relationship types, and returned properties as sensitive, and can require a label to be constrained by a property or parameter such as `tenantId`.
 
-Pass the rule set to `assessCypherPolicy` as `policyRules`, or to the CLI with `--policy-rules`, to include stable policy findings and a compact rule summary in `cypher-llm-policy-report/v1`.
+Pass the rule set to `assessCypherPolicy` as `policyRules`, or to the CLI with `--policy-rules`, to include stable policy findings and a compact rule summary in `cypher-llm-policy-report/v1`. The same rule set can also be supplied to proof and repair-plan calls so agents receive blocked proof claims or unsafe repair-plan steps.
 
 ## `buildPolicyProfileCatalog()`
 

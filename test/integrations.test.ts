@@ -64,6 +64,13 @@ describe("OpenAI tool schemas", () => {
     ]);
     assert.equal(chatTools[0]?.function.name, "cypher_render");
     assert.equal(responseTools.every((tool) => tool.type === "function" && tool.parameters.type === "object"), true);
+    const toolsByName = Object.fromEntries(responseTools.map((tool) => [tool.name, tool]));
+    const renderProperties = toolsByName.cypher_render?.parameters.properties as Record<string, unknown>;
+    const repairPlanProperties = toolsByName.cypher_repair_plan?.parameters.properties as Record<string, unknown>;
+    const proveProperties = toolsByName.cypher_prove?.parameters.properties as Record<string, unknown>;
+    assert.equal("policyRules" in renderProperties, false);
+    assert.equal("policyRules" in repairPlanProperties, true);
+    assert.equal("maxReturnLimit" in proveProperties, true);
   });
 
   it("executes the render and parse-check tools through the shared dispatcher", async () => {
@@ -107,11 +114,17 @@ describe("OpenAI tool schemas", () => {
       query: repairableQuery,
       defaultLimit: 25,
       defaultMaxHops: 3,
-      parserMode: "syntax"
-    })) as { version: string; deterministic: { patch?: { path: string } }[] };
+      parserMode: "syntax",
+      policyRules: {
+        version: "cypher-llm-policy-rules/v1",
+        id: "repair-tool-policy",
+        sensitiveLabels: [{ label: "Hash", severity: "warning" }]
+      }
+    })) as { version: string; deterministic: { patch?: { path: string } }[]; diagnostics: { code: string }[] };
 
     assert.equal(repairPlan.version, "cypher-llm-repair-plan/v1");
     assert.ok(repairPlan.deterministic.some((step) => step.patch?.path === "/clauses/1/limit"));
+    assert.ok(repairPlan.diagnostics.some((diagnostic) => diagnostic.code === "policy-sensitive-label-access"));
 
     const policy = (await executeCypherCompilerTool("cypher_policy_check", {
       schema,
@@ -173,11 +186,17 @@ describe("OpenAI tool schemas", () => {
       query: repairableQuery,
       defaultLimit: 25,
       defaultMaxHops: 3,
-      parserMode: "syntax"
-    })) as { status: string; canExecute: boolean; claims: { id: string }[] };
+      parserMode: "syntax",
+      policyRules: {
+        version: "cypher-llm-policy-rules/v1",
+        id: "proof-tool-policy",
+        sensitiveLabels: [{ label: "Hash", severity: "warning" }]
+      }
+    })) as { status: string; canExecute: boolean; diagnosticCodes: string[]; claims: { id: string }[] };
 
     assert.equal(proof.status, "repaired");
     assert.equal(proof.canExecute, true);
+    assert.ok(proof.diagnosticCodes.includes("policy-sensitive-label-access"));
     assert.ok(proof.claims.some((claim) => claim.id === "parser-preflight"));
 
     const evalReport = (await executeCypherCompilerTool("cypher_eval", {

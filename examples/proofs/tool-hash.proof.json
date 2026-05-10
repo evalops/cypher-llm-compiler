@@ -46,10 +46,11 @@
     },
     {
       "id": "cost-safety-policy",
-      "title": "Static cost and cardinality policy finds no blocking risk",
+      "title": "Static cost, cardinality, and rule policy finds no blocking risk",
       "status": "passed",
       "evidence": [
         "src/policy.ts",
+        "src/policy-rules.ts",
         "docs/LLM_SAFE_PROFILE.md"
       ],
       "diagnostics": []

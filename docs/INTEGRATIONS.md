@@ -5,13 +5,13 @@ The compiler exposes the same fourteen operations across OpenAI tool schemas, MC
 - `cypher_render`: repair IR, validate, and return a `SafeExecutionPlan`.
 - `cypher_validate`: return stable compiler diagnostics for IR.
 - `cypher_repair`: repair structured IR or narrow legacy raw Cypher failures.
-- `cypher_repair_plan`: return ranked deterministic, model-required, and unsafe repair plan steps.
+- `cypher_repair_plan`: return ranked deterministic, model-required, and unsafe repair plan steps, including optional policy evidence and thresholds.
 - `cypher_parse_lossless`: preserve raw Cypher byte-for-byte while exposing comments, clauses, source spans, parser output, and IR-preview coverage.
 - `cypher_parse_check`: run Neo4j language-support parser validation.
 - `cypher_policy_check`: assess static cost, cardinality, schema-statistics, policy-rule, planner-estimate, and safety policy.
 - `cypher_policy_profiles`: list built-in policy profiles for audited autonomous-agent safety settings.
 - `cypher_lsp_diagnostics`: emit LSP-style diagnostics and code actions for editor and agent UIs.
-- `cypher_prove`: return proof-carrying compile output with repairs, diagnostics, parser preflight, and execution-policy claims.
+- `cypher_prove`: return proof-carrying compile output with repairs, diagnostics, parser preflight, execution-policy claims, and optional policy evidence and thresholds.
 - `cypher_eval`: score model attempts against an eval dataset.
 - `cypher_scorecard`: publish ranked CypherBench scorecards from eval reports.
 - `cypher_benchmark_gate`: publish pass/fail CypherBench regression gates for CI.
