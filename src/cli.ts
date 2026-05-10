@@ -52,6 +52,9 @@ export async function runCli(argv: string[], io: CliIO = defaultIo()): Promise<n
       case "parse-check":
         await parseCheckCommand(args, io);
         return 0;
+      case "mcp":
+        await mcpCommand();
+        return 0;
       case "import-text2cypher":
         await importText2CypherCommand(args, io);
         return 0;
@@ -171,6 +174,11 @@ async function importOpenCypherTckCommand(args: Map<string, string | boolean>, i
   await writeImportedFixtureSet(args, io, imported);
 }
 
+async function mcpCommand() {
+  const { runMcpServer } = await import("./mcp-server.js");
+  await runMcpServer(process.stdin, process.stdout);
+}
+
 async function readSchema(args: Map<string, string | boolean>, io: CliIO): Promise<CypherSchemaContract> {
   return JSON.parse(await io.readFile(stringArg(args, "schema"), "utf8")) as CypherSchemaContract;
 }
@@ -287,6 +295,7 @@ Commands:
   corpus
   eval        --dataset dataset.json --attempts attempts.json [--report-out report.json] [--raw-cypher-can-execute] [--default-limit 25] [--default-max-hops 5]
   parse-check --schema schema.json (--query query.json | --cypher "MATCH ...") [--mode lint|syntax] [--default-limit 25] [--default-max-hops 5]
+  mcp
   import-text2cypher --csv rows.csv --dataset-out dataset.json --attempts-out attempts.json [--summary-out summary.json] [--dataset-name name] [--source name] [--model name] [--limit 10] [--indexes 0,2,39]
   import-functional-cypher --json rows.json --dataset-out dataset.json --attempts-out attempts.json [--summary-out summary.json] [--dataset-name name] [--source name] [--limit 10]
   import-opencypher-tck --feature feature.file --dataset-out dataset.json --attempts-out attempts.json [--summary-out summary.json] [--dataset-name name] [--source name] [--limit 10]

@@ -167,6 +167,51 @@ Output:
 
 This is the main entrypoint for comparing raw text2cypher against compiler-mediated generation.
 
+## `getOpenAiResponsesTools()`
+
+Returns OpenAI Responses API function-tool definitions for:
+
+- `cypher_render`
+- `cypher_validate`
+- `cypher_repair`
+- `cypher_parse_check`
+- `cypher_eval`
+
+## `getOpenAiChatTools()`
+
+Returns the same operations in the chat-completions `{ type: "function", function: ... }` shape.
+
+## `executeCypherCompilerTool(name, input)`
+
+Runs one of the exported tool operations using the same implementation that backs MCP:
+
+```ts
+const output = await executeCypherCompilerTool("cypher_render", {
+  schema,
+  query,
+  defaultLimit: 25,
+  defaultMaxHops: 5
+});
+```
+
+## `runMcpServer(input?, output?)`
+
+Starts a stdio MCP server that supports `initialize`, `ping`, `tools/list`, and `tools/call`.
+
+The package also exposes a `cypher-llm-mcp` binary and `cypher-llm mcp` CLI command.
+
+## `createLangChainCypherAdapter(schema, options?)`
+
+Creates a LangChain-shaped adapter without importing LangChain directly.
+
+Methods:
+
+- `compileQuery(query, params?)`: uses IR repair, safe execution planning, and parser-backed validation.
+- `correctRawCypher(rawCypher, params?)`: supports legacy text2cypher migration with narrow raw repair plus parser-backed validation.
+- `invoke(input)`: accepts `{ query, params }`, `{ rawCypher, params }`, a JSON string, or a raw Cypher string.
+- `asRunnable()`: returns a Runnable-like `{ invoke }` object.
+- `asTool(name?)`: returns a Tool-like object with `name`, `description`, `schema`, `invoke`, `call`, and `func`.
+
 ## Fixture Importers
 
 The package exposes import helpers for building eval datasets from upstream sources:

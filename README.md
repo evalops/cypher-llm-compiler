@@ -128,6 +128,7 @@ cypher-llm corpus
 cypher-llm eval --dataset examples/eval-dataset.json --attempts examples/eval-attempts.json --default-limit 25
 cypher-llm parse-check --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json --default-limit 25
 cypher-llm import-text2cypher --csv rows.csv --dataset-out dataset.json --attempts-out attempts.json
+cypher-llm mcp
 ```
 
 `render` returns a `SafeExecutionPlan`:
@@ -142,6 +143,37 @@ cypher-llm import-text2cypher --csv rows.csv --dataset-out dataset.json --attemp
 `eval` returns a `cypher-llm-eval-report/v1` report with pass rate, executable rate, repair rate, diagnostic counts, and per-task outcomes.
 
 `parse-check` validates rendered IR or raw Cypher against Neo4j's language-support parser and maps parser diagnostics back into this package's `Diagnostic` shape.
+
+`mcp` starts a stdio MCP server exposing the same render, validate, repair, parse-check, and eval operations to agent clients.
+
+## Agent Integrations
+
+The package exports OpenAI tool definitions, an MCP server, and a LangChain-shaped adapter:
+
+```ts
+import {
+  createLangChainCypherAdapter,
+  executeCypherCompilerTool,
+  getOpenAiResponsesTools
+} from "@evalops/cypher-llm-compiler";
+
+const openAiTools = getOpenAiResponsesTools();
+const toolOutput = await executeCypherCompilerTool("cypher_render", {
+  schema,
+  query,
+  defaultLimit: 25,
+  defaultMaxHops: 5
+});
+
+const adapter = createLangChainCypherAdapter(schema, {
+  defaultLimit: 25,
+  defaultMaxHops: 5,
+  parserMode: "lint"
+});
+const compiled = await adapter.compileQuery(query);
+```
+
+See `docs/INTEGRATIONS.md` and `examples/raw-to-ir-migration.md` for the full adoption path from raw text2cypher to structured IR.
 
 ## LLM Integration Contract
 
@@ -225,8 +257,12 @@ Those are deliberate boundaries. The repo is the missing LLM compiler surface, n
 - `src/normalize.ts`: Stable query normalization and equivalence helpers.
 - `src/safety.ts`: Safe execution planning.
 - `src/failure-corpus.ts`: Runnable corpus of LLM failure cases.
+- `src/fixture-importers.ts`: Importers for text2cypher CSV/JSON and openCypher TCK fixtures.
 - `src/parser-validation.ts`: Parser-backed validation through Neo4j language support.
 - `src/neo4j-explain.ts`: Driver-compatible Neo4j `EXPLAIN` preflight adapter.
+- `src/tools.ts`: OpenAI/MCP-compatible tool schemas and shared tool dispatcher.
+- `src/mcp-server.ts`: Stdio MCP server for agent clients.
+- `src/langchain.ts`: LangChain-shaped adapter for structured IR repair plus parser validation.
 - `src/cli.ts`: JSON-in/JSON-out CLI for agents and eval harnesses.
 - `docs/`: Design notes and LLM integration guidance.
 - `examples/`: Small schema/query fixtures for CLI smoke tests and agent onboarding.
@@ -251,10 +287,10 @@ This is an implementation prototype intended to become the LLM-facing compiler l
 
 ## Next Hardening Pass
 
-The highest-value next pass is to wire this to a real parser and the openCypher/Neo4j TCK:
+The highest-value next pass is to make the parser/database checks continuous and grow semantic coverage:
 
-- Import openCypher grammar examples as parse/render fixtures.
-- Add a Neo4j adapter that runs `EXPLAIN` and maps server errors back into `Diagnostic`.
-- Grow the failure corpus with `neo4j-labs/text2cypher` syntax-error examples.
-- Add dialect-specific render modes for openCypher 9, Cypher 25, and emerging GQL syntax.
-- Publish JSON Schema files for `CypherSchemaContract` and `CypherQuery`.
+- Add a Docker-backed Neo4j `EXPLAIN` CI fixture.
+- Expand subquery scope and procedure-yield validation.
+- Add richer property and parameter type checks.
+- Keep importing larger text2cypher/openCypher slices as regression fixtures.
+- Harden dialect-specific render modes for openCypher 9, Cypher 25, and emerging GQL syntax.

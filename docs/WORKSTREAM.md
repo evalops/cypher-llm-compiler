@@ -57,4 +57,4 @@ Artifacts:
 - LangChain adapter that replaces regex correction.
 - Migration guide for raw text2cypher chains.
 
-This is how the compiler becomes easy to adopt.
+Status: implemented through `src/tools.ts`, `src/mcp-server.ts`, `src/langchain.ts`, `docs/INTEGRATIONS.md`, and `examples/raw-to-ir-migration.md`. The same operation contract now reaches OpenAI function tools, MCP clients, LangChain-style chains, and direct TypeScript callers.
