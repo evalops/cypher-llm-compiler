@@ -276,6 +276,7 @@ export const agentGuide = {
     "cypher-llm-agent-feedback/v1",
     "cypher-llm-repair-plan/v1",
     "cypher-llm-proof/v1",
+    "cypher-llm-diagnostic-catalog/v1",
     "cypher-llm-policy-report/v1",
     "cypher-llm-compatibility-catalog/v1",
     "cypher-llm-compatibility-diff/v1"
@@ -285,6 +286,7 @@ export const agentGuide = {
     "examples/tool-hash.schema.json",
     "examples/proofs/tool-hash.agent-feedback.json",
     "examples/proofs/tool-hash.repair-plan.json",
+    "examples/diagnostics/diagnostic-catalog.json",
     "examples/governance/compatibility-catalog.json",
     "examples/governance/compatibility-diff.json"
   ]

@@ -107,6 +107,9 @@ export const compatibilityCatalog = {
       "examples/lsp/tool-hash.lsp.json",
       "examples/proofs/tool-hash.proof.json"
     ], ["src/diagnostics.ts", "src/validate.ts", "docs/COMPATIBILITY.md"]),
+    stableContract("diagnostic-catalog", "cypher-llm-diagnostic-catalog/v1", "diagnostic", "ecosystem-ux", "schemas/diagnostic-catalog.schema.json", [
+      "examples/diagnostics/diagnostic-catalog.json"
+    ], ["src/diagnostic-catalog.ts", "test/diagnostic-catalog.test.ts"]),
     stableContract("eval-dataset", "cypher-llm-eval-dataset/v1", "eval", "public-cypherbench", "schemas/eval-dataset.schema.json", [
       "examples/eval-dataset.json"
     ], ["src/evals.ts", "test/evals.test.ts"]),

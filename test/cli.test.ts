@@ -991,6 +991,31 @@ describe("cli", () => {
     assert.ok(writes.get("out/agent-guide.json")?.includes("cypher-llm-agent-guide/v1"));
   });
 
+  it("prints and writes the diagnostic catalog", async () => {
+    const writes = new Map<string, string>();
+    let stdout = "";
+    let stderr = "";
+    const io: CliIO = {
+      stdout: { write: (chunk: string | Uint8Array) => ((stdout += String(chunk)), true) },
+      stderr: { write: (chunk: string | Uint8Array) => ((stderr += String(chunk)), true) },
+      readFile: async () => "",
+      writeFile: async (path, data) => {
+        writes.set(path, data);
+      },
+      mkdir: async () => undefined
+    };
+
+    const jsonCode = await runCli(["diagnostic-catalog", "--integrity", "--fail-on-error", "--catalog-out", "out/diagnostics.json"], io);
+    const markdownCode = await runCli(["diagnostic-catalog", "--format", "markdown"], io);
+
+    assert.equal(jsonCode, 0);
+    assert.equal(markdownCode, 0);
+    assert.equal(stderr, "");
+    assert.ok(stdout.includes("cypher-llm-diagnostic-catalog/v1"));
+    assert.ok(stdout.includes("# Diagnostic Catalog"));
+    assert.ok(writes.get("out/diagnostics.json")?.includes("cypher-llm-diagnostic-catalog-integrity/v1"));
+  });
+
   it("prints and writes the compatibility diff report", async () => {
     const files = new Map<string, string>([
       ["baseline.json", JSON.stringify(buildCompatibilityCatalog())]

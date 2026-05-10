@@ -14,6 +14,11 @@ import {
 } from "./compatibility.js";
 import { buildCompatibilityDiffReport, renderCompatibilityDiffMarkdown } from "./compatibility-diff.js";
 import { buildDatasetGovernanceReport } from "./dataset-governance.js";
+import {
+  buildDiagnosticCatalog,
+  diagnosticCatalogIntegrityReport,
+  renderDiagnosticCatalogMarkdown
+} from "./diagnostic-catalog.js";
 import { certifyDialectProfiles, renderDialectCertificationMarkdown } from "./dialect-certification.js";
 import type { EvalAttemptSet, EvalDataset, EvalReport } from "./evals.js";
 import { compareEvalReports } from "./eval-compare.js";
@@ -130,6 +135,9 @@ export async function runCli(argv: string[], io: CliIO = defaultIo()): Promise<n
         return 0;
       case "agent-guide":
         await agentGuideCommand(args, io);
+        return 0;
+      case "diagnostic-catalog":
+        await diagnosticCatalogCommand(args, io);
         return 0;
       case "introspect-neo4j":
         await introspectNeo4jCommand(args, io);
@@ -673,6 +681,21 @@ async function agentGuideCommand(args: Map<string, string | boolean>, io: CliIO)
   io.stdout.write(output);
 }
 
+async function diagnosticCatalogCommand(args: Map<string, string | boolean>, io: CliIO) {
+  const catalog = buildDiagnosticCatalog();
+  const includeIntegrity = args.get("integrity") === true;
+  const output = args.get("format") === "markdown"
+    ? renderDiagnosticCatalogMarkdown(catalog)
+    : `${JSON.stringify(includeIntegrity ? { catalog, integrity: diagnosticCatalogIntegrityReport(catalog) } : catalog, null, 2)}\n`;
+  if (typeof args.get("catalog-out") === "string") {
+    await writeTextFile(io, args.get("catalog-out") as string, output);
+  }
+  io.stdout.write(output);
+  if (args.get("fail-on-error") === true && !diagnosticCatalogIntegrityReport(catalog).ok) {
+    throw new Error("Diagnostic catalog integrity failed.");
+  }
+}
+
 async function compatibilityDiffCommand(args: Map<string, string | boolean>, io: CliIO) {
   const baseline = JSON.parse(await io.readFile(stringArg(args, "baseline"), "utf8")) as CompatibilityCatalog;
   const candidate = typeof args.get("candidate") === "string"
@@ -998,6 +1021,7 @@ Commands:
   prove       --schema schema.json --query query.json [--params params.json] [--proof-out proof.json] [--fail-on-blocked] [--default-limit 25] [--default-max-hops 5] [--planner-estimate estimate.json] [--schema-statistics stats.json] [--policy-rules rules.json] [--no-require-limit] [--max-return-limit 100] [--max-relationship-hops 5] [--allow-writes] [--approved] [--parser-mode syntax|lint] [--no-parser]
   agent-feedback --schema schema.json --query query.json [--params params.json] [--feedback-out feedback.json] [--fail-on-blocked] [--default-limit 25] [--default-max-hops 5] [--planner-estimate estimate.json] [--schema-statistics stats.json] [--policy-rules rules.json] [--no-require-limit] [--max-return-limit 100] [--max-relationship-hops 5] [--allow-writes] [--approved] [--parser-mode syntax|lint] [--no-parser]
   agent-guide [--format json|markdown] [--guide-out path]
+  diagnostic-catalog [--format json|markdown] [--integrity] [--fail-on-error] [--catalog-out path]
   introspect-neo4j --uri bolt://localhost:7687 --user neo4j --password password [--schema-out schema.json] [--sample-limit 1000] [--no-procedures]
   roadmap    [--format json|markdown] [--integrity] [--roadmap-out path]
   compatibility [--format json|markdown] [--integrity] [--fail-on-error] [--catalog-out path]

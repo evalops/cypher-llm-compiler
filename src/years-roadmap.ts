@@ -274,7 +274,9 @@ export const yearsRoadmap = {
         "src/lsp.ts",
         "src/agent-feedback.ts",
         "src/agent-guide.ts",
+        "src/diagnostic-catalog.ts",
         "schemas/agent-guide.schema.json",
+        "schemas/diagnostic-catalog.schema.json",
         "schemas/agent-feedback.schema.json",
         "docs/INTEGRATIONS.md",
         "examples/raw-to-ir-migration.md"
@@ -502,6 +504,13 @@ export const yearsRoadmap = {
       status: "partial",
       evidence: ["src/agent-guide.ts", "schemas/agent-guide.schema.json", "test/agent-guide.test.ts"],
       workstreamIds: ["ecosystem-ux", "semantic-proof-repair", "compiler-service", "governance-standards"]
+    },
+    {
+      id: "diagnostic-catalog",
+      title: "Machine-Readable Diagnostic Catalog",
+      status: "partial",
+      evidence: ["src/diagnostic-catalog.ts", "schemas/diagnostic-catalog.schema.json", "test/diagnostic-catalog.test.ts"],
+      workstreamIds: ["ecosystem-ux", "semantic-proof-repair", "cost-safety-policy", "governance-standards"]
     },
     {
       id: "roadmap-governance",

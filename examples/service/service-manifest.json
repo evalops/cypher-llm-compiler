@@ -79,6 +79,12 @@
     },
     {
       "method": "GET",
+      "path": "/v1/diagnostic-catalog",
+      "operation": "diagnostic_catalog",
+      "authRequired": false
+    },
+    {
+      "method": "GET",
       "path": "/v1/compatibility",
       "operation": "compatibility_catalog",
       "authRequired": false
@@ -153,6 +159,12 @@
       "method": "POST",
       "path": "/v1/agent-guide",
       "operation": "cypher_agent_guide",
+      "authRequired": false
+    },
+    {
+      "method": "POST",
+      "path": "/v1/diagnostic-catalog",
+      "operation": "cypher_diagnostic_catalog",
       "authRequired": false
     },
     {

@@ -1,0 +1,1383 @@
+{
+  "version": "cypher-llm-diagnostic-catalog/v1",
+  "generatedAt": "2026-05-10",
+  "packageName": "@evalops/cypher-llm-compiler",
+  "packageVersion": "0.1.0",
+  "entries": [
+    {
+      "code": "missing-return",
+      "match": "exact",
+      "title": "Missing RETURN",
+      "severity": "warning",
+      "source": "compiler-validation",
+      "category": "syntax",
+      "preferredAction": "apply-deterministic-repair",
+      "preferredTool": "cypher_repair_plan",
+      "description": "Generated reads should project an explicit result.",
+      "modelInstruction": "Generated reads should project an explicit result. Apply deterministic compiler repair first, then re-run proof or agent feedback.",
+      "evidencePaths": [
+        "src/validate.ts",
+        "test/compiler-loop.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "write-requires-approval",
+      "match": "exact",
+      "title": "Write Requires Approval",
+      "severity": "error",
+      "source": "compiler-validation",
+      "category": "execution",
+      "preferredAction": "request-approval",
+      "preferredTool": "cypher_agent_feedback",
+      "description": "Write clauses are blocked unless an external approval path is supplied.",
+      "modelInstruction": "Write clauses are blocked unless an external approval path is supplied. Stop before execution and request an explicit external approval path.",
+      "evidencePaths": [
+        "src/validate.ts",
+        "test/compiler-loop.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "raw-cypher-escape-hatch",
+      "match": "exact",
+      "title": "Raw Cypher Escape Hatch",
+      "severity": "warning",
+      "source": "compiler-validation",
+      "category": "raw-compatibility",
+      "preferredAction": "use-raw-migration",
+      "preferredTool": "cypher_parse_lossless",
+      "description": "Raw clauses are allowed only as explicit migration escape hatches.",
+      "modelInstruction": "Raw clauses are allowed only as explicit migration escape hatches. Preserve source bytes and migrate toward structured IR only where supported.",
+      "evidencePaths": [
+        "src/validate.ts",
+        "test/compiler-loop.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "raw-expression-escape-hatch",
+      "match": "exact",
+      "title": "Raw Expression Escape Hatch",
+      "severity": "warning",
+      "source": "compiler-validation",
+      "category": "raw-compatibility",
+      "preferredAction": "use-raw-migration",
+      "preferredTool": "cypher_parse_lossless",
+      "description": "Raw expressions should be migrated to typed IR where possible.",
+      "modelInstruction": "Raw expressions should be migrated to typed IR where possible. Preserve source bytes and migrate toward structured IR only where supported.",
+      "evidencePaths": [
+        "src/validate.ts",
+        "test/compiler-loop.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "aggregate-in-match-where",
+      "match": "exact",
+      "title": "Aggregate In MATCH WHERE",
+      "severity": "error",
+      "source": "compiler-validation",
+      "category": "aggregation",
+      "preferredAction": "regenerate-ir",
+      "preferredTool": "cypher_validate",
+      "description": "Aggregate predicates must move after WITH or RETURN.",
+      "modelInstruction": "Aggregate predicates must move after WITH or RETURN. Regenerate the smallest affected IR subtree and preserve validated clauses.",
+      "evidencePaths": [
+        "src/validate.ts",
+        "test/compiler-loop.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "aggregate-alias-required",
+      "match": "exact",
+      "title": "Aggregate Alias Required",
+      "severity": "error",
+      "source": "compiler-validation",
+      "category": "aggregation",
+      "preferredAction": "regenerate-ir",
+      "preferredTool": "cypher_validate",
+      "description": "Aggregate projections need stable aliases for later references.",
+      "modelInstruction": "Aggregate projections need stable aliases for later references. Regenerate the smallest affected IR subtree and preserve validated clauses.",
+      "evidencePaths": [
+        "src/validate.ts",
+        "test/compiler-loop.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "ambiguous-aggregation-expression",
+      "match": "exact",
+      "title": "Ambiguous Aggregation Expression",
+      "severity": "error",
+      "source": "compiler-validation",
+      "category": "aggregation",
+      "preferredAction": "regenerate-ir",
+      "preferredTool": "cypher_validate",
+      "description": "Mixed aggregate and scalar projections need explicit grouping shape.",
+      "modelInstruction": "Mixed aggregate and scalar projections need explicit grouping shape. Regenerate the smallest affected IR subtree and preserve validated clauses.",
+      "evidencePaths": [
+        "src/validate.ts",
+        "test/compiler-loop.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "invalid-aggregation",
+      "match": "exact",
+      "title": "Invalid Aggregation",
+      "severity": "error",
+      "source": "compiler-validation",
+      "category": "aggregation",
+      "preferredAction": "regenerate-ir",
+      "preferredTool": "cypher_validate",
+      "description": "Aggregation expression shape is not valid for the target IR.",
+      "modelInstruction": "Aggregation expression shape is not valid for the target IR. Regenerate the smallest affected IR subtree and preserve validated clauses.",
+      "evidencePaths": [
+        "src/validate.ts",
+        "test/compiler-loop.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "missing-procedure",
+      "match": "exact",
+      "title": "Missing Procedure Metadata",
+      "severity": "warning",
+      "source": "compiler-validation",
+      "category": "schema",
+      "preferredAction": "ask-for-schema",
+      "preferredTool": "cypher_validate",
+      "description": "Procedure calls need schema procedure metadata for full validation.",
+      "modelInstruction": "Procedure calls need schema procedure metadata for full validation. Ask for schema metadata or use declared aliases; do not invent graph names.",
+      "evidencePaths": [
+        "src/validate.ts",
+        "test/compiler-loop.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "unknown-procedure",
+      "match": "exact",
+      "title": "Unknown Procedure",
+      "severity": "error",
+      "source": "compiler-validation",
+      "category": "schema",
+      "preferredAction": "ask-for-schema",
+      "preferredTool": "cypher_validate",
+      "description": "The procedure is not declared in the schema contract.",
+      "modelInstruction": "The procedure is not declared in the schema contract. Ask for schema metadata or use declared aliases; do not invent graph names.",
+      "evidencePaths": [
+        "src/validate.ts",
+        "test/compiler-loop.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "unknown-procedure-yield",
+      "match": "exact",
+      "title": "Unknown Procedure YIELD",
+      "severity": "error",
+      "source": "compiler-validation",
+      "category": "schema",
+      "preferredAction": "ask-for-schema",
+      "preferredTool": "cypher_validate",
+      "description": "The procedure YIELD variable is not declared in schema metadata.",
+      "modelInstruction": "The procedure YIELD variable is not declared in schema metadata. Ask for schema metadata or use declared aliases; do not invent graph names.",
+      "evidencePaths": [
+        "src/validate.ts",
+        "test/compiler-loop.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "function-argument-mismatch",
+      "match": "exact",
+      "title": "Function Argument Mismatch",
+      "severity": "error",
+      "source": "compiler-validation",
+      "category": "type",
+      "preferredAction": "regenerate-ir",
+      "preferredTool": "cypher_validate",
+      "description": "Function call arguments do not match declared arity or type metadata.",
+      "modelInstruction": "Function call arguments do not match declared arity or type metadata. Regenerate the smallest affected IR subtree and preserve validated clauses.",
+      "evidencePaths": [
+        "src/validate.ts",
+        "test/compiler-loop.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "procedure-argument-mismatch",
+      "match": "exact",
+      "title": "Procedure Argument Mismatch",
+      "severity": "error",
+      "source": "compiler-validation",
+      "category": "type",
+      "preferredAction": "regenerate-ir",
+      "preferredTool": "cypher_validate",
+      "description": "Procedure call arguments do not match declared arity or type metadata.",
+      "modelInstruction": "Procedure call arguments do not match declared arity or type metadata. Regenerate the smallest affected IR subtree and preserve validated clauses.",
+      "evidencePaths": [
+        "src/validate.ts",
+        "test/compiler-loop.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "subquery-import-undefined",
+      "match": "exact",
+      "title": "Subquery Import Undefined",
+      "severity": "error",
+      "source": "compiler-validation",
+      "category": "scope",
+      "preferredAction": "regenerate-ir",
+      "preferredTool": "cypher_repair_plan",
+      "description": "CALL subquery imports must reference variables in outer scope.",
+      "modelInstruction": "CALL subquery imports must reference variables in outer scope. Regenerate the smallest affected IR subtree and preserve validated clauses.",
+      "evidencePaths": [
+        "src/validate.ts",
+        "test/compiler-loop.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "subquery-missing-return",
+      "match": "exact",
+      "title": "Subquery Missing RETURN",
+      "severity": "error",
+      "source": "compiler-validation",
+      "category": "scope",
+      "preferredAction": "regenerate-ir",
+      "preferredTool": "cypher_repair_plan",
+      "description": "CALL subqueries need explicit exported variables.",
+      "modelInstruction": "CALL subqueries need explicit exported variables. Regenerate the smallest affected IR subtree and preserve validated clauses.",
+      "evidencePaths": [
+        "src/validate.ts",
+        "test/compiler-loop.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "subquery-variable-shadowing",
+      "match": "exact",
+      "title": "Subquery Variable Shadowing",
+      "severity": "warning",
+      "source": "compiler-validation",
+      "category": "scope",
+      "preferredAction": "regenerate-ir",
+      "preferredTool": "cypher_repair_plan",
+      "description": "Subqueries should not accidentally shadow outer variables.",
+      "modelInstruction": "Subqueries should not accidentally shadow outer variables. Regenerate the smallest affected IR subtree and preserve validated clauses.",
+      "evidencePaths": [
+        "src/validate.ts",
+        "test/compiler-loop.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "missing-limit",
+      "match": "exact",
+      "title": "Missing LIMIT",
+      "severity": "warning",
+      "source": "compiler-validation",
+      "category": "policy",
+      "preferredAction": "apply-deterministic-repair",
+      "preferredTool": "cypher_repair_plan",
+      "description": "Autonomous reads should add a bounded RETURN LIMIT.",
+      "modelInstruction": "Autonomous reads should add a bounded RETURN LIMIT. Apply deterministic compiler repair first, then re-run proof or agent feedback.",
+      "evidencePaths": [
+        "src/validate.ts",
+        "test/compiler-loop.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "unknown-label",
+      "match": "exact",
+      "title": "Unknown Label",
+      "severity": "error",
+      "source": "compiler-validation",
+      "category": "schema",
+      "preferredAction": "ask-for-schema",
+      "preferredTool": "cypher_validate",
+      "description": "The label is not declared in the schema contract.",
+      "modelInstruction": "The label is not declared in the schema contract. Ask for schema metadata or use declared aliases; do not invent graph names.",
+      "evidencePaths": [
+        "src/validate.ts",
+        "test/compiler-loop.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "unknown-relationship-type",
+      "match": "exact",
+      "title": "Unknown Relationship Type",
+      "severity": "error",
+      "source": "compiler-validation",
+      "category": "schema",
+      "preferredAction": "ask-for-schema",
+      "preferredTool": "cypher_validate",
+      "description": "The relationship type is not declared in the schema contract.",
+      "modelInstruction": "The relationship type is not declared in the schema contract. Ask for schema metadata or use declared aliases; do not invent graph names.",
+      "evidencePaths": [
+        "src/validate.ts",
+        "test/compiler-loop.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "unknown-property",
+      "match": "exact",
+      "title": "Unknown Property",
+      "severity": "error",
+      "source": "compiler-validation",
+      "category": "schema",
+      "preferredAction": "ask-for-schema",
+      "preferredTool": "cypher_validate",
+      "description": "The property is not declared for the inferred node or relationship binding.",
+      "modelInstruction": "The property is not declared for the inferred node or relationship binding. Ask for schema metadata or use declared aliases; do not invent graph names.",
+      "evidencePaths": [
+        "src/validate.ts",
+        "test/compiler-loop.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "unknown-parameter",
+      "match": "exact",
+      "title": "Unknown Parameter",
+      "severity": "error",
+      "source": "compiler-validation",
+      "category": "schema",
+      "preferredAction": "ask-for-schema",
+      "preferredTool": "cypher_validate",
+      "description": "The parameter is not declared in the schema contract.",
+      "modelInstruction": "The parameter is not declared in the schema contract. Ask for schema metadata or use declared aliases; do not invent graph names.",
+      "evidencePaths": [
+        "src/validate.ts",
+        "test/compiler-loop.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "undefined-variable",
+      "match": "exact",
+      "title": "Undefined Variable",
+      "severity": "error",
+      "source": "compiler-validation",
+      "category": "scope",
+      "preferredAction": "regenerate-ir",
+      "preferredTool": "cypher_repair_plan",
+      "description": "Variables must be introduced before they are referenced.",
+      "modelInstruction": "Variables must be introduced before they are referenced. Regenerate the smallest affected IR subtree and preserve validated clauses.",
+      "evidencePaths": [
+        "src/validate.ts",
+        "test/compiler-loop.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "unbounded-variable-length-path",
+      "match": "exact",
+      "title": "Unbounded Variable-Length Path",
+      "severity": "warning",
+      "source": "compiler-validation",
+      "category": "policy",
+      "preferredAction": "apply-deterministic-repair",
+      "preferredTool": "cypher_repair_plan",
+      "description": "Variable-length traversals should have a maximum hop count.",
+      "modelInstruction": "Variable-length traversals should have a maximum hop count. Apply deterministic compiler repair first, then re-run proof or agent feedback.",
+      "evidencePaths": [
+        "src/validate.ts",
+        "test/compiler-loop.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "relationship-direction-mismatch",
+      "match": "exact",
+      "title": "Relationship Direction Mismatch",
+      "severity": "warning",
+      "source": "compiler-validation",
+      "category": "schema",
+      "preferredAction": "apply-deterministic-repair",
+      "preferredTool": "cypher_repair_plan",
+      "description": "Direction can be flipped only when schema endpoints make it unambiguous.",
+      "modelInstruction": "Direction can be flipped only when schema endpoints make it unambiguous. Apply deterministic compiler repair first, then re-run proof or agent feedback.",
+      "evidencePaths": [
+        "src/validate.ts",
+        "test/compiler-loop.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "dialect-rendering-limitation",
+      "match": "exact",
+      "title": "Dialect Rendering Limitation",
+      "severity": "warning",
+      "source": "compiler-validation",
+      "category": "dialect",
+      "preferredAction": "use-raw-migration",
+      "preferredTool": "cypher_parse_lossless",
+      "description": "The renderer cannot yet express a supported dialect feature.",
+      "modelInstruction": "The renderer cannot yet express a supported dialect feature. Preserve source bytes and migrate toward structured IR only where supported.",
+      "evidencePaths": [
+        "src/validate.ts",
+        "test/compiler-loop.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "dialect-unsupported-feature",
+      "match": "exact",
+      "title": "Dialect Unsupported Feature",
+      "severity": "error",
+      "source": "compiler-validation",
+      "category": "dialect",
+      "preferredAction": "regenerate-ir",
+      "preferredTool": "cypher_validate",
+      "description": "The selected dialect profile does not support the requested feature.",
+      "modelInstruction": "The selected dialect profile does not support the requested feature. Regenerate the smallest affected IR subtree and preserve validated clauses.",
+      "evidencePaths": [
+        "src/validate.ts",
+        "test/compiler-loop.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "comparison-type-mismatch",
+      "match": "exact",
+      "title": "Comparison Type Mismatch",
+      "severity": "error",
+      "source": "compiler-validation",
+      "category": "type",
+      "preferredAction": "regenerate-ir",
+      "preferredTool": "cypher_validate",
+      "description": "The compared expression types are incompatible.",
+      "modelInstruction": "The compared expression types are incompatible. Regenerate the smallest affected IR subtree and preserve validated clauses.",
+      "evidencePaths": [
+        "src/validate.ts",
+        "test/compiler-loop.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "property-type-mismatch",
+      "match": "exact",
+      "title": "Property Type Mismatch",
+      "severity": "error",
+      "source": "compiler-validation",
+      "category": "type",
+      "preferredAction": "regenerate-ir",
+      "preferredTool": "cypher_validate",
+      "description": "A property value does not match schema-declared type metadata.",
+      "modelInstruction": "A property value does not match schema-declared type metadata. Regenerate the smallest affected IR subtree and preserve validated clauses.",
+      "evidencePaths": [
+        "src/validate.ts",
+        "test/compiler-loop.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "parameter-type-mismatch",
+      "match": "exact",
+      "title": "Parameter Type Mismatch",
+      "severity": "error",
+      "source": "compiler-validation",
+      "category": "type",
+      "preferredAction": "regenerate-ir",
+      "preferredTool": "cypher_validate",
+      "description": "A parameter value does not match schema-declared type metadata.",
+      "modelInstruction": "A parameter value does not match schema-declared type metadata. Regenerate the smallest affected IR subtree and preserve validated clauses.",
+      "evidencePaths": [
+        "src/validate.ts",
+        "test/compiler-loop.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "cypher-parser-error",
+      "match": "exact",
+      "title": "Parser Error",
+      "severity": "error",
+      "source": "parser-validation",
+      "category": "syntax",
+      "preferredAction": "regenerate-ir",
+      "preferredTool": "cypher_parse_check",
+      "description": "Neo4j language-support rejected the rendered Cypher.",
+      "modelInstruction": "Neo4j language-support rejected the rendered Cypher. Regenerate the smallest affected IR subtree and preserve validated clauses.",
+      "evidencePaths": [
+        "src/parser-validation.ts",
+        "test/parser-validation.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "cypher-parser-warning",
+      "match": "exact",
+      "title": "Parser Warning",
+      "severity": "warning",
+      "source": "parser-validation",
+      "category": "syntax",
+      "preferredAction": "inspect-source",
+      "preferredTool": "cypher_parse_check",
+      "description": "Neo4j language-support emitted a non-blocking warning.",
+      "modelInstruction": "Neo4j language-support emitted a non-blocking warning. Inspect the source span and keep the query in review if evidence is incomplete.",
+      "evidencePaths": [
+        "src/parser-validation.ts",
+        "test/parser-validation.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "no-cypher-output",
+      "match": "exact",
+      "title": "No Cypher Output",
+      "severity": "error",
+      "source": "raw-repair",
+      "category": "raw-compatibility",
+      "preferredAction": "regenerate-ir",
+      "preferredTool": "cypher_repair",
+      "description": "The model output does not look like Cypher.",
+      "modelInstruction": "The model output does not look like Cypher. Regenerate the smallest affected IR subtree and preserve validated clauses.",
+      "evidencePaths": [
+        "src/repair.ts",
+        "test/compiler-loop.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "sqlism-between",
+      "match": "exact",
+      "title": "SQL BETWEEN",
+      "severity": "warning",
+      "source": "raw-repair",
+      "category": "raw-compatibility",
+      "preferredAction": "regenerate-ir",
+      "preferredTool": "cypher_repair",
+      "description": "The output used SQL BETWEEN syntax instead of Cypher comparisons.",
+      "modelInstruction": "The output used SQL BETWEEN syntax instead of Cypher comparisons. Regenerate the smallest affected IR subtree and preserve validated clauses.",
+      "evidencePaths": [
+        "src/repair.ts",
+        "test/compiler-loop.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "raw-identifier-quoted",
+      "match": "exact",
+      "title": "Raw Identifier Quoted",
+      "severity": "info",
+      "source": "raw-repair",
+      "category": "raw-compatibility",
+      "preferredAction": "apply-deterministic-repair",
+      "preferredTool": "cypher_repair",
+      "description": "Known schema identifiers were backtick-escaped.",
+      "modelInstruction": "Known schema identifiers were backtick-escaped. Apply deterministic compiler repair first, then re-run proof or agent feedback.",
+      "evidencePaths": [
+        "src/repair.ts",
+        "test/compiler-loop.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "raw-lift-parser-diagnostic",
+      "match": "exact",
+      "title": "Raw Lift Parser Diagnostic",
+      "severity": "varies",
+      "source": "raw-lift",
+      "category": "raw-compatibility",
+      "preferredAction": "use-raw-migration",
+      "preferredTool": "cypher_parse_lossless",
+      "description": "The lifted IR produced parser diagnostics.",
+      "modelInstruction": "The lifted IR produced parser diagnostics. Preserve source bytes and migrate toward structured IR only where supported.",
+      "evidencePaths": [
+        "src/raw-lift.ts",
+        "test/raw-lift.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "raw-lift-unsupported-clause",
+      "match": "exact",
+      "title": "Raw Lift Unsupported Clause",
+      "severity": "warning",
+      "source": "raw-lift",
+      "category": "raw-compatibility",
+      "preferredAction": "use-raw-migration",
+      "preferredTool": "cypher_parse_lossless",
+      "description": "A raw clause is outside the raw-to-IR migration subset.",
+      "modelInstruction": "A raw clause is outside the raw-to-IR migration subset. Preserve source bytes and migrate toward structured IR only where supported.",
+      "evidencePaths": [
+        "src/raw-lift.ts",
+        "test/raw-lift.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "lossless-roundtrip-mismatch",
+      "match": "exact",
+      "title": "Lossless Roundtrip Mismatch",
+      "severity": "error",
+      "source": "lossless-parser",
+      "category": "raw-compatibility",
+      "preferredAction": "block-release-or-request-review",
+      "preferredTool": "cypher_parse_lossless",
+      "description": "Lossless fragments did not reconstruct the original source.",
+      "modelInstruction": "Lossless fragments did not reconstruct the original source. Treat this as a compiler or release blocker until reviewed.",
+      "evidencePaths": [
+        "src/lossless-parser.ts",
+        "test/lossless-parser.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "missing-required-parameter",
+      "match": "exact",
+      "title": "Missing Required Parameter",
+      "severity": "error",
+      "source": "safe-execution",
+      "category": "execution",
+      "preferredAction": "ask-for-schema",
+      "preferredTool": "cypher_render",
+      "description": "A required Cypher parameter value was not supplied.",
+      "modelInstruction": "A required Cypher parameter value was not supplied. Ask for schema metadata or use declared aliases; do not invent graph names.",
+      "evidencePaths": [
+        "src/safety.ts",
+        "test/safety.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "execution-approval-required",
+      "match": "exact",
+      "title": "Execution Approval Required",
+      "severity": "error",
+      "source": "safe-execution",
+      "category": "execution",
+      "preferredAction": "request-approval",
+      "preferredTool": "cypher_agent_feedback",
+      "description": "A write query needs external approval before execution.",
+      "modelInstruction": "A write query needs external approval before execution. Stop before execution and request an explicit external approval path.",
+      "evidencePaths": [
+        "src/safety.ts",
+        "test/safety.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "policy-write-risk",
+      "match": "exact",
+      "title": "Write Risk",
+      "severity": "error",
+      "source": "policy",
+      "category": "policy",
+      "preferredAction": "request-approval",
+      "preferredTool": "cypher_policy_check",
+      "description": "Policy blocked graph mutation without approval.",
+      "modelInstruction": "Policy blocked graph mutation without approval. Stop before execution and request an explicit external approval path.",
+      "evidencePaths": [
+        "src/policy.ts",
+        "test/policy.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "policy-cartesian-pattern-risk",
+      "match": "exact",
+      "title": "Cartesian Pattern Risk",
+      "severity": "warning",
+      "source": "policy",
+      "category": "policy",
+      "preferredAction": "regenerate-ir",
+      "preferredTool": "cypher_policy_check",
+      "description": "Disconnected MATCH patterns can create cartesian products.",
+      "modelInstruction": "Disconnected MATCH patterns can create cartesian products. Regenerate the smallest affected IR subtree and preserve validated clauses.",
+      "evidencePaths": [
+        "src/policy.ts",
+        "test/policy.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "policy-unfiltered-label-scan",
+      "match": "exact",
+      "title": "Unfiltered Label Scan",
+      "severity": "warning",
+      "source": "policy",
+      "category": "policy",
+      "preferredAction": "regenerate-ir",
+      "preferredTool": "cypher_policy_check",
+      "description": "A label scan has no anchoring predicate.",
+      "modelInstruction": "A label scan has no anchoring predicate. Regenerate the smallest affected IR subtree and preserve validated clauses.",
+      "evidencePaths": [
+        "src/policy.ts",
+        "test/policy.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "policy-unfiltered-node-scan",
+      "match": "exact",
+      "title": "Unfiltered Node Scan",
+      "severity": "warning",
+      "source": "policy",
+      "category": "policy",
+      "preferredAction": "regenerate-ir",
+      "preferredTool": "cypher_policy_check",
+      "description": "An unlabeled node scan has no anchoring predicate.",
+      "modelInstruction": "An unlabeled node scan has no anchoring predicate. Regenerate the smallest affected IR subtree and preserve validated clauses.",
+      "evidencePaths": [
+        "src/policy.ts",
+        "test/policy.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "policy-high-cardinality-label-scan",
+      "match": "exact",
+      "title": "High-Cardinality Label Scan",
+      "severity": "warning",
+      "source": "policy",
+      "category": "policy",
+      "preferredAction": "regenerate-ir",
+      "preferredTool": "cypher_policy_check",
+      "description": "Schema statistics show a broad label scan.",
+      "modelInstruction": "Schema statistics show a broad label scan. Regenerate the smallest affected IR subtree and preserve validated clauses.",
+      "evidencePaths": [
+        "src/policy.ts",
+        "test/policy.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "policy-unbounded-traversal",
+      "match": "exact",
+      "title": "Unbounded Traversal",
+      "severity": "warning",
+      "source": "policy",
+      "category": "policy",
+      "preferredAction": "apply-deterministic-repair",
+      "preferredTool": "cypher_repair_plan",
+      "description": "Traversal is missing a maximum hop bound.",
+      "modelInstruction": "Traversal is missing a maximum hop bound. Apply deterministic compiler repair first, then re-run proof or agent feedback.",
+      "evidencePaths": [
+        "src/policy.ts",
+        "test/policy.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "policy-high-hop-traversal",
+      "match": "exact",
+      "title": "High-Hop Traversal",
+      "severity": "warning",
+      "source": "policy",
+      "category": "policy",
+      "preferredAction": "apply-deterministic-repair",
+      "preferredTool": "cypher_repair_plan",
+      "description": "Traversal exceeds configured hop policy.",
+      "modelInstruction": "Traversal exceeds configured hop policy. Apply deterministic compiler repair first, then re-run proof or agent feedback.",
+      "evidencePaths": [
+        "src/policy.ts",
+        "test/policy.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "policy-high-fanout-relationship",
+      "match": "exact",
+      "title": "High-Fanout Relationship",
+      "severity": "warning",
+      "source": "policy",
+      "category": "policy",
+      "preferredAction": "regenerate-ir",
+      "preferredTool": "cypher_policy_check",
+      "description": "Schema statistics show high relationship fanout.",
+      "modelInstruction": "Schema statistics show high relationship fanout. Regenerate the smallest affected IR subtree and preserve validated clauses.",
+      "evidencePaths": [
+        "src/policy.ts",
+        "test/policy.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "policy-missing-limit",
+      "match": "exact",
+      "title": "Policy Missing LIMIT",
+      "severity": "warning",
+      "source": "policy",
+      "category": "policy",
+      "preferredAction": "apply-deterministic-repair",
+      "preferredTool": "cypher_repair_plan",
+      "description": "Policy requires bounded RETURN output.",
+      "modelInstruction": "Policy requires bounded RETURN output. Apply deterministic compiler repair first, then re-run proof or agent feedback.",
+      "evidencePaths": [
+        "src/policy.ts",
+        "test/policy.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "policy-high-return-limit",
+      "match": "exact",
+      "title": "High RETURN LIMIT",
+      "severity": "warning",
+      "source": "policy",
+      "category": "policy",
+      "preferredAction": "regenerate-ir",
+      "preferredTool": "cypher_policy_check",
+      "description": "RETURN LIMIT exceeds configured policy.",
+      "modelInstruction": "RETURN LIMIT exceeds configured policy. Regenerate the smallest affected IR subtree and preserve validated clauses.",
+      "evidencePaths": [
+        "src/policy.ts",
+        "test/policy.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "policy-high-estimated-rows",
+      "match": "exact",
+      "title": "High Estimated Rows",
+      "severity": "warning",
+      "source": "policy",
+      "category": "policy",
+      "preferredAction": "regenerate-ir",
+      "preferredTool": "cypher_policy_check",
+      "description": "Planner evidence estimates too many rows.",
+      "modelInstruction": "Planner evidence estimates too many rows. Regenerate the smallest affected IR subtree and preserve validated clauses.",
+      "evidencePaths": [
+        "src/policy.ts",
+        "test/policy.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "policy-high-db-hits",
+      "match": "exact",
+      "title": "High DB Hits",
+      "severity": "warning",
+      "source": "policy",
+      "category": "policy",
+      "preferredAction": "regenerate-ir",
+      "preferredTool": "cypher_policy_check",
+      "description": "Planner evidence estimates too many db hits.",
+      "modelInstruction": "Planner evidence estimates too many db hits. Regenerate the smallest affected IR subtree and preserve validated clauses.",
+      "evidencePaths": [
+        "src/policy.ts",
+        "test/policy.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "policy-expensive-plan-operator",
+      "match": "exact",
+      "title": "Expensive Plan Operator",
+      "severity": "warning",
+      "source": "policy",
+      "category": "policy",
+      "preferredAction": "regenerate-ir",
+      "preferredTool": "cypher_policy_check",
+      "description": "Planner evidence includes an operator configured as risky.",
+      "modelInstruction": "Planner evidence includes an operator configured as risky. Regenerate the smallest affected IR subtree and preserve validated clauses.",
+      "evidencePaths": [
+        "src/policy.ts",
+        "test/policy.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "policy-planner-estimate-warning",
+      "match": "exact",
+      "title": "Planner Estimate Warning",
+      "severity": "info",
+      "source": "policy",
+      "category": "policy",
+      "preferredAction": "inspect-source",
+      "preferredTool": "cypher_policy_check",
+      "description": "Planner evidence itself contains warnings.",
+      "modelInstruction": "Planner evidence itself contains warnings. Inspect the source span and keep the query in review if evidence is incomplete.",
+      "evidencePaths": [
+        "src/policy.ts",
+        "test/policy.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "policy-unindexed-high-cardinality-predicate",
+      "match": "exact",
+      "title": "Unindexed High-Cardinality Predicate",
+      "severity": "warning",
+      "source": "policy",
+      "category": "policy",
+      "preferredAction": "regenerate-ir",
+      "preferredTool": "cypher_policy_check",
+      "description": "A predicate on a high-cardinality label is not known to be indexed.",
+      "modelInstruction": "A predicate on a high-cardinality label is not known to be indexed. Regenerate the smallest affected IR subtree and preserve validated clauses.",
+      "evidencePaths": [
+        "src/policy.ts",
+        "test/policy.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "policy-sensitive-label-access",
+      "match": "exact",
+      "title": "Sensitive Label Access",
+      "severity": "varies",
+      "source": "policy",
+      "category": "policy",
+      "preferredAction": "request-approval",
+      "preferredTool": "cypher_policy_check",
+      "description": "Policy rules mark the label as sensitive.",
+      "modelInstruction": "Policy rules mark the label as sensitive. Stop before execution and request an explicit external approval path.",
+      "evidencePaths": [
+        "src/policy.ts",
+        "test/policy.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "policy-missing-tenant-scope",
+      "match": "exact",
+      "title": "Missing Tenant Scope",
+      "severity": "varies",
+      "source": "policy",
+      "category": "policy",
+      "preferredAction": "regenerate-ir",
+      "preferredTool": "cypher_policy_check",
+      "description": "Policy rules require tenant scoping predicates.",
+      "modelInstruction": "Policy rules require tenant scoping predicates. Regenerate the smallest affected IR subtree and preserve validated clauses.",
+      "evidencePaths": [
+        "src/policy.ts",
+        "test/policy.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "policy-sensitive-relationship-access",
+      "match": "exact",
+      "title": "Sensitive Relationship Access",
+      "severity": "varies",
+      "source": "policy",
+      "category": "policy",
+      "preferredAction": "request-approval",
+      "preferredTool": "cypher_policy_check",
+      "description": "Policy rules mark the relationship as sensitive.",
+      "modelInstruction": "Policy rules mark the relationship as sensitive. Stop before execution and request an explicit external approval path.",
+      "evidencePaths": [
+        "src/policy.ts",
+        "test/policy.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "policy-sensitive-property-return",
+      "match": "exact",
+      "title": "Sensitive Property Return",
+      "severity": "varies",
+      "source": "policy",
+      "category": "policy",
+      "preferredAction": "request-approval",
+      "preferredTool": "cypher_policy_check",
+      "description": "Policy rules mark the returned property as sensitive.",
+      "modelInstruction": "Policy rules mark the returned property as sensitive. Stop before execution and request an explicit external approval path.",
+      "evidencePaths": [
+        "src/policy.ts",
+        "test/policy.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "neo4j-*",
+      "match": "prefix",
+      "title": "Neo4j Server Error",
+      "severity": "error",
+      "source": "neo4j-explain",
+      "category": "execution",
+      "preferredAction": "regenerate-ir",
+      "preferredTool": "cypher_parse_check",
+      "description": "Neo4j rejected EXPLAIN or planning with a server error.",
+      "modelInstruction": "Neo4j rejected EXPLAIN or planning with a server error. Regenerate the smallest affected IR subtree and preserve validated clauses.",
+      "evidencePaths": [
+        "src/neo4j-explain.ts",
+        "test/neo4j-explain.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "dataset-duplicate-task-id",
+      "match": "exact",
+      "title": "Duplicate Task ID",
+      "severity": "error",
+      "source": "dataset-governance",
+      "category": "dataset",
+      "preferredAction": "fix-dataset",
+      "preferredTool": "cypher_dataset_governance",
+      "description": "Dataset contains duplicate task ids.",
+      "modelInstruction": "Dataset contains duplicate task ids. Fix benchmark data before publishing or using it as a gate.",
+      "evidencePaths": [
+        "src/dataset-governance.ts",
+        "test/dataset-governance.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "dataset-missing-source",
+      "match": "exact",
+      "title": "Missing Dataset Source",
+      "severity": "error",
+      "source": "dataset-governance",
+      "category": "dataset",
+      "preferredAction": "fix-dataset",
+      "preferredTool": "cypher_dataset_governance",
+      "description": "Dataset task is missing provenance.",
+      "modelInstruction": "Dataset task is missing provenance. Fix benchmark data before publishing or using it as a gate.",
+      "evidencePaths": [
+        "src/dataset-governance.ts",
+        "test/dataset-governance.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "dataset-missing-split",
+      "match": "exact",
+      "title": "Missing Dataset Split",
+      "severity": "warning",
+      "source": "dataset-governance",
+      "category": "dataset",
+      "preferredAction": "fix-dataset",
+      "preferredTool": "cypher_dataset_governance",
+      "description": "Dataset task is missing a split tag.",
+      "modelInstruction": "Dataset task is missing a split tag. Fix benchmark data before publishing or using it as a gate.",
+      "evidencePaths": [
+        "src/dataset-governance.ts",
+        "test/dataset-governance.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "possible-email",
+      "match": "exact",
+      "title": "Possible Email",
+      "severity": "error",
+      "source": "dataset-governance",
+      "category": "dataset",
+      "preferredAction": "fix-dataset",
+      "preferredTool": "cypher_dataset_governance",
+      "description": "Redaction scanner found an email-like value.",
+      "modelInstruction": "Redaction scanner found an email-like value. Fix benchmark data before publishing or using it as a gate.",
+      "evidencePaths": [
+        "src/dataset-governance.ts",
+        "test/dataset-governance.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "possible-secret",
+      "match": "exact",
+      "title": "Possible Secret",
+      "severity": "error",
+      "source": "dataset-governance",
+      "category": "dataset",
+      "preferredAction": "fix-dataset",
+      "preferredTool": "cypher_dataset_governance",
+      "description": "Redaction scanner found a secret-like value.",
+      "modelInstruction": "Redaction scanner found a secret-like value. Fix benchmark data before publishing or using it as a gate.",
+      "evidencePaths": [
+        "src/dataset-governance.ts",
+        "test/dataset-governance.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "private-key",
+      "match": "exact",
+      "title": "Private Key",
+      "severity": "error",
+      "source": "dataset-governance",
+      "category": "dataset",
+      "preferredAction": "fix-dataset",
+      "preferredTool": "cypher_dataset_governance",
+      "description": "Redaction scanner found private-key material.",
+      "modelInstruction": "Redaction scanner found private-key material. Fix benchmark data before publishing or using it as a gate.",
+      "evidencePaths": [
+        "src/dataset-governance.ts",
+        "test/dataset-governance.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "dataset-redaction-*",
+      "match": "prefix",
+      "title": "Dataset Redaction Finding",
+      "severity": "varies",
+      "source": "dataset-governance",
+      "category": "dataset",
+      "preferredAction": "fix-dataset",
+      "preferredTool": "cypher_dataset_governance",
+      "description": "Dataset governance wraps redaction findings as blocking diagnostics.",
+      "modelInstruction": "Dataset governance wraps redaction findings as blocking diagnostics. Fix benchmark data before publishing or using it as a gate.",
+      "evidencePaths": [
+        "src/dataset-governance.ts",
+        "test/dataset-governance.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "internal-error",
+      "match": "exact",
+      "title": "Internal Error",
+      "severity": "error",
+      "source": "http-service",
+      "category": "service",
+      "preferredAction": "retry-service",
+      "preferredTool": "http-service",
+      "description": "The HTTP service hit an unexpected error.",
+      "modelInstruction": "The HTTP service hit an unexpected error. Correct the request envelope or service auth before retrying.",
+      "evidencePaths": [
+        "src/http-server.ts",
+        "test/http-server.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "unauthorized",
+      "match": "exact",
+      "title": "Unauthorized",
+      "severity": "error",
+      "source": "http-service",
+      "category": "service",
+      "preferredAction": "retry-service",
+      "preferredTool": "http-service",
+      "description": "The request missed required bearer authentication.",
+      "modelInstruction": "The request missed required bearer authentication. Correct the request envelope or service auth before retrying.",
+      "evidencePaths": [
+        "src/http-server.ts",
+        "test/http-server.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "not-found",
+      "match": "exact",
+      "title": "Not Found",
+      "severity": "error",
+      "source": "http-service",
+      "category": "service",
+      "preferredAction": "retry-service",
+      "preferredTool": "http-service",
+      "description": "The requested HTTP route is unknown.",
+      "modelInstruction": "The requested HTTP route is unknown. Correct the request envelope or service auth before retrying.",
+      "evidencePaths": [
+        "src/http-server.ts",
+        "test/http-server.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "method-not-allowed",
+      "match": "exact",
+      "title": "Method Not Allowed",
+      "severity": "error",
+      "source": "http-service",
+      "category": "service",
+      "preferredAction": "retry-service",
+      "preferredTool": "http-service",
+      "description": "The route was called with the wrong HTTP method.",
+      "modelInstruction": "The route was called with the wrong HTTP method. Correct the request envelope or service auth before retrying.",
+      "evidencePaths": [
+        "src/http-server.ts",
+        "test/http-server.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "invalid-json-body",
+      "match": "exact",
+      "title": "Invalid JSON Body",
+      "severity": "error",
+      "source": "http-service",
+      "category": "service",
+      "preferredAction": "retry-service",
+      "preferredTool": "http-service",
+      "description": "The service could not parse the request JSON body.",
+      "modelInstruction": "The service could not parse the request JSON body. Correct the request envelope or service auth before retrying.",
+      "evidencePaths": [
+        "src/http-server.ts",
+        "test/http-server.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "compiler-tool-error",
+      "match": "exact",
+      "title": "Compiler Tool Error",
+      "severity": "error",
+      "source": "http-service",
+      "category": "service",
+      "preferredAction": "retry-service",
+      "preferredTool": "http-service",
+      "description": "The shared tool dispatcher rejected the request.",
+      "modelInstruction": "The shared tool dispatcher rejected the request. Correct the request envelope or service auth before retrying.",
+      "evidencePaths": [
+        "src/http-server.ts",
+        "test/http-server.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    }
+  ],
+  "summary": {
+    "entries": 72,
+    "exactCodes": 70,
+    "templates": 2,
+    "errorOrVaries": 44,
+    "warningOrInfo": 28
+  }
+}

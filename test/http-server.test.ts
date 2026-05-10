@@ -53,6 +53,7 @@ describe("compiler HTTP service", () => {
     const health = await getJson(`${baseUrl}/healthz`) as { version: string; tools: number };
     const tools = await getJson(`${baseUrl}/v1/tools`) as { tools: { name: string }[] };
     const agentGuide = await getJson(`${baseUrl}/v1/agent-guide`) as { version: string; workflows: unknown[] };
+    const diagnosticCatalog = await getJson(`${baseUrl}/v1/diagnostic-catalog`) as { version: string; entries: unknown[] };
     const compatibility = await getJson(`${baseUrl}/v1/compatibility`) as { version: string; contracts: unknown[] };
 
     assert.equal(health.version, "cypher-llm-compiler-http/v1");
@@ -61,6 +62,8 @@ describe("compiler HTTP service", () => {
     assert.ok(tools.tools.some((tool) => tool.name === "cypher_agent_feedback"));
     assert.equal(agentGuide.version, "cypher-llm-agent-guide/v1");
     assert.ok(agentGuide.workflows.length > 0);
+    assert.equal(diagnosticCatalog.version, "cypher-llm-diagnostic-catalog/v1");
+    assert.ok(diagnosticCatalog.entries.length > 0);
     assert.equal(compatibility.version, "cypher-llm-compatibility-catalog/v1");
     assert.ok(compatibility.contracts.length > 0);
   });
@@ -92,6 +95,7 @@ describe("compiler HTTP service", () => {
       defaultLimit: 25
     }) as { version: string; nextAction: { kind: string } };
     const agentGuide = await postJson(`${baseUrl}/v1/agent-guide`, {}) as { version: string };
+    const diagnosticCatalog = await postJson(`${baseUrl}/v1/diagnostic-catalog`, {}) as { version: string };
     const compatibility = await postJson(`${baseUrl}/v1/compatibility`, {}) as { version: string; contracts: unknown[] };
     const compatibilityDiff = await postJson(`${baseUrl}/v1/compatibility-diff`, {
       baseline: compatibility
@@ -151,6 +155,7 @@ describe("compiler HTTP service", () => {
     assert.equal(feedback.version, "cypher-llm-agent-feedback/v1");
     assert.equal(feedback.nextAction.kind, "apply-deterministic-repairs");
     assert.equal(agentGuide.version, "cypher-llm-agent-guide/v1");
+    assert.equal(diagnosticCatalog.version, "cypher-llm-diagnostic-catalog/v1");
     assert.equal(compatibility.version, "cypher-llm-compatibility-catalog/v1");
     assert.equal(compatibilityDiff.version, "cypher-llm-compatibility-diff/v1");
     assert.equal(compatibilityDiff.status, "passed");

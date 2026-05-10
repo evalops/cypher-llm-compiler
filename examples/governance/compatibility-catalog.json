@@ -79,6 +79,23 @@
       "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
     },
     {
+      "id": "diagnostic-catalog",
+      "version": "cypher-llm-diagnostic-catalog/v1",
+      "category": "diagnostic",
+      "level": "stable",
+      "ownerWorkstreamId": "ecosystem-ux",
+      "schemaPath": "schemas/diagnostic-catalog.schema.json",
+      "examplePaths": [
+        "examples/diagnostics/diagnostic-catalog.json"
+      ],
+      "evidencePaths": [
+        "src/diagnostic-catalog.ts",
+        "test/diagnostic-catalog.test.ts"
+      ],
+      "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
+    },
+    {
       "id": "eval-dataset",
       "version": "cypher-llm-eval-dataset/v1",
       "category": "eval",

@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evalops.dev/schemas/cypher-llm/diagnostic-catalog/v1.json",
+  "title": "Cypher LLM Diagnostic Catalog",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "generatedAt", "packageName", "packageVersion", "entries", "summary"],
+  "properties": {
+    "version": { "const": "cypher-llm-diagnostic-catalog/v1" },
+    "generatedAt": { "type": "string", "minLength": 1 },
+    "packageName": { "type": "string", "minLength": 1 },
+    "packageVersion": { "type": "string", "minLength": 1 },
+    "entries": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/entry" },
+      "minItems": 1
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["entries", "exactCodes", "templates", "errorOrVaries", "warningOrInfo"],
+      "properties": {
+        "entries": { "type": "integer", "minimum": 1 },
+        "exactCodes": { "type": "integer", "minimum": 0 },
+        "templates": { "type": "integer", "minimum": 0 },
+        "errorOrVaries": { "type": "integer", "minimum": 0 },
+        "warningOrInfo": { "type": "integer", "minimum": 0 }
+      }
+    }
+  },
+  "$defs": {
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "match",
+        "title",
+        "severity",
+        "source",
+        "category",
+        "preferredAction",
+        "description",
+        "modelInstruction",
+        "evidencePaths"
+      ],
+      "properties": {
+        "code": { "type": "string", "minLength": 1 },
+        "match": { "enum": ["exact", "prefix", "template"] },
+        "title": { "type": "string", "minLength": 1 },
+        "severity": { "enum": ["error", "warning", "info", "varies"] },
+        "source": {
+          "enum": [
+            "compiler-validation",
+            "parser-validation",
+            "raw-repair",
+            "raw-lift",
+            "lossless-parser",
+            "safe-execution",
+            "policy",
+            "neo4j-explain",
+            "dataset-governance",
+            "http-service"
+          ]
+        },
+        "category": {
+          "enum": [
+            "aggregation",
+            "dataset",
+            "dialect",
+            "execution",
+            "policy",
+            "raw-compatibility",
+            "schema",
+            "scope",
+            "service",
+            "syntax",
+            "type"
+          ]
+        },
+        "preferredAction": {
+          "enum": [
+            "apply-deterministic-repair",
+            "ask-for-schema",
+            "block-release-or-request-review",
+            "fix-dataset",
+            "inspect-source",
+            "regenerate-ir",
+            "request-approval",
+            "retry-service",
+            "use-raw-migration"
+          ]
+        },
+        "preferredTool": { "type": "string", "minLength": 1 },
+        "description": { "type": "string", "minLength": 1 },
+        "modelInstruction": { "type": "string", "minLength": 1 },
+        "evidencePaths": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 1
+        },
+        "examplePaths": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 1
+        }
+      }
+    }
+  }
+}

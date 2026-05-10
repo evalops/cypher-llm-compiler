@@ -19,7 +19,7 @@ The gap is not "LLMs need a better prompt." The gap is a missing compiler bounda
 
 ## What This Implements
 
-This package implements twenty-seven concrete improvements:
+This package implements twenty-eight concrete improvements:
 
 1. **Official JSON IR**: Agents can emit a small, typed Cypher AST instead of brittle text.
 2. **LLM-safe profile**: The renderer emits conservative Cypher with escaped schema identifiers, explicit projections, bounded path recommendations, and deterministic formatting.
@@ -48,6 +48,7 @@ This package implements twenty-seven concrete improvements:
 25. **Compatibility catalog**: Contract versions, stability levels, release gates, certification gates, and deprecation rules are machine-readable.
 26. **Compatibility diff gates**: Release automation can compare catalogs and fail on removed or reshaped stable contracts.
 27. **Agent guide bundle**: LLM clients can fetch workflow rules, tool sequences, execution blockers, and diagnostic playbooks as JSON.
+28. **Diagnostic catalog**: Every stable diagnostic code has machine-readable severity, source, category, preferred action, and model instruction metadata.
 
 ## Quick Start
 
@@ -161,6 +162,7 @@ cypher-llm lsp-diagnostics --schema examples/tool-hash.schema.json --query examp
 cypher-llm prove --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json --params examples/tool-hash.params.json --default-limit 25
 cypher-llm agent-feedback --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json --params examples/tool-hash.params.json --default-limit 25
 cypher-llm agent-guide --format markdown
+cypher-llm diagnostic-catalog --integrity --fail-on-error
 cypher-llm introspect-neo4j --uri bolt://localhost:7687 --user neo4j --password "$NEO4J_PASSWORD" --schema-out schema.json
 cypher-llm roadmap --integrity
 cypher-llm compatibility --integrity --fail-on-error
@@ -217,6 +219,8 @@ npm run test:live:neo4j
 
 `agent-guide` emits a `cypher-llm-agent-guide/v1` guide covering authoring rules, tool sequences, execution blockers, and diagnostic playbooks for LLM clients.
 
+`diagnostic-catalog` emits a `cypher-llm-diagnostic-catalog/v1` catalog of stable diagnostic codes, severities, sources, categories, preferred actions, and model instructions.
+
 `introspect-neo4j` connects to Neo4j and writes a `CypherSchemaContract` from labels, relationship types, properties, observed endpoints, and procedure yields.
 
 `roadmap` emits the years-scale public workstream and capability ledger as JSON or markdown.
@@ -231,7 +235,7 @@ npm run test:live:neo4j
 
 `mcp` starts a stdio MCP server exposing the same compiler operation set as the OpenAI tool definitions and HTTP dispatcher.
 
-`serve` starts a local JSON HTTP service exposing `/healthz`, `/v1/service-manifest`, `/v1/tools`, `/v1/render`, `/v1/validate`, `/v1/repair`, `/v1/repair-plan`, `/v1/parse-lossless`, `/v1/parse-check`, `/v1/policy`, `/v1/policy-profiles`, `/v1/lsp-diagnostics`, `/v1/prove`, `/v1/agent-feedback`, `/v1/agent-guide`, `/v1/compatibility`, `/v1/compatibility-diff`, `/v1/eval`, `/v1/scorecard`, `/v1/benchmark-gate`, `/v1/dataset-governance`, `/v1/roadmap`, and `/v1/dialect-certification`. Set `--require-auth` with `--auth-token` or `CYPHER_LLM_HTTP_TOKEN` to require bearer auth for runtime routes; `--audit-log` writes JSONL audit events without request or response payloads.
+`serve` starts a local JSON HTTP service exposing `/healthz`, `/v1/service-manifest`, `/v1/tools`, `/v1/render`, `/v1/validate`, `/v1/repair`, `/v1/repair-plan`, `/v1/parse-lossless`, `/v1/parse-check`, `/v1/policy`, `/v1/policy-profiles`, `/v1/lsp-diagnostics`, `/v1/prove`, `/v1/agent-feedback`, `/v1/agent-guide`, `/v1/diagnostic-catalog`, `/v1/compatibility`, `/v1/compatibility-diff`, `/v1/eval`, `/v1/scorecard`, `/v1/benchmark-gate`, `/v1/dataset-governance`, `/v1/roadmap`, and `/v1/dialect-certification`. Set `--require-auth` with `--auth-token` or `CYPHER_LLM_HTTP_TOKEN` to require bearer auth for runtime routes; `--audit-log` writes JSONL audit events without request or response payloads.
 
 `test:live:neo4j` runs the optional Docker-backed Neo4j `EXPLAIN` fixture when `CYPHER_LLM_NEO4J_URI` and `CYPHER_LLM_NEO4J_PASSWORD` are set.
 
@@ -376,6 +380,7 @@ Those are deliberate boundaries. The repo is the missing LLM compiler surface, n
 - `src/proof.ts`: Proof-carrying compile output for agent feedback loops.
 - `src/agent-feedback.ts`: One-shot proof, repair-plan, policy-evidence, and next-action packets for LLM clients.
 - `src/agent-guide.ts`: Machine-readable workflow and diagnostic playbooks for LLM clients.
+- `src/diagnostic-catalog.ts`: Machine-readable diagnostic-code catalog and model action metadata.
 - `src/compatibility.ts`: Machine-readable compatibility catalog, release gates, certification gates, and deprecation policy.
 - `src/compatibility-diff.ts`: Compatibility diff reports for release gates and contract review.
 - `src/years-roadmap.ts`: Public years-scale workstream and capability ledger.
@@ -408,7 +413,7 @@ Those are deliberate boundaries. The repo is the missing LLM compiler surface, n
 - `examples/roadmap/`: Machine-readable years-scale roadmap snapshot.
 - `examples/service/`: Checked-in compiler service manifest.
 - `profiles/`: Versioned dialect profiles for Neo4j Cypher 25, openCypher 9, and GQL-oriented output.
-- `schemas/`: JSON Schema contracts for IR, graph schema, planner estimates, schema statistics, policy rules, policy reports/profiles, repair plans, service manifests, benchmark gates, lossless parse reports, dataset governance, eval datasets, and eval attempts.
+- `schemas/`: JSON Schema contracts for IR, graph schema, planner estimates, schema statistics, policy rules, policy reports/profiles, repair plans, diagnostic catalogs, service manifests, benchmark gates, lossless parse reports, dataset governance, eval datasets, and eval attempts.
 - `test/`: Node test-runner coverage for renderer, schema, validation, repair, safety, and corpus behavior.
 
 ## Design Rules

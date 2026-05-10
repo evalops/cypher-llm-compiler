@@ -4,6 +4,7 @@ import { buildBenchmarkGateReport } from "./benchmark-gate.js";
 import { buildCompatibilityCatalog, type CompatibilityCatalog } from "./compatibility.js";
 import { buildCompatibilityDiffReport } from "./compatibility-diff.js";
 import { buildDatasetGovernanceReport } from "./dataset-governance.js";
+import { buildDiagnosticCatalog } from "./diagnostic-catalog.js";
 import type { EvalAttemptSet, EvalDataset, EvalOptions, EvalReport } from "./evals.js";
 import { evaluateAttempts } from "./evals.js";
 import type { CypherQuery, CypherSchemaContract, JsonLiteral } from "./ir.js";
@@ -47,6 +48,7 @@ export type CypherCompilerToolName =
   | "cypher_prove"
   | "cypher_agent_feedback"
   | "cypher_agent_guide"
+  | "cypher_diagnostic_catalog"
   | "cypher_compatibility_catalog"
   | "cypher_compatibility_diff"
   | "cypher_eval"
@@ -515,6 +517,12 @@ export const CYPHER_COMPILER_TOOLS: readonly CypherCompilerToolDefinition[] = [
     inputSchema: objectSchema([], {})
   },
   {
+    name: "cypher_diagnostic_catalog",
+    description:
+      "Return the machine-readable diagnostic catalog: stable codes, severity, source, category, preferred action, and model repair instructions.",
+    inputSchema: objectSchema([], {})
+  },
+  {
     name: "cypher_compatibility_catalog",
     description:
       "Return the machine-readable compatibility catalog: contract versions, stability levels, release gates, certification gates, and deprecation policy.",
@@ -729,6 +737,9 @@ export async function executeCypherCompilerTool(name: string, input: unknown): P
     }
     case "cypher_agent_guide": {
       return buildAgentGuide();
+    }
+    case "cypher_diagnostic_catalog": {
+      return buildDiagnosticCatalog();
     }
     case "cypher_compatibility_diff": {
       return buildCompatibilityDiffReport(

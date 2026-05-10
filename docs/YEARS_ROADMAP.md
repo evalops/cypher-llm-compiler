@@ -81,6 +81,12 @@ Agent guides publish stable LLM-facing workflow rules, tool sequences, execution
 cypher-llm agent-guide --format markdown
 ```
 
+Diagnostic catalogs publish stable finding-code metadata for model repair loops. They are exported from `src/diagnostic-catalog.ts`, validated by `schemas/diagnostic-catalog.schema.json`, and checked in at `examples/diagnostics/diagnostic-catalog.json`.
+
+```bash
+cypher-llm diagnostic-catalog --integrity --fail-on-error
+```
+
 Cost and safety policy planning is exported from `src/policy.ts`, validated by `schemas/policy-report.schema.json`, and checked in at `examples/policy/tool-hash.policy.json`.
 
 ```bash

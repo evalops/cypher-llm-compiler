@@ -188,6 +188,17 @@ The guide includes:
 - Diagnostic playbooks that map stable codes to preferred actions and tools.
 - Public contract and example paths agents should pin.
 
+## `buildDiagnosticCatalog()`
+
+Produces a `cypher-llm-diagnostic-catalog/v1` object for LLM clients and release governance.
+
+The catalog includes:
+
+- Stable diagnostic codes and code-prefix families.
+- Severity, source, category, preferred action, and preferred tool metadata.
+- Model instructions for repair loops.
+- Evidence paths used to keep diagnostic code ownership visible.
+
 ## `buildCompatibilityCatalog()`
 
 Produces a `cypher-llm-compatibility-catalog/v1` object for governance and release automation.
@@ -413,6 +424,7 @@ Returns OpenAI Responses API function-tool definitions for:
 - `cypher_prove`
 - `cypher_agent_feedback`
 - `cypher_agent_guide`
+- `cypher_diagnostic_catalog`
 - `cypher_compatibility_catalog`
 - `cypher_compatibility_diff`
 - `cypher_eval`
@@ -465,6 +477,8 @@ Routes:
 - `POST /v1/agent-feedback`
 - `GET /v1/agent-guide`
 - `POST /v1/agent-guide`
+- `GET /v1/diagnostic-catalog`
+- `POST /v1/diagnostic-catalog`
 - `GET /v1/compatibility`
 - `POST /v1/compatibility`
 - `POST /v1/compatibility-diff`

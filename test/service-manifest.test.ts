@@ -28,6 +28,12 @@ describe("compiler service manifest", () => {
       manifest.routes.some((route) => route.path === "/v1/agent-guide" && route.operation === "cypher_agent_guide" && route.method === "POST")
     );
     assert.ok(
+      manifest.routes.some((route) => route.path === "/v1/diagnostic-catalog" && route.operation === "diagnostic_catalog" && route.method === "GET")
+    );
+    assert.ok(
+      manifest.routes.some((route) => route.path === "/v1/diagnostic-catalog" && route.operation === "cypher_diagnostic_catalog" && route.method === "POST")
+    );
+    assert.ok(
       manifest.routes.some((route) => route.path === "/v1/compatibility" && route.operation === "compatibility_catalog" && route.method === "GET")
     );
     assert.ok(

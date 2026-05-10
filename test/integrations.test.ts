@@ -60,6 +60,7 @@ describe("OpenAI tool schemas", () => {
       "cypher_prove",
       "cypher_agent_feedback",
       "cypher_agent_guide",
+      "cypher_diagnostic_catalog",
       "cypher_compatibility_catalog",
       "cypher_compatibility_diff",
       "cypher_eval",
@@ -230,6 +231,14 @@ describe("OpenAI tool schemas", () => {
 
     assert.equal(agentGuide.version, "cypher-llm-agent-guide/v1");
     assert.ok(agentGuide.workflows.some((workflow) => workflow.id === "author-read-query"));
+
+    const diagnosticCatalog = (await executeCypherCompilerTool("cypher_diagnostic_catalog", {})) as {
+      version: string;
+      entries: { code: string }[];
+    };
+
+    assert.equal(diagnosticCatalog.version, "cypher-llm-diagnostic-catalog/v1");
+    assert.ok(diagnosticCatalog.entries.some((entry) => entry.code === "missing-limit"));
 
     const compatibility = (await executeCypherCompilerTool("cypher_compatibility_catalog", {})) as {
       version: string;

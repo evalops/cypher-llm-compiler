@@ -8,6 +8,7 @@ Stable public contracts:
 
 - `cypher-llm-ir/v1`
 - `cypher-llm-schema/v1`
+- `cypher-llm-diagnostic/v1`
 - `cypher-llm-eval-dataset/v1`
 - `cypher-llm-eval-attempts/v1`
 - `cypher-llm-dialect-profile/v1`
@@ -26,7 +27,9 @@ Stable public contracts:
 - `cypher-llm-repair-plan/v1`
 - `cypher-llm-agent-feedback/v1`
 - `cypher-llm-agent-guide/v1`
+- `cypher-llm-diagnostic-catalog/v1`
 - `cypher-llm-service-manifest/v1`
+- `cypher-llm-years-roadmap/v1`
 - `cypher-llm-compatibility-catalog/v1`
 - `cypher-llm-compatibility-diff/v1`
 
@@ -61,6 +64,16 @@ cypher-llm agent-guide --guide-out examples/agent/agent-guide.json
 ```
 
 Agent guides are the machine-readable client contract for how LLMs should use the compiler. They publish authoring rules, default limits, workflow steps, execution blockers, diagnostic playbooks, public contract pins, and example paths. JSON output validates against `schemas/agent-guide.schema.json`.
+
+## Diagnostic Catalog
+
+Run:
+
+```bash
+cypher-llm diagnostic-catalog --integrity --fail-on-error --catalog-out examples/diagnostics/diagnostic-catalog.json
+```
+
+Diagnostic catalogs are the machine-readable repair contract for stable compiler, parser, policy, dataset, service, and runtime finding codes. They publish severity, source, category, preferred action, preferred tool, model instruction, and code-owner evidence so LLM clients can route failures without scraping prose. JSON output validates against `schemas/diagnostic-catalog.schema.json`.
 
 ## Dialect Profiles
 
