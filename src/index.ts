@@ -2,6 +2,7 @@ export * from "./ir.js";
 export * from "./diagnostics.js";
 export * from "./evals.js";
 export * from "./failure-corpus.js";
+export * from "./neo4j-explain.js";
 export * from "./normalize.js";
 export * from "./parser-validation.js";
 export * from "./repair.js";

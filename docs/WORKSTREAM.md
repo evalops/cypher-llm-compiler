@@ -33,7 +33,7 @@ Artifacts:
 - Runtime error mapping into the `Diagnostic` shape.
 - Docker-based CI fixture.
 
-Status: parser-backed validation has started through `validateRenderedQueryWithParser`, `validateCypherTextWithParser`, and `cypher-llm parse-check`. Database-backed `EXPLAIN` remains the next vertical.
+Status: parser-backed validation has started through `validateRenderedQueryWithParser`, `validateCypherTextWithParser`, and `cypher-llm parse-check`. Driver-compatible database preflight has started through `explainWithNeo4j`; a Docker-backed live Neo4j CI fixture remains the next vertical.
 
 ## 4. Semantic Analyzer Expansion
 

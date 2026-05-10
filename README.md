@@ -222,6 +222,8 @@ Those are deliberate boundaries. The repo is the missing LLM compiler surface, n
 - `src/normalize.ts`: Stable query normalization and equivalence helpers.
 - `src/safety.ts`: Safe execution planning.
 - `src/failure-corpus.ts`: Runnable corpus of LLM failure cases.
+- `src/parser-validation.ts`: Parser-backed validation through Neo4j language support.
+- `src/neo4j-explain.ts`: Driver-compatible Neo4j `EXPLAIN` preflight adapter.
 - `src/cli.ts`: JSON-in/JSON-out CLI for agents and eval harnesses.
 - `docs/`: Design notes and LLM integration guidance.
 - `examples/`: Small schema/query fixtures for CLI smoke tests and agent onboarding.

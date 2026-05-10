@@ -110,6 +110,28 @@ Runs parser-backed validation directly on raw Cypher text. This is useful for mi
 
 Converts a `CypherSchemaContract` into the `DbSchema` object expected by Neo4j language support. It includes both canonical and backtick-escaped identifier forms so rendered LLM-safe Cypher does not produce false missing-label warnings.
 
+## `explainWithNeo4j(query, schema, session, params?, options?)`
+
+Runs the compiler loop and then executes `EXPLAIN` through a Neo4j driver-compatible session.
+
+The adapter accepts a small session interface rather than importing `neo4j-driver` directly:
+
+```ts
+{
+  run(cypher, params): Promise<{ records?: unknown[]; summary?: unknown }>;
+  executeRead?(work): Promise<unknown>;
+}
+```
+
+Behavior:
+
+- Builds a `SafeExecutionPlan`.
+- Refuses to contact Neo4j when compiler diagnostics already block execution.
+- Runs `EXPLAIN` with params when the plan is executable.
+- Maps thrown Neo4j driver errors back into stable `Diagnostic` objects.
+
+This lets applications bring their own driver/session lifecycle while the compiler owns preflight behavior.
+
 ## `evaluateFailureCorpus(cases?)`
 
 Runs the known LLM failure fixtures and returns pass/fail records with canonical Cypher and diagnostic codes.
