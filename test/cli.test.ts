@@ -644,6 +644,54 @@ describe("cli", () => {
     assert.ok(writes.get("out/proof.json")?.includes("parser-preflight"));
   });
 
+  it("emits agent feedback packets", async () => {
+    const files = new Map<string, string>([
+      [
+        "schema.json",
+        JSON.stringify({
+          version: "cypher-llm-schema/v1",
+          nodes: [{ name: "Tool", aliases: ["tool"] }],
+          relationships: []
+        })
+      ],
+      [
+        "query.json",
+        JSON.stringify({
+          version: "cypher-llm-ir/v1",
+          profile: "llm-safe-readonly",
+          clauses: [
+            { kind: "match", patterns: [{ segments: [{ variable: "tool", labels: ["tool"] }] }] },
+            { kind: "return", items: [{ expression: { kind: "var", name: "tool" } }] }
+          ]
+        })
+      ]
+    ]);
+    const writes = new Map<string, string>();
+    let stdout = "";
+    let stderr = "";
+    const io: CliIO = {
+      stdout: { write: (chunk: string | Uint8Array) => ((stdout += String(chunk)), true) },
+      stderr: { write: (chunk: string | Uint8Array) => ((stderr += String(chunk)), true) },
+      readFile: async (path) => files.get(String(path)) ?? "",
+      writeFile: async (path, data) => {
+        writes.set(path, data);
+      },
+      mkdir: async () => undefined
+    };
+
+    const code = await runCli(
+      ["agent-feedback", "--schema", "schema.json", "--query", "query.json", "--feedback-out", "out/feedback.json", "--default-limit", "25"],
+      io
+    );
+    const output = JSON.parse(stdout) as { version: string; nextAction: { kind: string } };
+
+    assert.equal(code, 0);
+    assert.equal(stderr, "");
+    assert.equal(output.version, "cypher-llm-agent-feedback/v1");
+    assert.equal(output.nextAction.kind, "apply-deterministic-repairs");
+    assert.ok(writes.get("out/feedback.json")?.includes("cypher-llm-agent-feedback/v1"));
+  });
+
   it("emits cost and safety policy reports", async () => {
     const files = new Map<string, string>([
       [

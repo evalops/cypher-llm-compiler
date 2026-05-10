@@ -13,6 +13,7 @@ export const COMPILER_HTTP_TOOL_ROUTES = {
   "/v1/policy-profiles": "cypher_policy_profiles",
   "/v1/lsp-diagnostics": "cypher_lsp_diagnostics",
   "/v1/prove": "cypher_prove",
+  "/v1/agent-feedback": "cypher_agent_feedback",
   "/v1/eval": "cypher_eval",
   "/v1/scorecard": "cypher_scorecard",
   "/v1/benchmark-gate": "cypher_benchmark_gate",

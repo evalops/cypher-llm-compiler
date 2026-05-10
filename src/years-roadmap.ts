@@ -269,7 +269,14 @@ export const yearsRoadmap = {
         "Interactive raw-to-IR migration and schema-contract tooling.",
         "Report rendering for CI, docs, and agent feedback UX."
       ],
-      firstArtifacts: ["src/tools.ts", "src/lsp.ts", "docs/INTEGRATIONS.md", "examples/raw-to-ir-migration.md"],
+      firstArtifacts: [
+        "src/tools.ts",
+        "src/lsp.ts",
+        "src/agent-feedback.ts",
+        "schemas/agent-feedback.schema.json",
+        "docs/INTEGRATIONS.md",
+        "examples/raw-to-ir-migration.md"
+      ],
       acceptanceGates: [
         "Editor and MCP clients receive the same stable diagnostic contract.",
         "Migration UX exposes source spans, IR paths, and repair previews.",
@@ -471,6 +478,13 @@ export const yearsRoadmap = {
         "test/proof.test.ts"
       ],
       workstreamIds: ["semantic-proof-repair", "cost-safety-policy"]
+    },
+    {
+      id: "agent-feedback-packets",
+      title: "One-Call Agent Feedback Packets",
+      status: "partial",
+      evidence: ["src/agent-feedback.ts", "schemas/agent-feedback.schema.json", "test/agent-feedback.test.ts"],
+      workstreamIds: ["semantic-proof-repair", "ecosystem-ux", "compiler-service"]
     },
     {
       id: "roadmap-governance",

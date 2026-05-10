@@ -57,6 +57,7 @@ describe("json schemas", () => {
     const schemaContractSchema = readJson("schemas/cypher-schema-contract.schema.json");
     const querySchema = readJson("schemas/cypher-query.schema.json");
     const proofSchema = readJson("schemas/cypher-proof.schema.json");
+    const agentFeedbackSchema = readJson("schemas/agent-feedback.schema.json");
     const plannerEstimateSchema = readJson("schemas/planner-estimate.schema.json");
     const policyReportSchema = readJson("schemas/policy-report.schema.json");
     const policyProfileSchema = readJson("schemas/policy-profile.schema.json");
@@ -77,6 +78,7 @@ describe("json schemas", () => {
     ajv.addSchema(schemaContractSchema);
     ajv.addSchema(querySchema);
     ajv.addSchema(proofSchema);
+    ajv.addSchema(agentFeedbackSchema);
     ajv.addSchema(plannerEstimateSchema);
     ajv.addSchema(policyReportSchema);
     ajv.addSchema(policyProfileSchema);
@@ -98,6 +100,7 @@ describe("json schemas", () => {
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/schema-contract/v1.json", readJson("examples/tool-hash.schema.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/query/v1.json", readJson("examples/tool-hash.query.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/proof/v1.json", readJson("examples/proofs/tool-hash.proof.json"));
+    assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/agent-feedback/v1.json", readJson("examples/proofs/tool-hash.agent-feedback.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/planner-estimate/v1.json", readJson("examples/policy/tool-hash.planner-estimate.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/policy-report/v1.json", readJson("examples/policy/tool-hash.policy.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/policy-profile-catalog/v1.json", readJson("examples/policy/policy-profiles.json"));

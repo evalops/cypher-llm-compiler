@@ -24,6 +24,7 @@ Stable public contracts:
 - `cypher-llm-benchmark-gate/v1`
 - `cypher-llm-dataset-governance/v1`
 - `cypher-llm-repair-plan/v1`
+- `cypher-llm-agent-feedback/v1`
 - `cypher-llm-service-manifest/v1`
 
 JSON Schema artifacts live under `schemas/` and should be treated as the source of truth for model/tool input validation.
@@ -69,6 +70,16 @@ cypher-llm repair-plan --schema examples/tool-hash.schema.json --query examples/
 ```
 
 Repair plans are ranked agent feedback objects. Deterministic steps include JSON-patch-like operations that the compiler can apply directly, model-required steps contain diagnostics that need regenerated IR, and unsafe steps hold policy or approval blockers. Planner estimates, schema statistics, policy thresholds, and policy rules can feed the unsafe blocker list and `policyEvidence` summary so policy failures do not get misclassified as ordinary model edits.
+
+## Agent Feedback
+
+Run:
+
+```bash
+cypher-llm agent-feedback --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json --params examples/tool-hash.params.json --default-limit 25 --feedback-out examples/proofs/tool-hash.agent-feedback.json
+```
+
+Agent feedback packets are the one-call contract for LLM clients. They include the proof object, repair plan, compact policy evidence, aggregate diagnostic codes, repair kinds, and a `nextAction` field that tells the client whether to execute, apply deterministic repairs, regenerate IR, request approval, or stop.
 
 ## Service Manifests
 

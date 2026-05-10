@@ -159,11 +159,23 @@ Produces a `cypher-llm-proof/v1` object for agent feedback loops:
   requiresApproval: boolean;
   repairKinds: string[];
   diagnosticCodes: string[];
+  policyEvidence: CypherPolicyEvidence;
   claims: CypherProofClaim[];
 }
 ```
 
 Proof claims cover deterministic repairs, compiler diagnostics, execution policy, static cost/safety policy, and parser preflight unless `includeParser` is false. `plannerEstimate`, `schemaStatistics`, policy thresholds, and `policyRules` can be passed into proof options so the cost/safety claim reflects the same evidence used by policy checks. Proofs also include `policyEvidence` so an agent can explain the policy status without issuing a separate policy-check call.
+
+## `buildCypherAgentFeedback(query, schema, params?, options?)`
+
+Produces a `cypher-llm-agent-feedback/v1` packet for agent runtimes that want one decision object instead of separate proof and repair-plan calls.
+
+The packet includes:
+
+- `proof`: the full `cypher-llm-proof/v1` object.
+- `repairPlan`: the full `cypher-llm-repair-plan/v1` object.
+- `policyEvidence`: compact policy status and finding-code summary.
+- `nextAction`: one of `execute`, `apply-deterministic-repairs`, `regenerate-query`, `request-approval`, or `blocked`.
 
 ## `assessCypherPolicy(query, schema, options?)`
 
@@ -365,6 +377,7 @@ Returns OpenAI Responses API function-tool definitions for:
 - `cypher_policy_profiles`
 - `cypher_lsp_diagnostics`
 - `cypher_prove`
+- `cypher_agent_feedback`
 - `cypher_eval`
 - `cypher_scorecard`
 - `cypher_benchmark_gate`
@@ -412,6 +425,7 @@ Routes:
 - `POST /v1/policy-profiles`
 - `POST /v1/lsp-diagnostics`
 - `POST /v1/prove`
+- `POST /v1/agent-feedback`
 - `POST /v1/eval`
 - `POST /v1/scorecard`
 - `POST /v1/benchmark-gate`

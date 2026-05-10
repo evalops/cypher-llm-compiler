@@ -227,6 +227,8 @@
       "firstArtifacts": [
         "src/tools.ts",
         "src/lsp.ts",
+        "src/agent-feedback.ts",
+        "schemas/agent-feedback.schema.json",
         "docs/INTEGRATIONS.md",
         "examples/raw-to-ir-migration.md"
       ],
@@ -582,6 +584,21 @@
       "workstreamIds": [
         "semantic-proof-repair",
         "cost-safety-policy"
+      ]
+    },
+    {
+      "id": "agent-feedback-packets",
+      "title": "One-Call Agent Feedback Packets",
+      "status": "partial",
+      "evidence": [
+        "src/agent-feedback.ts",
+        "schemas/agent-feedback.schema.json",
+        "test/agent-feedback.test.ts"
+      ],
+      "workstreamIds": [
+        "semantic-proof-repair",
+        "ecosystem-ux",
+        "compiler-service"
       ]
     },
     {

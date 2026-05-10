@@ -133,6 +133,12 @@
     },
     {
       "method": "POST",
+      "path": "/v1/agent-feedback",
+      "operation": "cypher_agent_feedback",
+      "authRequired": false
+    },
+    {
+      "method": "POST",
       "path": "/v1/eval",
       "operation": "cypher_eval",
       "authRequired": false

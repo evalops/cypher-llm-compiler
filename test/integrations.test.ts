@@ -57,6 +57,7 @@ describe("OpenAI tool schemas", () => {
       "cypher_policy_profiles",
       "cypher_lsp_diagnostics",
       "cypher_prove",
+      "cypher_agent_feedback",
       "cypher_eval",
       "cypher_scorecard",
       "cypher_benchmark_gate",
@@ -205,6 +206,18 @@ describe("OpenAI tool schemas", () => {
     assert.ok(proof.diagnosticCodes.includes("policy-sensitive-label-access"));
     assert.ok(proof.policyEvidence.findingCodes.includes("policy-sensitive-label-access"));
     assert.ok(proof.claims.some((claim) => claim.id === "parser-preflight"));
+
+    const feedback = (await executeCypherCompilerTool("cypher_agent_feedback", {
+      schema,
+      query: repairableQuery,
+      defaultLimit: 25,
+      defaultMaxHops: 3
+    })) as { status: string; nextAction: { kind: string }; proof: { version: string }; repairPlan: { version: string } };
+
+    assert.equal(feedback.status, "repaired");
+    assert.equal(feedback.nextAction.kind, "apply-deterministic-repairs");
+    assert.equal(feedback.proof.version, "cypher-llm-proof/v1");
+    assert.equal(feedback.repairPlan.version, "cypher-llm-repair-plan/v1");
 
     const evalReport = (await executeCypherCompilerTool("cypher_eval", {
       dataset: {

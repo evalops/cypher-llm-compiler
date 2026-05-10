@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evalops.dev/schemas/cypher-llm/agent-feedback/v1.json",
+  "title": "Cypher LLM Agent Feedback",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "status",
+    "canExecute",
+    "nextAction",
+    "diagnosticCodes",
+    "repairKinds",
+    "policyEvidence",
+    "proof",
+    "repairPlan"
+  ],
+  "properties": {
+    "version": { "const": "cypher-llm-agent-feedback/v1" },
+    "status": { "enum": ["ready", "repaired", "needs-model", "blocked"] },
+    "canExecute": { "type": "boolean" },
+    "nextAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "title", "reason", "diagnosticCodes"],
+      "properties": {
+        "kind": {
+          "enum": ["execute", "apply-deterministic-repairs", "regenerate-query", "request-approval", "blocked"]
+        },
+        "title": { "type": "string", "minLength": 1 },
+        "reason": { "type": "string", "minLength": 1 },
+        "diagnosticCodes": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        }
+      }
+    },
+    "diagnosticCodes": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "repairKinds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "policyEvidence": { "$ref": "#/$defs/policyEvidence" },
+    "proof": { "type": "object", "additionalProperties": true },
+    "repairPlan": { "type": "object", "additionalProperties": true }
+  },
+  "$defs": {
+    "policyEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "ok", "summary", "findingCodes"],
+      "properties": {
+        "version": { "const": "cypher-llm-policy-evidence/v1" },
+        "ok": { "type": "boolean" },
+        "policy": { "type": "object", "additionalProperties": true },
+        "rules": { "type": "object", "additionalProperties": true },
+        "planner": { "type": "object", "additionalProperties": true },
+        "statistics": { "type": "object", "additionalProperties": true },
+        "summary": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["findings", "errors", "warnings", "infos"],
+          "properties": {
+            "findings": { "type": "integer", "minimum": 0 },
+            "errors": { "type": "integer", "minimum": 0 },
+            "warnings": { "type": "integer", "minimum": 0 },
+            "infos": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "findingCodes": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        }
+      }
+    }
+  }
+}

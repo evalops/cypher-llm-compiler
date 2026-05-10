@@ -57,6 +57,12 @@ cypher-llm repair-plan --schema examples/tool-hash.schema.json --query examples/
 
 Repair plans can consume the same policy evidence, expose the same compact `policyEvidence` summary, and classify blocking policy-rule diagnostics as unsafe steps.
 
+Agent feedback packets wrap proof, repair-plan, policy evidence, and next-action guidance for LLM clients. They are exported from `src/agent-feedback.ts`, validated by `schemas/agent-feedback.schema.json`, and checked in at `examples/proofs/tool-hash.agent-feedback.json`.
+
+```bash
+cypher-llm agent-feedback --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json --params examples/tool-hash.params.json --default-limit 25
+```
+
 Cost and safety policy planning is exported from `src/policy.ts`, validated by `schemas/policy-report.schema.json`, and checked in at `examples/policy/tool-hash.policy.json`.
 
 ```bash

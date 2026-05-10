@@ -3,6 +3,7 @@ import { appendFile, mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 import type { CypherQuery, CypherSchemaContract, JsonLiteral } from "./ir.js";
+import { buildCypherAgentFeedback } from "./agent-feedback.js";
 import { buildBenchmarkGateReport } from "./benchmark-gate.js";
 import { buildDatasetGovernanceReport } from "./dataset-governance.js";
 import { certifyDialectProfiles, renderDialectCertificationMarkdown } from "./dialect-certification.js";
@@ -115,6 +116,9 @@ export async function runCli(argv: string[], io: CliIO = defaultIo()): Promise<n
         return 0;
       case "prove":
         await proveCommand(args, io);
+        return 0;
+      case "agent-feedback":
+        await agentFeedbackCommand(args, io);
         return 0;
       case "introspect-neo4j":
         await introspectNeo4jCommand(args, io);
@@ -438,6 +442,40 @@ async function proveCommand(args: Map<string, string | boolean>, io: CliIO) {
   writeJson(io, proof);
   if (args.get("fail-on-blocked") === true && proof.status === "blocked") {
     throw new Error("Cypher proof is blocked.");
+  }
+}
+
+async function agentFeedbackCommand(args: Map<string, string | boolean>, io: CliIO) {
+  const schema = normalizeSchema(await readSchema(args, io)).original;
+  const query = await readQuery(args, io);
+  const params = await readParams(args, io);
+  const defaultLimit = optionalNumber(args.get("default-limit"));
+  const defaultMaxHops = optionalNumber(args.get("default-max-hops"));
+  const feedbackOptions: Parameters<typeof buildCypherAgentFeedback>[3] = {};
+  if (defaultLimit !== undefined) {
+    feedbackOptions.defaultLimit = defaultLimit;
+  }
+  if (defaultMaxHops !== undefined) {
+    feedbackOptions.defaultMaxHops = defaultMaxHops;
+  }
+  if (args.get("allow-writes") === true) {
+    feedbackOptions.allowWrites = true;
+  }
+  if (args.get("approved") === true) {
+    feedbackOptions.approved = true;
+  }
+  if (args.get("no-parser") === true) {
+    feedbackOptions.includeParser = false;
+  }
+  await applyPolicyEvidenceArgs(args, io, feedbackOptions);
+  feedbackOptions.parserMode = args.get("parser-mode") === "lint" ? "lint" : "syntax";
+  const feedback = buildCypherAgentFeedback(query, schema, params, feedbackOptions);
+  if (typeof args.get("feedback-out") === "string") {
+    await writeJsonFile(io, args.get("feedback-out") as string, feedback);
+  }
+  writeJson(io, feedback);
+  if (args.get("fail-on-blocked") === true && feedback.status === "blocked") {
+    throw new Error("Cypher agent feedback is blocked.");
   }
 }
 
@@ -900,6 +938,7 @@ Commands:
   policy-profiles [--format json|markdown] [--profiles-out profiles.json]
   lsp-diagnostics --schema schema.json (--query query.json | --cypher "MATCH ...") [--uri file:///query.cypher] [--report-out report.json] [--parser-mode syntax|lint] [--default-limit 25] [--default-max-hops 5]
   prove       --schema schema.json --query query.json [--params params.json] [--proof-out proof.json] [--fail-on-blocked] [--default-limit 25] [--default-max-hops 5] [--planner-estimate estimate.json] [--schema-statistics stats.json] [--policy-rules rules.json] [--no-require-limit] [--max-return-limit 100] [--max-relationship-hops 5] [--allow-writes] [--approved] [--parser-mode syntax|lint] [--no-parser]
+  agent-feedback --schema schema.json --query query.json [--params params.json] [--feedback-out feedback.json] [--fail-on-blocked] [--default-limit 25] [--default-max-hops 5] [--planner-estimate estimate.json] [--schema-statistics stats.json] [--policy-rules rules.json] [--no-require-limit] [--max-return-limit 100] [--max-relationship-hops 5] [--allow-writes] [--approved] [--parser-mode syntax|lint] [--no-parser]
   introspect-neo4j --uri bolt://localhost:7687 --user neo4j --password password [--schema-out schema.json] [--sample-limit 1000] [--no-procedures]
   roadmap    [--format json|markdown] [--integrity] [--roadmap-out path]
   certify-dialects [--format json|markdown] [--report-out path] [--fail-on-fail]

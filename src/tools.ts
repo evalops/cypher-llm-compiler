@@ -1,3 +1,4 @@
+import { buildCypherAgentFeedback } from "./agent-feedback.js";
 import { buildBenchmarkGateReport } from "./benchmark-gate.js";
 import { buildDatasetGovernanceReport } from "./dataset-governance.js";
 import type { EvalAttemptSet, EvalDataset, EvalOptions, EvalReport } from "./evals.js";
@@ -41,6 +42,7 @@ export type CypherCompilerToolName =
   | "cypher_policy_profiles"
   | "cypher_lsp_diagnostics"
   | "cypher_prove"
+  | "cypher_agent_feedback"
   | "cypher_eval"
   | "cypher_scorecard"
   | "cypher_benchmark_gate"
@@ -453,6 +455,38 @@ export const CYPHER_COMPILER_TOOLS: readonly CypherCompilerToolDefinition[] = [
     })
   },
   {
+    name: "cypher_agent_feedback",
+    description:
+      "Return one agent-facing feedback packet with proof, repair plan, policy evidence, and the next action an LLM client should take.",
+    inputSchema: objectSchema(["schema", "query"], {
+      schema: schemaContractSchema,
+      query: cypherQuerySchema,
+      params: paramsSchema,
+      ...repairOptionProperties,
+      ...policyEvidenceProperties,
+      allowWrites: {
+        type: "boolean",
+        description: "Allow write clauses to pass validation. Use only after an external approval step."
+      },
+      approved: {
+        type: "boolean",
+        description: "Mark a write query as externally approved when allowWrites is also true."
+      },
+      mode: {
+        enum: ["explain", "readonly", "write-requires-approval"],
+        description: "Execution mode metadata for the nested proof."
+      },
+      parserMode: {
+        enum: ["lint", "syntax"],
+        description: "Parser preflight mode for the rendered Cypher."
+      },
+      includeParser: {
+        type: "boolean",
+        description: "Set false to skip parser preflight in constrained environments."
+      }
+    })
+  },
+  {
     name: "cypher_eval",
     description: "Score offline text2cypher or IR attempts against a Cypher LLM eval dataset.",
     inputSchema: objectSchema(["dataset", "attempts"], {
@@ -633,6 +667,14 @@ export async function executeCypherCompilerTool(name: string, input: unknown): P
     }
     case "cypher_prove": {
       return buildCypherProof(
+        requiredObject<CypherQuery>(args, "query"),
+        requiredObject<CypherSchemaContract>(args, "schema"),
+        optionalParams(args),
+        proofOptions(args)
+      );
+    }
+    case "cypher_agent_feedback": {
+      return buildCypherAgentFeedback(
         requiredObject<CypherQuery>(args, "query"),
         requiredObject<CypherSchemaContract>(args, "schema"),
         optionalParams(args),

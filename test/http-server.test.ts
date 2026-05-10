@@ -56,6 +56,7 @@ describe("compiler HTTP service", () => {
     assert.equal(health.version, "cypher-llm-compiler-http/v1");
     assert.equal(health.tools, tools.tools.length);
     assert.ok(tools.tools.some((tool) => tool.name === "cypher_prove"));
+    assert.ok(tools.tools.some((tool) => tool.name === "cypher_agent_feedback"));
   });
 
   it("runs compiler tools through stable HTTP routes", async () => {
@@ -79,6 +80,11 @@ describe("compiler HTTP service", () => {
       query,
       defaultLimit: 25
     }) as { version: string; deterministic: unknown[] };
+    const feedback = await postJson(`${baseUrl}/v1/agent-feedback`, {
+      schema,
+      query,
+      defaultLimit: 25
+    }) as { version: string; nextAction: { kind: string } };
     const policy = await postJson(`${baseUrl}/v1/policy`, {
       schema,
       query,
@@ -131,6 +137,8 @@ describe("compiler HTTP service", () => {
     assert.equal(lossless.roundTrip.ok, true);
     assert.equal(repairPlan.version, "cypher-llm-repair-plan/v1");
     assert.equal(repairPlan.deterministic.length, 1);
+    assert.equal(feedback.version, "cypher-llm-agent-feedback/v1");
+    assert.equal(feedback.nextAction.kind, "apply-deterministic-repairs");
     assert.equal(policy.version, "cypher-llm-policy-report/v1");
     assert.equal(policy.policy?.id, "llm-readonly-strict");
     assert.deepEqual(policy.findings.map((finding) => finding.code), ["policy-unfiltered-label-scan", "policy-missing-limit"]);
