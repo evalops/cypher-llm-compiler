@@ -14,7 +14,8 @@
     "dist/src",
     "README.md",
     "docs",
-    "examples"
+    "examples",
+    "schemas"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
@@ -23,6 +24,7 @@
   },
   "devDependencies": {
     "@types/node": "^25.6.2",
+    "ajv": "^8.20.0",
     "typescript": "^5.9.0"
   },
   "engines": {

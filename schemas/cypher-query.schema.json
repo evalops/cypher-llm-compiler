@@ -1,0 +1,488 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evalops.dev/schemas/cypher-llm/query/v1.json",
+  "title": "Cypher LLM Query IR",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "clauses"],
+  "properties": {
+    "version": { "const": "cypher-llm-ir/v1" },
+    "profile": {
+      "enum": ["llm-safe-readonly", "llm-safe-write", "raw-compatible"]
+    },
+    "clauses": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/clause" },
+      "minItems": 1
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/jsonLiteral" }
+    }
+  },
+  "$defs": {
+    "jsonLiteral": {
+      "oneOf": [
+        { "type": "string" },
+        { "type": "number" },
+        { "type": "boolean" },
+        { "type": "null" },
+        {
+          "type": "array",
+          "items": { "$ref": "#/$defs/jsonLiteral" }
+        },
+        {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/jsonLiteral" }
+        }
+      ]
+    },
+    "clause": {
+      "oneOf": [
+        { "$ref": "#/$defs/matchClause" },
+        { "$ref": "#/$defs/unwindClause" },
+        { "$ref": "#/$defs/letClause" },
+        { "$ref": "#/$defs/withClause" },
+        { "$ref": "#/$defs/returnClause" },
+        { "$ref": "#/$defs/callClause" },
+        { "$ref": "#/$defs/createClause" },
+        { "$ref": "#/$defs/mergeClause" },
+        { "$ref": "#/$defs/deleteClause" },
+        { "$ref": "#/$defs/setClause" },
+        { "$ref": "#/$defs/rawClause" }
+      ]
+    },
+    "matchClause": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "patterns"],
+      "properties": {
+        "kind": { "const": "match" },
+        "optional": { "type": "boolean" },
+        "patterns": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/pathPattern" },
+          "minItems": 1
+        },
+        "where": { "$ref": "#/$defs/expression" }
+      }
+    },
+    "unwindClause": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "expression", "alias"],
+      "properties": {
+        "kind": { "const": "unwind" },
+        "expression": { "$ref": "#/$defs/expression" },
+        "alias": { "type": "string", "minLength": 1 }
+      }
+    },
+    "letClause": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "bindings"],
+      "properties": {
+        "kind": { "const": "let" },
+        "bindings": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/binding" },
+          "minItems": 1
+        }
+      }
+    },
+    "withClause": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "items"],
+      "properties": {
+        "kind": { "const": "with" },
+        "distinct": { "type": "boolean" },
+        "includeExisting": { "type": "boolean" },
+        "items": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/projectionItem" }
+        },
+        "where": { "$ref": "#/$defs/expression" },
+        "orderBy": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/orderItem" }
+        },
+        "skip": { "$ref": "#/$defs/expression" },
+        "limit": { "$ref": "#/$defs/expression" }
+      }
+    },
+    "returnClause": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "items"],
+      "properties": {
+        "kind": { "const": "return" },
+        "distinct": { "type": "boolean" },
+        "items": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/projectionItem" }
+        },
+        "orderBy": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/orderItem" }
+        },
+        "skip": { "$ref": "#/$defs/expression" },
+        "limit": { "$ref": "#/$defs/expression" }
+      }
+    },
+    "callClause": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "procedure"],
+      "properties": {
+        "kind": { "const": "call" },
+        "procedure": { "type": "string", "minLength": 1 },
+        "arguments": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/expression" }
+        },
+        "yield": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/projectionItem" }
+        },
+        "where": { "$ref": "#/$defs/expression" }
+      }
+    },
+    "createClause": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "patterns"],
+      "properties": {
+        "kind": { "const": "create" },
+        "patterns": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/pathPattern" },
+          "minItems": 1
+        }
+      }
+    },
+    "mergeClause": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "pattern"],
+      "properties": {
+        "kind": { "const": "merge" },
+        "pattern": { "$ref": "#/$defs/pathPattern" },
+        "onCreate": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/setItem" }
+        },
+        "onMatch": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/setItem" }
+        }
+      }
+    },
+    "deleteClause": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "expressions"],
+      "properties": {
+        "kind": { "const": "delete" },
+        "detach": { "type": "boolean" },
+        "expressions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/expression" },
+          "minItems": 1
+        }
+      }
+    },
+    "setClause": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "items"],
+      "properties": {
+        "kind": { "const": "set" },
+        "items": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/setItem" },
+          "minItems": 1
+        }
+      }
+    },
+    "rawClause": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "cypher"],
+      "properties": {
+        "kind": { "const": "raw" },
+        "cypher": { "type": "string", "minLength": 1 },
+        "reason": { "type": "string" }
+      }
+    },
+    "pathPattern": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["segments"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "mode": { "enum": ["walk", "trail", "acyclic"] },
+        "shortest": { "enum": ["any", "all"] },
+        "segments": {
+          "type": "array",
+          "prefixItems": [{ "$ref": "#/$defs/nodePattern" }],
+          "items": { "$ref": "#/$defs/pathContinuation" },
+          "minItems": 1
+        }
+      }
+    },
+    "pathContinuation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rel", "node"],
+      "properties": {
+        "rel": { "$ref": "#/$defs/relationshipPattern" },
+        "node": { "$ref": "#/$defs/nodePattern" }
+      }
+    },
+    "nodePattern": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "variable": { "type": "string", "minLength": 1 },
+        "labels": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "properties": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/expression" }
+        },
+        "where": { "$ref": "#/$defs/expression" }
+      }
+    },
+    "relationshipPattern": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "variable": { "type": "string", "minLength": 1 },
+        "types": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "direction": { "enum": ["out", "in", "undirected"] },
+        "minHops": { "type": "integer", "minimum": 0 },
+        "maxHops": {
+          "oneOf": [
+            { "type": "integer", "minimum": 0 },
+            { "type": "null" }
+          ]
+        },
+        "properties": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/expression" }
+        },
+        "where": { "$ref": "#/$defs/expression" }
+      }
+    },
+    "binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["alias", "expression"],
+      "properties": {
+        "alias": { "type": "string", "minLength": 1 },
+        "expression": { "$ref": "#/$defs/expression" }
+      }
+    },
+    "projectionItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["expression"],
+      "properties": {
+        "expression": { "$ref": "#/$defs/expression" },
+        "alias": { "type": "string", "minLength": 1 }
+      }
+    },
+    "orderItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["expression"],
+      "properties": {
+        "expression": { "$ref": "#/$defs/expression" },
+        "direction": { "enum": ["ASC", "DESC"] }
+      }
+    },
+    "setItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["target", "value"],
+      "properties": {
+        "target": { "$ref": "#/$defs/expression" },
+        "value": { "$ref": "#/$defs/expression" },
+        "operator": { "enum": ["=", "+="] }
+      }
+    },
+    "expression": {
+      "oneOf": [
+        { "$ref": "#/$defs/variableExpression" },
+        { "$ref": "#/$defs/propertyExpression" },
+        { "$ref": "#/$defs/parameterExpression" },
+        { "$ref": "#/$defs/literalExpression" },
+        { "$ref": "#/$defs/binaryExpression" },
+        { "$ref": "#/$defs/unaryExpression" },
+        { "$ref": "#/$defs/functionExpression" },
+        { "$ref": "#/$defs/listExpression" },
+        { "$ref": "#/$defs/mapExpression" },
+        { "$ref": "#/$defs/caseExpression" },
+        { "$ref": "#/$defs/rawExpression" }
+      ]
+    },
+    "variableExpression": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "name"],
+      "properties": {
+        "kind": { "const": "var" },
+        "name": { "type": "string", "minLength": 1 }
+      }
+    },
+    "propertyExpression": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "object", "key"],
+      "properties": {
+        "kind": { "const": "prop" },
+        "object": { "$ref": "#/$defs/expression" },
+        "key": { "type": "string", "minLength": 1 }
+      }
+    },
+    "parameterExpression": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "name"],
+      "properties": {
+        "kind": { "const": "param" },
+        "name": { "type": "string", "minLength": 1 }
+      }
+    },
+    "literalExpression": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "value"],
+      "properties": {
+        "kind": { "const": "literal" },
+        "value": { "$ref": "#/$defs/jsonLiteral" }
+      }
+    },
+    "binaryExpression": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "op", "left", "right"],
+      "properties": {
+        "kind": { "const": "binary" },
+        "op": {
+          "enum": [
+            "OR",
+            "XOR",
+            "AND",
+            "=",
+            "<>",
+            "<",
+            "<=",
+            ">",
+            ">=",
+            "IN",
+            "CONTAINS",
+            "STARTS WITH",
+            "ENDS WITH",
+            "+",
+            "-",
+            "*",
+            "/",
+            "%",
+            "^"
+          ]
+        },
+        "left": { "$ref": "#/$defs/expression" },
+        "right": { "$ref": "#/$defs/expression" }
+      }
+    },
+    "unaryExpression": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "op", "expression"],
+      "properties": {
+        "kind": { "const": "unary" },
+        "op": { "enum": ["NOT", "+", "-"] },
+        "expression": { "$ref": "#/$defs/expression" }
+      }
+    },
+    "functionExpression": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "name", "arguments"],
+      "properties": {
+        "kind": { "const": "function" },
+        "name": { "type": "string", "minLength": 1 },
+        "distinct": { "type": "boolean" },
+        "arguments": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/expression" }
+        }
+      }
+    },
+    "listExpression": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "items"],
+      "properties": {
+        "kind": { "const": "list" },
+        "items": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/expression" }
+        }
+      }
+    },
+    "mapExpression": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "entries"],
+      "properties": {
+        "kind": { "const": "map" },
+        "entries": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/expression" }
+        }
+      }
+    },
+    "caseExpression": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "cases"],
+      "properties": {
+        "kind": { "const": "case" },
+        "expression": { "$ref": "#/$defs/expression" },
+        "cases": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/caseWhen" },
+          "minItems": 1
+        },
+        "else": { "$ref": "#/$defs/expression" }
+      }
+    },
+    "caseWhen": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["when", "then"],
+      "properties": {
+        "when": { "$ref": "#/$defs/expression" },
+        "then": { "$ref": "#/$defs/expression" }
+      }
+    },
+    "rawExpression": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "cypher"],
+      "properties": {
+        "kind": { "const": "raw" },
+        "cypher": { "type": "string", "minLength": 1 },
+        "reason": { "type": "string" }
+      }
+    }
+  }
+}

@@ -1,0 +1,60 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import path from "node:path";
+import { describe, it } from "node:test";
+import Ajv2020Module from "ajv/dist/2020.js";
+import type { EvalAttemptSet, EvalDataset } from "../src/evals.js";
+import { evaluateAttempts } from "../src/evals.js";
+
+interface AjvLike {
+  addSchema(schema: unknown): unknown;
+  getSchema(schemaId: string): ((value: unknown) => boolean) & { errors?: unknown };
+}
+
+const Ajv2020 = Ajv2020Module as unknown as new (options: Record<string, unknown>) => AjvLike;
+
+describe("eval harness", () => {
+  it("scores IR and raw Cypher attempts against task expectations", () => {
+    const dataset = readJson<EvalDataset>("examples/eval-dataset.json");
+    const attempts = readJson<EvalAttemptSet>("examples/eval-attempts.json");
+    const report = evaluateAttempts(dataset, attempts, { defaultLimit: 25, defaultMaxHops: 5 });
+
+    assert.equal(report.metrics.totalTasks, 3);
+    assert.equal(report.metrics.passedTasks, 3);
+    assert.equal(report.metrics.passRate, 1);
+    assert.equal(report.metrics.irAttempts, 2);
+    assert.equal(report.metrics.rawAttempts, 1);
+    assert.equal(report.results[0]?.cypher?.includes("[:`has MD5 hash`]->"), true);
+    assert.equal(report.results[1]?.diagnostics.includes("undefined-variable"), true);
+    assert.equal(report.results[2]?.repairs.includes("quote-raw-identifier"), true);
+  });
+});
+
+describe("json schemas", () => {
+  it("validate the checked-in examples used by the CLI and eval runner", () => {
+    const ajv = new Ajv2020({ allErrors: true, strict: false });
+    const schemaContractSchema = readJson("schemas/cypher-schema-contract.schema.json");
+    const querySchema = readJson("schemas/cypher-query.schema.json");
+    const evalDatasetSchema = readJson("schemas/eval-dataset.schema.json");
+    const evalAttemptsSchema = readJson("schemas/eval-attempts.schema.json");
+    ajv.addSchema(schemaContractSchema);
+    ajv.addSchema(querySchema);
+    ajv.addSchema(evalDatasetSchema);
+    ajv.addSchema(evalAttemptsSchema);
+
+    assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/schema-contract/v1.json", readJson("examples/tool-hash.schema.json"));
+    assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/query/v1.json", readJson("examples/tool-hash.query.json"));
+    assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/eval-dataset/v1.json", readJson("examples/eval-dataset.json"));
+    assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/eval-attempts/v1.json", readJson("examples/eval-attempts.json"));
+  });
+});
+
+function readJson<T = unknown>(relativePath: string): T {
+  return JSON.parse(readFileSync(path.join(process.cwd(), relativePath), "utf8")) as T;
+}
+
+function assertValid(ajv: AjvLike, schemaId: string, value: unknown) {
+  const validate = ajv.getSchema(schemaId);
+  assert.ok(validate, `missing schema ${schemaId}`);
+  assert.equal(validate(value), true, JSON.stringify(validate.errors, null, 2));
+}

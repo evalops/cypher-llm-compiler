@@ -1,5 +1,6 @@
 export * from "./ir.js";
 export * from "./diagnostics.js";
+export * from "./evals.js";
 export * from "./failure-corpus.js";
 export * from "./normalize.js";
 export * from "./repair.js";

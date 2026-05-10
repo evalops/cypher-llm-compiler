@@ -12,6 +12,31 @@ Current corpus categories:
 
 The corpus runner keeps both pre-repair and post-repair diagnostic codes. This matters because some deterministic repairs are useful precisely because the original failure was detected.
 
+## Offline Dataset Runner
+
+The longer-horizon eval surface is now represented by two JSON files:
+
+- `cypher-llm-eval-dataset/v1`: tasks with natural-language questions, schema contracts, params, tags, and expectations.
+- `cypher-llm-eval-attempts/v1`: model outputs as either `CypherQuery` IR or legacy raw Cypher.
+
+Run the checked-in smoke set:
+
+```bash
+cypher-llm eval \
+  --dataset examples/eval-dataset.json \
+  --attempts examples/eval-attempts.json \
+  --default-limit 25 \
+  --default-max-hops 5
+```
+
+The report includes:
+
+- `passRate`: fraction of tasks whose expectations passed.
+- `executableRate`: fraction that produced executable safe plans.
+- `repairRate`: fraction of attempted tasks that needed deterministic repair.
+- `diagnosticsByCode`: stable failure taxonomy counts.
+- per-task canonical Cypher, diagnostics, repairs, and expectation checks.
+
 Recommended external eval loop:
 
 1. Generate `CypherQuery` IR from natural-language tasks.

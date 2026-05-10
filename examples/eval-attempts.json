@@ -1,0 +1,115 @@
+{
+  "version": "cypher-llm-eval-attempts/v1",
+  "datasetName": "tool-hash-smoke",
+  "model": "fixture-model",
+  "prompt": "Emit CypherQuery IR when possible.",
+  "attempts": [
+    {
+      "taskId": "tool-md5-by-name",
+      "query": {
+        "version": "cypher-llm-ir/v1",
+        "profile": "llm-safe-readonly",
+        "clauses": [
+          {
+            "kind": "match",
+            "patterns": [
+              {
+                "segments": [
+                  {
+                    "variable": "tool",
+                    "labels": ["tool"],
+                    "properties": {
+                      "name": {
+                        "kind": "param",
+                        "name": "toolName"
+                      }
+                    }
+                  },
+                  {
+                    "rel": {
+                      "types": ["md5"],
+                      "direction": "in"
+                    },
+                    "node": {
+                      "variable": "hash",
+                      "labels": ["Hash"]
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "return",
+            "items": [
+              {
+                "expression": {
+                  "kind": "prop",
+                  "object": {
+                    "kind": "var",
+                    "name": "hash"
+                  },
+                  "key": "value"
+                },
+                "alias": "md5"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "taskId": "tool-scope-drift",
+      "query": {
+        "version": "cypher-llm-ir/v1",
+        "profile": "llm-safe-readonly",
+        "clauses": [
+          {
+            "kind": "match",
+            "patterns": [
+              {
+                "segments": [
+                  {
+                    "variable": "tool",
+                    "labels": ["Tool"]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "with",
+            "items": [
+              {
+                "expression": {
+                  "kind": "literal",
+                  "value": 1
+                },
+                "alias": "one"
+              }
+            ]
+          },
+          {
+            "kind": "return",
+            "items": [
+              {
+                "expression": {
+                  "kind": "var",
+                  "name": "tool"
+                }
+              }
+            ],
+            "limit": {
+              "kind": "literal",
+              "value": 10
+            }
+          }
+        ]
+      }
+    },
+    {
+      "taskId": "raw-spaced-relationship",
+      "rawCypher": "MATCH (tool:Tool)-[:has MD5 hash]->(hash:Hash) RETURN hash"
+    }
+  ]
+}

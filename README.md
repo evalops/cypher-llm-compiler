@@ -125,6 +125,7 @@ cypher-llm render --schema schema.json --query query.json --params params.json -
 cypher-llm validate --schema schema.json --query query.json
 cypher-llm repair-raw --schema schema.json --cypher "MATCH (t:Tool)-[:has MD5 hash]->(h:Hash) RETURN h"
 cypher-llm corpus
+cypher-llm eval --dataset examples/eval-dataset.json --attempts examples/eval-attempts.json --default-limit 25
 ```
 
 `render` returns a `SafeExecutionPlan`:
@@ -135,6 +136,8 @@ cypher-llm corpus
 - `repairs`: deterministic repairs applied before rendering.
 - `requiresApproval`: true for graph mutations without explicit approval.
 - `canExecute`: false if errors remain or approval is required.
+
+`eval` returns a `cypher-llm-eval-report/v1` report with pass rate, executable rate, repair rate, diagnostic counts, and per-task outcomes.
 
 ## LLM Integration Contract
 
@@ -219,6 +222,7 @@ Those are deliberate boundaries. The repo is the missing LLM compiler surface, n
 - `src/cli.ts`: JSON-in/JSON-out CLI for agents and eval harnesses.
 - `docs/`: Design notes and LLM integration guidance.
 - `examples/`: Small schema/query fixtures for CLI smoke tests and agent onboarding.
+- `schemas/`: JSON Schema contracts for IR, graph schema, eval datasets, and eval attempts.
 - `test/`: Node test-runner coverage for renderer, schema, validation, repair, safety, and corpus behavior.
 
 ## Design Rules

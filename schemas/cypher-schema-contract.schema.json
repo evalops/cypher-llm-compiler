@@ -1,0 +1,165 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evalops.dev/schemas/cypher-llm/schema-contract/v1.json",
+  "title": "Cypher LLM Schema Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "nodes", "relationships"],
+  "properties": {
+    "version": { "const": "cypher-llm-schema/v1" },
+    "dialect": { "type": "string" },
+    "nodes": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/schemaNode" }
+    },
+    "relationships": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/schemaRelationship" }
+    },
+    "parameters": {
+      "type": "object",
+      "additionalProperties": {
+        "oneOf": [
+          { "$ref": "#/$defs/cypherType" },
+          { "$ref": "#/$defs/schemaParameter" }
+        ]
+      }
+    },
+    "pathTemplates": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/pathTemplate" }
+    },
+    "disallowWritesByDefault": { "type": "boolean" }
+  },
+  "$defs": {
+    "cypherType": {
+      "type": "string",
+      "minLength": 1
+    },
+    "jsonLiteral": {
+      "oneOf": [
+        { "type": "string" },
+        { "type": "number" },
+        { "type": "boolean" },
+        { "type": "null" },
+        {
+          "type": "array",
+          "items": { "$ref": "#/$defs/jsonLiteral" }
+        },
+        {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/jsonLiteral" }
+        }
+      ]
+    },
+    "schemaProperty": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": { "$ref": "#/$defs/cypherType" },
+        "nullable": { "type": "boolean" },
+        "aliases": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "description": { "type": "string" },
+        "sampleValues": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/jsonLiteral" }
+        }
+      }
+    },
+    "schemaParameter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": { "$ref": "#/$defs/cypherType" },
+        "required": { "type": "boolean" },
+        "description": { "type": "string" }
+      }
+    },
+    "schemaNode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "aliases": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "description": { "type": "string" },
+        "properties": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/schemaProperty" }
+        }
+      }
+    },
+    "schemaRelationship": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "from", "to"],
+      "properties": {
+        "type": { "type": "string", "minLength": 1 },
+        "from": { "$ref": "#/$defs/endpoint" },
+        "to": { "$ref": "#/$defs/endpoint" },
+        "directed": { "type": "boolean" },
+        "aliases": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "description": { "type": "string" },
+        "properties": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/schemaProperty" }
+        }
+      }
+    },
+    "endpoint": {
+      "oneOf": [
+        { "type": "string", "minLength": 1 },
+        {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      ]
+    },
+    "pathTemplate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "steps"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "description": { "type": "string" },
+        "steps": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/pathTemplateStep" },
+          "minItems": 1
+        }
+      }
+    },
+    "pathTemplateStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["from", "relationship", "to"],
+      "properties": {
+        "from": { "type": "string", "minLength": 1 },
+        "relationship": { "type": "string", "minLength": 1 },
+        "to": { "type": "string", "minLength": 1 },
+        "direction": { "$ref": "#/$defs/relationshipDirection" },
+        "minHops": { "type": "integer", "minimum": 0 },
+        "maxHops": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "relationshipDirection": {
+      "enum": ["out", "in", "undirected"]
+    }
+  }
+}

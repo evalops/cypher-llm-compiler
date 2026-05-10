@@ -94,3 +94,32 @@ No database is touched. A real adapter can run `preflightCypher`, then use `canE
 ## `evaluateFailureCorpus(cases?)`
 
 Runs the known LLM failure fixtures and returns pass/fail records with canonical Cypher and diagnostic codes.
+
+## `evaluateAttempts(dataset, attemptSet, options?)`
+
+Scores an offline eval dataset against a set of model attempts.
+
+Inputs:
+
+- `EvalDataset`: task id, natural-language question, schema contract, optional params, and expectations.
+- `EvalAttemptSet`: per-task model output as either structured IR or raw Cypher.
+
+Output:
+
+```ts
+{
+  version: "cypher-llm-eval-report/v1";
+  datasetName: string;
+  metrics: {
+    totalTasks: number;
+    passedTasks: number;
+    passRate: number;
+    executableRate: number;
+    repairRate: number;
+    diagnosticsByCode: Record<string, number>;
+  };
+  results: EvalResult[];
+}
+```
+
+This is the main entrypoint for comparing raw text2cypher against compiler-mediated generation.

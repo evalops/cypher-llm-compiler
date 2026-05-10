@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evalops.dev/schemas/cypher-llm/eval-attempts/v1.json",
+  "title": "Cypher LLM Eval Attempts",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "attempts"],
+  "properties": {
+    "version": { "const": "cypher-llm-eval-attempts/v1" },
+    "datasetName": { "type": "string" },
+    "model": { "type": "string" },
+    "prompt": { "type": "string" },
+    "attempts": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/attempt" }
+    }
+  },
+  "$defs": {
+    "jsonLiteral": {
+      "oneOf": [
+        { "type": "string" },
+        { "type": "number" },
+        { "type": "boolean" },
+        { "type": "null" },
+        {
+          "type": "array",
+          "items": { "$ref": "#/$defs/jsonLiteral" }
+        },
+        {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/jsonLiteral" }
+        }
+      ]
+    },
+    "attempt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["taskId"],
+      "oneOf": [
+        { "required": ["query"] },
+        { "required": ["rawCypher"] }
+      ],
+      "properties": {
+        "taskId": { "type": "string", "minLength": 1 },
+        "model": { "type": "string" },
+        "prompt": { "type": "string" },
+        "query": { "$ref": "https://evalops.dev/schemas/cypher-llm/query/v1.json" },
+        "rawCypher": { "type": "string", "minLength": 1 },
+        "params": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/jsonLiteral" }
+        }
+      }
+    }
+  }
+}

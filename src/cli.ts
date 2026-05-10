@@ -2,6 +2,8 @@
 import { readFile } from "node:fs/promises";
 import process from "node:process";
 import type { CypherQuery, CypherSchemaContract, JsonLiteral } from "./ir.js";
+import type { EvalAttemptSet, EvalDataset } from "./evals.js";
+import { evaluateAttempts } from "./evals.js";
 import { evaluateFailureCorpus } from "./failure-corpus.js";
 import { repairRawCypher } from "./repair.js";
 import { createSafeExecutionPlan } from "./safety.js";
@@ -31,6 +33,9 @@ export async function runCli(argv: string[], io: CliIO = defaultIo()): Promise<n
         return 0;
       case "corpus":
         writeJson(io, { results: evaluateFailureCorpus() });
+        return 0;
+      case "eval":
+        await evalCommand(args, io);
         return 0;
       case "help":
       case undefined:
@@ -73,6 +78,21 @@ async function repairRawCommand(args: Map<string, string | boolean>, io: CliIO) 
   const schema = normalizeSchema(await readSchema(args, io));
   const raw = stringArg(args, "cypher");
   writeJson(io, repairRawCypher(raw, schema));
+}
+
+async function evalCommand(args: Map<string, string | boolean>, io: CliIO) {
+  const dataset = JSON.parse(await io.readFile(stringArg(args, "dataset"), "utf8")) as EvalDataset;
+  const attempts = JSON.parse(await io.readFile(stringArg(args, "attempts"), "utf8")) as EvalAttemptSet;
+  const defaultLimit = optionalNumber(args.get("default-limit"));
+  const defaultMaxHops = optionalNumber(args.get("default-max-hops"));
+  const evalOptions: { defaultLimit?: number; defaultMaxHops?: number } = {};
+  if (defaultLimit !== undefined) {
+    evalOptions.defaultLimit = defaultLimit;
+  }
+  if (defaultMaxHops !== undefined) {
+    evalOptions.defaultMaxHops = defaultMaxHops;
+  }
+  writeJson(io, evaluateAttempts(dataset, attempts, evalOptions));
 }
 
 async function readSchema(args: Map<string, string | boolean>, io: CliIO): Promise<CypherSchemaContract> {
@@ -144,6 +164,7 @@ Commands:
   validate    --schema schema.json --query query.json
   repair-raw  --schema schema.json --cypher "MATCH ..."
   corpus
+  eval        --dataset dataset.json --attempts attempts.json [--default-limit 25] [--default-max-hops 5]
   help
 `;
 }

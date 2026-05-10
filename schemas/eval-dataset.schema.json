@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evalops.dev/schemas/cypher-llm/eval-dataset/v1.json",
+  "title": "Cypher LLM Eval Dataset",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "name", "tasks"],
+  "properties": {
+    "version": { "const": "cypher-llm-eval-dataset/v1" },
+    "name": { "type": "string", "minLength": 1 },
+    "description": { "type": "string" },
+    "tasks": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/task" },
+      "minItems": 1
+    }
+  },
+  "$defs": {
+    "jsonLiteral": {
+      "oneOf": [
+        { "type": "string" },
+        { "type": "number" },
+        { "type": "boolean" },
+        { "type": "null" },
+        {
+          "type": "array",
+          "items": { "$ref": "#/$defs/jsonLiteral" }
+        },
+        {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/jsonLiteral" }
+        }
+      ]
+    },
+    "task": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "question", "schema"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "question": { "type": "string", "minLength": 1 },
+        "source": { "type": "string" },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "schema": { "$ref": "https://evalops.dev/schemas/cypher-llm/schema-contract/v1.json" },
+        "params": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/jsonLiteral" }
+        },
+        "expected": { "$ref": "#/$defs/expectation" }
+      }
+    },
+    "expectation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "cypherContains": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "diagnosticCodes": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "repairKinds": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "canExecute": { "type": "boolean" }
+      }
+    }
+  }
+}
