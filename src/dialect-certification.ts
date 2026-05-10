@@ -23,8 +23,23 @@ export interface DialectLiveDatabaseEvidence {
   cypher?: string;
 }
 
+export interface DialectLiveDatabaseEvidenceSet {
+  version: "cypher-llm-dialect-live-evidence/v1";
+  generatedAt: string;
+  summary: {
+    evidenceProfiles: number;
+    passedEvidence: number;
+    warningEvidence: number;
+    failedEvidence: number;
+    databases: string[];
+  };
+  evidence: DialectLiveDatabaseEvidence[];
+}
+
+export type DialectLiveDatabaseEvidenceInput = DialectLiveDatabaseEvidence[] | DialectLiveDatabaseEvidenceSet;
+
 export interface DialectCertificationOptions {
-  liveDatabaseEvidence?: DialectLiveDatabaseEvidence[];
+  liveDatabaseEvidence?: DialectLiveDatabaseEvidenceInput;
 }
 
 export interface DialectCertificationCheck {
@@ -94,6 +109,15 @@ export function certifyDialectProfiles(
   };
 }
 
+export function normalizeDialectLiveDatabaseEvidence(
+  input?: DialectLiveDatabaseEvidenceInput
+): DialectLiveDatabaseEvidence[] {
+  if (!input) {
+    return [];
+  }
+  return Array.isArray(input) ? input : input.evidence;
+}
+
 export function renderDialectCertificationMarkdown(report: DialectCertificationReport = certifyDialectProfiles()): string {
   const lines = [
     "# Dialect Certification",
@@ -123,6 +147,7 @@ export function renderDialectCertificationMarkdown(report: DialectCertificationR
 }
 
 function certifyProfile(profile: DialectProfile, options: DialectCertificationOptions): DialectCertificationProfileReport {
+  const liveDatabaseEvidence = normalizeDialectLiveDatabaseEvidence(options.liveDatabaseEvidence);
   const checks = [
     checkProfileMetadata(profile),
     checkRendererEscapes(profile),
@@ -130,7 +155,7 @@ function certifyProfile(profile: DialectProfile, options: DialectCertificationOp
     checkLetFeature(profile),
     checkPathModeFeature(profile),
     checkRelationshipRangeRendering(profile),
-    checkLiveDatabaseEvidence(profile, options.liveDatabaseEvidence ?? [])
+    checkLiveDatabaseEvidence(profile, liveDatabaseEvidence)
   ];
 
   return {

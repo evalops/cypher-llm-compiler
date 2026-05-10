@@ -1078,15 +1078,26 @@ describe("cli", () => {
       stderr: { write: (chunk: string | Uint8Array) => ((stderr += String(chunk)), true) },
       readFile: async (path) =>
         path === "fixtures/live-evidence.json"
-          ? JSON.stringify([
-              {
-                profileId: "neo4j-cypher-25",
-                status: "passed",
-                database: "neo4j-fixture",
-                source: "fixtures/live-evidence.json",
-                observed: "fixture EXPLAIN accepted rendered read query"
-              }
-            ])
+          ? JSON.stringify({
+              version: "cypher-llm-dialect-live-evidence/v1",
+              generatedAt: "2026-05-10",
+              summary: {
+                evidenceProfiles: 1,
+                passedEvidence: 1,
+                warningEvidence: 0,
+                failedEvidence: 0,
+                databases: ["neo4j-fixture"]
+              },
+              evidence: [
+                {
+                  profileId: "neo4j-cypher-25",
+                  status: "passed",
+                  database: "neo4j-fixture",
+                  source: "fixtures/live-evidence.json",
+                  observed: "fixture EXPLAIN accepted rendered read query"
+                }
+              ]
+            })
           : "",
       writeFile: async (path, data) => {
         writes.set(path, data);

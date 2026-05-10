@@ -169,7 +169,7 @@ cypher-llm roadmap --integrity
 cypher-llm compatibility --integrity --fail-on-error
 cypher-llm compatibility-diff --baseline examples/governance/compatibility-catalog.json --fail-on-breaking
 cypher-llm contract-conformance --fail-on-error
-cypher-llm certify-dialects --fail-on-fail
+cypher-llm certify-dialects --live-evidence examples/certification/live-database-evidence.json --fail-on-fail
 cypher-llm service-manifest --manifest-out service-manifest.json
 cypher-llm serve --host 127.0.0.1 --port 8787
 cypher-llm serve --host 127.0.0.1 --port 8787 --require-auth --auth-token "$CYPHER_LLM_HTTP_TOKEN" --audit-log audit.jsonl
@@ -233,7 +233,7 @@ npm run test:live:neo4j
 
 `contract-conformance` emits a `cypher-llm-contract-conformance/v1` report that verifies public schemas, examples, fingerprints, schema validation, and evidence paths.
 
-`certify-dialects` emits a `cypher-llm-dialect-certification/v1` report that checks profile metadata, renderer behavior, parser acceptance, semantic feature gates, known rendering limitations, and separated live-database evidence when supplied.
+`certify-dialects` emits a `cypher-llm-dialect-certification/v1` report that checks profile metadata, renderer behavior, parser acceptance, semantic feature gates, known rendering limitations, and separated live-database evidence when supplied. Checked-in live evidence is versioned as `cypher-llm-dialect-live-evidence/v1`.
 
 `service-manifest` emits a `cypher-llm-service-manifest/v1` report covering HTTP routes, auth requirements, body limits, audit redaction, and data-boundary guarantees.
 
@@ -409,7 +409,7 @@ Those are deliberate boundaries. The repo is the missing LLM compiler surface, n
 - `docker-compose.neo4j.yml`: Optional local Neo4j fixture for live `EXPLAIN` tests.
 - `examples/`: Small schema/query fixtures for CLI smoke tests and agent onboarding.
 - `examples/benchmarks/`: CypherBench raw-vs-IR reports, comparisons, scorecards, gates, and repair-loop artifacts.
-- `examples/certification/`: Checked-in dialect certification report.
+- `examples/certification/`: Checked-in dialect certification report and live database evidence.
 - `examples/imported/`: Imported text2cypher/openCypher fixture samples and baseline reports.
 - `examples/lossless/`: Checked-in lossless parse report.
 - `examples/lsp/`: Checked-in LSP diagnostics report.
@@ -418,7 +418,7 @@ Those are deliberate boundaries. The repo is the missing LLM compiler surface, n
 - `examples/roadmap/`: Machine-readable years-scale roadmap snapshot.
 - `examples/service/`: Checked-in compiler service manifest.
 - `profiles/`: Versioned dialect profiles for Neo4j Cypher 25, openCypher 9, and GQL-oriented output.
-- `schemas/`: JSON Schema contracts for IR, graph schema, planner estimates, schema statistics, policy rules, policy reports/profiles, repair plans, diagnostic catalogs, service manifests, benchmark gates, lossless parse reports, contract conformance, dataset governance, eval datasets, and eval attempts.
+- `schemas/`: JSON Schema contracts for IR, graph schema, planner estimates, schema statistics, policy rules, policy reports/profiles, repair plans, diagnostic catalogs, service manifests, benchmark gates, lossless parse reports, dialect live evidence, contract conformance, dataset governance, eval datasets, and eval attempts.
 - `test/`: Node test-runner coverage for renderer, schema, validation, repair, safety, and corpus behavior.
 
 ## Design Rules

@@ -22,8 +22,10 @@ import {
 } from "./diagnostic-catalog.js";
 import {
   certifyDialectProfiles,
+  normalizeDialectLiveDatabaseEvidence,
   renderDialectCertificationMarkdown,
-  type DialectLiveDatabaseEvidence
+  type DialectLiveDatabaseEvidence,
+  type DialectLiveDatabaseEvidenceInput
 } from "./dialect-certification.js";
 import type { EvalAttemptSet, EvalDataset, EvalReport } from "./evals.js";
 import { compareEvalReports } from "./eval-compare.js";
@@ -864,7 +866,8 @@ async function readDialectLiveEvidence(
   if (typeof evidencePath !== "string") {
     return undefined;
   }
-  return JSON.parse(await io.readFile(evidencePath, "utf8")) as DialectLiveDatabaseEvidence[];
+  const parsed = JSON.parse(await io.readFile(evidencePath, "utf8")) as DialectLiveDatabaseEvidenceInput;
+  return normalizeDialectLiveDatabaseEvidence(parsed);
 }
 
 async function applyPolicyEvidenceArgs(

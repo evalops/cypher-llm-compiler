@@ -103,10 +103,10 @@ Known boundary: the GQL profile records desired relationship quantifier behavior
 Run:
 
 ```bash
-cypher-llm certify-dialects --fail-on-fail --report-out examples/certification/dialect-certification.json
+cypher-llm certify-dialects --live-evidence examples/certification/live-database-evidence.json --fail-on-fail --report-out examples/certification/dialect-certification.json
 ```
 
-The report checks profile metadata, schema identifier escaping, parser acceptance for rendered reads, semantic feature gates for `LET` and path modes, known relationship range rendering limitations, and a separated live-database evidence lane. Warnings are allowed for documented experimental boundaries, missing live evidence fixtures, and the current GQL range syntax limitation; failures indicate a profile claim is not enforced by code.
+The report checks profile metadata, schema identifier escaping, parser acceptance for rendered reads, semantic feature gates for `LET` and path modes, known relationship range rendering limitations, and a separated live-database evidence lane. The live evidence artifact is versioned as `cypher-llm-dialect-live-evidence/v1` at `examples/certification/live-database-evidence.json` and is backed by the CI Neo4j `EXPLAIN` fixture. Warnings are allowed for documented experimental boundaries, missing live evidence fixtures on non-stable targets, and the current GQL range syntax limitation; failures indicate a profile claim is not enforced by code.
 
 ## Proof Objects
 

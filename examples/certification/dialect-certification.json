@@ -3,12 +3,12 @@
   "generatedAt": "2026-05-10",
   "summary": {
     "profiles": 3,
-    "passedProfiles": 0,
-    "warningProfiles": 3,
+    "passedProfiles": 1,
+    "warningProfiles": 2,
     "failedProfiles": 0,
     "checks": 21,
-    "passedChecks": 17,
-    "warningChecks": 4,
+    "passedChecks": 18,
+    "warningChecks": 3,
     "failedChecks": 0
   },
   "profiles": [
@@ -16,7 +16,7 @@
       "profileId": "neo4j-cypher-25",
       "displayName": "Neo4j Cypher 25",
       "profileStatus": "stable",
-      "status": "warning",
+      "status": "passed",
       "checks": [
         {
           "id": "profile-metadata",
@@ -104,16 +104,14 @@
           "id": "live-database-evidence",
           "title": "Live database evidence is reported separately from parser and semantic checks",
           "kind": "live-database",
-          "status": "warning",
+          "status": "passed",
           "expected": "A live database EXPLAIN or execution fixture is supplied for this dialect profile when available.",
-          "observed": "No live database evidence supplied; parser, renderer, and semantic certification are still reported.",
+          "observed": "CI live Neo4j EXPLAIN accepts the representative rendered read query.",
           "evidence": [
             "src/neo4j-explain.ts",
-            "docs/NEO4J_LIVE_FIXTURE.md"
+            "test/neo4j-live.test.ts"
           ],
-          "diagnostics": [
-            "dialect-live-evidence-missing"
-          ],
+          "diagnostics": [],
           "cypher": "MATCH (tool:`Tool`)-[:`HAS_HASH`]->(hash:`Hash`)\nRETURN hash\nLIMIT 10"
         }
       ]

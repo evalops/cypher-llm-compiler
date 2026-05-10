@@ -27,6 +27,8 @@ npm run test:live:neo4j
 
 The same env vars also enable the live fixture inside `npm test`.
 
+The checked-in evidence artifact lives at `examples/certification/live-database-evidence.json`. CI asserts that its Neo4j Cypher 25 evidence query matches the representative query that the live fixture sends through Neo4j `EXPLAIN`, and `certify-dialects --live-evidence examples/certification/live-database-evidence.json` folds that evidence into the public dialect certification report.
+
 ## Env Vars
 
 - `CYPHER_LLM_NEO4J_URI`: Bolt URI. Defaults to `bolt://localhost:7687` for `npm run neo4j:wait`.

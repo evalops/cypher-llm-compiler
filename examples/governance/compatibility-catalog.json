@@ -267,7 +267,37 @@
         {
           "kind": "example",
           "path": "examples/certification/dialect-certification.json",
-          "sha256": "4738eff79214ea7bcf88cc80f8e8003572c8a6e25c0067b8792d0bcd87820275"
+          "sha256": "fedf108b5673c695297a6f7c3c9367dfd5faff0755c683bb634c2593e6b6207f"
+        }
+      ]
+    },
+    {
+      "id": "dialect-live-evidence",
+      "version": "cypher-llm-dialect-live-evidence/v1",
+      "category": "dialect",
+      "level": "stable",
+      "ownerWorkstreamId": "dialect-certification",
+      "schemaPath": "schemas/dialect-live-evidence.schema.json",
+      "examplePaths": [
+        "examples/certification/live-database-evidence.json"
+      ],
+      "evidencePaths": [
+        "src/dialect-certification.ts",
+        "test/neo4j-live.test.ts",
+        "docs/NEO4J_LIVE_FIXTURE.md"
+      ],
+      "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path.",
+      "fingerprints": [
+        {
+          "kind": "schema",
+          "path": "schemas/dialect-live-evidence.schema.json",
+          "sha256": "f043f8f7346499106f766c7802d3634a16e935928c6c5f4b399dce326785e647"
+        },
+        {
+          "kind": "example",
+          "path": "examples/certification/live-database-evidence.json",
+          "sha256": "e6b4489974e4e64ff52a95604389577207560d26bcde543946d77ffb3290603b"
         }
       ]
     },
@@ -784,7 +814,7 @@
         {
           "kind": "example",
           "path": "examples/governance/compatibility-diff.json",
-          "sha256": "c5cdba324f509497661914e3416b481f4c11df7f870819c631b76a828d21cb8d"
+          "sha256": "a79e340f461815574f1efc570f0220955b073d271209e3ac06fbde4b9b22cb9b"
         }
       ]
     },
@@ -813,7 +843,7 @@
         {
           "kind": "example",
           "path": "examples/governance/contract-conformance.json",
-          "sha256": "9dbba43085f14e9936ed6e4990e2daea2de0a6ce1f28243c27f3305d7dc15e54"
+          "sha256": "1347a640c8bdbf2441e6e26505c4f792c75fca3ae3b289c86b81817c81b3b82f"
         }
       ]
     }
@@ -850,10 +880,11 @@
     {
       "id": "dialect-certification",
       "title": "Dialect profile claims are executable",
-      "command": "cypher-llm certify-dialects --fail-on-fail",
+      "command": "cypher-llm certify-dialects --live-evidence examples/certification/live-database-evidence.json --fail-on-fail",
       "evidencePaths": [
         "src/dialect-certification.ts",
-        "examples/certification/dialect-certification.json"
+        "examples/certification/dialect-certification.json",
+        "examples/certification/live-database-evidence.json"
       ]
     },
     {

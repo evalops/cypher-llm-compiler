@@ -53,11 +53,11 @@ Lossless parse reports are the first executable parser/AST compatibility lane. T
 cypher-llm parse-lossless --schema examples/tool-hash.schema.json --cypher "MATCH (tool:Tool) RETURN tool"
 ```
 
-Dialect certification is the first executable certification lane under this program. It is exported from `src/dialect-certification.ts`, validated by `schemas/dialect-certification.schema.json`, and checked in at `examples/certification/dialect-certification.json`.
+Dialect certification is the first executable certification lane under this program. It is exported from `src/dialect-certification.ts`, validated by `schemas/dialect-certification.schema.json`, and checked in at `examples/certification/dialect-certification.json`. Live database evidence is versioned separately by `schemas/dialect-live-evidence.schema.json` and checked in at `examples/certification/live-database-evidence.json`.
 
 ```bash
 cypher-llm certify-dialects --fail-on-fail
-cypher-llm certify-dialects --live-evidence live-database-evidence.json
+cypher-llm certify-dialects --live-evidence examples/certification/live-database-evidence.json
 ```
 
 Certification checks are separated into profile, renderer, parser, semantic, and live-database lanes. When live evidence is not supplied, the report emits a warning rather than pretending parser acceptance is the same as database evidence.

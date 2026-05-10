@@ -77,6 +77,7 @@ describe("json schemas", () => {
     const serviceManifestSchema = readJson("schemas/service-manifest.schema.json");
     const dialectProfileSchema = readJson("schemas/dialect-profile.schema.json");
     const dialectCertificationSchema = readJson("schemas/dialect-certification.schema.json");
+    const dialectLiveEvidenceSchema = readJson("schemas/dialect-live-evidence.schema.json");
     const yearsRoadmapSchema = readJson("schemas/years-roadmap.schema.json");
     const evalDatasetSchema = readJson("schemas/eval-dataset.schema.json");
     const evalAttemptsSchema = readJson("schemas/eval-attempts.schema.json");
@@ -103,6 +104,7 @@ describe("json schemas", () => {
     ajv.addSchema(serviceManifestSchema);
     ajv.addSchema(dialectProfileSchema);
     ajv.addSchema(dialectCertificationSchema);
+    ajv.addSchema(dialectLiveEvidenceSchema);
     ajv.addSchema(yearsRoadmapSchema);
     ajv.addSchema(evalDatasetSchema);
     ajv.addSchema(evalAttemptsSchema);
@@ -132,6 +134,7 @@ describe("json schemas", () => {
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/eval-attempts/v1.json", readJson("examples/eval-attempts.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/dialect-profile/v1.json", readJson("profiles/neo4j-cypher-25.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/dialect-certification/v1.json", readJson("examples/certification/dialect-certification.json"));
+    assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/dialect-live-evidence/v1.json", readJson("examples/certification/live-database-evidence.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/years-roadmap/v1.json", readJson("examples/roadmap/cypher-llm-years-roadmap.json"));
 
     const importedDir = path.join(process.cwd(), "examples/imported");

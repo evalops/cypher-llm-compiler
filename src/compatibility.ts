@@ -141,6 +141,9 @@ const compatibilityCatalogBase = {
     stableContract("dialect-certification", "cypher-llm-dialect-certification/v1", "dialect", "dialect-certification", "schemas/dialect-certification.schema.json", [
       "examples/certification/dialect-certification.json"
     ], ["src/dialect-certification.ts", "test/dialect-certification.test.ts"]),
+    stableContract("dialect-live-evidence", "cypher-llm-dialect-live-evidence/v1", "dialect", "dialect-certification", "schemas/dialect-live-evidence.schema.json", [
+      "examples/certification/live-database-evidence.json"
+    ], ["src/dialect-certification.ts", "test/neo4j-live.test.ts", "docs/NEO4J_LIVE_FIXTURE.md"]),
     stableContract("proof", "cypher-llm-proof/v1", "proof", "semantic-proof-repair", "schemas/cypher-proof.schema.json", [
       "examples/proofs/tool-hash.proof.json"
     ], ["src/proof.ts", "test/proof.test.ts"]),
@@ -223,8 +226,12 @@ const compatibilityCatalogBase = {
     {
       id: "dialect-certification",
       title: "Dialect profile claims are executable",
-      command: "cypher-llm certify-dialects --fail-on-fail",
-      evidencePaths: ["src/dialect-certification.ts", "examples/certification/dialect-certification.json"]
+      command: "cypher-llm certify-dialects --live-evidence examples/certification/live-database-evidence.json --fail-on-fail",
+      evidencePaths: [
+        "src/dialect-certification.ts",
+        "examples/certification/dialect-certification.json",
+        "examples/certification/live-database-evidence.json"
+      ]
     },
     {
       id: "compatibility-integrity",

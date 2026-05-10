@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evalops.dev/schemas/cypher-llm/dialect-live-evidence/v1.json",
+  "title": "Cypher LLM Dialect Live Evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "generatedAt", "summary", "evidence"],
+  "properties": {
+    "version": { "const": "cypher-llm-dialect-live-evidence/v1" },
+    "generatedAt": { "type": "string", "minLength": 1 },
+    "summary": { "$ref": "#/$defs/summary" },
+    "evidence": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/evidence" },
+      "minItems": 1
+    }
+  },
+  "$defs": {
+    "profileId": { "enum": ["neo4j-cypher-25", "opencypher-9", "gql"] },
+    "status": { "enum": ["passed", "warning", "failed"] },
+    "stringList": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["evidenceProfiles", "passedEvidence", "warningEvidence", "failedEvidence", "databases"],
+      "properties": {
+        "evidenceProfiles": { "type": "integer", "minimum": 0 },
+        "passedEvidence": { "type": "integer", "minimum": 0 },
+        "warningEvidence": { "type": "integer", "minimum": 0 },
+        "failedEvidence": { "type": "integer", "minimum": 0 },
+        "databases": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["profileId", "status", "database", "source", "observed", "diagnostics", "cypher"],
+      "properties": {
+        "profileId": { "$ref": "#/$defs/profileId" },
+        "status": { "$ref": "#/$defs/status" },
+        "database": { "type": "string", "minLength": 1 },
+        "source": { "type": "string", "minLength": 1 },
+        "observed": { "type": "string", "minLength": 1 },
+        "diagnostics": { "$ref": "#/$defs/stringList" },
+        "cypher": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

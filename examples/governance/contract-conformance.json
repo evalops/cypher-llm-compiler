@@ -5,11 +5,11 @@
   "packageName": "@evalops/cypher-llm-compiler",
   "packageVersion": "0.1.0",
   "summary": {
-    "contracts": 27,
-    "passedContracts": 27,
+    "contracts": 28,
+    "passedContracts": 28,
     "warningContracts": 0,
     "failedContracts": 0,
-    "checks": 197,
+    "checks": 205,
     "warnings": 0,
     "failures": 0,
     "missingFiles": 0,
@@ -461,6 +461,62 @@
           "id": "evidence-file",
           "status": "pass",
           "path": "test/dialect-certification.test.ts",
+          "message": "File exists."
+        }
+      ]
+    },
+    {
+      "id": "dialect-live-evidence",
+      "version": "cypher-llm-dialect-live-evidence/v1",
+      "level": "stable",
+      "status": "pass",
+      "checks": [
+        {
+          "id": "schema-file",
+          "status": "pass",
+          "path": "schemas/dialect-live-evidence.schema.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "schemas/dialect-live-evidence.schema.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "example-file",
+          "status": "pass",
+          "path": "examples/certification/live-database-evidence.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "examples/certification/live-database-evidence.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "schema-validation",
+          "status": "pass",
+          "path": "examples/certification/live-database-evidence.json",
+          "message": "Example validates against schema."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "src/dialect-certification.ts",
+          "message": "File exists."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "test/neo4j-live.test.ts",
+          "message": "File exists."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "docs/NEO4J_LIVE_FIXTURE.md",
           "message": "File exists."
         }
       ]

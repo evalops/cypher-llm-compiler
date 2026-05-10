@@ -1,0 +1,24 @@
+{
+  "version": "cypher-llm-dialect-live-evidence/v1",
+  "generatedAt": "2026-05-10",
+  "summary": {
+    "evidenceProfiles": 1,
+    "passedEvidence": 1,
+    "warningEvidence": 0,
+    "failedEvidence": 0,
+    "databases": [
+      "neo4j:5-community"
+    ]
+  },
+  "evidence": [
+    {
+      "profileId": "neo4j-cypher-25",
+      "status": "passed",
+      "database": "neo4j:5-community",
+      "source": "test/neo4j-live.test.ts",
+      "observed": "CI live Neo4j EXPLAIN accepts the representative rendered read query.",
+      "diagnostics": [],
+      "cypher": "MATCH (tool:`Tool`)-[:`HAS_HASH`]->(hash:`Hash`)\nRETURN hash\nLIMIT 10"
+    }
+  ]
+}

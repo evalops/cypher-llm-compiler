@@ -6,6 +6,7 @@ import Ajv2020Module from "ajv/dist/2020.js";
 import {
   certifyDialectProfiles,
   renderDialectCertificationMarkdown,
+  type DialectLiveDatabaseEvidenceSet,
   type DialectLiveDatabaseEvidence,
   type DialectCertificationReport
 } from "../src/dialect-certification.js";
@@ -37,15 +38,13 @@ describe("dialect certification", () => {
   });
 
   it("can consume supplied live database certification evidence", () => {
-    const liveDatabaseEvidence: DialectLiveDatabaseEvidence[] = [
-      {
-        profileId: "neo4j-cypher-25",
-        status: "passed",
-        database: "neo4j-fixture",
-        source: "test-fixtures/live-neo4j.json",
-        observed: "fixture EXPLAIN accepted rendered read query"
-      }
-    ];
+    const liveDatabaseEvidence: DialectLiveDatabaseEvidence[] = [{
+      profileId: "neo4j-cypher-25",
+      status: "passed",
+      database: "neo4j-fixture",
+      source: "test-fixtures/live-neo4j.json",
+      observed: "fixture EXPLAIN accepted rendered read query"
+    }];
     const report = certifyDialectProfiles(undefined, { liveDatabaseEvidence });
     const liveCheck = report.profiles
       .find((profile) => profile.profileId === "neo4j-cypher-25")
@@ -54,6 +53,19 @@ describe("dialect certification", () => {
     assert.equal(liveCheck?.status, "passed");
     assert.equal(liveCheck?.diagnostics.length, 0);
     assert.equal(liveCheck?.observed, "fixture EXPLAIN accepted rendered read query");
+  });
+
+  it("can consume the checked-in versioned live evidence artifact", () => {
+    const liveDatabaseEvidence = readJson<DialectLiveDatabaseEvidenceSet>("examples/certification/live-database-evidence.json");
+    const report = certifyDialectProfiles(undefined, { liveDatabaseEvidence });
+
+    assert.equal(report.summary.passedProfiles, 1);
+    assert.equal(report.summary.warningProfiles, 2);
+    assert.equal(report.summary.warningChecks, 3);
+    assert.equal(
+      report.profiles.find((profile) => profile.profileId === "neo4j-cypher-25")?.checks.find((check) => check.kind === "live-database")?.status,
+      "passed"
+    );
   });
 
   it("renders a markdown certification view", () => {
@@ -67,13 +79,19 @@ describe("dialect certification", () => {
   it("keeps checked-in certification JSON aligned with runtime data and schema", () => {
     const ajv = new Ajv2020({ allErrors: true, strict: false });
     const schema = readJson("schemas/dialect-certification.schema.json");
+    const evidenceSchema = readJson("schemas/dialect-live-evidence.schema.json");
     const checkedIn = readJson<DialectCertificationReport>("examples/certification/dialect-certification.json");
+    const liveDatabaseEvidence = readJson<DialectLiveDatabaseEvidenceSet>("examples/certification/live-database-evidence.json");
     ajv.addSchema(schema);
+    ajv.addSchema(evidenceSchema);
     const validate = ajv.getSchema("https://evalops.dev/schemas/cypher-llm/dialect-certification/v1.json");
+    const validateEvidence = ajv.getSchema("https://evalops.dev/schemas/cypher-llm/dialect-live-evidence/v1.json");
 
     assert.ok(validate, "missing dialect certification schema");
+    assert.ok(validateEvidence, "missing dialect live evidence schema");
+    assert.equal(validateEvidence(liveDatabaseEvidence), true, JSON.stringify(validateEvidence.errors, null, 2));
     assert.equal(validate(checkedIn), true, JSON.stringify(validate.errors, null, 2));
-    assert.deepEqual(checkedIn, certifyDialectProfiles());
+    assert.deepEqual(checkedIn, certifyDialectProfiles(undefined, { liveDatabaseEvidence }));
   });
 });
 
