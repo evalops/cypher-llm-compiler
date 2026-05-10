@@ -146,6 +146,27 @@
         "rank": 1,
         "title": "Canonicalize schema identifier",
         "path": "/clauses/0/patterns/0/segments/0/labels/0",
+        "sourceAnchor": {
+          "sourcePath": "/statements/0/clauses/0",
+          "span": {
+            "start": {
+              "offset": 0,
+              "line": 0,
+              "character": 0
+            },
+            "end": {
+              "offset": 64,
+              "line": 1,
+              "character": 0
+            }
+          },
+          "text": "MATCH (tool:`tool` {`name`: $toolName})<-[:`md5`]-(hash:`Hash`)\n",
+          "kind": "clause",
+          "sourceKind": "match",
+          "keyword": "MATCH",
+          "support": "lifted",
+          "irPath": "/clauses/0"
+        },
         "diagnostics": [],
         "patch": {
           "op": "replace",
@@ -162,6 +183,27 @@
         "rank": 2,
         "title": "Canonicalize schema identifier",
         "path": "/clauses/0/patterns/0/segments/1/rel/types/0",
+        "sourceAnchor": {
+          "sourcePath": "/statements/0/clauses/0",
+          "span": {
+            "start": {
+              "offset": 0,
+              "line": 0,
+              "character": 0
+            },
+            "end": {
+              "offset": 64,
+              "line": 1,
+              "character": 0
+            }
+          },
+          "text": "MATCH (tool:`tool` {`name`: $toolName})<-[:`md5`]-(hash:`Hash`)\n",
+          "kind": "clause",
+          "sourceKind": "match",
+          "keyword": "MATCH",
+          "support": "lifted",
+          "irPath": "/clauses/0"
+        },
         "diagnostics": [],
         "patch": {
           "op": "replace",
@@ -178,6 +220,27 @@
         "rank": 3,
         "title": "Repair relationship direction",
         "path": "/clauses/0/patterns/0/segments/1/rel/direction",
+        "sourceAnchor": {
+          "sourcePath": "/statements/0/clauses/0",
+          "span": {
+            "start": {
+              "offset": 0,
+              "line": 0,
+              "character": 0
+            },
+            "end": {
+              "offset": 64,
+              "line": 1,
+              "character": 0
+            }
+          },
+          "text": "MATCH (tool:`tool` {`name`: $toolName})<-[:`md5`]-(hash:`Hash`)\n",
+          "kind": "clause",
+          "sourceKind": "match",
+          "keyword": "MATCH",
+          "support": "lifted",
+          "irPath": "/clauses/0"
+        },
         "diagnostics": [],
         "patch": {
           "op": "replace",
@@ -194,6 +257,27 @@
         "rank": 4,
         "title": "Add bounded LIMIT",
         "path": "/clauses/1/limit",
+        "sourceAnchor": {
+          "sourcePath": "/statements/0/clauses/1",
+          "span": {
+            "start": {
+              "offset": 64,
+              "line": 1,
+              "character": 0
+            },
+            "end": {
+              "offset": 90,
+              "line": 1,
+              "character": 26
+            }
+          },
+          "text": "RETURN hash.`value` AS md5",
+          "kind": "clause",
+          "sourceKind": "return",
+          "keyword": "RETURN",
+          "support": "lifted",
+          "irPath": "/clauses/1"
+        },
         "diagnostics": [],
         "patch": {
           "op": "add",
@@ -246,6 +330,7 @@
       "deterministic": 4,
       "modelRequired": 0,
       "unsafe": 0,
+      "sourceAnchored": 4,
       "diagnostics": 2
     }
   }

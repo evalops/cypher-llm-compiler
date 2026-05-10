@@ -301,7 +301,7 @@ export const CYPHER_COMPILER_TOOLS: readonly CypherCompilerToolDefinition[] = [
   {
     name: "cypher_repair_plan",
     description:
-      "Build a ranked repair plan for Cypher IR, separating deterministic JSON-patch repairs, model-required fixes, and unsafe or approval-gated blockers.",
+      "Build a source-anchored ranked repair plan for Cypher IR, separating deterministic JSON-patch repairs, model-required fixes, and unsafe or approval-gated blockers.",
     inputSchema: objectSchema(["schema", "query"], {
       schema: schemaContractSchema,
       query: cypherQuerySchema,

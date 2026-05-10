@@ -125,7 +125,7 @@ Run:
 cypher-llm repair-plan --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json --params examples/tool-hash.params.json --default-limit 25 --plan-out examples/proofs/tool-hash.repair-plan.json
 ```
 
-Repair plans are ranked agent feedback objects. Deterministic steps include JSON-patch-like operations that the compiler can apply directly, model-required steps contain diagnostics that need regenerated IR, and unsafe steps hold policy or approval blockers. Planner estimates, schema statistics, policy thresholds, and policy rules can feed the unsafe blocker list and `policyEvidence` summary so policy failures do not get misclassified as ordinary model edits.
+Repair plans are ranked agent feedback objects. Deterministic steps include JSON-patch-like operations that the compiler can apply directly, model-required steps contain diagnostics that need regenerated IR, and unsafe steps hold policy or approval blockers. Steps also include `sourceAnchor` data when their IR path maps back to a lossless clause span in `cypherBefore`. Planner estimates, schema statistics, policy thresholds, and policy rules can feed the unsafe blocker list and `policyEvidence` summary so policy failures do not get misclassified as ordinary model edits.
 
 ## Agent Feedback
 

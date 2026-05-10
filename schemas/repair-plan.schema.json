@@ -46,6 +46,7 @@
         "deterministic": { "type": "integer", "minimum": 0 },
         "modelRequired": { "type": "integer", "minimum": 0 },
         "unsafe": { "type": "integer", "minimum": 0 },
+        "sourceAnchored": { "type": "integer", "minimum": 0 },
         "diagnostics": { "type": "integer", "minimum": 0 }
       }
     }
@@ -61,6 +62,7 @@
         "rank": { "type": "integer" },
         "title": { "type": "string" },
         "path": { "type": "string" },
+        "sourceAnchor": { "$ref": "#/$defs/sourceAnchor" },
         "diagnostics": {
           "type": "array",
           "items": { "$ref": "#/$defs/diagnostic" }
@@ -78,6 +80,40 @@
         "before": {},
         "after": {},
         "rationale": { "type": "string" }
+      }
+    },
+    "sourceAnchor": {
+      "type": "object",
+      "required": ["sourcePath", "span", "text", "kind"],
+      "additionalProperties": false,
+      "properties": {
+        "sourcePath": { "type": "string", "pattern": "^/" },
+        "span": { "$ref": "#/$defs/span" },
+        "text": { "type": "string" },
+        "kind": { "enum": ["fragment", "statement", "clause", "trivia", "terminator"] },
+        "sourceKind": { "type": "string", "minLength": 1 },
+        "keyword": { "type": "string", "minLength": 1 },
+        "support": { "enum": ["lifted", "raw", "unknown"] },
+        "irPath": { "type": "string", "pattern": "^/" }
+      }
+    },
+    "span": {
+      "type": "object",
+      "required": ["start", "end"],
+      "additionalProperties": false,
+      "properties": {
+        "start": { "$ref": "#/$defs/position" },
+        "end": { "$ref": "#/$defs/position" }
+      }
+    },
+    "position": {
+      "type": "object",
+      "required": ["offset", "line", "character"],
+      "additionalProperties": false,
+      "properties": {
+        "offset": { "type": "integer", "minimum": 0 },
+        "line": { "type": "integer", "minimum": 0 },
+        "character": { "type": "integer", "minimum": 0 }
       }
     },
     "diagnostic": {

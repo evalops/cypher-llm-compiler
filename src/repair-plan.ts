@@ -1,5 +1,6 @@
 import { diagnostic, type Diagnostic } from "./diagnostics.js";
 import type { CypherQuery, CypherSchemaContract, JsonLiteral } from "./ir.js";
+import { parseCypherLosslessly, type LosslessSourceMapEntry, type SourceSpan } from "./lossless-parser.js";
 import { validateCypherTextWithParser } from "./parser-validation.js";
 import type { CypherPolicyEvidence, CypherPolicyOptions } from "./policy.js";
 import { assessCypherPolicy, summarizePolicyEvidence } from "./policy.js";
@@ -28,6 +29,7 @@ export interface RepairPlanOptions extends RepairOptions {
   plannerEstimate?: CypherPolicyOptions["plannerEstimate"];
   schemaStatistics?: CypherPolicyOptions["schemaStatistics"];
   policyRules?: CypherPolicyOptions["policyRules"];
+  sourceMap?: LosslessSourceMapEntry[];
 }
 
 export interface RepairPlanPatch {
@@ -42,11 +44,23 @@ export interface RepairPlanStep {
   rank: number;
   title: string;
   path?: string;
+  sourceAnchor?: RepairPlanSourceAnchor;
   diagnostics: Diagnostic[];
   patch?: RepairPlanPatch;
   before?: unknown;
   after?: unknown;
   rationale: string;
+}
+
+export interface RepairPlanSourceAnchor {
+  sourcePath: string;
+  span: SourceSpan;
+  text: string;
+  kind: LosslessSourceMapEntry["kind"];
+  sourceKind?: string;
+  keyword?: string;
+  support?: LosslessSourceMapEntry["support"];
+  irPath?: string;
 }
 
 export interface CypherRepairPlan {
@@ -63,6 +77,7 @@ export interface CypherRepairPlan {
     deterministic: number;
     modelRequired: number;
     unsafe: number;
+    sourceAnchored: number;
     diagnostics: number;
   };
 }
@@ -104,6 +119,9 @@ export function buildCypherRepairPlan(
   const beforeDiagnostics = validateQuery(query, normalized).diagnostics;
   const repaired = repairQuery(query, normalized, options);
   const plan = createSafeExecutionPlan(repaired.query, normalized, params, options);
+  const cypherBefore = renderQuery(query);
+  const sourceMap =
+    options.sourceMap ?? parseCypherLosslessly(cypherBefore, { schema, parserMode: options.parserMode ?? "syntax" }).sourceMap;
   const parser = validateCypherTextWithParser(plan.cypher, normalized, { mode: options.parserMode ?? "syntax" });
   const policy = assessCypherPolicy(repaired.query, schema, policyOptionsFromRepairPlanOptions(options));
   const policyDiagnostics = policy.findings.map((finding) =>
@@ -122,16 +140,19 @@ export function buildCypherRepairPlan(
     ...parser.diagnostics,
     ...policyDiagnostics
   ]);
-  const deterministic = repaired.applied.map((repair, index) => deterministicStep(repair, index));
-  const unsafe = diagnostics.filter((item) => item.severity === "error" && UNSAFE_CODES.has(item.code)).map(unsafeStep);
+  const deterministic = repaired.applied.map((repair, index) => deterministicStep(repair, index, sourceMap));
+  const unsafe = diagnostics
+    .filter((item) => item.severity === "error" && UNSAFE_CODES.has(item.code))
+    .map((item, index) => unsafeStep(item, index, sourceMap));
   const modelRequired = diagnostics
     .filter((item) => shouldRequireModel(item, repaired.applied))
-    .map((item, index) => modelRequiredStep(item, index, deterministic.length + unsafe.length));
+    .map((item, index) => modelRequiredStep(item, index, deterministic.length + unsafe.length, sourceMap));
+  const sourceAnchored = [...deterministic, ...modelRequired, ...unsafe].filter((step) => step.sourceAnchor).length;
 
   return {
     version: "cypher-llm-repair-plan/v1",
     status: unsafe.length > 0 ? "blocked" : modelRequired.length > 0 ? "needs-model" : "ready",
-    cypherBefore: renderQuery(query),
+    cypherBefore,
     cypherAfter: plan.cypher,
     deterministic,
     modelRequired,
@@ -142,6 +163,7 @@ export function buildCypherRepairPlan(
       deterministic: deterministic.length,
       modelRequired: modelRequired.length,
       unsafe: unsafe.length,
+      sourceAnchored,
       diagnostics: diagnostics.length
     }
   };
@@ -164,13 +186,14 @@ function policyOptionsFromRepairPlanOptions(options: RepairPlanOptions): CypherP
   };
 }
 
-function deterministicStep(repair: RepairAction, index: number): RepairPlanStep {
+function deterministicStep(repair: RepairAction, index: number, sourceMap: LosslessSourceMapEntry[]): RepairPlanStep {
   return {
     id: `deterministic-${index + 1}-${repair.kind}`,
     class: "deterministic",
     rank: index + 1,
     title: titleForRepair(repair),
     path: repair.path,
+    ...sourceAnchorProperty(sourceMap, repair.path),
     diagnostics: [],
     patch: {
       op: repair.before === undefined ? "add" : "replace",
@@ -183,25 +206,32 @@ function deterministicStep(repair: RepairAction, index: number): RepairPlanStep 
   };
 }
 
-function modelRequiredStep(diagnosticItem: Diagnostic, index: number, rankOffset: number): RepairPlanStep {
+function modelRequiredStep(
+  diagnosticItem: Diagnostic,
+  index: number,
+  rankOffset: number,
+  sourceMap: LosslessSourceMapEntry[]
+): RepairPlanStep {
   return {
     id: `model-required-${index + 1}-${diagnosticItem.code}`,
     class: "model-required",
     rank: rankOffset + index + 1,
     title: `Model must address ${diagnosticItem.code}`,
     ...(diagnosticItem.path ? { path: diagnosticItem.path } : {}),
+    ...sourceAnchorProperty(sourceMap, diagnosticItem.path),
     diagnostics: [diagnosticItem],
     rationale: diagnosticItem.suggestion ?? "Ask the model for corrected CypherQuery IR that satisfies this diagnostic."
   };
 }
 
-function unsafeStep(diagnosticItem: Diagnostic, index: number): RepairPlanStep {
+function unsafeStep(diagnosticItem: Diagnostic, index: number, sourceMap: LosslessSourceMapEntry[]): RepairPlanStep {
   return {
     id: `unsafe-${index + 1}-${diagnosticItem.code}`,
     class: "unsafe",
     rank: 10_000 + index,
     title: `Unsafe or approval-gated query: ${diagnosticItem.code}`,
     ...(diagnosticItem.path ? { path: diagnosticItem.path } : {}),
+    ...sourceAnchorProperty(sourceMap, diagnosticItem.path),
     diagnostics: [diagnosticItem],
     rationale: diagnosticItem.suggestion ?? "Do not auto-repair this query without an explicit policy decision or approval."
   };
@@ -247,6 +277,96 @@ function titleForRepair(repair: RepairAction): string {
       return "Bound variable-length traversal";
     case "quote-raw-identifier":
       return "Quote raw schema identifier";
+  }
+}
+
+function sourceAnchorProperty(
+  sourceMap: LosslessSourceMapEntry[],
+  path: string | undefined
+): { sourceAnchor: RepairPlanSourceAnchor } | Record<string, never> {
+  const anchor = sourceAnchorForPath(sourceMap, path);
+  return anchor ? { sourceAnchor: anchor } : {};
+}
+
+function sourceAnchorForPath(
+  sourceMap: LosslessSourceMapEntry[],
+  path: string | undefined
+): RepairPlanSourceAnchor | undefined {
+  if (!path) {
+    return undefined;
+  }
+  const jsonPointerAnchor = bestJsonPointerAnchor(sourceMap, path);
+  if (jsonPointerAnchor) {
+    return sourceAnchorFromEntry(jsonPointerAnchor);
+  }
+  const position = positionFromDiagnosticPath(path);
+  if (!position) {
+    return undefined;
+  }
+  const rangeAnchor = bestRangeAnchor(sourceMap, position);
+  return rangeAnchor ? sourceAnchorFromEntry(rangeAnchor) : undefined;
+}
+
+function bestJsonPointerAnchor(sourceMap: LosslessSourceMapEntry[], path: string): LosslessSourceMapEntry | undefined {
+  return sourceMap
+    .filter((entry) => entry.irPath && (path === entry.irPath || path.startsWith(`${entry.irPath}/`)))
+    .sort((left, right) => (right.irPath?.length ?? 0) - (left.irPath?.length ?? 0))[0];
+}
+
+function bestRangeAnchor(
+  sourceMap: LosslessSourceMapEntry[],
+  position: { line: number; character: number }
+): LosslessSourceMapEntry | undefined {
+  return sourceMap
+    .filter((entry) => containsPosition(entry, position))
+    .sort((left, right) => sourceMapKindRank(left.kind) - sourceMapKindRank(right.kind))[0];
+}
+
+function sourceAnchorFromEntry(entry: LosslessSourceMapEntry): RepairPlanSourceAnchor {
+  return {
+    sourcePath: entry.sourcePath,
+    span: entry.span,
+    text: entry.text,
+    kind: entry.kind,
+    ...(entry.sourceKind ? { sourceKind: entry.sourceKind } : {}),
+    ...(entry.keyword ? { keyword: entry.keyword } : {}),
+    ...(entry.support ? { support: entry.support } : {}),
+    ...(entry.irPath ? { irPath: entry.irPath } : {})
+  };
+}
+
+function positionFromDiagnosticPath(path: string): { line: number; character: number } | undefined {
+  const match = path.match(/^line:(\d+):character:(\d+)$/);
+  if (!match) {
+    return undefined;
+  }
+  return {
+    line: Math.max(0, Number(match[1]) - 1),
+    character: Math.max(0, Number(match[2]) - 1)
+  };
+}
+
+function containsPosition(entry: LosslessSourceMapEntry, position: { line: number; character: number }): boolean {
+  const start = entry.span.start;
+  const end = entry.span.end;
+  const afterStart =
+    position.line > start.line || (position.line === start.line && position.character >= start.character);
+  const beforeEnd = position.line < end.line || (position.line === end.line && position.character <= end.character);
+  return afterStart && beforeEnd;
+}
+
+function sourceMapKindRank(kind: LosslessSourceMapEntry["kind"]): number {
+  switch (kind) {
+    case "clause":
+      return 0;
+    case "terminator":
+      return 1;
+    case "trivia":
+      return 2;
+    case "statement":
+      return 3;
+    case "fragment":
+      return 4;
   }
 }
 

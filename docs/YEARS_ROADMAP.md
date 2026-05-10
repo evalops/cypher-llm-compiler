@@ -73,7 +73,7 @@ Repair plans are exported from `src/repair-plan.ts`, validated by `schemas/repai
 cypher-llm repair-plan --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json --params examples/tool-hash.params.json --default-limit 25
 ```
 
-Repair plans can consume the same policy evidence, expose the same compact `policyEvidence` summary, and classify blocking policy-rule diagnostics as unsafe steps.
+Repair plans can consume the same policy evidence, expose the same compact `policyEvidence` summary, classify blocking policy-rule diagnostics as unsafe steps, and attach source anchors to repair steps when their IR paths map back to lossless `cypherBefore` clauses.
 
 Agent feedback packets wrap proof, repair-plan, policy evidence, and next-action guidance for LLM clients. They are exported from `src/agent-feedback.ts`, validated by `schemas/agent-feedback.schema.json`, and checked in at `examples/proofs/tool-hash.agent-feedback.json`.
 

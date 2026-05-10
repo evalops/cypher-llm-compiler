@@ -55,6 +55,19 @@ describe("repair plans", () => {
     );
     assert.equal(plan.summary.modelRequired, 0);
     assert.equal(plan.summary.unsafe, 0);
+    assert.equal(plan.summary.sourceAnchored, 5);
+    assert.deepEqual(
+      plan.deterministic.map((step) => step.sourceAnchor?.sourcePath),
+      [
+        "/statements/0/clauses/0",
+        "/statements/0/clauses/0",
+        "/statements/0/clauses/0",
+        "/statements/0/clauses/0",
+        "/statements/0/clauses/1"
+      ]
+    );
+    assert.equal(plan.deterministic[0]?.sourceAnchor?.irPath, "/clauses/0");
+    assert.equal(plan.deterministic[4]?.sourceAnchor?.irPath, "/clauses/1");
     assert.ok(plan.cypherAfter.includes("LIMIT 25"));
   });
 
@@ -72,6 +85,7 @@ describe("repair plans", () => {
 
     assert.equal(plan.status, "needs-model");
     assert.ok(plan.modelRequired.some((step) => step.diagnostics.some((item) => item.code === "undefined-variable")));
+    assert.equal(plan.modelRequired[0]?.sourceAnchor?.sourcePath, "/statements/0/clauses/0");
     assert.equal(plan.summary.deterministic, 0);
   });
 

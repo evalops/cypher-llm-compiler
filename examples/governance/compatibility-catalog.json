@@ -320,12 +320,12 @@
         {
           "kind": "schema",
           "path": "schemas/repair-plan.schema.json",
-          "sha256": "dcdbc329d39bab7a6ee1ffb071b19ebcdca372cf1a12b0898c237a2d46530073"
+          "sha256": "dbf30b39a05fbc0f6f7b3d707e61cd3d4ebb84e03effe8dd2caafa88c2af431e"
         },
         {
           "kind": "example",
           "path": "examples/proofs/tool-hash.repair-plan.json",
-          "sha256": "507728a29e149c2dba414e719945ceba27afec263ccf7c59794a859ff4b4b347"
+          "sha256": "e7135e32e1e12afaaf3ddc0192d0a2993bb7ab32e8704f3c1ab714e9ce6049a7"
         }
       ]
     },
@@ -354,7 +354,7 @@
         {
           "kind": "example",
           "path": "examples/proofs/tool-hash.agent-feedback.json",
-          "sha256": "9a4989647dc6f099c0b90cad18b86f50a4f44453b3154456eafde5fa195b6c0c"
+          "sha256": "36ce26b21585b49f1b716f3dcb775ab28691cd26264b2e1a67c4d9fda8ccd2fa"
         }
       ]
     },

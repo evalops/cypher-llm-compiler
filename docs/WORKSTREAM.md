@@ -79,7 +79,7 @@ Artifacts:
 - Dialect-specific rendering and validation.
 - Property and parameter type checks.
 
-Status: implemented for the current IR surface. Validation now covers aggregate aliasing, invalid aggregate predicates, ambiguous aggregate/scalar expressions, `CALL {}` subquery import/export scope, subquery export shadowing, procedure arguments and `YIELD` variables when `schema.procedures` metadata is present, built-in and schema-declared function arguments, property/parameter/comparison type mismatches, and dialect feature flags for Neo4j Cypher 25, openCypher 9, and GQL-oriented profiles. Repair planning now separates deterministic compiler patches from model-required and unsafe fixes.
+Status: implemented for the current IR surface. Validation now covers aggregate aliasing, invalid aggregate predicates, ambiguous aggregate/scalar expressions, `CALL {}` subquery import/export scope, subquery export shadowing, procedure arguments and `YIELD` variables when `schema.procedures` metadata is present, built-in and schema-declared function arguments, property/parameter/comparison type mismatches, and dialect feature flags for Neo4j Cypher 25, openCypher 9, and GQL-oriented profiles. Repair planning now separates deterministic compiler patches from model-required and unsafe fixes, and repair steps carry source anchors when their IR paths can be mapped to lossless clause spans.
 
 ## 5. Agent Integrations
 

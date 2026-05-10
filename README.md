@@ -41,7 +41,7 @@ This package implements twenty-nine concrete improvements:
 18. **Lossless parse reports**: Existing Cypher can be preserved byte-for-byte while agents inspect statements, clauses, comments, source spans, source-map anchors, parser output, and IR-preview coverage.
 19. **CypherBench scorecards**: Eval reports can be published as ranked JSON and markdown scorecards across raw, IR-first, repaired, parser-validated, and mixed lanes.
 20. **Dataset governance reports**: Benchmark datasets can be audited for provenance, split assignment, redaction findings, duplicate ids, and public-release diagnostics.
-21. **Ranked repair plans**: Agents can receive deterministic patches, model-required fixes, and unsafe blockers as separate ranked plan steps.
+21. **Ranked repair plans**: Agents can receive source-anchored deterministic patches, model-required fixes, and unsafe blockers as separate ranked plan steps.
 22. **Service manifest and controls**: Agent runtimes can discover HTTP routes, auth posture, request limits, audit redaction, and data-boundary guarantees.
 23. **Benchmark gates**: CI can publish pass/fail CypherBench gates over metric regressions, pass-rate floors, executable-rate floors, and optional diagnostic regressions.
 24. **Agent feedback packets**: LLM clients can receive proof, repair plan, policy evidence, and a concrete next action in one stable JSON object.
@@ -189,7 +189,7 @@ npm run test:live:neo4j
 
 `eval` returns a `cypher-llm-eval-report/v1` report with pass rate, executable rate, repair rate, diagnostic counts, and per-task outcomes.
 
-`repair-plan` emits a `cypher-llm-repair-plan/v1` object that separates deterministic JSON-patch-like repairs, model-required diagnostics, and unsafe or approval-gated blockers. It accepts planner estimates, schema statistics, policy thresholds, and policy rules so blocked policy findings become repair-plan evidence. The `policyEvidence` summary records policy status, finding codes, and any planner/statistics/rule summaries used.
+`repair-plan` emits a `cypher-llm-repair-plan/v1` object that separates deterministic JSON-patch-like repairs, model-required diagnostics, and unsafe or approval-gated blockers. Steps include lossless source anchors when their IR paths map back to `cypherBefore` clauses. It accepts planner estimates, schema statistics, policy thresholds, and policy rules so blocked policy findings become repair-plan evidence. The `policyEvidence` summary records policy status, finding codes, and any planner/statistics/rule summaries used.
 
 `compare-evals` compares two reports and marks directional metric deltas as improvements or regressions.
 

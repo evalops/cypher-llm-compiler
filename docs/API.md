@@ -75,6 +75,8 @@ Builds a `cypher-llm-repair-plan/v1` object that separates:
 
 The report includes `cypherBefore`, `cypherAfter`, ranked steps, diagnostics, and a compact summary.
 
+Each repair step is source-anchored when the compiler can map its IR path back to the rendered `cypherBefore`: `sourceAnchor` includes the lossless source path, span, source text, keyword, support state, and clause-level `irPath`.
+
 When supplied, `plannerEstimate`, `schemaStatistics`, policy thresholds, and `policyRules` feed the same policy engine used by `assessCypherPolicy`; blocking policy-rule diagnostics are placed in `unsafe` rather than treated as model-editable repairs. The output includes `policyEvidence` with `ok`, summary counts, stable finding codes, and any rule, planner, or statistics summaries used by the decision.
 
 ## `repairRawCypher(raw, schema)`

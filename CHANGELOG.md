@@ -23,6 +23,7 @@
 - Added contract conformance reports that verify public schema files, examples, fingerprints, schema validation, and evidence paths for release agents.
 - Added a compiler service manifest plus optional bearer auth, redacted audit events, body-limit reporting, JSON Schema, CLI output, and checked-in service manifest artifact.
 - Added a JSON HTTP compiler service over the shared tool dispatcher with health, metadata, tool, roadmap, and dialect certification routes.
+- Added source-anchored repair-plan steps that map deterministic, model-required, and unsafe repairs back to lossless `cypherBefore` clause spans and IR paths.
 - Added static cost and safety policy reports for broad scans, traversal risk, high limits, cartesian patterns, and writes, including CLI/tool/service output and checked-in policy artifact.
 - Added named Cypher policy profiles with a catalog contract, CLI/tool/service output, report attribution, JSON Schema, and checked-in profile catalog artifact.
 - Added planner estimate evidence for policy checks with Neo4j-like summary extraction, live `EXPLAIN` result attachment, estimated-row/db-hit/operator findings, JSON Schema, CLI/tool input, and checked-in planner fixture.
