@@ -13,6 +13,7 @@ export * from "./neo4j-explain.js";
 export * from "./neo4j-introspect.js";
 export * from "./normalize.js";
 export * from "./parser-validation.js";
+export * from "./policy.js";
 export * from "./proof.js";
 export * from "./raw-lift.js";
 export * from "./repair.js";

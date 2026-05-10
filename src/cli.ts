@@ -21,6 +21,7 @@ import { evaluateRepairLoop } from "./repair-loop.js";
 import { renderQuery } from "./render.js";
 import { createSafeExecutionPlan } from "./safety.js";
 import { validateCypherTextWithParser } from "./parser-validation.js";
+import { assessCypherPolicy } from "./policy.js";
 import { buildCypherProof } from "./proof.js";
 import { evaluateRawLiftAttempts, liftRawCypherToIr } from "./raw-lift.js";
 import { normalizeSchema } from "./schema.js";
@@ -70,6 +71,9 @@ export async function runCli(argv: string[], io: CliIO = defaultIo()): Promise<n
         return 0;
       case "parse-check":
         await parseCheckCommand(args, io);
+        return 0;
+      case "policy-check":
+        await policyCheckCommand(args, io);
         return 0;
       case "prove":
         await proveCommand(args, io);
@@ -289,6 +293,34 @@ async function proveCommand(args: Map<string, string | boolean>, io: CliIO) {
   }
 }
 
+async function policyCheckCommand(args: Map<string, string | boolean>, io: CliIO) {
+  const schema = normalizeSchema(await readSchema(args, io)).original;
+  const query = await readQuery(args, io);
+  const maxReturnLimit = optionalNumber(args.get("max-return-limit"));
+  const maxRelationshipHops = optionalNumber(args.get("max-relationship-hops"));
+  const policyOptions: Parameters<typeof assessCypherPolicy>[2] = {};
+  if (args.get("allow-writes") === true) {
+    policyOptions.allowWrites = true;
+  }
+  if (args.get("no-require-limit") === true) {
+    policyOptions.requireLimit = false;
+  }
+  if (maxReturnLimit !== undefined) {
+    policyOptions.maxReturnLimit = maxReturnLimit;
+  }
+  if (maxRelationshipHops !== undefined) {
+    policyOptions.maxRelationshipHops = maxRelationshipHops;
+  }
+  const report = assessCypherPolicy(query, schema, policyOptions);
+  if (typeof args.get("report-out") === "string") {
+    await writeJsonFile(io, args.get("report-out") as string, report);
+  }
+  writeJson(io, report);
+  if (args.get("fail-on-error") === true && !report.ok) {
+    throw new Error(`Cypher policy check found ${report.summary.errors} error(s).`);
+  }
+}
+
 async function importText2CypherCommand(args: Map<string, string | boolean>, io: CliIO) {
   const csv = await io.readFile(stringArg(args, "csv"), "utf8");
   const imported = importText2CypherCsv(csv, importOptions(args, "text2cypher-import"));
@@ -494,6 +526,7 @@ Commands:
   repair-loop --dataset dataset.json --attempts attempts.json [--feedback-out feedback.json] [--report-out report.json] [--raw-cypher-can-execute] [--default-limit 25] [--default-max-hops 5]
   lift-raw-eval --dataset dataset.json --attempts attempts.json [--summary-out summary.json]
   parse-check --schema schema.json (--query query.json | --cypher "MATCH ...") [--mode lint|syntax] [--default-limit 25] [--default-max-hops 5]
+  policy-check --schema schema.json --query query.json [--report-out report.json] [--fail-on-error] [--allow-writes] [--no-require-limit] [--max-return-limit 100] [--max-relationship-hops 5]
   prove       --schema schema.json --query query.json [--params params.json] [--proof-out proof.json] [--fail-on-blocked] [--default-limit 25] [--default-max-hops 5] [--allow-writes] [--approved] [--parser-mode syntax|lint] [--no-parser]
   introspect-neo4j --uri bolt://localhost:7687 --user neo4j --password password [--schema-out schema.json] [--sample-limit 1000] [--no-procedures]
   roadmap    [--format json|markdown] [--integrity] [--roadmap-out path]

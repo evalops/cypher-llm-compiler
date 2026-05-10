@@ -70,12 +70,18 @@ describe("compiler HTTP service", () => {
       query,
       defaultLimit: 25
     }) as { canExecute: boolean; cypher: string };
+    const policy = await postJson(`${baseUrl}/v1/policy`, {
+      schema,
+      query
+    }) as { version: string; findings: { code: string }[] };
 
     assert.equal(proof.version, "cypher-llm-proof/v1");
     assert.equal(proof.status, "repaired");
     assert.equal(proof.canExecute, true);
     assert.equal(rendered.canExecute, true);
     assert.equal(rendered.cypher, proof.cypher);
+    assert.equal(policy.version, "cypher-llm-policy-report/v1");
+    assert.deepEqual(policy.findings.map((finding) => finding.code), ["policy-unfiltered-label-scan", "policy-missing-limit"]);
   });
 
   it("returns structured errors for invalid tool input", async () => {

@@ -136,7 +136,19 @@ Produces a `cypher-llm-proof/v1` object for agent feedback loops:
 }
 ```
 
-Proof claims cover deterministic repairs, compiler diagnostics, execution policy, and parser preflight unless `includeParser` is false.
+Proof claims cover deterministic repairs, compiler diagnostics, execution policy, static cost/safety policy, and parser preflight unless `includeParser` is false.
+
+## `assessCypherPolicy(query, schema, options?)`
+
+Produces a `cypher-llm-policy-report/v1` object for static cost, cardinality, and safety checks.
+
+Current findings include:
+
+- Broad label or node scans without an anchoring predicate.
+- Multiple `MATCH` patterns that may create cartesian products.
+- Missing or high literal `RETURN LIMIT` values.
+- Unbounded or high-hop variable-length traversals.
+- Write clauses without an explicit policy allowance.
 
 ## `validateRenderedQueryWithParser(query, schema, options?)`
 
@@ -246,6 +258,7 @@ Returns OpenAI Responses API function-tool definitions for:
 - `cypher_validate`
 - `cypher_repair`
 - `cypher_parse_check`
+- `cypher_policy_check`
 - `cypher_prove`
 - `cypher_eval`
 
@@ -284,6 +297,7 @@ Routes:
 - `POST /v1/validate`
 - `POST /v1/repair`
 - `POST /v1/parse-check`
+- `POST /v1/policy`
 - `POST /v1/prove`
 - `POST /v1/eval`
 - `POST /v1/tools/:toolName`

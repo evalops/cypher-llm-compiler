@@ -3,6 +3,7 @@ import { evaluateAttempts } from "./evals.js";
 import type { CypherQuery, CypherSchemaContract, JsonLiteral } from "./ir.js";
 import type { ParserValidationOptions } from "./parser-validation.js";
 import { validateCypherTextWithParser } from "./parser-validation.js";
+import { assessCypherPolicy } from "./policy.js";
 import { buildCypherProof } from "./proof.js";
 import type { RepairOptions } from "./repair.js";
 import { repairQuery, repairRawCypher } from "./repair.js";
@@ -19,6 +20,7 @@ export type CypherCompilerToolName =
   | "cypher_validate"
   | "cypher_repair"
   | "cypher_parse_check"
+  | "cypher_policy_check"
   | "cypher_prove"
   | "cypher_eval";
 
@@ -193,6 +195,31 @@ export const CYPHER_COMPILER_TOOLS: readonly CypherCompilerToolDefinition[] = [
     })
   },
   {
+    name: "cypher_policy_check",
+    description:
+      "Assess static cost, cardinality, and safety policy for LLM-generated Cypher IR, including broad scans, missing or high limits, traversal hop risk, cartesian patterns, and writes.",
+    inputSchema: objectSchema(["schema", "query"], {
+      schema: schemaContractSchema,
+      query: cypherQuerySchema,
+      allowWrites: {
+        type: "boolean",
+        description: "Allow write clauses in policy assessment."
+      },
+      requireLimit: {
+        type: "boolean",
+        description: "Require RETURN clauses to include a LIMIT."
+      },
+      maxReturnLimit: {
+        type: "number",
+        description: "Warn when a literal RETURN limit exceeds this value."
+      },
+      maxRelationshipHops: {
+        type: "number",
+        description: "Warn when maxHops exceeds this value; unbounded traversals are errors."
+      }
+    })
+  },
+  {
     name: "cypher_prove",
     description:
       "Compile Cypher IR into proof-carrying output: rendered Cypher, repairs, diagnostics, parser preflight, execution-policy status, and blocking reasons.",
@@ -316,6 +343,13 @@ export async function executeCypherCompilerTool(name: string, input: unknown): P
         repairs: repaired.applied,
         compilerDiagnostics: repaired.diagnostics
       };
+    }
+    case "cypher_policy_check": {
+      return assessCypherPolicy(
+        requiredObject<CypherQuery>(args, "query"),
+        requiredObject<CypherSchemaContract>(args, "schema"),
+        policyOptions(args)
+      );
     }
     case "cypher_prove": {
       return buildCypherProof(
@@ -453,6 +487,32 @@ function proofOptions(args: Record<string, unknown>) {
   }
   if (includeParser !== undefined) {
     options.includeParser = includeParser;
+  }
+  return options;
+}
+
+function policyOptions(args: Record<string, unknown>) {
+  const options: {
+    allowWrites?: boolean;
+    requireLimit?: boolean;
+    maxReturnLimit?: number;
+    maxRelationshipHops?: number;
+  } = {};
+  const allowWrites = optionalBoolean(args, "allowWrites");
+  const requireLimit = optionalBoolean(args, "requireLimit");
+  const maxReturnLimit = optionalNumber(args, "maxReturnLimit");
+  const maxRelationshipHops = optionalNumber(args, "maxRelationshipHops");
+  if (allowWrites !== undefined) {
+    options.allowWrites = allowWrites;
+  }
+  if (requireLimit !== undefined) {
+    options.requireLimit = requireLimit;
+  }
+  if (maxReturnLimit !== undefined) {
+    options.maxReturnLimit = maxReturnLimit;
+  }
+  if (maxRelationshipHops !== undefined) {
+    options.maxRelationshipHops = maxRelationshipHops;
   }
   return options;
 }

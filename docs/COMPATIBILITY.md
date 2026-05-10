@@ -13,6 +13,7 @@ Stable public contracts:
 - `cypher-llm-dialect-profile/v1`
 - `cypher-llm-dialect-certification/v1`
 - `cypher-llm-proof/v1`
+- `cypher-llm-policy-report/v1`
 
 JSON Schema artifacts live under `schemas/` and should be treated as the source of truth for model/tool input validation.
 
@@ -47,6 +48,16 @@ cypher-llm prove --schema examples/tool-hash.schema.json --query examples/tool-h
 ```
 
 Proofs are compact compile artifacts for agents. They include the rendered Cypher, `EXPLAIN` preflight, deterministic repair kinds, diagnostic codes, parser preflight status, and execution-policy claims. A blocked proof is not safe to execute without resolving its failed claims.
+
+## Policy Reports
+
+Run:
+
+```bash
+cypher-llm policy-check --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json --report-out examples/policy/tool-hash.policy.json
+```
+
+Policy reports are static pre-execution checks for broad scans, cartesian pattern risk, missing or high return limits, unbounded or high-hop traversals, and write risk. They complement parser and semantic validation: a query can be syntactically valid but still too broad or expensive for an autonomous agent to run.
 
 ## Breaking Changes
 

@@ -45,6 +45,16 @@
       "diagnostics": []
     },
     {
+      "id": "cost-safety-policy",
+      "title": "Static cost and cardinality policy finds no blocking risk",
+      "status": "passed",
+      "evidence": [
+        "src/policy.ts",
+        "docs/LLM_SAFE_PROFILE.md"
+      ],
+      "diagnostics": []
+    },
+    {
       "id": "parser-preflight",
       "title": "Rendered Cypher is accepted by parser preflight",
       "status": "passed",

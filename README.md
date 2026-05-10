@@ -19,7 +19,7 @@ The gap is not "LLMs need a better prompt." The gap is a missing compiler bounda
 
 ## What This Implements
 
-This package implements eleven concrete improvements:
+This package implements twelve concrete improvements:
 
 1. **Official JSON IR**: Agents can emit a small, typed Cypher AST instead of brittle text.
 2. **LLM-safe profile**: The renderer emits conservative Cypher with escaped schema identifiers, explicit projections, bounded path recommendations, and deterministic formatting.
@@ -32,6 +32,7 @@ This package implements eleven concrete improvements:
 9. **Roadmap governance**: Multi-year compiler ambitions are tracked as public issues plus a machine-readable capability ledger.
 10. **Dialect certification**: Neo4j Cypher, openCypher, and GQL profile claims produce CI-checkable certification reports.
 11. **Proof-carrying compile output**: Agents can ask why a query is accepted, repaired, blocked, or approval-gated.
+12. **Cost and safety policy reports**: Broad scans, risky traversals, high limits, cartesian patterns, and writes are surfaced before execution.
 
 ## Quick Start
 
@@ -134,6 +135,7 @@ cypher-llm compare-evals --baseline baseline.report.json --candidate candidate.r
 cypher-llm repair-loop --dataset examples/eval-dataset.json --attempts examples/eval-attempts.json --default-limit 25
 cypher-llm lift-raw-eval --dataset examples/imported/text2cypher-gpt4o-sample.dataset.json --attempts examples/imported/text2cypher-gpt4o-sample.attempts.json
 cypher-llm parse-check --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json --default-limit 25
+cypher-llm policy-check --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json --report-out policy.json
 cypher-llm prove --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json --params examples/tool-hash.params.json --default-limit 25
 cypher-llm introspect-neo4j --uri bolt://localhost:7687 --user neo4j --password "$NEO4J_PASSWORD" --schema-out schema.json
 cypher-llm roadmap --integrity
@@ -165,6 +167,8 @@ npm run test:live:neo4j
 
 `parse-check` validates rendered IR or raw Cypher against Neo4j's language-support parser and maps parser diagnostics back into this package's `Diagnostic` shape.
 
+`policy-check` emits a `cypher-llm-policy-report/v1` report for static cost, cardinality, and safety risks before execution.
+
 `prove` emits a `cypher-llm-proof/v1` proof object with rendered Cypher, preflight Cypher, repair kinds, diagnostic codes, parser preflight, and execution-policy claims.
 
 `introspect-neo4j` connects to Neo4j and writes a `CypherSchemaContract` from labels, relationship types, properties, observed endpoints, and procedure yields.
@@ -175,7 +179,7 @@ npm run test:live:neo4j
 
 `mcp` starts a stdio MCP server exposing the same render, validate, repair, parse-check, and eval operations to agent clients.
 
-`serve` starts a local JSON HTTP service exposing `/healthz`, `/v1/tools`, `/v1/render`, `/v1/validate`, `/v1/repair`, `/v1/parse-check`, `/v1/prove`, `/v1/eval`, `/v1/roadmap`, and `/v1/dialect-certification`.
+`serve` starts a local JSON HTTP service exposing `/healthz`, `/v1/tools`, `/v1/render`, `/v1/validate`, `/v1/repair`, `/v1/parse-check`, `/v1/policy`, `/v1/prove`, `/v1/eval`, `/v1/roadmap`, and `/v1/dialect-certification`.
 
 `test:live:neo4j` runs the optional Docker-backed Neo4j `EXPLAIN` fixture when `CYPHER_LLM_NEO4J_URI` and `CYPHER_LLM_NEO4J_PASSWORD` are set.
 
@@ -317,6 +321,7 @@ Those are deliberate boundaries. The repo is the missing LLM compiler surface, n
 - `src/years-roadmap.ts`: Public years-scale workstream and capability ledger.
 - `src/fixture-importers.ts`: Importers for text2cypher CSV/JSON and openCypher TCK fixtures.
 - `src/parser-validation.ts`: Parser-backed validation through Neo4j language support.
+- `src/policy.ts`: Static cost, cardinality, and safety policy checks.
 - `src/neo4j-explain.ts`: Driver-compatible Neo4j `EXPLAIN` preflight adapter.
 - `src/tools.ts`: OpenAI/MCP-compatible tool schemas and shared tool dispatcher.
 - `src/mcp-server.ts`: Stdio MCP server for agent clients.
@@ -329,6 +334,7 @@ Those are deliberate boundaries. The repo is the missing LLM compiler surface, n
 - `examples/benchmarks/`: CypherBench raw-vs-IR reports, comparisons, and repair-loop artifacts.
 - `examples/certification/`: Checked-in dialect certification report.
 - `examples/imported/`: Imported text2cypher/openCypher fixture samples and baseline reports.
+- `examples/policy/`: Checked-in cost and safety policy report.
 - `examples/proofs/`: Checked-in proof-carrying compile output.
 - `examples/roadmap/`: Machine-readable years-scale roadmap snapshot.
 - `profiles/`: Versioned dialect profiles for Neo4j Cypher 25, openCypher 9, and GQL-oriented output.

@@ -2,6 +2,7 @@ import type { Diagnostic } from "./diagnostics.js";
 import type { CypherQuery, CypherSchemaContract, JsonLiteral } from "./ir.js";
 import type { ParserValidationOptions } from "./parser-validation.js";
 import { validateCypherTextWithParser } from "./parser-validation.js";
+import { assessCypherPolicy } from "./policy.js";
 import { type SafeExecutionOptions, createSafeExecutionPlan } from "./safety.js";
 
 export type CypherProofStatus = "accepted" | "accepted-with-warnings" | "repaired" | "blocked";
@@ -42,6 +43,15 @@ export function buildCypherProof(
 ): CypherProof {
   const plan = createSafeExecutionPlan(query, schema, params, options);
   const planDiagnostics = plan.diagnostics;
+  const policyOptions = options.allowWrites === undefined ? {} : { allowWrites: options.allowWrites };
+  const policy = assessCypherPolicy(plan.query, schema, policyOptions);
+  const policyDiagnostics = policy.findings.map((finding) => ({
+    code: finding.code,
+    severity: finding.severity,
+    message: finding.message,
+    path: finding.path,
+    suggestion: finding.suggestion
+  }));
   const claims: CypherProofClaim[] = [
     {
       id: "deterministic-repair",
@@ -65,6 +75,13 @@ export function buildCypherProof(
       diagnostics: planDiagnostics.filter((diagnostic) =>
         ["execution-approval-required", "write-requires-approval", "missing-required-parameter"].includes(diagnostic.code)
       )
+    },
+    {
+      id: "cost-safety-policy",
+      title: "Static cost and cardinality policy finds no blocking risk",
+      status: claimStatus(policyDiagnostics),
+      evidence: ["src/policy.ts", "docs/LLM_SAFE_PROFILE.md"],
+      diagnostics: policyDiagnostics
     }
   ];
 

@@ -1,0 +1,20 @@
+{
+  "version": "cypher-llm-policy-report/v1",
+  "ok": true,
+  "dialect": "neo4j-cypher-25",
+  "summary": {
+    "findings": 1,
+    "errors": 0,
+    "warnings": 1,
+    "infos": 0
+  },
+  "findings": [
+    {
+      "code": "policy-missing-limit",
+      "severity": "warning",
+      "message": "RETURN has no LIMIT.",
+      "path": "/clauses/1",
+      "suggestion": "Add a bounded LIMIT before allowing autonomous execution."
+    }
+  ]
+}

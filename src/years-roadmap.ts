@@ -193,7 +193,7 @@ export const yearsRoadmap = {
         "Policy DSL for approvals, tenant restrictions, and sensitive data boundaries.",
         "Integration with schema statistics and live planner estimates."
       ],
-      firstArtifacts: ["src/safety.ts", "src/neo4j-explain.ts", "docs/LLM_SAFE_PROFILE.md"],
+      firstArtifacts: ["src/safety.ts", "src/policy.ts", "src/neo4j-explain.ts", "docs/LLM_SAFE_PROFILE.md"],
       acceptanceGates: [
         "Risky but syntactically valid queries are caught before execution.",
         "Safety diagnostics feed proof objects and repair plans.",
@@ -307,6 +307,13 @@ export const yearsRoadmap = {
       workstreamIds: ["cost-safety-policy", "public-cypherbench"]
     },
     {
+      id: "policy-reports",
+      title: "Static Cost And Safety Policy Reports",
+      status: "partial",
+      evidence: ["src/policy.ts", "schemas/policy-report.schema.json", "test/policy.test.ts"],
+      workstreamIds: ["cost-safety-policy", "semantic-proof-repair"]
+    },
+    {
       id: "compiler-service",
       title: "Long-Running Compiler Service",
       status: "partial",
@@ -317,7 +324,7 @@ export const yearsRoadmap = {
       id: "proof-objects",
       title: "Proof-Carrying Validation And Repair Plans",
       status: "partial",
-      evidence: ["src/proof.ts", "schemas/cypher-proof.schema.json", "test/proof.test.ts"],
+      evidence: ["src/proof.ts", "src/policy.ts", "schemas/cypher-proof.schema.json", "test/proof.test.ts"],
       workstreamIds: ["semantic-proof-repair", "cost-safety-policy"]
     },
     {
