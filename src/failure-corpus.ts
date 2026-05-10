@@ -26,11 +26,11 @@ const toolHashSchema: CypherSchemaContract = {
   version: "cypher-llm-schema/v1",
   dialect: "neo4j-cypher-25",
   nodes: [
-    { name: "Tool", aliases: ["tool"], properties: { name: { type: "STRING" } } },
+    { name: "Tool", aliases: ["tool"], properties: { name: { type: "STRING" }, score: { type: "INTEGER" } } },
     { name: "Hash", properties: { value: { type: "STRING" } } }
   ],
   relationships: [{ type: "has MD5 hash", aliases: ["md5"], from: "Tool", to: "Hash" }],
-  parameters: { toolName: { type: "STRING", required: true } },
+  parameters: { toolName: { type: "STRING", required: true }, numericToolName: { type: "INTEGER" } },
   procedures: {
     "db.indexes": {
       yields: {
@@ -38,8 +38,28 @@ const toolHashSchema: CypherSchemaContract = {
         type: "STRING",
         labelsOrTypes: "LIST<STRING>"
       }
+    },
+    "db.awaitIndex": {
+      arguments: { name: "STRING" },
+      yields: { done: "BOOLEAN" }
+    }
+  },
+  functions: {
+    "app.slug": {
+      arguments: { value: "STRING" },
+      returns: "STRING"
     }
   }
+};
+
+const openCypherSchema: CypherSchemaContract = {
+  ...toolHashSchema,
+  dialect: "opencypher-9"
+};
+
+const gqlSchema: CypherSchemaContract = {
+  ...toolHashSchema,
+  dialect: "gql"
 };
 
 export const llmFailureCorpus: LlmFailureCase[] = [
@@ -284,6 +304,139 @@ export const llmFailureCorpus: LlmFailureCase[] = [
       ]
     },
     expectedDiagnosticCodes: ["subquery-import-undefined"]
+  },
+  {
+    id: "text2cypher-property-type-mismatch",
+    source: "text2cypher typed property drift",
+    problem: "The model fills an integer property with a string literal.",
+    schema: toolHashSchema,
+    query: {
+      version: "cypher-llm-ir/v1",
+      profile: "llm-safe-readonly",
+      clauses: [
+        {
+          kind: "match",
+          patterns: [{ segments: [{ variable: "tool", labels: ["Tool"], properties: { score: { kind: "literal", value: "high" } } }] }]
+        },
+        { kind: "return", items: [{ expression: { kind: "var", name: "tool" } }], limit: { kind: "literal", value: 10 } }
+      ]
+    },
+    expectedDiagnosticCodes: ["property-type-mismatch"]
+  },
+  {
+    id: "text2cypher-parameter-type-mismatch",
+    source: "text2cypher parameter binding drift",
+    problem: "The model uses an integer parameter where the schema expects a string property value.",
+    schema: toolHashSchema,
+    query: {
+      version: "cypher-llm-ir/v1",
+      profile: "llm-safe-readonly",
+      clauses: [
+        {
+          kind: "match",
+          patterns: [{ segments: [{ variable: "tool", labels: ["Tool"], properties: { name: { kind: "param", name: "numericToolName" } } }] }]
+        },
+        { kind: "return", items: [{ expression: { kind: "var", name: "tool" } }], limit: { kind: "literal", value: 10 } }
+      ]
+    },
+    expectedDiagnosticCodes: ["parameter-type-mismatch"]
+  },
+  {
+    id: "text2cypher-comparison-type-mismatch",
+    source: "text2cypher predicate drift",
+    problem: "The model compares a string property to an integer literal.",
+    schema: toolHashSchema,
+    query: {
+      version: "cypher-llm-ir/v1",
+      profile: "llm-safe-readonly",
+      clauses: [
+        {
+          kind: "match",
+          patterns: [{ segments: [{ variable: "tool", labels: ["Tool"] }] }],
+          where: {
+            kind: "binary",
+            op: ">",
+            left: { kind: "prop", object: { kind: "var", name: "tool" }, key: "name" },
+            right: { kind: "literal", value: 3 }
+          }
+        },
+        { kind: "return", items: [{ expression: { kind: "var", name: "tool" } }], limit: { kind: "literal", value: 10 } }
+      ]
+    },
+    expectedDiagnosticCodes: ["comparison-type-mismatch"]
+  },
+  {
+    id: "opencypher-function-argument-mismatch",
+    source: "openCypher TCK function signature fixture",
+    problem: "The model passes the wrong type to a string function.",
+    schema: toolHashSchema,
+    query: {
+      version: "cypher-llm-ir/v1",
+      profile: "llm-safe-readonly",
+      clauses: [
+        {
+          kind: "return",
+          items: [{ expression: { kind: "function", name: "length", arguments: [{ kind: "literal", value: 123 }] }, alias: "badLength" }],
+          limit: { kind: "literal", value: 10 }
+        }
+      ]
+    },
+    expectedDiagnosticCodes: ["function-argument-mismatch"]
+  },
+  {
+    id: "procedure-argument-mismatch",
+    source: "Neo4j procedure metadata fixture",
+    problem: "The model calls a procedure with an argument type that does not match schema metadata.",
+    schema: toolHashSchema,
+    query: {
+      version: "cypher-llm-ir/v1",
+      profile: "llm-safe-readonly",
+      clauses: [
+        { kind: "call", procedure: "db.awaitIndex", arguments: [{ kind: "literal", value: 123 }], yield: [{ expression: { kind: "var", name: "done" } }] },
+        { kind: "return", items: [{ expression: { kind: "var", name: "done" } }], limit: { kind: "literal", value: 10 } }
+      ]
+    },
+    expectedDiagnosticCodes: ["procedure-argument-mismatch"]
+  },
+  {
+    id: "opencypher-dialect-unsupported-feature",
+    source: "openCypher TCK dialect fixture",
+    problem: "The model uses Cypher 25 path modes while targeting openCypher 9.",
+    schema: openCypherSchema,
+    query: {
+      version: "cypher-llm-ir/v1",
+      profile: "llm-safe-readonly",
+      clauses: [
+        { kind: "match", patterns: [{ mode: "trail", shortest: "any", segments: [{ variable: "tool", labels: ["Tool"] }] }] },
+        { kind: "return", items: [{ expression: { kind: "var", name: "tool" } }], limit: { kind: "literal", value: 10 } }
+      ]
+    },
+    expectedDiagnosticCodes: ["dialect-unsupported-feature"]
+  },
+  {
+    id: "gql-rendering-limitation",
+    source: "GQL profile compatibility fixture",
+    problem: "The model requests a variable-length relationship under the GQL profile before GQL quantifier rendering exists.",
+    schema: gqlSchema,
+    query: {
+      version: "cypher-llm-ir/v1",
+      profile: "llm-safe-readonly",
+      clauses: [
+        {
+          kind: "match",
+          patterns: [
+            {
+              segments: [
+                { variable: "tool", labels: ["Tool"] },
+                { rel: { types: ["has MD5 hash"], direction: "out", minHops: 1, maxHops: 3 }, node: { variable: "hash", labels: ["Hash"] } }
+              ]
+            }
+          ]
+        },
+        { kind: "return", items: [{ expression: { kind: "var", name: "hash" } }], limit: { kind: "literal", value: 10 } }
+      ]
+    },
+    expectedDiagnosticCodes: ["dialect-rendering-limitation"]
   }
 ];
 

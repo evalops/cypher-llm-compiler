@@ -17,6 +17,10 @@ Defaults:
 - Binary expressions are parenthesized.
 - Clauses are separated by newlines.
 
+## `renderQueryForDialect(query, dialect, options?)`
+
+Renders with the checked-in dialect profile's rendering rules, currently identifier escaping. Validation reports dialect limitations that the renderer cannot yet express, such as GQL relationship quantifier output.
+
 ## `validateQuery(query, schema, options?)`
 
 Returns:
@@ -40,6 +44,10 @@ Validation currently covers:
 - Ambiguous aggregate/scalar projection expressions.
 - `CALL {}` subquery imports, exports, and outer-scope shadowing.
 - Procedure names and `YIELD` variables when `schema.procedures` metadata is provided.
+- Procedure argument count and type checks when `schema.procedures` metadata is provided.
+- Function argument count and type checks for built-ins and `schema.functions` metadata.
+- Property, parameter, and comparison type mismatches.
+- Dialect feature checks for core Neo4j Cypher 25, openCypher 9, and GQL-oriented profile flags.
 - Relationship direction against declared endpoints.
 - Missing `LIMIT` in LLM-safe read mode.
 - Unbounded variable-length paths.

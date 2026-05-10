@@ -12,15 +12,21 @@ import type {
   RelationshipDirection,
   RelationshipPattern,
   ReturnClause,
+  SchemaFunction,
+  SchemaParameter,
+  SchemaProcedure,
+  SchemaProperty,
   SchemaRelationship,
   WithClause
 } from "./ir.js";
+import { getDialectProfile, type DialectProfile, type DialectProfileId } from "./dialects.js";
 import { diagnostic, hasErrors, type Diagnostic } from "./diagnostics.js";
 import {
   canonicalLabel,
   canonicalRelationshipType,
   normalizeSchema,
   resolveLabel,
+  resolveFunction,
   resolveProperty,
   resolveProcedure,
   resolveRelationshipType,
@@ -28,6 +34,7 @@ import {
 } from "./schema.js";
 
 export interface ValidationOptions {
+  dialect?: DialectProfileId;
   requireKnownParameters?: boolean;
   warnOnMissingLimit?: boolean;
   warnOnRawCypher?: boolean;
@@ -43,11 +50,13 @@ interface VariableBinding {
   kind: "node" | "relationship" | "path" | "unknown";
   labels?: string[];
   relationshipTypes?: string[];
+  valueType?: string | undefined;
 }
 
 type Scope = Map<string, VariableBinding>;
+type InternalValidationOptions = Required<Omit<ValidationOptions, "dialect">>;
 
-const DEFAULT_OPTIONS: Required<ValidationOptions> = {
+const DEFAULT_OPTIONS: InternalValidationOptions = {
   requireKnownParameters: true,
   warnOnMissingLimit: true,
   warnOnRawCypher: true,
@@ -67,9 +76,10 @@ export function validateQuery(
   };
   const diagnostics: Diagnostic[] = [];
   const scope: Scope = new Map();
+  const dialect = dialectProfileFor(options.dialect ?? schema.dialect);
 
   query.clauses.forEach((clause, index) => {
-    validateClause(clause, index, scope, schema, diagnostics, opts);
+    validateClause(clause, index, scope, schema, diagnostics, opts, dialect);
   });
 
   if (query.profile === "llm-safe-readonly" && !query.clauses.some((clause) => clause.kind === "return")) {
@@ -99,10 +109,12 @@ function validateClause(
   scope: Scope,
   schema: NormalizedSchema,
   diagnostics: Diagnostic[],
-  options: Required<ValidationOptions>,
+  options: InternalValidationOptions,
+  dialect: DialectProfile,
   basePath = "/clauses"
 ) {
   const path = `${basePath}/${index}`;
+  validateDialectClause(clause, path, dialect, diagnostics);
   if (isWriteClause(clause) && options.disallowWrites) {
     diagnostics.push(
       diagnostic({
@@ -117,18 +129,18 @@ function validateClause(
 
   switch (clause.kind) {
     case "match":
-      validateMatch(clause, path, scope, schema, diagnostics, options);
+      validateMatch(clause, path, scope, schema, diagnostics, options, dialect);
       return;
     case "unwind":
       validateExpression(clause.expression, scope, schema, diagnostics, `${path}/expression`, options);
-      scope.set(clause.alias, { kind: "unknown" });
+      scope.set(clause.alias, { kind: "unknown", valueType: listElementType(inferExpressionType(clause.expression, scope, schema)) });
       return;
     case "let":
       for (const [bindingIndex, binding] of clause.bindings.entries()) {
         validateBinding(binding, scope, schema, diagnostics, `${path}/bindings/${bindingIndex}`, options);
       }
       for (const binding of clause.bindings) {
-        scope.set(binding.alias, { kind: "unknown" });
+        scope.set(binding.alias, { kind: "unknown", valueType: inferExpressionType(binding.expression, scope, schema) });
       }
       return;
     case "with":
@@ -138,15 +150,15 @@ function validateClause(
       validateReturn(clause, path, scope, schema, diagnostics, options);
       return;
     case "call":
-      validateCall(clause, path, scope, schema, diagnostics, options);
+      validateCall(clause, path, scope, schema, diagnostics, options, dialect);
       return;
     case "create":
       clause.patterns.forEach((pattern, patternIndex) =>
-        validatePath(pattern, scope, schema, diagnostics, `${path}/patterns/${patternIndex}`, options)
+        validatePath(pattern, scope, schema, diagnostics, `${path}/patterns/${patternIndex}`, options, dialect)
       );
       return;
     case "merge":
-      validatePath(clause.pattern, scope, schema, diagnostics, `${path}/pattern`, options);
+      validatePath(clause.pattern, scope, schema, diagnostics, `${path}/pattern`, options, dialect);
       for (const item of [...(clause.onCreate ?? []), ...(clause.onMatch ?? [])]) {
         validateExpression(item.target, scope, schema, diagnostics, `${path}/set/target`, options);
         validateExpression(item.value, scope, schema, diagnostics, `${path}/set/value`, options);
@@ -185,10 +197,11 @@ function validateMatch(
   scope: Scope,
   schema: NormalizedSchema,
   diagnostics: Diagnostic[],
-  options: Required<ValidationOptions>
+  options: InternalValidationOptions,
+  dialect: DialectProfile
 ) {
   clause.patterns.forEach((pattern, patternIndex) =>
-    validatePath(pattern, scope, schema, diagnostics, `${path}/patterns/${patternIndex}`, options)
+    validatePath(pattern, scope, schema, diagnostics, `${path}/patterns/${patternIndex}`, options, dialect)
   );
   if (clause.where) {
     if (containsAggregateFunction(clause.where)) {
@@ -212,10 +225,11 @@ function validateCall(
   scope: Scope,
   schema: NormalizedSchema,
   diagnostics: Diagnostic[],
-  options: Required<ValidationOptions>
+  options: InternalValidationOptions,
+  dialect: DialectProfile
 ) {
   if (clause.subquery) {
-    validateSubqueryCall(clause, path, scope, schema, diagnostics, options);
+    validateSubqueryCall(clause, path, scope, schema, diagnostics, options, dialect);
     return;
   }
   validateProcedureCall(clause, path, scope, schema, diagnostics, options);
@@ -227,7 +241,7 @@ function validateProcedureCall(
   scope: Scope,
   schema: NormalizedSchema,
   diagnostics: Diagnostic[],
-  options: Required<ValidationOptions>
+  options: InternalValidationOptions
 ) {
   if (!clause.procedure) {
     diagnostics.push(
@@ -258,6 +272,18 @@ function validateProcedureCall(
   for (const [argumentIndex, argument] of (clause.arguments ?? []).entries()) {
     validateExpression(argument, scope, schema, diagnostics, `${path}/arguments/${argumentIndex}`, options);
   }
+  if (procedure?.arguments) {
+    validateCallableArguments(
+      "procedure",
+      clause.procedure,
+      procedure.arguments,
+      clause.arguments ?? [],
+      scope,
+      schema,
+      diagnostics,
+      `${path}/arguments`
+    );
+  }
 
   for (const [yieldIndex, projection] of (clause.yield ?? []).entries()) {
     const yieldedName = variableName(projection.expression);
@@ -276,7 +302,7 @@ function validateProcedureCall(
     }
     const alias = projection.alias ?? yieldedName;
     if (alias) {
-      scope.set(alias, { kind: "unknown" });
+      scope.set(alias, { kind: "unknown", valueType: yieldedName ? declaredType(procedure?.yields?.[yieldedName]) : undefined });
     }
   }
 
@@ -291,7 +317,8 @@ function validateSubqueryCall(
   scope: Scope,
   schema: NormalizedSchema,
   diagnostics: Diagnostic[],
-  options: Required<ValidationOptions>
+  options: InternalValidationOptions,
+  dialect: DialectProfile
 ) {
   const subScope: Scope = new Map();
   for (const [importIndex, name] of (clause.import ?? []).entries()) {
@@ -312,10 +339,10 @@ function validateSubqueryCall(
   }
 
   clause.subquery?.clauses.forEach((subClause, subIndex) => {
-    validateClause(subClause, subIndex, subScope, schema, diagnostics, options, `${path}/subquery/clauses`);
+    validateClause(subClause, subIndex, subScope, schema, diagnostics, options, dialect, `${path}/subquery/clauses`);
   });
 
-  const exports = exportedSubqueryBindings(clause.subquery, subScope);
+  const exports = exportedSubqueryBindings(clause.subquery, subScope, schema);
   if (exports.size === 0) {
     diagnostics.push(
       diagnostic({
@@ -350,7 +377,7 @@ function validateWith(
   scope: Scope,
   schema: NormalizedSchema,
   diagnostics: Diagnostic[],
-  options: Required<ValidationOptions>
+  options: InternalValidationOptions
 ) {
   clause.items.forEach((item, itemIndex) =>
     validateProjectionItem(item, scope, schema, diagnostics, `${path}/items/${itemIndex}`, options)
@@ -361,7 +388,7 @@ function validateWith(
   for (const item of clause.items) {
     const alias = item.alias ?? variableName(item.expression);
     if (alias) {
-      nextScope.set(alias, inferExpressionBinding(item.expression, scope));
+      nextScope.set(alias, inferExpressionBinding(item.expression, scope, schema));
     }
   }
   scope.clear();
@@ -390,7 +417,7 @@ function validateReturn(
   scope: Scope,
   schema: NormalizedSchema,
   diagnostics: Diagnostic[],
-  options: Required<ValidationOptions>
+  options: InternalValidationOptions
 ) {
   clause.items.forEach((item, itemIndex) =>
     validateProjectionItem(item, scope, schema, diagnostics, `${path}/items/${itemIndex}`, options)
@@ -428,7 +455,7 @@ function validateBinding(
   schema: NormalizedSchema,
   diagnostics: Diagnostic[],
   path: string,
-  options: Required<ValidationOptions>
+  options: InternalValidationOptions
 ) {
   validateExpression(binding.expression, scope, schema, diagnostics, `${path}/expression`, options);
 }
@@ -439,7 +466,7 @@ function validateProjectionItem(
   schema: NormalizedSchema,
   diagnostics: Diagnostic[],
   path: string,
-  options: Required<ValidationOptions>
+  options: InternalValidationOptions
 ) {
   if (containsAggregateFunction(item.expression) && !item.alias) {
     diagnostics.push(
@@ -472,18 +499,20 @@ function validatePath(
   schema: NormalizedSchema,
   diagnostics: Diagnostic[],
   path: string,
-  options: Required<ValidationOptions>
+  options: InternalValidationOptions,
+  dialect: DialectProfile
 ) {
   if (pattern.name) {
-    scope.set(pattern.name, { kind: "path" });
+    scope.set(pattern.name, { kind: "path", valueType: "PATH" });
   }
+  validateDialectPath(pattern, path, dialect, diagnostics);
 
   const [head, ...tail] = pattern.segments;
   validateNode(head, scope, schema, diagnostics, `${path}/segments/0`, options);
   let previous = head;
   tail.forEach((segment, tailIndex) => {
     const segmentIndex = tailIndex + 1;
-    validateRelationship(segment.rel, previous, segment.node, scope, schema, diagnostics, `${path}/segments/${segmentIndex}/rel`, options);
+    validateRelationship(segment.rel, previous, segment.node, scope, schema, diagnostics, `${path}/segments/${segmentIndex}/rel`, options, dialect);
     validateNode(segment.node, scope, schema, diagnostics, `${path}/segments/${segmentIndex}/node`, options);
     previous = segment.node;
   });
@@ -495,7 +524,7 @@ function validateNode(
   schema: NormalizedSchema,
   diagnostics: Diagnostic[],
   path: string,
-  options: Required<ValidationOptions>
+  options: InternalValidationOptions
 ) {
   const labels: string[] = [];
   for (const [labelIndex, label] of (node.labels ?? []).entries()) {
@@ -520,7 +549,7 @@ function validateNode(
     validateExpression(node.where, scope, schema, diagnostics, `${path}/where`, options);
   }
   if (node.variable) {
-    scope.set(node.variable, { kind: "node", labels });
+    scope.set(node.variable, { kind: "node", labels, valueType: "NODE" });
   }
 }
 
@@ -532,8 +561,10 @@ function validateRelationship(
   schema: NormalizedSchema,
   diagnostics: Diagnostic[],
   path: string,
-  options: Required<ValidationOptions>
+  options: InternalValidationOptions,
+  dialect: DialectProfile
 ) {
+  validateDialectRelationship(rel, path, dialect, diagnostics);
   const types: string[] = [];
   for (const [typeIndex, type] of (rel.types ?? []).entries()) {
     const resolved = resolveRelationshipType(schema, type);
@@ -574,7 +605,7 @@ function validateRelationship(
     validateExpression(rel.where, scope, schema, diagnostics, `${path}/where`, options);
   }
   if (rel.variable) {
-    scope.set(rel.variable, { kind: "relationship", relationshipTypes: types });
+    scope.set(rel.variable, { kind: "relationship", relationshipTypes: types, valueType: "RELATIONSHIP" });
   }
 }
 
@@ -647,6 +678,59 @@ function relationshipAllows(
   return endpointMatch(leftLabels, to) && endpointMatch(rightLabels, from);
 }
 
+function validateDialectClause(clause: Clause, path: string, dialect: DialectProfile, diagnostics: Diagnostic[]) {
+  if (clause.kind === "let" && !dialect.features.letClause) {
+    dialectUnsupported(diagnostics, path, dialect, "LET clauses");
+  }
+  if (clause.kind === "call" && clause.subquery && !dialect.features.subqueries) {
+    dialectUnsupported(diagnostics, path, dialect, "CALL subqueries");
+  }
+  if (isWriteClause(clause) && !dialect.features.writeClauses) {
+    dialectUnsupported(diagnostics, path, dialect, "write clauses");
+  }
+}
+
+function validateDialectPath(pattern: PathPattern, path: string, dialect: DialectProfile, diagnostics: Diagnostic[]) {
+  if (pattern.mode && !dialect.features.pathModes) {
+    dialectUnsupported(diagnostics, `${path}/mode`, dialect, "path match modes");
+  }
+  if (pattern.shortest && !dialect.features.shortestPathModes) {
+    dialectUnsupported(diagnostics, `${path}/shortest`, dialect, "shortest path modes");
+  }
+}
+
+function validateDialectRelationship(
+  rel: RelationshipPattern,
+  path: string,
+  dialect: DialectProfile,
+  diagnostics: Diagnostic[]
+) {
+  const hasRange = rel.minHops !== undefined || rel.maxHops !== undefined;
+  if (hasRange && !dialect.features.legacyVariableLengthRelationships) {
+    diagnostics.push(
+      diagnostic({
+        code: "dialect-rendering-limitation",
+        severity: "warning",
+        message: `${dialect.displayName} prefers '${dialect.rendering.relationshipRangeStyle}' relationship ranges, but the current renderer emits legacy star ranges.`,
+        path,
+        suggestion: "Use the Neo4j/openCypher profiles for legacy star ranges, or keep this as an explicit compatibility exception."
+      })
+    );
+  }
+}
+
+function dialectUnsupported(diagnostics: Diagnostic[], path: string, dialect: DialectProfile, feature: string) {
+  diagnostics.push(
+    diagnostic({
+      code: "dialect-unsupported-feature",
+      severity: "error",
+      message: `${feature} are not supported by the ${dialect.displayName} profile.`,
+      path,
+      suggestion: "Switch dialect profiles or rewrite the query using supported Cypher features."
+    })
+  );
+}
+
 function validateProperties(
   ownerKind: "node" | "relationship",
   ownerName: string | undefined,
@@ -655,10 +739,11 @@ function validateProperties(
   schema: NormalizedSchema,
   diagnostics: Diagnostic[],
   path: string,
-  options: Required<ValidationOptions>
+  options: InternalValidationOptions
 ) {
   for (const [propertyName, expression] of Object.entries(properties ?? {})) {
-    if (ownerName && !resolveProperty(schema, ownerKind, ownerName, propertyName)) {
+    const property = ownerName ? resolveProperty(schema, ownerKind, ownerName, propertyName) : undefined;
+    if (ownerName && !property) {
       diagnostics.push(
         diagnostic({
           code: "unknown-property",
@@ -670,6 +755,16 @@ function validateProperties(
       );
     }
     validateExpression(expression, scope, schema, diagnostics, `${path}/${propertyName}`, options);
+    validateExpectedType(
+      expression,
+      declaredType(property),
+      scope,
+      schema,
+      diagnostics,
+      `${path}/${propertyName}`,
+      "property-type-mismatch",
+      `Property '${propertyName}' expects ${declaredType(property) ?? "a known type"}.`
+    );
   }
 }
 
@@ -679,7 +774,7 @@ function validateExpression(
   schema: NormalizedSchema,
   diagnostics: Diagnostic[],
   path: string,
-  options: Required<ValidationOptions>
+  options: InternalValidationOptions
 ) {
   switch (expression.kind) {
     case "var":
@@ -724,6 +819,7 @@ function validateExpression(
     case "binary":
       validateExpression(expression.left, scope, schema, diagnostics, `${path}/left`, options);
       validateExpression(expression.right, scope, schema, diagnostics, `${path}/right`, options);
+      validateBinaryTypes(expression, scope, schema, diagnostics, path);
       return;
     case "unary":
       validateExpression(expression.expression, scope, schema, diagnostics, `${path}/expression`, options);
@@ -732,6 +828,7 @@ function validateExpression(
       expression.arguments.forEach((argument, index) =>
         validateExpression(argument, scope, schema, diagnostics, `${path}/arguments/${index}`, options)
       );
+      validateFunctionCall(expression, scope, schema, diagnostics, path);
       return;
     case "list":
       expression.items.forEach((item, index) =>
@@ -777,7 +874,7 @@ function validatePropertyExpression(
   schema: NormalizedSchema,
   diagnostics: Diagnostic[],
   path: string,
-  options: Required<ValidationOptions>
+  options: InternalValidationOptions
 ) {
   validateExpression(expression.object, scope, schema, diagnostics, `${path}/object`, options);
   if (expression.object.kind !== "var") {
@@ -789,7 +886,8 @@ function validatePropertyExpression(
   }
   if (binding.kind === "node") {
     const owner = binding.labels?.[0];
-    if (owner && !resolveProperty(schema, "node", owner, expression.key)) {
+    const property = owner ? resolveProperty(schema, "node", owner, expression.key) : undefined;
+    if (owner && !property) {
       diagnostics.push(
         diagnostic({
           code: "unknown-property",
@@ -803,7 +901,8 @@ function validatePropertyExpression(
   }
   if (binding.kind === "relationship") {
     const owner = binding.relationshipTypes?.[0];
-    if (owner && !resolveProperty(schema, "relationship", owner, expression.key)) {
+    const property = owner ? resolveProperty(schema, "relationship", owner, expression.key) : undefined;
+    if (owner && !property) {
       diagnostics.push(
         diagnostic({
           code: "unknown-property",
@@ -817,16 +916,375 @@ function validatePropertyExpression(
   }
 }
 
+function validateBinaryTypes(
+  expression: Extract<Expression, { kind: "binary" }>,
+  scope: Scope,
+  schema: NormalizedSchema,
+  diagnostics: Diagnostic[],
+  path: string
+) {
+  const leftType = inferExpressionType(expression.left, scope, schema);
+  const rightType = inferExpressionType(expression.right, scope, schema);
+  const comparableOps = new Set(["=", "<>", "<", "<=", ">", ">="]);
+  if (comparableOps.has(expression.op) && leftType && rightType && !typesCompatible(leftType, rightType) && !typesCompatible(rightType, leftType)) {
+    diagnostics.push(
+      diagnostic({
+        code: "comparison-type-mismatch",
+        severity: "error",
+        message: `Cannot compare ${leftType} to ${rightType} with '${expression.op}'.`,
+        path,
+        suggestion: "Compare values with compatible Cypher types or cast explicitly before comparing."
+      })
+    );
+  }
+
+  if (expression.op === "IN" && leftType && rightType) {
+    const elementType = listElementType(rightType);
+    if (!elementType) {
+      diagnostics.push(
+        diagnostic({
+          code: "comparison-type-mismatch",
+          severity: "error",
+          message: `IN expects a list on the right side, got ${rightType}.`,
+          path: `${path}/right`,
+          suggestion: "Use a LIST value or collect values before using IN."
+        })
+      );
+    } else if (!typesCompatible(elementType, leftType)) {
+      diagnostics.push(
+        diagnostic({
+          code: "comparison-type-mismatch",
+          severity: "error",
+          message: `IN compares ${leftType} against LIST<${elementType}>.`,
+          path,
+          suggestion: "Compare values with compatible Cypher types or cast explicitly before comparing."
+        })
+      );
+    }
+  }
+
+  if (expression.op === "CONTAINS" || expression.op === "STARTS WITH" || expression.op === "ENDS WITH") {
+    validateExpectedType(expression.left, "STRING", scope, schema, diagnostics, `${path}/left`, "comparison-type-mismatch", `${expression.op} expects a string left operand.`);
+    validateExpectedType(expression.right, "STRING", scope, schema, diagnostics, `${path}/right`, "comparison-type-mismatch", `${expression.op} expects a string right operand.`);
+  }
+
+  if (expression.op === "AND" || expression.op === "OR" || expression.op === "XOR") {
+    validateExpectedType(expression.left, "BOOLEAN", scope, schema, diagnostics, `${path}/left`, "comparison-type-mismatch", `${expression.op} expects boolean operands.`);
+    validateExpectedType(expression.right, "BOOLEAN", scope, schema, diagnostics, `${path}/right`, "comparison-type-mismatch", `${expression.op} expects boolean operands.`);
+  }
+
+  if (["-", "*", "/", "%", "^"].includes(expression.op)) {
+    validateExpectedType(expression.left, "FLOAT", scope, schema, diagnostics, `${path}/left`, "comparison-type-mismatch", `${expression.op} expects numeric operands.`);
+    validateExpectedType(expression.right, "FLOAT", scope, schema, diagnostics, `${path}/right`, "comparison-type-mismatch", `${expression.op} expects numeric operands.`);
+  }
+}
+
+function validateFunctionCall(
+  expression: Extract<Expression, { kind: "function" }>,
+  scope: Scope,
+  schema: NormalizedSchema,
+  diagnostics: Diagnostic[],
+  path: string
+) {
+  const schemaFunction = resolveFunction(schema, expression.name);
+  if (schemaFunction?.arguments) {
+    validateCallableArguments("function", expression.name, schemaFunction.arguments, expression.arguments, scope, schema, diagnostics, `${path}/arguments`);
+  }
+
+  const signature = BUILTIN_FUNCTIONS.get(normalizeFunctionName(expression.name));
+  if (!signature) {
+    return;
+  }
+
+  if (expression.arguments.length < signature.minArgs || expression.arguments.length > signature.maxArgs) {
+    diagnostics.push(
+      diagnostic({
+        code: "function-argument-mismatch",
+        severity: "error",
+        message: `Function '${expression.name}' expects ${arityText(signature.minArgs, signature.maxArgs)}, got ${expression.arguments.length}.`,
+        path,
+        suggestion: "Adjust the function arguments or choose a function with the desired signature."
+      })
+    );
+  }
+
+  expression.arguments.forEach((argument, index) => {
+    const expected = signature.arguments[Math.min(index, signature.arguments.length - 1)];
+    if (!expected) {
+      return;
+    }
+    validateOneOfTypes(argument, expected.types, scope, schema, diagnostics, `${path}/arguments/${index}`, "function-argument-mismatch", `Function '${expression.name}' argument '${expected.name}' expects ${expected.types.join(" or ")}.`);
+  });
+}
+
+function validateCallableArguments(
+  kind: "function" | "procedure",
+  name: string,
+  expectedArguments: Record<string, string | SchemaParameter>,
+  actualArguments: Expression[],
+  scope: Scope,
+  schema: NormalizedSchema,
+  diagnostics: Diagnostic[],
+  path: string
+) {
+  const expected = Object.entries(expectedArguments).map(([argumentName, argument]) => ({
+    name: argumentName,
+    type: declaredType(argument),
+    required: typeof argument === "string" ? true : argument.required !== false
+  }));
+  const requiredCount = expected.filter((argument) => argument.required).length;
+  if (actualArguments.length < requiredCount || actualArguments.length > expected.length) {
+    diagnostics.push(
+      diagnostic({
+        code: `${kind}-argument-mismatch`,
+        severity: "error",
+        message: `${capitalize(kind)} '${name}' expects ${arityText(requiredCount, expected.length)}, got ${actualArguments.length}.`,
+        path,
+        suggestion: `Pass arguments that match the ${kind} metadata in the schema contract.`
+      })
+    );
+  }
+
+  actualArguments.forEach((argument, index) => {
+    const expectedArgument = expected[index];
+    if (!expectedArgument?.type) {
+      return;
+    }
+    validateExpectedType(
+      argument,
+      expectedArgument.type,
+      scope,
+      schema,
+      diagnostics,
+      `${path}/${index}`,
+      `${kind}-argument-mismatch`,
+      `${capitalize(kind)} '${name}' argument '${expectedArgument.name}' expects ${expectedArgument.type}.`
+    );
+  });
+}
+
+function validateExpectedType(
+  expression: Expression,
+  expectedType: string | undefined,
+  scope: Scope,
+  schema: NormalizedSchema,
+  diagnostics: Diagnostic[],
+  path: string,
+  code: string,
+  message: string
+) {
+  if (!expectedType) {
+    return;
+  }
+  const actualType = inferExpressionType(expression, scope, schema);
+  if (!actualType || typesCompatible(expectedType, actualType)) {
+    return;
+  }
+  diagnostics.push(
+    diagnostic({
+      code: expression.kind === "param" && code === "property-type-mismatch" ? "parameter-type-mismatch" : code,
+      severity: "error",
+      message: `${message} Received ${actualType}.`,
+      path,
+      suggestion: "Use a value with the expected Cypher type, change the schema contract, or cast explicitly."
+    })
+  );
+}
+
+function validateOneOfTypes(
+  expression: Expression,
+  expectedTypes: string[],
+  scope: Scope,
+  schema: NormalizedSchema,
+  diagnostics: Diagnostic[],
+  path: string,
+  code: string,
+  message: string
+) {
+  const actualType = inferExpressionType(expression, scope, schema);
+  if (!actualType || expectedTypes.some((expectedType) => typesCompatible(expectedType, actualType))) {
+    return;
+  }
+  diagnostics.push(
+    diagnostic({
+      code,
+      severity: "error",
+      message: `${message} Received ${actualType}.`,
+      path,
+      suggestion: "Use a compatible argument type or cast before calling the function."
+    })
+  );
+}
+
+function inferExpressionType(expression: Expression, scope: Scope, schema: NormalizedSchema): string | undefined {
+  switch (expression.kind) {
+    case "var":
+      return scope.get(expression.name)?.valueType;
+    case "prop":
+      return inferPropertyExpressionType(expression, scope, schema);
+    case "param":
+      return declaredType(schema.parameters.get(expression.name));
+    case "literal":
+      return literalType(expression.value);
+    case "binary":
+      if (["=", "<>", "<", "<=", ">", ">=", "IN", "CONTAINS", "STARTS WITH", "ENDS WITH", "AND", "OR", "XOR"].includes(expression.op)) {
+        return "BOOLEAN";
+      }
+      return "FLOAT";
+    case "unary":
+      return expression.op === "NOT" ? "BOOLEAN" : inferExpressionType(expression.expression, scope, schema);
+    case "function":
+      return declaredType(resolveFunction(schema, expression.name)?.returns) ?? BUILTIN_FUNCTIONS.get(normalizeFunctionName(expression.name))?.returns;
+    case "list": {
+      const itemTypes = expression.items.map((item) => inferExpressionType(item, scope, schema)).filter(isString);
+      const first = itemTypes[0] ?? "ANY";
+      return itemTypes.every((item) => typesCompatible(first, item)) ? `LIST<${first}>` : "LIST<ANY>";
+    }
+    case "map":
+      return "MAP<ANY>";
+    case "case": {
+      const resultTypes = [
+        ...expression.cases.map((branch) => inferExpressionType(branch.then, scope, schema)),
+        ...(expression.else ? [inferExpressionType(expression.else, scope, schema)] : [])
+      ].filter(isString);
+      const first = resultTypes[0];
+      return first && resultTypes.every((item) => typesCompatible(first, item)) ? first : "ANY";
+    }
+    case "raw":
+      return undefined;
+  }
+}
+
+function inferPropertyExpressionType(
+  expression: Extract<Expression, { kind: "prop" }>,
+  scope: Scope,
+  schema: NormalizedSchema
+): string | undefined {
+  if (expression.object.kind !== "var") {
+    return undefined;
+  }
+  const binding = scope.get(expression.object.name);
+  if (binding?.kind === "node") {
+    return declaredType(resolveProperty(schema, "node", binding.labels?.[0], expression.key));
+  }
+  if (binding?.kind === "relationship") {
+    return declaredType(resolveProperty(schema, "relationship", binding.relationshipTypes?.[0], expression.key));
+  }
+  return undefined;
+}
+
+function declaredType(value: string | SchemaParameter | SchemaProperty | SchemaFunction["returns"] | undefined): string | undefined {
+  if (!value) {
+    return undefined;
+  }
+  return typeof value === "string" ? value : value.type;
+}
+
+function literalType(value: unknown): string {
+  if (value === null) return "NULL";
+  if (typeof value === "boolean") return "BOOLEAN";
+  if (typeof value === "number") return Number.isInteger(value) ? "INTEGER" : "FLOAT";
+  if (typeof value === "string") return "STRING";
+  if (Array.isArray(value)) return "LIST<ANY>";
+  return "MAP<ANY>";
+}
+
+function typesCompatible(expected: string, actual: string): boolean {
+  const normalizedExpected = normalizeType(expected);
+  const normalizedActual = normalizeType(actual);
+  if (normalizedExpected === "ANY" || normalizedActual === "ANY" || normalizedActual === "NULL") {
+    return true;
+  }
+  if (normalizedExpected === normalizedActual) {
+    return true;
+  }
+  if (normalizedExpected === "FLOAT" && normalizedActual === "INTEGER") {
+    return true;
+  }
+  if (normalizedExpected === "NUMBER" && (normalizedActual === "INTEGER" || normalizedActual === "FLOAT")) {
+    return true;
+  }
+  const expectedList = listElementType(normalizedExpected);
+  const actualList = listElementType(normalizedActual);
+  if (expectedList && actualList) {
+    return typesCompatible(expectedList, actualList);
+  }
+  return false;
+}
+
+function normalizeType(type: string): string {
+  return type.trim().toUpperCase();
+}
+
+function listElementType(type: string | undefined): string | undefined {
+  const match = /^LIST<(.+)>$/i.exec(type ?? "");
+  return match?.[1]?.trim();
+}
+
+function arityText(minArgs: number, maxArgs: number): string {
+  return minArgs === maxArgs ? `${minArgs} argument(s)` : `${minArgs}-${maxArgs} argument(s)`;
+}
+
+function capitalize(value: string): string {
+  return `${value.charAt(0).toUpperCase()}${value.slice(1)}`;
+}
+
 function variableName(expression: Expression): string | undefined {
   return expression.kind === "var" ? expression.name : undefined;
 }
 
-function inferExpressionBinding(expression: Expression, scope: Scope): VariableBinding {
+function inferExpressionBinding(expression: Expression, scope: Scope, schema: NormalizedSchema): VariableBinding {
   if (expression.kind === "var") {
     return scope.get(expression.name) ?? { kind: "unknown" };
   }
-  return { kind: "unknown" };
+  return { kind: "unknown", valueType: inferExpressionType(expression, scope, schema) };
 }
+
+interface FunctionArgumentSignature {
+  name: string;
+  types: string[];
+}
+
+interface FunctionSignature {
+  minArgs: number;
+  maxArgs: number;
+  arguments: FunctionArgumentSignature[];
+  returns: string;
+}
+
+const BUILTIN_FUNCTIONS = new Map<string, FunctionSignature>(
+  [
+    ["count", { minArgs: 1, maxArgs: 1, arguments: [{ name: "value", types: ["ANY"] }], returns: "INTEGER" }],
+    ["avg", { minArgs: 1, maxArgs: 1, arguments: [{ name: "value", types: ["INTEGER", "FLOAT"] }], returns: "FLOAT" }],
+    ["sum", { minArgs: 1, maxArgs: 1, arguments: [{ name: "value", types: ["INTEGER", "FLOAT"] }], returns: "FLOAT" }],
+    ["min", { minArgs: 1, maxArgs: 1, arguments: [{ name: "value", types: ["ANY"] }], returns: "ANY" }],
+    ["max", { minArgs: 1, maxArgs: 1, arguments: [{ name: "value", types: ["ANY"] }], returns: "ANY" }],
+    ["collect", { minArgs: 1, maxArgs: 1, arguments: [{ name: "value", types: ["ANY"] }], returns: "LIST<ANY>" }],
+    ["length", { minArgs: 1, maxArgs: 1, arguments: [{ name: "value", types: ["STRING", "PATH", "LIST<ANY>"] }], returns: "INTEGER" }],
+    ["size", { minArgs: 1, maxArgs: 1, arguments: [{ name: "value", types: ["STRING", "LIST<ANY>", "MAP<ANY>"] }], returns: "INTEGER" }],
+    ["tointeger", { minArgs: 1, maxArgs: 1, arguments: [{ name: "value", types: ["ANY"] }], returns: "INTEGER" }],
+    ["tofloat", { minArgs: 1, maxArgs: 1, arguments: [{ name: "value", types: ["ANY"] }], returns: "FLOAT" }],
+    ["tostring", { minArgs: 1, maxArgs: 1, arguments: [{ name: "value", types: ["ANY"] }], returns: "STRING" }],
+    ["tolower", { minArgs: 1, maxArgs: 1, arguments: [{ name: "value", types: ["STRING"] }], returns: "STRING" }],
+    ["toupper", { minArgs: 1, maxArgs: 1, arguments: [{ name: "value", types: ["STRING"] }], returns: "STRING" }],
+    [
+      "substring",
+      {
+        minArgs: 2,
+        maxArgs: 3,
+        arguments: [
+          { name: "value", types: ["STRING"] },
+          { name: "start", types: ["INTEGER"] },
+          { name: "length", types: ["INTEGER"] }
+        ],
+        returns: "STRING"
+      }
+    ],
+    ["coalesce", { minArgs: 1, maxArgs: Number.MAX_SAFE_INTEGER, arguments: [{ name: "value", types: ["ANY"] }], returns: "ANY" }],
+    ["date", { minArgs: 0, maxArgs: 1, arguments: [{ name: "value", types: ["ANY"] }], returns: "DATE" }],
+    ["datetime", { minArgs: 0, maxArgs: 1, arguments: [{ name: "value", types: ["ANY"] }], returns: "ZONED_DATETIME" }]
+  ].map(([name, signature]) => [normalizeFunctionName(name as string), signature as FunctionSignature])
+);
 
 const AGGREGATE_FUNCTIONS = new Set([
   "avg",
@@ -885,7 +1343,7 @@ function validateAggregationPredicate(
   );
 }
 
-function exportedSubqueryBindings(query: CypherQuery | undefined, scope: Scope): Scope {
+function exportedSubqueryBindings(query: CypherQuery | undefined, scope: Scope, schema: NormalizedSchema): Scope {
   const exported: Scope = new Map();
   const finalClause = query?.clauses.at(-1);
   if (!finalClause || finalClause.kind !== "return") {
@@ -894,7 +1352,7 @@ function exportedSubqueryBindings(query: CypherQuery | undefined, scope: Scope):
   for (const item of finalClause.items) {
     const alias = item.alias ?? variableName(item.expression);
     if (alias) {
-      exported.set(alias, inferExpressionBinding(item.expression, scope));
+      exported.set(alias, inferExpressionBinding(item.expression, scope, schema));
     }
   }
   return exported;
@@ -942,7 +1400,11 @@ function mergeAggregationShapes(shapes: AggregationShape[]): AggregationShape {
 }
 
 function isAggregateFunction(name: string): boolean {
-  return AGGREGATE_FUNCTIONS.has(name.replaceAll(".", "").toLowerCase());
+  return AGGREGATE_FUNCTIONS.has(normalizeFunctionName(name));
+}
+
+function normalizeFunctionName(name: string): string {
+  return name.replaceAll(".", "").toLowerCase();
 }
 
 function endpointMatch(labels: string[], allowed: string[]): boolean {
@@ -959,4 +1421,12 @@ function isString(value: string | undefined): value is string {
 
 function asNormalizedSchema(schema: CypherSchemaContract | NormalizedSchema): NormalizedSchema {
   return "nodeByName" in schema ? schema : normalizeSchema(schema);
+}
+
+function dialectProfileFor(id: string): DialectProfile {
+  try {
+    return getDialectProfile(id as DialectProfileId);
+  } catch {
+    return getDialectProfile("neo4j-cypher-25");
+  }
 }

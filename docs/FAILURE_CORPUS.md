@@ -8,6 +8,8 @@ The failure corpus captures mistakes that repeatedly appear when LLMs generate C
 - Aggregate expressions are mixed into invalid scopes.
 - SQL idioms such as `BETWEEN` appear in Cypher.
 - Variable-length paths are left unbounded.
+- Typed properties, parameters, comparisons, function calls, and procedure calls drift away from schema metadata.
+- Dialect-specific features appear under incompatible profiles.
 - The model returns explanation text instead of a query.
 
 Each fixture should have one of two outcomes:

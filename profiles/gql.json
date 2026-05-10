@@ -23,6 +23,6 @@
     "Dialect-specific graph reference rendering is not implemented yet"
   ],
   "notes": [
-    "This profile records intended compatibility behavior before the renderer fully targets GQL syntax."
+    "Validation warns when the current renderer falls back to legacy star syntax for relationship ranges."
   ]
 }

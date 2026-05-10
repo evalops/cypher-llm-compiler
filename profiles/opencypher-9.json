@@ -26,6 +26,6 @@
   ],
   "notes": [
     "Use this profile when targeting engines closer to the openCypher 9 grammar.",
-    "The package does not yet enforce every profile-specific restriction."
+    "Validation enforces core feature flags such as LET, path modes, shortest path modes, subqueries, and write support."
   ]
 }

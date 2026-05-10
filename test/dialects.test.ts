@@ -4,6 +4,9 @@ import path from "node:path";
 import { describe, it } from "node:test";
 import Ajv2020Module from "ajv/dist/2020.js";
 import { dialectProfiles, getDialectProfile, listDialectProfiles, type DialectProfile } from "../src/dialects.js";
+import type { CypherQuery, CypherSchemaContract } from "../src/ir.js";
+import { renderQueryForDialect } from "../src/render.js";
+import { validateQuery } from "../src/validate.js";
 
 interface AjvLike {
   addSchema(schema: unknown): unknown;
@@ -41,6 +44,53 @@ describe("dialect profiles", () => {
     for (const profile of dialectProfiles) {
       assert.equal(validate(profile), true, JSON.stringify(validate.errors, null, 2));
     }
+  });
+
+  it("enforces dialect feature flags and exposes dialect rendering", () => {
+    const openCypherSchema: CypherSchemaContract = {
+      version: "cypher-llm-schema/v1",
+      dialect: "opencypher-9",
+      nodes: [{ name: "Tool" }],
+      relationships: []
+    };
+    const openCypherQuery: CypherQuery = {
+      version: "cypher-llm-ir/v1",
+      clauses: [
+        { kind: "let", bindings: [{ alias: "x", expression: { kind: "literal", value: 1 } }] },
+        {
+          kind: "match",
+          patterns: [{ mode: "trail", shortest: "any", segments: [{ variable: "tool", labels: ["Tool"] }] }]
+        },
+        { kind: "return", items: [{ expression: { kind: "var", name: "tool" } }], limit: { kind: "literal", value: 1 } }
+      ]
+    };
+    const gqlSchema: CypherSchemaContract = {
+      version: "cypher-llm-schema/v1",
+      dialect: "gql",
+      nodes: [{ name: "Tool" }, { name: "Hash" }],
+      relationships: [{ type: "HAS_HASH", from: "Tool", to: "Hash" }]
+    };
+    const gqlQuery: CypherQuery = {
+      version: "cypher-llm-ir/v1",
+      clauses: [
+        {
+          kind: "match",
+          patterns: [
+            {
+              segments: [
+                { variable: "tool", labels: ["Tool"] },
+                { rel: { types: ["HAS_HASH"], direction: "out", minHops: 1, maxHops: 3 }, node: { variable: "hash", labels: ["Hash"] } }
+              ]
+            }
+          ]
+        },
+        { kind: "return", items: [{ expression: { kind: "var", name: "hash" } }], limit: { kind: "literal", value: 1 } }
+      ]
+    };
+
+    assert.ok(validateQuery(openCypherQuery, openCypherSchema).diagnostics.some((item) => item.code === "dialect-unsupported-feature"));
+    assert.ok(validateQuery(gqlQuery, gqlSchema).diagnostics.some((item) => item.code === "dialect-rendering-limitation"));
+    assert.equal(renderQueryForDialect(gqlQuery, "gql").includes("MATCH"), true);
   });
 });
 

@@ -245,6 +245,13 @@ Current diagnostic codes include:
 - `missing-procedure`
 - `unknown-procedure`
 - `unknown-procedure-yield`
+- `property-type-mismatch`
+- `parameter-type-mismatch`
+- `comparison-type-mismatch`
+- `function-argument-mismatch`
+- `procedure-argument-mismatch`
+- `dialect-unsupported-feature`
+- `dialect-rendering-limitation`
 - `unbounded-variable-length-path`
 - `raw-cypher-escape-hatch`
 - `raw-expression-escape-hatch`
@@ -281,8 +288,8 @@ Those are deliberate boundaries. The repo is the missing LLM compiler surface, n
 - `src/ir.ts`: Public IR and schema types.
 - `src/schema.ts`: Schema normalization, alias lookup, identifier metadata.
 - `src/neo4j-introspect.ts`: Driver-compatible Neo4j schema introspection.
-- `src/render.ts`: Deterministic Cypher renderer.
-- `src/validate.ts`: Semantic diagnostics and LLM-safe profile checks.
+- `src/render.ts`: Deterministic Cypher renderer and dialect render entrypoint.
+- `src/validate.ts`: Semantic type, dialect, and LLM-safe profile diagnostics.
 - `src/repair.ts`: Structured repair actions over IR and limited raw-Cypher bootstrap repair.
 - `src/raw-lift.ts`: Raw Cypher to IR migration bridge and lift-coverage evals.
 - `src/normalize.ts`: Stable query normalization and equivalence helpers.

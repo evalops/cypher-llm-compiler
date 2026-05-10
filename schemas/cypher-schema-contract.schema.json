@@ -29,6 +29,10 @@
       "type": "object",
       "additionalProperties": { "$ref": "#/$defs/schemaProcedure" }
     },
+    "functions": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/schemaFunction" }
+    },
     "pathTemplates": {
       "type": "array",
       "items": { "$ref": "#/$defs/pathTemplate" }
@@ -107,6 +111,28 @@
               { "$ref": "#/$defs/schemaProperty" }
             ]
           }
+        }
+      }
+    },
+    "schemaFunction": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "description": { "type": "string" },
+        "arguments": {
+          "type": "object",
+          "additionalProperties": {
+            "oneOf": [
+              { "$ref": "#/$defs/cypherType" },
+              { "$ref": "#/$defs/schemaParameter" }
+            ]
+          }
+        },
+        "returns": {
+          "oneOf": [
+            { "$ref": "#/$defs/cypherType" },
+            { "$ref": "#/$defs/schemaProperty" }
+          ]
         }
       }
     },

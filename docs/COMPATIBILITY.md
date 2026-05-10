@@ -22,7 +22,9 @@ Checked-in profiles live under `profiles/`:
 - `opencypher-9`: preview profile for openCypher-style targets.
 - `gql`: experimental forward-looking profile.
 
-The current renderer defaults to LLM-safe Neo4j Cypher 25 behavior. Profiles currently document compatibility and rendering intent; future work should make every profile flag enforceable in validation and rendering.
+The current renderer defaults to LLM-safe Neo4j Cypher 25 behavior. Validation now enforces core feature flags such as `LET`, subqueries, write clauses, path modes, shortest path modes, and GQL range-rendering limitations. `renderQueryForDialect` applies profile rendering rules that are currently safe to express in the text renderer.
+
+Known boundary: the GQL profile records desired relationship quantifier behavior, but the renderer still emits legacy star syntax. Validation reports `dialect-rendering-limitation` when that boundary matters.
 
 ## Breaking Changes
 

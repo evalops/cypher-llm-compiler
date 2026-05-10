@@ -64,6 +64,12 @@ export interface SchemaProcedure {
   yields?: Record<string, CypherType | SchemaProperty>;
 }
 
+export interface SchemaFunction {
+  description?: string;
+  arguments?: Record<string, CypherType | SchemaParameter>;
+  returns?: CypherType | SchemaProperty;
+}
+
 export interface PathTemplateStep {
   from: string;
   relationship: string;
@@ -86,6 +92,7 @@ export interface CypherSchemaContract {
   relationships: SchemaRelationship[];
   parameters?: Record<string, CypherType | SchemaParameter>;
   procedures?: Record<string, SchemaProcedure>;
+  functions?: Record<string, SchemaFunction>;
   pathTemplates?: PathTemplate[];
   disallowWritesByDefault?: boolean;
 }

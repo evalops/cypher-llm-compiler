@@ -81,7 +81,7 @@ export const dialectProfiles = [
     unsupportedPatterns: ["LET clauses", "Cypher 25 FILTER clauses", "GQL path modes"],
     notes: [
       "Use this profile when targeting engines closer to the openCypher 9 grammar.",
-      "The package does not yet enforce every profile-specific restriction."
+      "Validation enforces core feature flags such as LET, path modes, shortest path modes, subqueries, and write support."
     ]
   },
   {
@@ -106,7 +106,9 @@ export const dialectProfiles = [
       requireReadonlyLimit: true
     },
     unsupportedPatterns: ["Dialect-specific graph reference rendering is not implemented yet"],
-    notes: ["This profile records intended compatibility behavior before the renderer fully targets GQL syntax."]
+    notes: [
+      "Validation warns when the current renderer falls back to legacy star syntax for relationship ranges."
+    ]
   }
 ] as const satisfies readonly DialectProfile[];
 

@@ -1,6 +1,7 @@
 import type {
   CypherSchemaContract,
   SchemaNode,
+  SchemaFunction,
   SchemaParameter,
   SchemaProcedure,
   SchemaProperty,
@@ -21,6 +22,7 @@ export interface NormalizedSchema {
   relationships: SchemaRelationship[];
   parameters: Map<string, SchemaParameter>;
   procedures: Map<string, SchemaProcedure>;
+  functions: Map<string, SchemaFunction>;
   nodeByName: Map<string, SchemaNode>;
   relationshipByType: Map<string, SchemaRelationship>;
   labelAliases: Map<string, string>;
@@ -96,6 +98,7 @@ export function normalizeSchema(schema: CypherSchemaContract): NormalizedSchema 
   const propertyAliases = new Map<string, string>();
   const parameters = new Map<string, SchemaParameter>();
   const procedures = new Map<string, SchemaProcedure>();
+  const functions = new Map<string, SchemaFunction>();
   const labelIdentifiers = new Map<string, IdentifierInfo>();
   const relationshipIdentifiers = new Map<string, IdentifierInfo>();
   const propertyIdentifiers = new Map<string, IdentifierInfo>();
@@ -139,6 +142,10 @@ export function normalizeSchema(schema: CypherSchemaContract): NormalizedSchema 
     procedures.set(lookupKey(name), procedure);
   }
 
+  for (const [name, fn] of Object.entries(schema.functions ?? {})) {
+    functions.set(lookupKey(name), fn);
+  }
+
   return {
     original: schema,
     dialect: schema.dialect ?? "neo4j-cypher-25",
@@ -146,6 +153,7 @@ export function normalizeSchema(schema: CypherSchemaContract): NormalizedSchema 
     relationships: schema.relationships,
     parameters,
     procedures,
+    functions,
     nodeByName,
     relationshipByType,
     labelAliases,
@@ -183,6 +191,10 @@ export function canonicalRelationshipType(schema: NormalizedSchema, typeOrAlias:
 
 export function resolveProcedure(schema: NormalizedSchema, name: string): SchemaProcedure | undefined {
   return schema.procedures.get(lookupKey(name));
+}
+
+export function resolveFunction(schema: NormalizedSchema, name: string): SchemaFunction | undefined {
+  return schema.functions.get(lookupKey(name));
 }
 
 export function resolveProperty(

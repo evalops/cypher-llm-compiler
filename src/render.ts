@@ -21,6 +21,7 @@ import type {
   UnwindClause,
   WithClause
 } from "./ir.js";
+import { getDialectProfile, type DialectProfileId } from "./dialects.js";
 import { cypherIdentifier, isBareIdentifier } from "./schema.js";
 
 export interface RenderOptions {
@@ -36,6 +37,18 @@ const DEFAULT_RENDER_OPTIONS: Required<RenderOptions> = {
 export function renderQuery(query: CypherQuery, options: RenderOptions = {}): string {
   const opts = { ...DEFAULT_RENDER_OPTIONS, ...options };
   return query.clauses.map((clause) => renderClause(clause, opts)).join(opts.newline);
+}
+
+export function renderQueryForDialect(
+  query: CypherQuery,
+  dialect: DialectProfileId,
+  options: RenderOptions = {}
+): string {
+  const profile = getDialectProfile(dialect);
+  return renderQuery(query, {
+    alwaysEscapeSchemaIdentifiers: profile.rendering.escapeSchemaIdentifiers,
+    ...options
+  });
 }
 
 export function renderClause(clause: Clause, options: Required<RenderOptions> = DEFAULT_RENDER_OPTIONS): string {

@@ -186,6 +186,80 @@ describe("validation and repair", () => {
     assert.ok(result.diagnostics.some((item) => item.code === "unknown-procedure-yield"));
   });
 
+  it("reports property, parameter, comparison, function, and procedure type mismatches", () => {
+    const typedSchema: CypherSchemaContract = {
+      ...schema,
+      nodes: [{ name: "Tool", properties: { name: { type: "STRING" }, score: { type: "INTEGER" } } }],
+      relationships: [],
+      parameters: { toolName: { type: "INTEGER", required: true } },
+      procedures: {
+        "db.awaitIndex": {
+          arguments: { name: "STRING" },
+          yields: { done: "BOOLEAN" }
+        }
+      },
+      functions: {
+        "app.slug": {
+          arguments: { value: "STRING" },
+          returns: "STRING"
+        }
+      }
+    };
+    const query: CypherQuery = {
+      version: "cypher-llm-ir/v1",
+      profile: "llm-safe-readonly",
+      clauses: [
+        {
+          kind: "match",
+          patterns: [
+            {
+              segments: [
+                {
+                  variable: "tool",
+                  labels: ["Tool"],
+                  properties: {
+                    name: { kind: "param", name: "toolName" },
+                    score: { kind: "literal", value: "high" }
+                  }
+                }
+              ]
+            }
+          ],
+          where: {
+            kind: "binary",
+            op: ">",
+            left: { kind: "prop", object: { kind: "var", name: "tool" }, key: "name" },
+            right: { kind: "literal", value: 7 }
+          }
+        },
+        {
+          kind: "call",
+          procedure: "db.awaitIndex",
+          arguments: [{ kind: "literal", value: 123 }],
+          yield: [{ expression: { kind: "var", name: "done" } }]
+        },
+        {
+          kind: "return",
+          items: [
+            { expression: { kind: "function", name: "length", arguments: [{ kind: "literal", value: 123 }] }, alias: "badLength" },
+            { expression: { kind: "function", name: "app.slug", arguments: [{ kind: "literal", value: 123 }] }, alias: "badSlug" }
+          ],
+          limit: { kind: "literal", value: 10 }
+        }
+      ]
+    };
+
+    const result = validateQuery(query, normalizeSchema(typedSchema));
+    const codes = result.diagnostics.map((item) => item.code);
+
+    assert.equal(result.ok, false);
+    assert.ok(codes.includes("parameter-type-mismatch"));
+    assert.ok(codes.includes("property-type-mismatch"));
+    assert.ok(codes.includes("comparison-type-mismatch"));
+    assert.ok(codes.includes("function-argument-mismatch"));
+    assert.ok(codes.includes("procedure-argument-mismatch"));
+  });
+
   it("reports scope, limit, direction, and traversal diagnostics with stable codes", () => {
     const query: CypherQuery = {
       version: "cypher-llm-ir/v1",
