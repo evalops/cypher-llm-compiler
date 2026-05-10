@@ -20,6 +20,7 @@ import { introspectNeo4jSchema } from "./neo4j-introspect.js";
 import { buildLspDiagnostics } from "./lsp.js";
 import { parseCypherLosslessly } from "./lossless-parser.js";
 import { repairQuery, repairRawCypher } from "./repair.js";
+import { buildCypherRepairPlan } from "./repair-plan.js";
 import { evaluateRepairLoop } from "./repair-loop.js";
 import { renderQuery } from "./render.js";
 import { createSafeExecutionPlan } from "./safety.js";
@@ -54,6 +55,9 @@ export async function runCli(argv: string[], io: CliIO = defaultIo()): Promise<n
         return 0;
       case "repair-raw":
         await repairRawCommand(args, io);
+        return 0;
+      case "repair-plan":
+        await repairPlanCommand(args, io);
         return 0;
       case "lift-raw":
         await liftRawCommand(args, io);
@@ -159,6 +163,37 @@ async function repairRawCommand(args: Map<string, string | boolean>, io: CliIO) 
   const schema = normalizeSchema(await readSchema(args, io));
   const raw = stringArg(args, "cypher");
   writeJson(io, repairRawCypher(raw, schema));
+}
+
+async function repairPlanCommand(args: Map<string, string | boolean>, io: CliIO) {
+  const schema = normalizeSchema(await readSchema(args, io)).original;
+  const query = await readQuery(args, io);
+  const params = await readParams(args, io);
+  const defaultLimit = optionalNumber(args.get("default-limit"));
+  const defaultMaxHops = optionalNumber(args.get("default-max-hops"));
+  const options: Parameters<typeof buildCypherRepairPlan>[2] = {};
+  if (defaultLimit !== undefined) {
+    options.defaultLimit = defaultLimit;
+  }
+  if (defaultMaxHops !== undefined) {
+    options.defaultMaxHops = defaultMaxHops;
+  }
+  if (args.get("allow-writes") === true) {
+    options.allowWrites = true;
+  }
+  if (args.get("approved") === true) {
+    options.approved = true;
+  }
+  options.params = params;
+  options.parserMode = args.get("parser-mode") === "lint" ? "lint" : "syntax";
+  const plan = buildCypherRepairPlan(query, schema, options);
+  if (typeof args.get("plan-out") === "string") {
+    await writeJsonFile(io, args.get("plan-out") as string, plan);
+  }
+  writeJson(io, plan);
+  if (args.get("fail-on-blocked") === true && plan.status === "blocked") {
+    throw new Error("Cypher repair plan is blocked.");
+  }
 }
 
 async function liftRawCommand(args: Map<string, string | boolean>, io: CliIO) {
@@ -614,6 +649,7 @@ Commands:
   render      --schema schema.json --query query.json [--params params.json] [--default-limit 25] [--default-max-hops 5]
   validate    --schema schema.json --query query.json
   repair-raw  --schema schema.json --cypher "MATCH ..."
+  repair-plan --schema schema.json --query query.json [--params params.json] [--plan-out plan.json] [--fail-on-blocked] [--default-limit 25] [--default-max-hops 5] [--allow-writes] [--approved] [--parser-mode syntax|lint]
   lift-raw    --cypher "MATCH ..." [--schema schema.json] [--query-out query.json] [--summary-out summary.json] [--profile raw-compatible|llm-safe-readonly] [--mode syntax|lint]
   parse-lossless --cypher "MATCH ..." [--schema schema.json] [--report-out report.json] [--parser-mode syntax|lint] [--no-ir-preview]
   corpus

@@ -47,6 +47,12 @@ Proof-carrying compile output is the first semantic-proof lane. It is exported f
 cypher-llm prove --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json --params examples/tool-hash.params.json --default-limit 25
 ```
 
+Repair plans are exported from `src/repair-plan.ts`, validated by `schemas/repair-plan.schema.json`, and checked in at `examples/proofs/tool-hash.repair-plan.json`.
+
+```bash
+cypher-llm repair-plan --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json --params examples/tool-hash.params.json --default-limit 25
+```
+
 Cost and safety policy planning is exported from `src/policy.ts`, validated by `schemas/policy-report.schema.json`, and checked in at `examples/policy/tool-hash.policy.json`.
 
 ```bash

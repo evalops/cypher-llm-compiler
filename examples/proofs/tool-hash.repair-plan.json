@@ -1,0 +1,104 @@
+{
+  "version": "cypher-llm-repair-plan/v1",
+  "status": "ready",
+  "cypherBefore": "MATCH (tool:`tool` {`name`: $toolName})<-[:`md5`]-(hash:`Hash`)\nRETURN hash.`value` AS md5",
+  "cypherAfter": "MATCH (tool:`Tool` {`name`: $toolName})-[:`has MD5 hash`]->(hash:`Hash`)\nRETURN hash.`value` AS md5\nLIMIT 25",
+  "deterministic": [
+    {
+      "id": "deterministic-1-canonicalize-identifier",
+      "class": "deterministic",
+      "rank": 1,
+      "title": "Canonicalize schema identifier",
+      "path": "/clauses/0/patterns/0/segments/0/labels/0",
+      "diagnostics": [],
+      "patch": {
+        "op": "replace",
+        "path": "/clauses/0/patterns/0/segments/0/labels/0",
+        "value": "Tool"
+      },
+      "before": "tool",
+      "after": "Tool",
+      "rationale": "Compiler can apply this repair without another model call."
+    },
+    {
+      "id": "deterministic-2-canonicalize-identifier",
+      "class": "deterministic",
+      "rank": 2,
+      "title": "Canonicalize schema identifier",
+      "path": "/clauses/0/patterns/0/segments/1/rel/types/0",
+      "diagnostics": [],
+      "patch": {
+        "op": "replace",
+        "path": "/clauses/0/patterns/0/segments/1/rel/types/0",
+        "value": "has MD5 hash"
+      },
+      "before": "md5",
+      "after": "has MD5 hash",
+      "rationale": "Compiler can apply this repair without another model call."
+    },
+    {
+      "id": "deterministic-3-fix-direction",
+      "class": "deterministic",
+      "rank": 3,
+      "title": "Repair relationship direction",
+      "path": "/clauses/0/patterns/0/segments/1/rel/direction",
+      "diagnostics": [],
+      "patch": {
+        "op": "replace",
+        "path": "/clauses/0/patterns/0/segments/1/rel/direction",
+        "value": "out"
+      },
+      "before": "in",
+      "after": "out",
+      "rationale": "Compiler can apply this repair without another model call."
+    },
+    {
+      "id": "deterministic-4-add-limit",
+      "class": "deterministic",
+      "rank": 4,
+      "title": "Add bounded LIMIT",
+      "path": "/clauses/1/limit",
+      "diagnostics": [],
+      "patch": {
+        "op": "add",
+        "path": "/clauses/1/limit",
+        "value": 25
+      },
+      "after": 25,
+      "rationale": "Compiler can apply this repair without another model call."
+    }
+  ],
+  "modelRequired": [],
+  "unsafe": [],
+  "diagnostics": [
+    {
+      "code": "relationship-direction-mismatch",
+      "severity": "warning",
+      "message": "Relationship 'has MD5 hash' direction does not match declared endpoints.",
+      "path": "/clauses/0/patterns/0/segments/1/rel",
+      "suggestion": "Use direction 'out' for this pattern.",
+      "repair": {
+        "kind": "fix-direction",
+        "description": "Change direction to 'out'.",
+        "replacement": "out"
+      }
+    },
+    {
+      "code": "missing-limit",
+      "severity": "warning",
+      "message": "RETURN has no LIMIT in an LLM-safe read profile.",
+      "path": "/clauses/1",
+      "suggestion": "Add a bounded LIMIT or let repairQuery add the configured default.",
+      "repair": {
+        "kind": "add-limit",
+        "description": "Add a default LIMIT to the RETURN clause."
+      }
+    }
+  ],
+  "summary": {
+    "deterministic": 4,
+    "modelRequired": 0,
+    "unsafe": 0,
+    "diagnostics": 2
+  }
+}

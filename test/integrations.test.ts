@@ -50,6 +50,7 @@ describe("OpenAI tool schemas", () => {
       "cypher_render",
       "cypher_validate",
       "cypher_repair",
+      "cypher_repair_plan",
       "cypher_parse_lossless",
       "cypher_parse_check",
       "cypher_policy_check",
@@ -98,6 +99,17 @@ describe("OpenAI tool schemas", () => {
     assert.equal(lossless.version, "cypher-llm-lossless-parse/v1");
     assert.equal(lossless.roundTrip.ok, true);
     assert.equal(lossless.irPreview?.supportedClauses, 2);
+
+    const repairPlan = (await executeCypherCompilerTool("cypher_repair_plan", {
+      schema,
+      query: repairableQuery,
+      defaultLimit: 25,
+      defaultMaxHops: 3,
+      parserMode: "syntax"
+    })) as { version: string; deterministic: { patch?: { path: string } }[] };
+
+    assert.equal(repairPlan.version, "cypher-llm-repair-plan/v1");
+    assert.ok(repairPlan.deterministic.some((step) => step.patch?.path === "/clauses/1/limit"));
 
     const policy = (await executeCypherCompilerTool("cypher_policy_check", {
       schema,

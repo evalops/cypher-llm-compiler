@@ -19,6 +19,7 @@ const TOOL_ROUTES: Record<string, CypherCompilerToolName> = {
   "/v1/render": "cypher_render",
   "/v1/validate": "cypher_validate",
   "/v1/repair": "cypher_repair",
+  "/v1/repair-plan": "cypher_repair_plan",
   "/v1/parse-lossless": "cypher_parse_lossless",
   "/v1/parse-check": "cypher_parse_check",
   "/v1/policy": "cypher_policy_check",

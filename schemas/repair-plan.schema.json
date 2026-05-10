@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evalops.dev/schemas/cypher-llm/repair-plan/v1.json",
+  "title": "Cypher Repair Plan",
+  "type": "object",
+  "required": ["version", "status", "cypherBefore", "cypherAfter", "deterministic", "modelRequired", "unsafe", "diagnostics", "summary"],
+  "additionalProperties": true,
+  "properties": {
+    "version": { "const": "cypher-llm-repair-plan/v1" },
+    "status": { "enum": ["ready", "needs-model", "blocked"] },
+    "cypherBefore": { "type": "string" },
+    "cypherAfter": { "type": "string" },
+    "deterministic": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/step" }
+    },
+    "modelRequired": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/step" }
+    },
+    "unsafe": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/step" }
+    },
+    "diagnostics": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/diagnostic" }
+    },
+    "summary": {
+      "type": "object",
+      "required": ["deterministic", "modelRequired", "unsafe", "diagnostics"],
+      "additionalProperties": false,
+      "properties": {
+        "deterministic": { "type": "integer", "minimum": 0 },
+        "modelRequired": { "type": "integer", "minimum": 0 },
+        "unsafe": { "type": "integer", "minimum": 0 },
+        "diagnostics": { "type": "integer", "minimum": 0 }
+      }
+    }
+  },
+  "$defs": {
+    "step": {
+      "type": "object",
+      "required": ["id", "class", "rank", "title", "diagnostics", "rationale"],
+      "additionalProperties": true,
+      "properties": {
+        "id": { "type": "string" },
+        "class": { "enum": ["deterministic", "model-required", "unsafe"] },
+        "rank": { "type": "integer" },
+        "title": { "type": "string" },
+        "path": { "type": "string" },
+        "diagnostics": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/diagnostic" }
+        },
+        "patch": {
+          "type": "object",
+          "required": ["op", "path", "value"],
+          "additionalProperties": true,
+          "properties": {
+            "op": { "enum": ["add", "replace"] },
+            "path": { "type": "string" },
+            "value": {}
+          }
+        },
+        "before": {},
+        "after": {},
+        "rationale": { "type": "string" }
+      }
+    },
+    "diagnostic": {
+      "type": "object",
+      "required": ["code", "severity", "message"],
+      "additionalProperties": true,
+      "properties": {
+        "code": { "type": "string" },
+        "severity": { "enum": ["error", "warning", "info"] },
+        "message": { "type": "string" },
+        "path": { "type": "string" },
+        "suggestion": { "type": "string" }
+      }
+    }
+  }
+}

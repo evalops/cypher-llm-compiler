@@ -19,7 +19,7 @@ The gap is not "LLMs need a better prompt." The gap is a missing compiler bounda
 
 ## What This Implements
 
-This package implements sixteen concrete improvements:
+This package implements seventeen concrete improvements:
 
 1. **Official JSON IR**: Agents can emit a small, typed Cypher AST instead of brittle text.
 2. **LLM-safe profile**: The renderer emits conservative Cypher with escaped schema identifiers, explicit projections, bounded path recommendations, and deterministic formatting.
@@ -37,6 +37,7 @@ This package implements sixteen concrete improvements:
 14. **Lossless parse reports**: Existing Cypher can be preserved byte-for-byte while agents inspect statements, clauses, comments, source spans, parser output, and IR-preview coverage.
 15. **CypherBench scorecards**: Eval reports can be published as ranked JSON and markdown scorecards across raw, IR-first, repaired, parser-validated, and mixed lanes.
 16. **Dataset governance reports**: Benchmark datasets can be audited for provenance, split assignment, redaction findings, duplicate ids, and public-release diagnostics.
+17. **Ranked repair plans**: Agents can receive deterministic patches, model-required fixes, and unsafe blockers as separate ranked plan steps.
 
 ## Quick Start
 
@@ -132,6 +133,7 @@ The CLI is intentionally boring JSON in, JSON out so it can be called by agents,
 cypher-llm render --schema schema.json --query query.json --params params.json --default-limit 25
 cypher-llm validate --schema schema.json --query query.json
 cypher-llm repair-raw --schema schema.json --cypher "MATCH (t:Tool)-[:has MD5 hash]->(h:Hash) RETURN h"
+cypher-llm repair-plan --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json --params examples/tool-hash.params.json --default-limit 25
 cypher-llm lift-raw --schema schema.json --cypher "MATCH (t:Tool)-[:has MD5 hash]->(h:Hash) RETURN h"
 cypher-llm parse-lossless --schema examples/tool-hash.schema.json --cypher "MATCH (t:Tool) RETURN t"
 cypher-llm corpus
@@ -165,6 +167,8 @@ npm run test:live:neo4j
 
 `eval` returns a `cypher-llm-eval-report/v1` report with pass rate, executable rate, repair rate, diagnostic counts, and per-task outcomes.
 
+`repair-plan` emits a `cypher-llm-repair-plan/v1` object that separates deterministic JSON-patch-like repairs, model-required diagnostics, and unsafe or approval-gated blockers.
+
 `compare-evals` compares two reports and marks directional metric deltas as improvements or regressions.
 
 `scorecard` emits a `cypher-llm-cypherbench-scorecard/v1` JSON report or markdown table from one or more eval reports.
@@ -195,7 +199,7 @@ npm run test:live:neo4j
 
 `mcp` starts a stdio MCP server exposing the same render, validate, repair, parse-lossless, parse-check, policy, proof, LSP, and eval operations to agent clients.
 
-`serve` starts a local JSON HTTP service exposing `/healthz`, `/v1/tools`, `/v1/render`, `/v1/validate`, `/v1/repair`, `/v1/parse-lossless`, `/v1/parse-check`, `/v1/policy`, `/v1/lsp-diagnostics`, `/v1/prove`, `/v1/eval`, `/v1/scorecard`, `/v1/dataset-governance`, `/v1/roadmap`, and `/v1/dialect-certification`.
+`serve` starts a local JSON HTTP service exposing `/healthz`, `/v1/tools`, `/v1/render`, `/v1/validate`, `/v1/repair`, `/v1/repair-plan`, `/v1/parse-lossless`, `/v1/parse-check`, `/v1/policy`, `/v1/lsp-diagnostics`, `/v1/prove`, `/v1/eval`, `/v1/scorecard`, `/v1/dataset-governance`, `/v1/roadmap`, and `/v1/dialect-certification`.
 
 `test:live:neo4j` runs the optional Docker-backed Neo4j `EXPLAIN` fixture when `CYPHER_LLM_NEO4J_URI` and `CYPHER_LLM_NEO4J_PASSWORD` are set.
 
@@ -326,6 +330,7 @@ Those are deliberate boundaries. The repo is the missing LLM compiler surface, n
 - `src/render.ts`: Deterministic Cypher renderer and dialect render entrypoint.
 - `src/validate.ts`: Semantic type, dialect, and LLM-safe profile diagnostics.
 - `src/repair.ts`: Structured repair actions over IR and limited raw-Cypher bootstrap repair.
+- `src/repair-plan.ts`: Ranked deterministic, model-required, and unsafe repair plans.
 - `src/raw-lift.ts`: Raw Cypher to IR migration bridge and lift-coverage evals.
 - `src/lossless-parser.ts`: Lossless source preservation, comment/span extraction, clause CST, and IR-preview mapping.
 - `src/normalize.ts`: Stable query normalization and equivalence helpers.
@@ -360,7 +365,7 @@ Those are deliberate boundaries. The repo is the missing LLM compiler surface, n
 - `examples/proofs/`: Checked-in proof-carrying compile output.
 - `examples/roadmap/`: Machine-readable years-scale roadmap snapshot.
 - `profiles/`: Versioned dialect profiles for Neo4j Cypher 25, openCypher 9, and GQL-oriented output.
-- `schemas/`: JSON Schema contracts for IR, graph schema, lossless parse reports, dataset governance, eval datasets, and eval attempts.
+- `schemas/`: JSON Schema contracts for IR, graph schema, repair plans, lossless parse reports, dataset governance, eval datasets, and eval attempts.
 - `test/`: Node test-runner coverage for renderer, schema, validation, repair, safety, and corpus behavior.
 
 ## Design Rules

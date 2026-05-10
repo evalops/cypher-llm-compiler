@@ -20,6 +20,7 @@ export * from "./policy.js";
 export * from "./proof.js";
 export * from "./raw-lift.js";
 export * from "./repair.js";
+export * from "./repair-plan.js";
 export * from "./repair-loop.js";
 export * from "./render.js";
 export * from "./safety.js";

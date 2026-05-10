@@ -352,6 +352,54 @@ describe("cli", () => {
     assert.ok(writes.get("out/governance.json")?.includes("default-public-benchmark"));
   });
 
+  it("emits ranked repair plans from query files", async () => {
+    const files = new Map<string, string>([
+      [
+        "schema.json",
+        JSON.stringify({
+          version: "cypher-llm-schema/v1",
+          nodes: [{ name: "Tool", aliases: ["tool"] }],
+          relationships: []
+        })
+      ],
+      [
+        "query.json",
+        JSON.stringify({
+          version: "cypher-llm-ir/v1",
+          profile: "llm-safe-readonly",
+          clauses: [
+            { kind: "match", patterns: [{ segments: [{ variable: "tool", labels: ["tool"] }] }] },
+            { kind: "return", items: [{ expression: { kind: "var", name: "tool" } }] }
+          ]
+        })
+      ]
+    ]);
+    const writes = new Map<string, string>();
+    let stdout = "";
+    let stderr = "";
+    const io: CliIO = {
+      stdout: { write: (chunk: string | Uint8Array) => ((stdout += String(chunk)), true) },
+      stderr: { write: (chunk: string | Uint8Array) => ((stderr += String(chunk)), true) },
+      readFile: async (path) => files.get(String(path)) ?? "",
+      writeFile: async (path, data) => {
+        writes.set(path, data);
+      },
+      mkdir: async () => undefined
+    };
+
+    const code = await runCli(
+      ["repair-plan", "--schema", "schema.json", "--query", "query.json", "--plan-out", "out/repair-plan.json", "--default-limit", "25"],
+      io
+    );
+    const output = JSON.parse(stdout) as { version: string; deterministic: { patch?: { path: string } }[] };
+
+    assert.equal(code, 0);
+    assert.equal(stderr, "");
+    assert.equal(output.version, "cypher-llm-repair-plan/v1");
+    assert.ok(output.deterministic.some((step) => step.patch?.path === "/clauses/1/limit"));
+    assert.ok(writes.get("out/repair-plan.json")?.includes("cypher-llm-repair-plan/v1"));
+  });
+
   it("runs parser-backed validation from raw Cypher", async () => {
     const files = new Map<string, string>([
       [

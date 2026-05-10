@@ -65,6 +65,16 @@ Applies deterministic repairs over the structured IR:
 
 It returns the repaired query, diagnostics, and an ordered list of applied repairs.
 
+## `buildCypherRepairPlan(query, schema, options?)`
+
+Builds a `cypher-llm-repair-plan/v1` object that separates:
+
+- `deterministic`: compiler-owned JSON-patch-like steps for canonicalization, direction, path bounds, and limits.
+- `modelRequired`: diagnostics that require corrected `CypherQuery` IR from a model.
+- `unsafe`: approval-gated or policy-blocked steps that should not be auto-repaired.
+
+The report includes `cypherBefore`, `cypherAfter`, ranked steps, diagnostics, and a compact summary.
+
 ## `repairRawCypher(raw, schema)`
 
 Bootstrap bridge for existing text2cypher chains.

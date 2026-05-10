@@ -115,9 +115,11 @@
       "firstArtifacts": [
         "src/validate.ts",
         "src/repair.ts",
+        "src/repair-plan.ts",
         "src/proof.ts",
         "src/failure-corpus.ts",
-        "docs/FAILURE_CORPUS.md"
+        "docs/FAILURE_CORPUS.md",
+        "examples/proofs/tool-hash.repair-plan.json"
       ],
       "acceptanceGates": [
         "Every accepted query can emit a compact proof summary.",
@@ -371,6 +373,20 @@
       "workstreamIds": [
         "public-cypherbench",
         "semantic-proof-repair"
+      ]
+    },
+    {
+      "id": "repair-plans",
+      "title": "Ranked Deterministic And Model Repair Plans",
+      "status": "partial",
+      "evidence": [
+        "src/repair-plan.ts",
+        "schemas/repair-plan.schema.json",
+        "test/repair-plan.test.ts"
+      ],
+      "workstreamIds": [
+        "semantic-proof-repair",
+        "public-cypherbench"
       ]
     },
     {

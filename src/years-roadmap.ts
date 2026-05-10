@@ -161,7 +161,15 @@ export const yearsRoadmap = {
         "Minimal IR patches split into deterministic, model-required, and unsafe repair classes.",
         "Repair plans attach source spans, IR paths, and benchmark evidence."
       ],
-      firstArtifacts: ["src/validate.ts", "src/repair.ts", "src/proof.ts", "src/failure-corpus.ts", "docs/FAILURE_CORPUS.md"],
+      firstArtifacts: [
+        "src/validate.ts",
+        "src/repair.ts",
+        "src/repair-plan.ts",
+        "src/proof.ts",
+        "src/failure-corpus.ts",
+        "docs/FAILURE_CORPUS.md",
+        "examples/proofs/tool-hash.repair-plan.json"
+      ],
       acceptanceGates: [
         "Every accepted query can emit a compact proof summary.",
         "Every failed query can emit a bounded repair plan or a clear refusal.",
@@ -328,6 +336,13 @@ export const yearsRoadmap = {
       status: "partial",
       evidence: ["src/repair-loop.ts", "docs/REPAIR_LOOP.md", "test/eval-compare.test.ts"],
       workstreamIds: ["public-cypherbench", "semantic-proof-repair"]
+    },
+    {
+      id: "repair-plans",
+      title: "Ranked Deterministic And Model Repair Plans",
+      status: "partial",
+      evidence: ["src/repair-plan.ts", "schemas/repair-plan.schema.json", "test/repair-plan.test.ts"],
+      workstreamIds: ["semantic-proof-repair", "public-cypherbench"]
     },
     {
       id: "parser-validation",

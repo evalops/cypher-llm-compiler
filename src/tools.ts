@@ -10,6 +10,7 @@ import { assessCypherPolicy } from "./policy.js";
 import { buildCypherProof } from "./proof.js";
 import type { RepairOptions } from "./repair.js";
 import { repairQuery, repairRawCypher } from "./repair.js";
+import { buildCypherRepairPlan } from "./repair-plan.js";
 import { renderQuery } from "./render.js";
 import type { SafeExecutionOptions } from "./safety.js";
 import { createSafeExecutionPlan } from "./safety.js";
@@ -23,6 +24,7 @@ export type CypherCompilerToolName =
   | "cypher_render"
   | "cypher_validate"
   | "cypher_repair"
+  | "cypher_repair_plan"
   | "cypher_parse_lossless"
   | "cypher_parse_check"
   | "cypher_policy_check"
@@ -203,6 +205,29 @@ export const CYPHER_COMPILER_TOOLS: readonly CypherCompilerToolDefinition[] = [
         description: "Legacy raw Cypher text to repair during migration. Prefer query for new generation."
       },
       ...repairOptionProperties
+    })
+  },
+  {
+    name: "cypher_repair_plan",
+    description:
+      "Build a ranked repair plan for Cypher IR, separating deterministic JSON-patch repairs, model-required fixes, and unsafe or approval-gated blockers.",
+    inputSchema: objectSchema(["schema", "query"], {
+      schema: schemaContractSchema,
+      query: cypherQuerySchema,
+      params: paramsSchema,
+      ...repairOptionProperties,
+      allowWrites: {
+        type: "boolean",
+        description: "Allow write clauses in policy assessment."
+      },
+      approved: {
+        type: "boolean",
+        description: "Mark write query as externally approved."
+      },
+      parserMode: {
+        enum: ["lint", "syntax"],
+        description: "Parser preflight mode for the repaired Cypher."
+      }
     })
   },
   {
@@ -423,6 +448,13 @@ export async function executeCypherCompilerTool(name: string, input: unknown): P
       }
       throw new Error("cypher_repair requires either 'query' or 'rawCypher'.");
     }
+    case "cypher_repair_plan": {
+      return buildCypherRepairPlan(
+        requiredObject<CypherQuery>(args, "query"),
+        requiredObject<CypherSchemaContract>(args, "schema"),
+        repairPlanOptions(args)
+      );
+    }
     case "cypher_parse_check": {
       const schema = requiredObject<CypherSchemaContract>(args, "schema");
       const mode = parseMode(args);
@@ -612,7 +644,7 @@ function safeExecutionOptions(args: Record<string, unknown>): SafeExecutionOptio
 
 function proofOptions(args: Record<string, unknown>) {
   const options = safeExecutionOptions(args) as ReturnType<typeof safeExecutionOptions> & {
-    parserMode?: ParserValidationOptions["mode"];
+    parserMode?: Required<ParserValidationOptions>["mode"];
     includeParser?: boolean;
   };
   const parserMode = optionalString(args, "parserMode");
@@ -625,6 +657,37 @@ function proofOptions(args: Record<string, unknown>) {
   }
   if (includeParser !== undefined) {
     options.includeParser = includeParser;
+  }
+  return options;
+}
+
+function repairPlanOptions(args: Record<string, unknown>) {
+  const options: {
+    defaultLimit?: number;
+    defaultMaxHops?: number;
+    params?: Record<string, JsonLiteral>;
+    allowWrites?: boolean;
+    approved?: boolean;
+    parserMode?: Required<ParserValidationOptions>["mode"];
+  } = { ...repairOptions(args) };
+  const params = optionalParams(args);
+  const allowWrites = optionalBoolean(args, "allowWrites");
+  const approved = optionalBoolean(args, "approved");
+  const parserMode = optionalString(args, "parserMode");
+  if (Object.keys(params).length > 0) {
+    options.params = params;
+  }
+  if (allowWrites !== undefined) {
+    options.allowWrites = allowWrites;
+  }
+  if (approved !== undefined) {
+    options.approved = approved;
+  }
+  if (parserMode !== undefined) {
+    if (parserMode !== "lint" && parserMode !== "syntax") {
+      throw new Error("Expected 'parserMode' to be lint or syntax.");
+    }
+    options.parserMode = parserMode;
   }
   return options;
 }
