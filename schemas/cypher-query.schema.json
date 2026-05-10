@@ -133,7 +133,7 @@
     "callClause": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["kind", "procedure"],
+      "required": ["kind"],
       "properties": {
         "kind": { "const": "call" },
         "procedure": { "type": "string", "minLength": 1 },
@@ -145,8 +145,18 @@
           "type": "array",
           "items": { "$ref": "#/$defs/projectionItem" }
         },
-        "where": { "$ref": "#/$defs/expression" }
-      }
+        "where": { "$ref": "#/$defs/expression" },
+        "subquery": { "$ref": "#" },
+        "import": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        }
+      },
+      "anyOf": [
+        { "required": ["procedure"] },
+        { "required": ["subquery"] }
+      ]
     },
     "createClause": {
       "type": "object",

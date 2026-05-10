@@ -120,6 +120,23 @@ function renderReturn(clause: ReturnClause, options: Required<RenderOptions>): s
 }
 
 function renderCall(clause: CallClause, options: Required<RenderOptions>): string {
+  if (clause.subquery) {
+    const lines = ["CALL {"];
+    if (clause.import && clause.import.length > 0) {
+      lines.push(`${options.newline}  WITH ${clause.import.map(renderVariable).join(", ")}`);
+    }
+    lines.push(
+      renderQuery(clause.subquery, options)
+        .split(options.newline)
+        .map((line) => `${options.newline}  ${line}`)
+        .join("")
+    );
+    lines.push(`${options.newline}}`);
+    return lines.join("");
+  }
+  if (!clause.procedure) {
+    return "CALL <missing-procedure>()";
+  }
   const args = (clause.arguments ?? []).map((arg) => renderExpressionWithOptions(arg, options)).join(", ");
   const lines = [`CALL ${clause.procedure}(${args})`];
   if (clause.yield && clause.yield.length > 0) {

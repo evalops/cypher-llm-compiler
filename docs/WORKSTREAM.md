@@ -46,7 +46,7 @@ Artifacts:
 - Dialect-specific rendering and validation.
 - Property and parameter type checks.
 
-Status: started with aggregation diagnostics for `MATCH WHERE` aggregate placement and ambiguous aggregate/scalar projection expressions. This is where LLM failures become precise repair instructions instead of broad invalid-query reports.
+Status: implemented for the current IR surface. Validation now covers aggregate aliasing, invalid aggregate predicates, ambiguous aggregate/scalar expressions, `CALL {}` subquery import/export scope, subquery export shadowing, and procedure `YIELD` variables when `schema.procedures` metadata is present.
 
 ## 5. Agent Integrations
 

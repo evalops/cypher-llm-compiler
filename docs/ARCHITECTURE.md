@@ -6,7 +6,7 @@ The flow is:
 
 1. Normalize the graph schema into a machine-readable contract.
 2. Accept a JSON IR query from an agent or tool.
-3. Validate semantics against schema, scope, parameter, and safety rules.
+3. Validate semantics against schema, scope, subquery import/export, procedure metadata, aggregation, parameter, and safety rules.
 4. Apply bounded IR repairs when a mistake is deterministic.
 5. Render canonical Cypher.
 6. Produce an execution plan that can be run as `EXPLAIN`, read-only, or approval-required.

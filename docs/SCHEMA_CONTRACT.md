@@ -8,6 +8,7 @@ The schema contract includes:
 - Relationship types, aliases, direction, and allowed endpoints.
 - Property names, aliases, types, nullability, and sample values.
 - Declared parameters and expected types.
+- Optional procedure metadata, including arguments and yielded variables.
 - Optional path templates for common traversals.
 
-The renderer uses this contract to escape identifiers. The validator uses it to detect unknown labels, unknown relationship types, property drift, invalid directions, and parameter mismatches.
+The renderer uses this contract to escape identifiers. The validator uses it to detect unknown labels, unknown relationship types, property drift, invalid directions, parameter mismatches, and procedure `YIELD` drift when metadata is present.

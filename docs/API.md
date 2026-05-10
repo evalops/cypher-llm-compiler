@@ -35,7 +35,11 @@ Validation currently covers:
 - Unknown parameters.
 - Variables referenced out of scope.
 - Aggregate functions in pre-aggregation `MATCH WHERE` clauses.
+- Aggregate projections that need stable aliases for later clauses.
+- Aggregate calls repeated in post-projection predicates instead of referenced by alias.
 - Ambiguous aggregate/scalar projection expressions.
+- `CALL {}` subquery imports, exports, and outer-scope shadowing.
+- Procedure names and `YIELD` variables when `schema.procedures` metadata is provided.
 - Relationship direction against declared endpoints.
 - Missing `LIMIT` in LLM-safe read mode.
 - Unbounded variable-length paths.

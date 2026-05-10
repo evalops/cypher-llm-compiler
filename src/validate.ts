@@ -1,5 +1,6 @@
 import type {
   Binding,
+  CallClause,
   Clause,
   CypherQuery,
   CypherSchemaContract,
@@ -21,6 +22,7 @@ import {
   normalizeSchema,
   resolveLabel,
   resolveProperty,
+  resolveProcedure,
   resolveRelationshipType,
   type NormalizedSchema
 } from "./schema.js";
@@ -97,9 +99,10 @@ function validateClause(
   scope: Scope,
   schema: NormalizedSchema,
   diagnostics: Diagnostic[],
-  options: Required<ValidationOptions>
+  options: Required<ValidationOptions>,
+  basePath = "/clauses"
 ) {
-  const path = `/clauses/${index}`;
+  const path = `${basePath}/${index}`;
   if (isWriteClause(clause) && options.disallowWrites) {
     diagnostics.push(
       diagnostic({
@@ -114,7 +117,7 @@ function validateClause(
 
   switch (clause.kind) {
     case "match":
-      validateMatch(clause, index, scope, schema, diagnostics, options);
+      validateMatch(clause, path, scope, schema, diagnostics, options);
       return;
     case "unwind":
       validateExpression(clause.expression, scope, schema, diagnostics, `${path}/expression`, options);
@@ -129,24 +132,13 @@ function validateClause(
       }
       return;
     case "with":
-      validateWith(clause, index, scope, schema, diagnostics, options);
+      validateWith(clause, path, scope, schema, diagnostics, options);
       return;
     case "return":
-      validateReturn(clause, index, scope, schema, diagnostics, options);
+      validateReturn(clause, path, scope, schema, diagnostics, options);
       return;
     case "call":
-      for (const [argumentIndex, argument] of (clause.arguments ?? []).entries()) {
-        validateExpression(argument, scope, schema, diagnostics, `${path}/arguments/${argumentIndex}`, options);
-      }
-      for (const projection of clause.yield ?? []) {
-        const alias = projection.alias ?? variableName(projection.expression);
-        if (alias) {
-          scope.set(alias, { kind: "unknown" });
-        }
-      }
-      if (clause.where) {
-        validateExpression(clause.where, scope, schema, diagnostics, `${path}/where`, options);
-      }
+      validateCall(clause, path, scope, schema, diagnostics, options);
       return;
     case "create":
       clause.patterns.forEach((pattern, patternIndex) =>
@@ -189,14 +181,14 @@ function validateClause(
 
 function validateMatch(
   clause: MatchClause,
-  index: number,
+  path: string,
   scope: Scope,
   schema: NormalizedSchema,
   diagnostics: Diagnostic[],
   options: Required<ValidationOptions>
 ) {
   clause.patterns.forEach((pattern, patternIndex) =>
-    validatePath(pattern, scope, schema, diagnostics, `/clauses/${index}/patterns/${patternIndex}`, options)
+    validatePath(pattern, scope, schema, diagnostics, `${path}/patterns/${patternIndex}`, options)
   );
   if (clause.where) {
     if (containsAggregateFunction(clause.where)) {
@@ -205,27 +197,165 @@ function validateMatch(
           code: "aggregate-in-match-where",
           severity: "error",
           message: "MATCH WHERE cannot contain aggregate functions because it is evaluated before aggregation.",
-          path: `/clauses/${index}/where`,
+          path: `${path}/where`,
           suggestion: "Move the aggregate into a WITH or RETURN projection, alias it, then filter on that alias."
         })
       );
     }
-    validateExpression(clause.where, scope, schema, diagnostics, `/clauses/${index}/where`, options);
+    validateExpression(clause.where, scope, schema, diagnostics, `${path}/where`, options);
   }
 }
 
-function validateWith(
-  clause: WithClause,
-  index: number,
+function validateCall(
+  clause: CallClause,
+  path: string,
   scope: Scope,
   schema: NormalizedSchema,
   diagnostics: Diagnostic[],
   options: Required<ValidationOptions>
 ) {
-  const path = `/clauses/${index}`;
+  if (clause.subquery) {
+    validateSubqueryCall(clause, path, scope, schema, diagnostics, options);
+    return;
+  }
+  validateProcedureCall(clause, path, scope, schema, diagnostics, options);
+}
+
+function validateProcedureCall(
+  clause: CallClause,
+  path: string,
+  scope: Scope,
+  schema: NormalizedSchema,
+  diagnostics: Diagnostic[],
+  options: Required<ValidationOptions>
+) {
+  if (!clause.procedure) {
+    diagnostics.push(
+      diagnostic({
+        code: "missing-procedure",
+        severity: "error",
+        message: "CALL procedure clause requires a procedure name.",
+        path,
+        suggestion: "Set procedure or use subquery for CALL { ... }."
+      })
+    );
+    return;
+  }
+
+  const procedure = resolveProcedure(schema, clause.procedure);
+  if (schema.procedures.size > 0 && !procedure) {
+    diagnostics.push(
+      diagnostic({
+        code: "unknown-procedure",
+        severity: "error",
+        message: `Procedure '${clause.procedure}' is not declared in the schema contract.`,
+        path: `${path}/procedure`,
+        suggestion: "Use a declared procedure or add procedure metadata to schema.procedures."
+      })
+    );
+  }
+
+  for (const [argumentIndex, argument] of (clause.arguments ?? []).entries()) {
+    validateExpression(argument, scope, schema, diagnostics, `${path}/arguments/${argumentIndex}`, options);
+  }
+
+  for (const [yieldIndex, projection] of (clause.yield ?? []).entries()) {
+    const yieldedName = variableName(projection.expression);
+    if (procedure?.yields && (!yieldedName || !(yieldedName in procedure.yields))) {
+      diagnostics.push(
+        diagnostic({
+          code: "unknown-procedure-yield",
+          severity: "error",
+          message: yieldedName
+            ? `Procedure '${clause.procedure}' does not yield '${yieldedName}'.`
+            : `Procedure '${clause.procedure}' YIELD item must be a yielded variable.`,
+          path: `${path}/yield/${yieldIndex}`,
+          suggestion: "Use a YIELD variable declared in schema.procedures for this procedure."
+        })
+      );
+    }
+    const alias = projection.alias ?? yieldedName;
+    if (alias) {
+      scope.set(alias, { kind: "unknown" });
+    }
+  }
+
+  if (clause.where) {
+    validateExpression(clause.where, scope, schema, diagnostics, `${path}/where`, options);
+  }
+}
+
+function validateSubqueryCall(
+  clause: CallClause,
+  path: string,
+  scope: Scope,
+  schema: NormalizedSchema,
+  diagnostics: Diagnostic[],
+  options: Required<ValidationOptions>
+) {
+  const subScope: Scope = new Map();
+  for (const [importIndex, name] of (clause.import ?? []).entries()) {
+    const binding = scope.get(name);
+    if (!binding) {
+      diagnostics.push(
+        diagnostic({
+          code: "subquery-import-undefined",
+          severity: "error",
+          message: `Subquery imports variable '${name}', but it is not in the outer scope.`,
+          path: `${path}/import/${importIndex}`,
+          suggestion: "Import only variables produced before CALL, or move the CALL after the variable is introduced."
+        })
+      );
+      continue;
+    }
+    subScope.set(name, binding);
+  }
+
+  clause.subquery?.clauses.forEach((subClause, subIndex) => {
+    validateClause(subClause, subIndex, subScope, schema, diagnostics, options, `${path}/subquery/clauses`);
+  });
+
+  const exports = exportedSubqueryBindings(clause.subquery, subScope);
+  if (exports.size === 0) {
+    diagnostics.push(
+      diagnostic({
+        code: "subquery-missing-return",
+        severity: "warning",
+        message: "CALL subquery does not export variables with a final RETURN clause.",
+        path: `${path}/subquery`,
+        suggestion: "End the subquery with RETURN aliases for values needed by following clauses."
+      })
+    );
+  }
+  for (const [name, binding] of exports) {
+    if (scope.has(name)) {
+      diagnostics.push(
+        diagnostic({
+          code: "subquery-variable-shadowing",
+          severity: "error",
+          message: `Subquery returns '${name}', which is already bound in the outer scope.`,
+          path: `${path}/subquery`,
+          suggestion: "Return the value with a distinct alias."
+        })
+      );
+      continue;
+    }
+    scope.set(name, binding);
+  }
+}
+
+function validateWith(
+  clause: WithClause,
+  path: string,
+  scope: Scope,
+  schema: NormalizedSchema,
+  diagnostics: Diagnostic[],
+  options: Required<ValidationOptions>
+) {
   clause.items.forEach((item, itemIndex) =>
     validateProjectionItem(item, scope, schema, diagnostics, `${path}/items/${itemIndex}`, options)
   );
+  const aggregation = projectionAggregationInfo(clause.items);
 
   const nextScope: Scope = clause.includeExisting ? new Map(scope) : new Map();
   for (const item of clause.items) {
@@ -240,6 +370,7 @@ function validateWith(
   }
 
   if (clause.where) {
+    validateAggregationPredicate(clause.where, aggregation, diagnostics, `${path}/where`);
     validateExpression(clause.where, scope, schema, diagnostics, `${path}/where`, options);
   }
   clause.orderBy?.forEach((item, itemIndex) =>
@@ -255,19 +386,20 @@ function validateWith(
 
 function validateReturn(
   clause: ReturnClause,
-  index: number,
+  path: string,
   scope: Scope,
   schema: NormalizedSchema,
   diagnostics: Diagnostic[],
   options: Required<ValidationOptions>
 ) {
-  const path = `/clauses/${index}`;
   clause.items.forEach((item, itemIndex) =>
     validateProjectionItem(item, scope, schema, diagnostics, `${path}/items/${itemIndex}`, options)
   );
-  clause.orderBy?.forEach((item, itemIndex) =>
-    validateExpression(item.expression, scope, schema, diagnostics, `${path}/orderBy/${itemIndex}`, options)
-  );
+  const aggregation = projectionAggregationInfo(clause.items);
+  clause.orderBy?.forEach((item, itemIndex) => {
+    validateAggregationPredicate(item.expression, aggregation, diagnostics, `${path}/orderBy/${itemIndex}`);
+    validateExpression(item.expression, scope, schema, diagnostics, `${path}/orderBy/${itemIndex}`, options);
+  });
   if (clause.skip) {
     validateExpression(clause.skip, scope, schema, diagnostics, `${path}/skip`, options);
   }
@@ -309,6 +441,17 @@ function validateProjectionItem(
   path: string,
   options: Required<ValidationOptions>
 ) {
+  if (containsAggregateFunction(item.expression) && !item.alias) {
+    diagnostics.push(
+      diagnostic({
+        code: "aggregate-alias-required",
+        severity: "error",
+        message: "Aggregate projections should be aliased before later clauses can use them safely.",
+        path,
+        suggestion: "Add an alias such as AS countValue and reference that alias in following WITH/RETURN/WHERE clauses."
+      })
+    );
+  }
   if (hasAmbiguousAggregation(item.expression)) {
     diagnostics.push(
       diagnostic({
@@ -710,6 +853,51 @@ function containsAggregateFunction(expression: Expression): boolean {
 
 function hasAmbiguousAggregation(expression: Expression): boolean {
   return aggregationShape(expression).ambiguous;
+}
+
+interface ProjectionAggregationInfo {
+  hasAggregate: boolean;
+}
+
+function projectionAggregationInfo(items: ProjectionItem[]): ProjectionAggregationInfo {
+  return {
+    hasAggregate: items.some((item) => containsAggregateFunction(item.expression))
+  };
+}
+
+function validateAggregationPredicate(
+  expression: Expression,
+  aggregation: ProjectionAggregationInfo,
+  diagnostics: Diagnostic[],
+  path: string
+) {
+  if (!aggregation.hasAggregate || !containsAggregateFunction(expression)) {
+    return;
+  }
+  diagnostics.push(
+    diagnostic({
+      code: "invalid-aggregation",
+      severity: "error",
+      message: "Aggregation predicates should reference projected aggregate aliases, not repeat aggregate calls.",
+      path,
+      suggestion: "Alias the aggregate in WITH/RETURN, then filter or order by that alias."
+    })
+  );
+}
+
+function exportedSubqueryBindings(query: CypherQuery | undefined, scope: Scope): Scope {
+  const exported: Scope = new Map();
+  const finalClause = query?.clauses.at(-1);
+  if (!finalClause || finalClause.kind !== "return") {
+    return exported;
+  }
+  for (const item of finalClause.items) {
+    const alias = item.alias ?? variableName(item.expression);
+    if (alias) {
+      exported.set(alias, inferExpressionBinding(item.expression, scope));
+    }
+  }
+  return exported;
 }
 
 function aggregationShape(expression: Expression): AggregationShape {

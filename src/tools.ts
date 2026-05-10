@@ -73,6 +73,7 @@ const schemaContractSchema: JsonSchema = {
     nodes: { type: "array", items: { type: "object", additionalProperties: true } },
     relationships: { type: "array", items: { type: "object", additionalProperties: true } },
     parameters: { type: "object", additionalProperties: true },
+    procedures: { type: "object", additionalProperties: true },
     disallowWritesByDefault: { type: "boolean" }
   }
 };

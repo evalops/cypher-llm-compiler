@@ -2,6 +2,7 @@ import type {
   CypherSchemaContract,
   SchemaNode,
   SchemaParameter,
+  SchemaProcedure,
   SchemaProperty,
   SchemaRelationship
 } from "./ir.js";
@@ -19,6 +20,7 @@ export interface NormalizedSchema {
   nodes: SchemaNode[];
   relationships: SchemaRelationship[];
   parameters: Map<string, SchemaParameter>;
+  procedures: Map<string, SchemaProcedure>;
   nodeByName: Map<string, SchemaNode>;
   relationshipByType: Map<string, SchemaRelationship>;
   labelAliases: Map<string, string>;
@@ -93,6 +95,7 @@ export function normalizeSchema(schema: CypherSchemaContract): NormalizedSchema 
   const relationshipAliases = new Map<string, string>();
   const propertyAliases = new Map<string, string>();
   const parameters = new Map<string, SchemaParameter>();
+  const procedures = new Map<string, SchemaProcedure>();
   const labelIdentifiers = new Map<string, IdentifierInfo>();
   const relationshipIdentifiers = new Map<string, IdentifierInfo>();
   const propertyIdentifiers = new Map<string, IdentifierInfo>();
@@ -132,12 +135,17 @@ export function normalizeSchema(schema: CypherSchemaContract): NormalizedSchema 
     parameterIdentifiers.set(name, identifierInfo("parameter", name, []));
   }
 
+  for (const [name, procedure] of Object.entries(schema.procedures ?? {})) {
+    procedures.set(lookupKey(name), procedure);
+  }
+
   return {
     original: schema,
     dialect: schema.dialect ?? "neo4j-cypher-25",
     nodes: schema.nodes,
     relationships: schema.relationships,
     parameters,
+    procedures,
     nodeByName,
     relationshipByType,
     labelAliases,
@@ -171,6 +179,10 @@ export function canonicalLabel(schema: NormalizedSchema, nameOrAlias: string): s
 
 export function canonicalRelationshipType(schema: NormalizedSchema, typeOrAlias: string): string | undefined {
   return resolveRelationshipType(schema, typeOrAlias)?.type;
+}
+
+export function resolveProcedure(schema: NormalizedSchema, name: string): SchemaProcedure | undefined {
+  return schema.procedures.get(lookupKey(name));
 }
 
 export function resolveProperty(

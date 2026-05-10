@@ -221,7 +221,15 @@ Current diagnostic codes include:
 - `missing-return`
 - `relationship-direction-mismatch`
 - `aggregate-in-match-where`
+- `aggregate-alias-required`
+- `invalid-aggregation`
 - `ambiguous-aggregation-expression`
+- `subquery-import-undefined`
+- `subquery-missing-return`
+- `subquery-variable-shadowing`
+- `missing-procedure`
+- `unknown-procedure`
+- `unknown-procedure-yield`
 - `unbounded-variable-length-path`
 - `raw-cypher-escape-hatch`
 - `raw-expression-escape-hatch`
@@ -291,9 +299,8 @@ This is an implementation prototype intended to become the LLM-facing compiler l
 
 ## Next Hardening Pass
 
-The highest-value next pass is to grow semantic coverage:
+The highest-value next pass is to grow type and dialect coverage:
 
-- Expand subquery scope and procedure-yield validation.
 - Add richer property and parameter type checks.
 - Keep importing larger text2cypher/openCypher slices as regression fixtures.
 - Harden dialect-specific render modes for openCypher 9, Cypher 25, and emerging GQL syntax.

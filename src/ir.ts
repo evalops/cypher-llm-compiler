@@ -58,6 +58,12 @@ export interface SchemaRelationship {
   properties?: Record<string, SchemaProperty>;
 }
 
+export interface SchemaProcedure {
+  description?: string;
+  arguments?: Record<string, CypherType | SchemaParameter>;
+  yields?: Record<string, CypherType | SchemaProperty>;
+}
+
 export interface PathTemplateStep {
   from: string;
   relationship: string;
@@ -79,6 +85,7 @@ export interface CypherSchemaContract {
   nodes: SchemaNode[];
   relationships: SchemaRelationship[];
   parameters?: Record<string, CypherType | SchemaParameter>;
+  procedures?: Record<string, SchemaProcedure>;
   pathTemplates?: PathTemplate[];
   disallowWritesByDefault?: boolean;
 }
@@ -147,10 +154,12 @@ export interface ReturnClause {
 
 export interface CallClause {
   kind: "call";
-  procedure: string;
+  procedure?: string;
   arguments?: Expression[];
   yield?: ProjectionItem[];
   where?: Expression;
+  subquery?: CypherQuery;
+  import?: string[];
 }
 
 export interface CreateClause {

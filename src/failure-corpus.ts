@@ -30,7 +30,16 @@ const toolHashSchema: CypherSchemaContract = {
     { name: "Hash", properties: { value: { type: "STRING" } } }
   ],
   relationships: [{ type: "has MD5 hash", aliases: ["md5"], from: "Tool", to: "Hash" }],
-  parameters: { toolName: { type: "STRING", required: true } }
+  parameters: { toolName: { type: "STRING", required: true } },
+  procedures: {
+    "db.indexes": {
+      yields: {
+        name: "STRING",
+        type: "STRING",
+        labelsOrTypes: "LIST<STRING>"
+      }
+    }
+  }
 };
 
 export const llmFailureCorpus: LlmFailureCase[] = [
@@ -167,6 +176,114 @@ export const llmFailureCorpus: LlmFailureCase[] = [
       ]
     },
     expectedDiagnosticCodes: ["ambiguous-aggregation-expression"]
+  },
+  {
+    id: "aggregate-without-alias",
+    source: "semantic aggregation drift",
+    problem: "The model emits an aggregate projection without an alias for later repair loops to target.",
+    schema: toolHashSchema,
+    query: {
+      version: "cypher-llm-ir/v1",
+      profile: "llm-safe-readonly",
+      clauses: [
+        {
+          kind: "match",
+          patterns: [{ segments: [{ variable: "tool", labels: ["Tool"] }] }]
+        },
+        {
+          kind: "return",
+          items: [{ expression: { kind: "function", name: "count", arguments: [{ kind: "var", name: "tool" }] } }],
+          limit: { kind: "literal", value: 10 }
+        }
+      ]
+    },
+    expectedDiagnosticCodes: ["aggregate-alias-required"]
+  },
+  {
+    id: "aggregate-predicate-repeats-aggregate",
+    source: "semantic aggregation drift",
+    problem: "The model repeats an aggregate call in WITH WHERE instead of filtering on the aggregate alias.",
+    schema: toolHashSchema,
+    query: {
+      version: "cypher-llm-ir/v1",
+      profile: "llm-safe-readonly",
+      clauses: [
+        {
+          kind: "match",
+          patterns: [{ segments: [{ variable: "tool", labels: ["Tool"] }] }]
+        },
+        {
+          kind: "with",
+          items: [{ expression: { kind: "function", name: "count", arguments: [{ kind: "var", name: "tool" }] }, alias: "toolCount" }],
+          where: {
+            kind: "binary",
+            op: ">",
+            left: { kind: "function", name: "count", arguments: [{ kind: "var", name: "tool" }] },
+            right: { kind: "literal", value: 1 }
+          }
+        },
+        {
+          kind: "return",
+          items: [{ expression: { kind: "var", name: "toolCount" } }],
+          limit: { kind: "literal", value: 10 }
+        }
+      ]
+    },
+    expectedDiagnosticCodes: ["invalid-aggregation"]
+  },
+  {
+    id: "procedure-yield-mismatch",
+    source: "procedure metadata mismatch",
+    problem: "The model asks a procedure to YIELD a variable that the schema metadata says it does not produce.",
+    schema: toolHashSchema,
+    query: {
+      version: "cypher-llm-ir/v1",
+      profile: "llm-safe-readonly",
+      clauses: [
+        {
+          kind: "call",
+          procedure: "db.indexes",
+          yield: [{ expression: { kind: "var", name: "badYield" } }]
+        },
+        {
+          kind: "return",
+          items: [{ expression: { kind: "var", name: "badYield" } }],
+          limit: { kind: "literal", value: 10 }
+        }
+      ]
+    },
+    expectedDiagnosticCodes: ["unknown-procedure-yield"]
+  },
+  {
+    id: "subquery-import-undefined",
+    source: "subquery scope drift",
+    problem: "The model imports a variable into CALL {} before that variable exists in the outer scope.",
+    schema: toolHashSchema,
+    query: {
+      version: "cypher-llm-ir/v1",
+      profile: "llm-safe-readonly",
+      clauses: [
+        {
+          kind: "call",
+          import: ["tool"],
+          subquery: {
+            version: "cypher-llm-ir/v1",
+            clauses: [
+              {
+                kind: "return",
+                items: [{ expression: { kind: "var", name: "tool" } }]
+              }
+            ]
+          }
+        },
+        {
+          kind: "return",
+          items: [{ expression: { kind: "var", name: "tool" } }],
+          limit: { kind: "literal", value: 10 }
+        }
+      ]
+    },
+    expectedDiagnosticCodes: ["subquery-import-undefined"]
   }
 ];
 

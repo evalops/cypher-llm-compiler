@@ -62,6 +62,130 @@ describe("validation and repair", () => {
     assert.ok(codes.includes("ambiguous-aggregation-expression"));
   });
 
+  it("reports aggregate alias and aggregate predicate mistakes", () => {
+    const query: CypherQuery = {
+      version: "cypher-llm-ir/v1",
+      profile: "llm-safe-readonly",
+      clauses: [
+        {
+          kind: "match",
+          patterns: [{ segments: [{ variable: "tool", labels: ["Tool"] }] }]
+        },
+        {
+          kind: "with",
+          items: [{ expression: { kind: "function", name: "count", arguments: [{ kind: "var", name: "tool" }] } }],
+          where: {
+            kind: "binary",
+            op: ">",
+            left: { kind: "function", name: "count", arguments: [{ kind: "var", name: "tool" }] },
+            right: { kind: "literal", value: 1 }
+          }
+        },
+        {
+          kind: "return",
+          items: [{ expression: { kind: "literal", value: 1 }, alias: "one" }],
+          limit: { kind: "literal", value: 1 }
+        }
+      ]
+    };
+
+    const result = validateQuery(query, normalizeSchema(schema));
+    const codes = result.diagnostics.map((item) => item.code);
+
+    assert.equal(result.ok, false);
+    assert.ok(codes.includes("aggregate-alias-required"));
+    assert.ok(codes.includes("invalid-aggregation"));
+  });
+
+  it("tracks variables imported and exported by CALL subqueries", () => {
+    const valid: CypherQuery = {
+      version: "cypher-llm-ir/v1",
+      profile: "llm-safe-readonly",
+      clauses: [
+        {
+          kind: "match",
+          patterns: [{ segments: [{ variable: "tool", labels: ["Tool"] }] }]
+        },
+        {
+          kind: "call",
+          import: ["tool"],
+          subquery: {
+            version: "cypher-llm-ir/v1",
+            clauses: [
+              {
+                kind: "match",
+                patterns: [
+                  {
+                    segments: [
+                      { variable: "tool", labels: ["Tool"] },
+                      { rel: { types: ["has MD5 hash"], direction: "out" }, node: { variable: "hash", labels: ["Hash"] } }
+                    ]
+                  }
+                ]
+              },
+              {
+                kind: "return",
+                items: [{ expression: { kind: "var", name: "hash" } }]
+              }
+            ]
+          }
+        },
+        {
+          kind: "return",
+          items: [{ expression: { kind: "var", name: "hash" } }],
+          limit: { kind: "literal", value: 10 }
+        }
+      ]
+    };
+    const invalid: CypherQuery = {
+      version: "cypher-llm-ir/v1",
+      clauses: [
+        {
+          kind: "call",
+          import: ["missing"],
+          subquery: {
+            version: "cypher-llm-ir/v1",
+            clauses: [{ kind: "return", items: [{ expression: { kind: "var", name: "missing" } }] }]
+          }
+        }
+      ]
+    };
+
+    assert.equal(validateQuery(valid, normalizeSchema(schema)).ok, true);
+    assert.ok(validateQuery(invalid, normalizeSchema(schema)).diagnostics.some((item) => item.code === "subquery-import-undefined"));
+  });
+
+  it("validates procedure YIELD variables when procedure metadata is present", () => {
+    const procSchema: CypherSchemaContract = {
+      ...schema,
+      procedures: {
+        "db.indexes": {
+          yields: { name: "STRING", type: "STRING" }
+        }
+      }
+    };
+    const query: CypherQuery = {
+      version: "cypher-llm-ir/v1",
+      clauses: [
+        {
+          kind: "call",
+          procedure: "db.indexes",
+          yield: [{ expression: { kind: "var", name: "badYield" } }]
+        },
+        {
+          kind: "return",
+          items: [{ expression: { kind: "var", name: "badYield" } }],
+          limit: { kind: "literal", value: 10 }
+        }
+      ]
+    };
+
+    const result = validateQuery(query, normalizeSchema(procSchema));
+
+    assert.equal(result.ok, false);
+    assert.ok(result.diagnostics.some((item) => item.code === "unknown-procedure-yield"));
+  });
+
   it("reports scope, limit, direction, and traversal diagnostics with stable codes", () => {
     const query: CypherQuery = {
       version: "cypher-llm-ir/v1",
