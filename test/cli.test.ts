@@ -1076,14 +1076,32 @@ describe("cli", () => {
     const io: CliIO = {
       stdout: { write: (chunk: string | Uint8Array) => ((stdout += String(chunk)), true) },
       stderr: { write: (chunk: string | Uint8Array) => ((stderr += String(chunk)), true) },
-      readFile: async () => "",
+      readFile: async (path) =>
+        path === "fixtures/live-evidence.json"
+          ? JSON.stringify([
+              {
+                profileId: "neo4j-cypher-25",
+                status: "passed",
+                database: "neo4j-fixture",
+                source: "fixtures/live-evidence.json",
+                observed: "fixture EXPLAIN accepted rendered read query"
+              }
+            ])
+          : "",
       writeFile: async (path, data) => {
         writes.set(path, data);
       },
       mkdir: async () => undefined
     };
 
-    const jsonCode = await runCli(["certify-dialects", "--fail-on-fail", "--report-out", "out/certification.json"], io);
+    const jsonCode = await runCli([
+      "certify-dialects",
+      "--fail-on-fail",
+      "--report-out",
+      "out/certification.json",
+      "--live-evidence",
+      "fixtures/live-evidence.json"
+    ], io);
     const markdownCode = await runCli(["certify-dialects", "--format", "markdown"], io);
 
     assert.equal(jsonCode, 0);
@@ -1092,6 +1110,7 @@ describe("cli", () => {
     assert.ok(stdout.includes("cypher-llm-dialect-certification/v1"));
     assert.ok(stdout.includes("# Dialect Certification"));
     assert.ok(writes.get("out/certification.json")?.includes("\"failedChecks\": 0"));
+    assert.ok(writes.get("out/certification.json")?.includes("fixture EXPLAIN accepted rendered read query"));
   });
 
   it("prints and writes the compiler service manifest", async () => {

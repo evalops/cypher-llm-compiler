@@ -1485,13 +1485,32 @@
       "examplePaths": [
         "examples/agent/agent-guide.json"
       ]
+    },
+    {
+      "code": "dialect-live-evidence-missing",
+      "match": "exact",
+      "title": "Dialect Live Evidence Missing",
+      "severity": "warning",
+      "source": "dialect-certification",
+      "category": "dialect",
+      "preferredAction": "inspect-source",
+      "preferredTool": "cypher-llm certify-dialects",
+      "description": "Dialect certification separated live-database evidence, but no live evidence fixture was supplied.",
+      "modelInstruction": "Dialect certification separated live-database evidence, but no live evidence fixture was supplied. Inspect the source span and keep the query in review if evidence is incomplete.",
+      "evidencePaths": [
+        "src/dialect-certification.ts",
+        "test/dialect-certification.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
     }
   ],
   "summary": {
-    "entries": 78,
-    "exactCodes": 76,
+    "entries": 79,
+    "exactCodes": 77,
     "templates": 2,
     "errorOrVaries": 50,
-    "warningOrInfo": 28
+    "warningOrInfo": 29
   }
 }

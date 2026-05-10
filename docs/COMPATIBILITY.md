@@ -80,7 +80,8 @@ Agent guides are the machine-readable client contract for how LLMs should use th
 Run:
 
 ```bash
-cypher-llm diagnostic-catalog --integrity --fail-on-error --catalog-out examples/diagnostics/diagnostic-catalog.json
+cypher-llm diagnostic-catalog --catalog-out examples/diagnostics/diagnostic-catalog.json
+cypher-llm diagnostic-catalog --integrity --fail-on-error
 ```
 
 Diagnostic catalogs are the machine-readable repair contract for stable compiler, parser, policy, dataset, service, and runtime finding codes. They publish severity, source, category, preferred action, preferred tool, model instruction, and code-owner evidence so LLM clients can route failures without scraping prose. JSON output validates against `schemas/diagnostic-catalog.schema.json`.
@@ -105,7 +106,7 @@ Run:
 cypher-llm certify-dialects --fail-on-fail --report-out examples/certification/dialect-certification.json
 ```
 
-The report checks profile metadata, schema identifier escaping, parser acceptance for rendered reads, semantic feature gates for `LET` and path modes, and known relationship range rendering limitations. Warnings are allowed for documented experimental boundaries such as the current GQL range syntax limitation; failures indicate a profile claim is not enforced by code.
+The report checks profile metadata, schema identifier escaping, parser acceptance for rendered reads, semantic feature gates for `LET` and path modes, known relationship range rendering limitations, and a separated live-database evidence lane. Warnings are allowed for documented experimental boundaries, missing live evidence fixtures, and the current GQL range syntax limitation; failures indicate a profile claim is not enforced by code.
 
 ## Proof Objects
 

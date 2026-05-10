@@ -18,7 +18,7 @@
   "$defs": {
     "status": { "enum": ["passed", "warning", "failed"] },
     "profileStatus": { "enum": ["stable", "preview", "experimental"] },
-    "checkKind": { "enum": ["profile", "renderer", "semantic", "parser"] },
+    "checkKind": { "enum": ["profile", "renderer", "semantic", "parser", "live-database"] },
     "stringList": {
       "type": "array",
       "items": { "type": "string", "minLength": 1 }

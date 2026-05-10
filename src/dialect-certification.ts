@@ -11,7 +11,21 @@ import { renderQueryForDialect } from "./render.js";
 import { validateQuery } from "./validate.js";
 
 export type CertificationStatus = "passed" | "warning" | "failed";
-export type CertificationCheckKind = "profile" | "renderer" | "semantic" | "parser";
+export type CertificationCheckKind = "profile" | "renderer" | "semantic" | "parser" | "live-database";
+
+export interface DialectLiveDatabaseEvidence {
+  profileId: DialectProfileId;
+  status: CertificationStatus;
+  database: string;
+  source: string;
+  observed?: string;
+  diagnostics?: string[];
+  cypher?: string;
+}
+
+export interface DialectCertificationOptions {
+  liveDatabaseEvidence?: DialectLiveDatabaseEvidence[];
+}
 
 export interface DialectCertificationCheck {
   id: string;
@@ -53,11 +67,14 @@ export interface DialectCertificationReport {
 
 const GENERATED_AT = "2026-05-10";
 
-export function certifyDialectProfiles(profileIds?: DialectProfileId[]): DialectCertificationReport {
+export function certifyDialectProfiles(
+  profileIds?: DialectProfileId[],
+  options: DialectCertificationOptions = {}
+): DialectCertificationReport {
   const selectedProfiles = profileIds?.length
     ? profileIds.map((id) => getDialectProfile(id))
     : listDialectProfiles();
-  const profiles = selectedProfiles.map(certifyProfile);
+  const profiles = selectedProfiles.map((profile) => certifyProfile(profile, options));
   const checks = profiles.flatMap((profile) => profile.checks);
 
   return {
@@ -105,14 +122,15 @@ export function renderDialectCertificationMarkdown(report: DialectCertificationR
   return `${lines.join("\n")}\n`;
 }
 
-function certifyProfile(profile: DialectProfile): DialectCertificationProfileReport {
+function certifyProfile(profile: DialectProfile, options: DialectCertificationOptions): DialectCertificationProfileReport {
   const checks = [
     checkProfileMetadata(profile),
     checkRendererEscapes(profile),
     checkParserAcceptsRenderedRead(profile),
     checkLetFeature(profile),
     checkPathModeFeature(profile),
-    checkRelationshipRangeRendering(profile)
+    checkRelationshipRangeRendering(profile),
+    checkLiveDatabaseEvidence(profile, options.liveDatabaseEvidence ?? [])
   ];
 
   return {
@@ -253,6 +271,39 @@ function checkRelationshipRangeRendering(profile: DialectProfile): DialectCertif
     evidence: ["src/render.ts", "src/validate.ts", "docs/COMPATIBILITY.md"],
     diagnostics,
     cypher: renderQueryForDialect(variableRangeQuery(), profile.id)
+  };
+}
+
+function checkLiveDatabaseEvidence(
+  profile: DialectProfile,
+  liveDatabaseEvidence: DialectLiveDatabaseEvidence[]
+): DialectCertificationCheck {
+  const cypher = renderQueryForDialect(baseReadQuery(), profile.id);
+  const evidence = liveDatabaseEvidence.find((item) => item.profileId === profile.id);
+  if (!evidence) {
+    return {
+      id: "live-database-evidence",
+      title: "Live database evidence is reported separately from parser and semantic checks",
+      kind: "live-database",
+      status: "warning",
+      expected: "A live database EXPLAIN or execution fixture is supplied for this dialect profile when available.",
+      observed: "No live database evidence supplied; parser, renderer, and semantic certification are still reported.",
+      evidence: ["src/neo4j-explain.ts", "docs/NEO4J_LIVE_FIXTURE.md"],
+      diagnostics: ["dialect-live-evidence-missing"],
+      cypher
+    };
+  }
+
+  return {
+    id: "live-database-evidence",
+    title: "Live database evidence is reported separately from parser and semantic checks",
+    kind: "live-database",
+    status: evidence.status,
+    expected: "A live database EXPLAIN or execution fixture is supplied for this dialect profile when available.",
+    observed: evidence.observed ?? `${evidence.database} evidence from ${evidence.source}`,
+    evidence: ["src/neo4j-explain.ts", evidence.source],
+    diagnostics: evidence.diagnostics ?? [],
+    cypher: evidence.cypher ?? cypher
   };
 }
 

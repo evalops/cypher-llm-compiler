@@ -57,7 +57,10 @@ Dialect certification is the first executable certification lane under this prog
 
 ```bash
 cypher-llm certify-dialects --fail-on-fail
+cypher-llm certify-dialects --live-evidence live-database-evidence.json
 ```
+
+Certification checks are separated into profile, renderer, parser, semantic, and live-database lanes. When live evidence is not supplied, the report emits a warning rather than pretending parser acceptance is the same as database evidence.
 
 Proof-carrying compile output is the first semantic-proof lane. It is exported from `src/proof.ts`, validated by `schemas/cypher-proof.schema.json`, and checked in at `examples/proofs/tool-hash.proof.json`.
 

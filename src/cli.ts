@@ -20,7 +20,11 @@ import {
   diagnosticCatalogIntegrityReport,
   renderDiagnosticCatalogMarkdown
 } from "./diagnostic-catalog.js";
-import { certifyDialectProfiles, renderDialectCertificationMarkdown } from "./dialect-certification.js";
+import {
+  certifyDialectProfiles,
+  renderDialectCertificationMarkdown,
+  type DialectLiveDatabaseEvidence
+} from "./dialect-certification.js";
 import type { EvalAttemptSet, EvalDataset, EvalReport } from "./evals.js";
 import { compareEvalReports } from "./eval-compare.js";
 import { evaluateAttempts } from "./evals.js";
@@ -729,7 +733,10 @@ async function contractConformanceCommand(args: Map<string, string | boolean>, i
 }
 
 async function certifyDialectsCommand(args: Map<string, string | boolean>, io: CliIO) {
-  const report = certifyDialectProfiles();
+  const liveDatabaseEvidence = await readDialectLiveEvidence(args, io);
+  const report = certifyDialectProfiles(undefined, {
+    ...(liveDatabaseEvidence !== undefined ? { liveDatabaseEvidence } : {})
+  });
   const format = args.get("format") === "markdown" ? "markdown" : "json";
   const output = format === "markdown" ? renderDialectCertificationMarkdown(report) : `${JSON.stringify(report, null, 2)}\n`;
   if (typeof args.get("report-out") === "string") {
@@ -847,6 +854,17 @@ async function readPolicyRules(args: Map<string, string | boolean>, io: CliIO): 
     return undefined;
   }
   return JSON.parse(await io.readFile(rulesPath, "utf8")) as CypherPolicyRuleSet;
+}
+
+async function readDialectLiveEvidence(
+  args: Map<string, string | boolean>,
+  io: CliIO
+): Promise<DialectLiveDatabaseEvidence[] | undefined> {
+  const evidencePath = args.get("live-evidence");
+  if (typeof evidencePath !== "string") {
+    return undefined;
+  }
+  return JSON.parse(await io.readFile(evidencePath, "utf8")) as DialectLiveDatabaseEvidence[];
 }
 
 async function applyPolicyEvidenceArgs(
@@ -1043,7 +1061,7 @@ Commands:
   compatibility [--format json|markdown] [--integrity] [--fail-on-error] [--catalog-out path]
   compatibility-diff --baseline catalog.json [--candidate catalog.json] [--format json|markdown] [--diff-out path] [--fail-on-breaking]
   contract-conformance [--format json|markdown] [--report-out path] [--fail-on-error]
-  certify-dialects [--format json|markdown] [--report-out path] [--fail-on-fail]
+  certify-dialects [--format json|markdown] [--report-out path] [--live-evidence evidence.json] [--fail-on-fail]
   service-manifest [--manifest-out path] [--max-body-bytes 1000000] [--require-auth] [--audit-enabled]
   mcp
   serve      [--host 127.0.0.1] [--port 8787] [--max-body-bytes 1000000] [--auth-token token] [--require-auth] [--audit-log audit.jsonl]

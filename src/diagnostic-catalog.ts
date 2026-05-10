@@ -154,7 +154,8 @@ const entries: DiagnosticCatalogEntry[] = [
   service("invalid-json-body", "Invalid JSON Body", "error", "retry-service", "http-service", "The service could not parse the request JSON body."),
   service("compiler-tool-error", "Compiler Tool Error", "error", "retry-service", "http-service", "The shared tool dispatcher rejected the request."),
   certification("profile-metadata-incomplete", "Profile Metadata Incomplete", "error", "block-release-or-request-review", "cypher-llm certify-dialects", "A dialect profile is missing required status, notes, or unsupported-pattern metadata."),
-  certification("unescaped-schema-identifier", "Unescaped Schema Identifier", "error", "block-release-or-request-review", "cypher-llm certify-dialects", "Dialect certification found renderer output that failed to escape schema identifiers.")
+  certification("unescaped-schema-identifier", "Unescaped Schema Identifier", "error", "block-release-or-request-review", "cypher-llm certify-dialects", "Dialect certification found renderer output that failed to escape schema identifiers."),
+  certification("dialect-live-evidence-missing", "Dialect Live Evidence Missing", "warning", "inspect-source", "cypher-llm certify-dialects", "Dialect certification separated live-database evidence, but no live evidence fixture was supplied.")
 ];
 
 export const diagnosticCatalog = {

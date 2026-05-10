@@ -139,7 +139,7 @@
         {
           "kind": "example",
           "path": "examples/diagnostics/diagnostic-catalog.json",
-          "sha256": "3f0a55a694b4427bf8432e0404c5050b10bea635cd1d6d2c7ae253fef35b396b"
+          "sha256": "3e9fa6a99380d5449543634bc6baf5e1a1b2c62ebce299d5d28191b4fd50b13e"
         }
       ]
     },
@@ -262,12 +262,12 @@
         {
           "kind": "schema",
           "path": "schemas/dialect-certification.schema.json",
-          "sha256": "36fa6d99dde60ae2466a210472736daec85f2ce83a6ad21d6c0829433ff8c7df"
+          "sha256": "fba80d3d2d5b56a3b8333dd9b42cdbe3cdc93ee55179f0e45cb23b090979f54e"
         },
         {
           "kind": "example",
           "path": "examples/certification/dialect-certification.json",
-          "sha256": "3dc01a80986276474089a74aaad69354cbc61e9e3cd3d62eca9743d81b1f3325"
+          "sha256": "4738eff79214ea7bcf88cc80f8e8003572c8a6e25c0067b8792d0bcd87820275"
         }
       ]
     },

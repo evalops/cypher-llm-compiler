@@ -233,7 +233,7 @@ npm run test:live:neo4j
 
 `contract-conformance` emits a `cypher-llm-contract-conformance/v1` report that verifies public schemas, examples, fingerprints, schema validation, and evidence paths.
 
-`certify-dialects` emits a `cypher-llm-dialect-certification/v1` report that checks profile metadata, renderer behavior, parser acceptance, semantic feature gates, and known rendering limitations.
+`certify-dialects` emits a `cypher-llm-dialect-certification/v1` report that checks profile metadata, renderer behavior, parser acceptance, semantic feature gates, known rendering limitations, and separated live-database evidence when supplied.
 
 `service-manifest` emits a `cypher-llm-service-manifest/v1` report covering HTTP routes, auth requirements, body limits, audit redaction, and data-boundary guarantees.
 

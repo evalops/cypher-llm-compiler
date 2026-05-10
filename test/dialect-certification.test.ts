@@ -6,6 +6,7 @@ import Ajv2020Module from "ajv/dist/2020.js";
 import {
   certifyDialectProfiles,
   renderDialectCertificationMarkdown,
+  type DialectLiveDatabaseEvidence,
   type DialectCertificationReport
 } from "../src/dialect-certification.js";
 
@@ -23,10 +24,36 @@ describe("dialect certification", () => {
     assert.equal(report.version, "cypher-llm-dialect-certification/v1");
     assert.equal(report.summary.profiles, 3);
     assert.equal(report.summary.failedChecks, 0);
-    assert.equal(report.summary.warningChecks, 1);
-    assert.equal(report.profiles.find((profile) => profile.profileId === "neo4j-cypher-25")?.status, "passed");
-    assert.equal(report.profiles.find((profile) => profile.profileId === "opencypher-9")?.status, "passed");
+    assert.equal(report.summary.checks, 21);
+    assert.equal(report.summary.warningChecks, 4);
+    assert.equal(report.profiles.find((profile) => profile.profileId === "neo4j-cypher-25")?.status, "warning");
+    assert.equal(report.profiles.find((profile) => profile.profileId === "opencypher-9")?.status, "warning");
     assert.equal(report.profiles.find((profile) => profile.profileId === "gql")?.status, "warning");
+    assert.ok(
+      report.profiles.every((profile) =>
+        profile.checks.some((check) => check.kind === "live-database" && check.id === "live-database-evidence")
+      )
+    );
+  });
+
+  it("can consume supplied live database certification evidence", () => {
+    const liveDatabaseEvidence: DialectLiveDatabaseEvidence[] = [
+      {
+        profileId: "neo4j-cypher-25",
+        status: "passed",
+        database: "neo4j-fixture",
+        source: "test-fixtures/live-neo4j.json",
+        observed: "fixture EXPLAIN accepted rendered read query"
+      }
+    ];
+    const report = certifyDialectProfiles(undefined, { liveDatabaseEvidence });
+    const liveCheck = report.profiles
+      .find((profile) => profile.profileId === "neo4j-cypher-25")
+      ?.checks.find((check) => check.kind === "live-database");
+
+    assert.equal(liveCheck?.status, "passed");
+    assert.equal(liveCheck?.diagnostics.length, 0);
+    assert.equal(liveCheck?.observed, "fixture EXPLAIN accepted rendered read query");
   });
 
   it("renders a markdown certification view", () => {
