@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import process from "node:process";
+import { buildAgentGuide } from "./agent-guide.js";
 import { buildCompatibilityCatalog } from "./compatibility.js";
 import { certifyDialectProfiles } from "./dialect-certification.js";
 import { CYPHER_COMPILER_TOOLS, executeCypherCompilerTool, type CypherCompilerToolName } from "./tools.js";
@@ -141,6 +142,11 @@ export async function handleCompilerHttpRequest(
 
   if (request.method === "GET" && url.pathname === "/v1/compatibility") {
     await finish(200, buildCompatibilityCatalog());
+    return;
+  }
+
+  if (request.method === "GET" && url.pathname === "/v1/agent-guide") {
+    await finish(200, buildAgentGuide());
     return;
   }
 

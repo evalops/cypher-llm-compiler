@@ -25,6 +25,7 @@ Stable public contracts:
 - `cypher-llm-dataset-governance/v1`
 - `cypher-llm-repair-plan/v1`
 - `cypher-llm-agent-feedback/v1`
+- `cypher-llm-agent-guide/v1`
 - `cypher-llm-service-manifest/v1`
 - `cypher-llm-compatibility-catalog/v1`
 - `cypher-llm-compatibility-diff/v1`
@@ -50,6 +51,16 @@ cypher-llm compatibility-diff --baseline examples/governance/compatibility-catal
 ```
 
 Compatibility diff reports compare a baseline catalog against a candidate catalog or the current runtime catalog. They classify added, removed, and changed contracts, release gates, certification gates, and deprecation-policy fields as `info`, `warning`, or `breaking`. JSON output validates against `schemas/compatibility-diff.schema.json`.
+
+## Agent Guide
+
+Run:
+
+```bash
+cypher-llm agent-guide --guide-out examples/agent/agent-guide.json
+```
+
+Agent guides are the machine-readable client contract for how LLMs should use the compiler. They publish authoring rules, default limits, workflow steps, execution blockers, diagnostic playbooks, public contract pins, and example paths. JSON output validates against `schemas/agent-guide.schema.json`.
 
 ## Dialect Profiles
 

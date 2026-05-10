@@ -52,12 +52,15 @@ describe("compiler HTTP service", () => {
   it("serves health and tool metadata", async () => {
     const health = await getJson(`${baseUrl}/healthz`) as { version: string; tools: number };
     const tools = await getJson(`${baseUrl}/v1/tools`) as { tools: { name: string }[] };
+    const agentGuide = await getJson(`${baseUrl}/v1/agent-guide`) as { version: string; workflows: unknown[] };
     const compatibility = await getJson(`${baseUrl}/v1/compatibility`) as { version: string; contracts: unknown[] };
 
     assert.equal(health.version, "cypher-llm-compiler-http/v1");
     assert.equal(health.tools, tools.tools.length);
     assert.ok(tools.tools.some((tool) => tool.name === "cypher_prove"));
     assert.ok(tools.tools.some((tool) => tool.name === "cypher_agent_feedback"));
+    assert.equal(agentGuide.version, "cypher-llm-agent-guide/v1");
+    assert.ok(agentGuide.workflows.length > 0);
     assert.equal(compatibility.version, "cypher-llm-compatibility-catalog/v1");
     assert.ok(compatibility.contracts.length > 0);
   });
@@ -88,6 +91,7 @@ describe("compiler HTTP service", () => {
       query,
       defaultLimit: 25
     }) as { version: string; nextAction: { kind: string } };
+    const agentGuide = await postJson(`${baseUrl}/v1/agent-guide`, {}) as { version: string };
     const compatibility = await postJson(`${baseUrl}/v1/compatibility`, {}) as { version: string; contracts: unknown[] };
     const compatibilityDiff = await postJson(`${baseUrl}/v1/compatibility-diff`, {
       baseline: compatibility
@@ -146,6 +150,7 @@ describe("compiler HTTP service", () => {
     assert.equal(repairPlan.deterministic.length, 1);
     assert.equal(feedback.version, "cypher-llm-agent-feedback/v1");
     assert.equal(feedback.nextAction.kind, "apply-deterministic-repairs");
+    assert.equal(agentGuide.version, "cypher-llm-agent-guide/v1");
     assert.equal(compatibility.version, "cypher-llm-compatibility-catalog/v1");
     assert.equal(compatibilityDiff.version, "cypher-llm-compatibility-diff/v1");
     assert.equal(compatibilityDiff.status, "passed");

@@ -58,6 +58,7 @@ describe("json schemas", () => {
     const querySchema = readJson("schemas/cypher-query.schema.json");
     const proofSchema = readJson("schemas/cypher-proof.schema.json");
     const agentFeedbackSchema = readJson("schemas/agent-feedback.schema.json");
+    const agentGuideSchema = readJson("schemas/agent-guide.schema.json");
     const compatibilityCatalogSchema = readJson("schemas/compatibility-catalog.schema.json");
     const compatibilityDiffSchema = readJson("schemas/compatibility-diff.schema.json");
     const plannerEstimateSchema = readJson("schemas/planner-estimate.schema.json");
@@ -81,6 +82,7 @@ describe("json schemas", () => {
     ajv.addSchema(querySchema);
     ajv.addSchema(proofSchema);
     ajv.addSchema(agentFeedbackSchema);
+    ajv.addSchema(agentGuideSchema);
     ajv.addSchema(compatibilityCatalogSchema);
     ajv.addSchema(compatibilityDiffSchema);
     ajv.addSchema(plannerEstimateSchema);
@@ -105,6 +107,7 @@ describe("json schemas", () => {
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/query/v1.json", readJson("examples/tool-hash.query.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/proof/v1.json", readJson("examples/proofs/tool-hash.proof.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/agent-feedback/v1.json", readJson("examples/proofs/tool-hash.agent-feedback.json"));
+    assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/agent-guide/v1.json", readJson("examples/agent/agent-guide.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/compatibility-catalog/v1.json", readJson("examples/governance/compatibility-catalog.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/compatibility-diff/v1.json", readJson("examples/governance/compatibility-diff.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/planner-estimate/v1.json", readJson("examples/policy/tool-hash.planner-estimate.json"));

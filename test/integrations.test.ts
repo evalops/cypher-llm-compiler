@@ -59,6 +59,7 @@ describe("OpenAI tool schemas", () => {
       "cypher_lsp_diagnostics",
       "cypher_prove",
       "cypher_agent_feedback",
+      "cypher_agent_guide",
       "cypher_compatibility_catalog",
       "cypher_compatibility_diff",
       "cypher_eval",
@@ -221,6 +222,14 @@ describe("OpenAI tool schemas", () => {
     assert.equal(feedback.nextAction.kind, "apply-deterministic-repairs");
     assert.equal(feedback.proof.version, "cypher-llm-proof/v1");
     assert.equal(feedback.repairPlan.version, "cypher-llm-repair-plan/v1");
+
+    const agentGuide = (await executeCypherCompilerTool("cypher_agent_guide", {})) as {
+      version: string;
+      workflows: { id: string }[];
+    };
+
+    assert.equal(agentGuide.version, "cypher-llm-agent-guide/v1");
+    assert.ok(agentGuide.workflows.some((workflow) => workflow.id === "author-read-query"));
 
     const compatibility = (await executeCypherCompilerTool("cypher_compatibility_catalog", {})) as {
       version: string;

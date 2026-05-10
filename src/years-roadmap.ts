@@ -273,6 +273,8 @@ export const yearsRoadmap = {
         "src/tools.ts",
         "src/lsp.ts",
         "src/agent-feedback.ts",
+        "src/agent-guide.ts",
+        "schemas/agent-guide.schema.json",
         "schemas/agent-feedback.schema.json",
         "docs/INTEGRATIONS.md",
         "examples/raw-to-ir-migration.md"
@@ -493,6 +495,13 @@ export const yearsRoadmap = {
       status: "partial",
       evidence: ["src/agent-feedback.ts", "schemas/agent-feedback.schema.json", "test/agent-feedback.test.ts"],
       workstreamIds: ["semantic-proof-repair", "ecosystem-ux", "compiler-service"]
+    },
+    {
+      id: "agent-guide-bundle",
+      title: "Machine-Readable Agent Guide Bundle",
+      status: "partial",
+      evidence: ["src/agent-guide.ts", "schemas/agent-guide.schema.json", "test/agent-guide.test.ts"],
+      workstreamIds: ["ecosystem-ux", "semantic-proof-repair", "compiler-service", "governance-standards"]
     },
     {
       id: "roadmap-governance",

@@ -4,6 +4,7 @@ import path from "node:path";
 import process from "node:process";
 import type { CypherQuery, CypherSchemaContract, JsonLiteral } from "./ir.js";
 import { buildCypherAgentFeedback } from "./agent-feedback.js";
+import { buildAgentGuide, renderAgentGuideMarkdown } from "./agent-guide.js";
 import { buildBenchmarkGateReport } from "./benchmark-gate.js";
 import {
   buildCompatibilityCatalog,
@@ -126,6 +127,9 @@ export async function runCli(argv: string[], io: CliIO = defaultIo()): Promise<n
         return 0;
       case "agent-feedback":
         await agentFeedbackCommand(args, io);
+        return 0;
+      case "agent-guide":
+        await agentGuideCommand(args, io);
         return 0;
       case "introspect-neo4j":
         await introspectNeo4jCommand(args, io);
@@ -660,6 +664,15 @@ async function compatibilityCommand(args: Map<string, string | boolean>, io: Cli
   }
 }
 
+async function agentGuideCommand(args: Map<string, string | boolean>, io: CliIO) {
+  const guide = buildAgentGuide();
+  const output = args.get("format") === "markdown" ? renderAgentGuideMarkdown(guide) : `${JSON.stringify(guide, null, 2)}\n`;
+  if (typeof args.get("guide-out") === "string") {
+    await writeTextFile(io, args.get("guide-out") as string, output);
+  }
+  io.stdout.write(output);
+}
+
 async function compatibilityDiffCommand(args: Map<string, string | boolean>, io: CliIO) {
   const baseline = JSON.parse(await io.readFile(stringArg(args, "baseline"), "utf8")) as CompatibilityCatalog;
   const candidate = typeof args.get("candidate") === "string"
@@ -984,6 +997,7 @@ Commands:
   lsp-diagnostics --schema schema.json (--query query.json | --cypher "MATCH ...") [--uri file:///query.cypher] [--report-out report.json] [--parser-mode syntax|lint] [--default-limit 25] [--default-max-hops 5]
   prove       --schema schema.json --query query.json [--params params.json] [--proof-out proof.json] [--fail-on-blocked] [--default-limit 25] [--default-max-hops 5] [--planner-estimate estimate.json] [--schema-statistics stats.json] [--policy-rules rules.json] [--no-require-limit] [--max-return-limit 100] [--max-relationship-hops 5] [--allow-writes] [--approved] [--parser-mode syntax|lint] [--no-parser]
   agent-feedback --schema schema.json --query query.json [--params params.json] [--feedback-out feedback.json] [--fail-on-blocked] [--default-limit 25] [--default-max-hops 5] [--planner-estimate estimate.json] [--schema-statistics stats.json] [--policy-rules rules.json] [--no-require-limit] [--max-return-limit 100] [--max-relationship-hops 5] [--allow-writes] [--approved] [--parser-mode syntax|lint] [--no-parser]
+  agent-guide [--format json|markdown] [--guide-out path]
   introspect-neo4j --uri bolt://localhost:7687 --user neo4j --password password [--schema-out schema.json] [--sample-limit 1000] [--no-procedures]
   roadmap    [--format json|markdown] [--integrity] [--roadmap-out path]
   compatibility [--format json|markdown] [--integrity] [--fail-on-error] [--catalog-out path]

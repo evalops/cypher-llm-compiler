@@ -200,6 +200,23 @@
       "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
     },
     {
+      "id": "agent-guide",
+      "version": "cypher-llm-agent-guide/v1",
+      "category": "agent-feedback",
+      "level": "stable",
+      "ownerWorkstreamId": "ecosystem-ux",
+      "schemaPath": "schemas/agent-guide.schema.json",
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ],
+      "evidencePaths": [
+        "src/agent-guide.ts",
+        "test/agent-guide.test.ts"
+      ],
+      "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
+    },
+    {
       "id": "policy-report",
       "version": "cypher-llm-policy-report/v1",
       "category": "policy",

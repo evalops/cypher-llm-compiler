@@ -75,6 +75,12 @@ Agent feedback packets wrap proof, repair-plan, policy evidence, and next-action
 cypher-llm agent-feedback --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json --params examples/tool-hash.params.json --default-limit 25
 ```
 
+Agent guides publish stable LLM-facing workflow rules, tool sequences, execution blockers, and diagnostic playbooks. They are exported from `src/agent-guide.ts`, validated by `schemas/agent-guide.schema.json`, and checked in at `examples/agent/agent-guide.json`.
+
+```bash
+cypher-llm agent-guide --format markdown
+```
+
 Cost and safety policy planning is exported from `src/policy.ts`, validated by `schemas/policy-report.schema.json`, and checked in at `examples/policy/tool-hash.policy.json`.
 
 ```bash

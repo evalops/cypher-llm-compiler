@@ -89,8 +89,9 @@ Artifacts:
 - MCP server exposing validate, repair, render, and eval tools.
 - LangChain adapter that replaces regex correction.
 - Migration guide for raw text2cypher chains.
+- Machine-readable agent guide for workflow and diagnostic playbooks.
 
-Status: implemented through `src/tools.ts`, `src/mcp-server.ts`, `src/langchain.ts`, `docs/INTEGRATIONS.md`, and `examples/raw-to-ir-migration.md`. The same operation contract now reaches OpenAI function tools, MCP clients, HTTP clients, LangChain-style chains, and direct TypeScript callers.
+Status: implemented through `src/tools.ts`, `src/mcp-server.ts`, `src/langchain.ts`, `src/agent-guide.ts`, `docs/INTEGRATIONS.md`, and `examples/raw-to-ir-migration.md`. The same operation contract now reaches OpenAI function tools, MCP clients, HTTP clients, LangChain-style chains, direct TypeScript callers, and LLM-facing guide consumers.
 
 ## Beyond: Years-Scale Program
 

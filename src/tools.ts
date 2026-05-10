@@ -1,4 +1,5 @@
 import { buildCypherAgentFeedback } from "./agent-feedback.js";
+import { buildAgentGuide } from "./agent-guide.js";
 import { buildBenchmarkGateReport } from "./benchmark-gate.js";
 import { buildCompatibilityCatalog, type CompatibilityCatalog } from "./compatibility.js";
 import { buildCompatibilityDiffReport } from "./compatibility-diff.js";
@@ -45,6 +46,7 @@ export type CypherCompilerToolName =
   | "cypher_lsp_diagnostics"
   | "cypher_prove"
   | "cypher_agent_feedback"
+  | "cypher_agent_guide"
   | "cypher_compatibility_catalog"
   | "cypher_compatibility_diff"
   | "cypher_eval"
@@ -507,6 +509,12 @@ export const CYPHER_COMPILER_TOOLS: readonly CypherCompilerToolDefinition[] = [
     })
   },
   {
+    name: "cypher_agent_guide",
+    description:
+      "Return the machine-readable agent guide: recommended Cypher IR workflow, tool sequences, execution rules, and diagnostic playbooks for LLM clients.",
+    inputSchema: objectSchema([], {})
+  },
+  {
     name: "cypher_compatibility_catalog",
     description:
       "Return the machine-readable compatibility catalog: contract versions, stability levels, release gates, certification gates, and deprecation policy.",
@@ -718,6 +726,9 @@ export async function executeCypherCompilerTool(name: string, input: unknown): P
     }
     case "cypher_compatibility_catalog": {
       return buildCompatibilityCatalog();
+    }
+    case "cypher_agent_guide": {
+      return buildAgentGuide();
     }
     case "cypher_compatibility_diff": {
       return buildCompatibilityDiffReport(

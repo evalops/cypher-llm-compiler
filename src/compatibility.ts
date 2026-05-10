@@ -130,6 +130,9 @@ export const compatibilityCatalog = {
     stableContract("agent-feedback", "cypher-llm-agent-feedback/v1", "agent-feedback", "ecosystem-ux", "schemas/agent-feedback.schema.json", [
       "examples/proofs/tool-hash.agent-feedback.json"
     ], ["src/agent-feedback.ts", "test/agent-feedback.test.ts"]),
+    stableContract("agent-guide", "cypher-llm-agent-guide/v1", "agent-feedback", "ecosystem-ux", "schemas/agent-guide.schema.json", [
+      "examples/agent/agent-guide.json"
+    ], ["src/agent-guide.ts", "test/agent-guide.test.ts"]),
     stableContract("policy-report", "cypher-llm-policy-report/v1", "policy", "cost-safety-policy", "schemas/policy-report.schema.json", [
       "examples/policy/tool-hash.policy.json"
     ], ["src/policy.ts", "test/policy.test.ts"]),

@@ -177,6 +177,17 @@ The packet includes:
 - `policyEvidence`: compact policy status and finding-code summary.
 - `nextAction`: one of `execute`, `apply-deterministic-repairs`, `regenerate-query`, `request-approval`, or `blocked`.
 
+## `buildAgentGuide()`
+
+Produces a `cypher-llm-agent-guide/v1` object for LLM clients and agent runtimes.
+
+The guide includes:
+
+- Contract principles and default authoring rules.
+- Tool workflows for read authoring, repair, policy-safe autonomy, raw migration, and release compatibility.
+- Diagnostic playbooks that map stable codes to preferred actions and tools.
+- Public contract and example paths agents should pin.
+
 ## `buildCompatibilityCatalog()`
 
 Produces a `cypher-llm-compatibility-catalog/v1` object for governance and release automation.
@@ -401,6 +412,7 @@ Returns OpenAI Responses API function-tool definitions for:
 - `cypher_lsp_diagnostics`
 - `cypher_prove`
 - `cypher_agent_feedback`
+- `cypher_agent_guide`
 - `cypher_compatibility_catalog`
 - `cypher_compatibility_diff`
 - `cypher_eval`
@@ -451,6 +463,8 @@ Routes:
 - `POST /v1/lsp-diagnostics`
 - `POST /v1/prove`
 - `POST /v1/agent-feedback`
+- `GET /v1/agent-guide`
+- `POST /v1/agent-guide`
 - `GET /v1/compatibility`
 - `POST /v1/compatibility`
 - `POST /v1/compatibility-diff`

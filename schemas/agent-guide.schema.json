@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evalops.dev/schemas/cypher-llm/agent-guide/v1.json",
+  "title": "Cypher LLM Agent Guide",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "generatedAt",
+    "packageName",
+    "packageVersion",
+    "contractPrinciples",
+    "authoringRules",
+    "workflows",
+    "diagnosticPlaybooks",
+    "publicContracts",
+    "examplePaths"
+  ],
+  "properties": {
+    "version": { "const": "cypher-llm-agent-guide/v1" },
+    "generatedAt": { "type": "string", "minLength": 1 },
+    "packageName": { "type": "string", "minLength": 1 },
+    "packageVersion": { "type": "string", "minLength": 1 },
+    "contractPrinciples": { "$ref": "#/$defs/stringList" },
+    "authoringRules": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["preferredInput", "rawCypherUse", "requiredDefaults", "neverExecuteWhen"],
+      "properties": {
+        "preferredInput": { "const": "cypher-llm-ir/v1" },
+        "rawCypherUse": { "type": "string", "minLength": 1 },
+        "requiredDefaults": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["defaultLimit", "defaultMaxHops", "parserMode", "policyProfileId"],
+          "properties": {
+            "defaultLimit": { "type": "integer", "minimum": 1 },
+            "defaultMaxHops": { "type": "integer", "minimum": 1 },
+            "parserMode": { "enum": ["syntax", "lint"] },
+            "policyProfileId": { "type": "string", "minLength": 1 }
+          }
+        },
+        "neverExecuteWhen": { "$ref": "#/$defs/stringList" }
+      }
+    },
+    "workflows": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/workflow" },
+      "minItems": 1
+    },
+    "diagnosticPlaybooks": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/diagnosticPlaybook" },
+      "minItems": 1
+    },
+    "publicContracts": { "$ref": "#/$defs/stringList" },
+    "examplePaths": { "$ref": "#/$defs/stringList" }
+  },
+  "$defs": {
+    "stringList": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "minItems": 1
+    },
+    "workflow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "goal", "steps"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "title": { "type": "string", "minLength": 1 },
+        "goal": { "type": "string", "minLength": 1 },
+        "steps": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/workflowStep" },
+          "minItems": 1
+        }
+      }
+    },
+    "workflowStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "successSignal", "failureHandling"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "title": { "type": "string", "minLength": 1 },
+        "toolName": { "type": "string", "minLength": 1 },
+        "cliCommand": { "type": "string", "minLength": 1 },
+        "inputContract": { "type": "string", "minLength": 1 },
+        "outputContract": { "type": "string", "minLength": 1 },
+        "successSignal": { "type": "string", "minLength": 1 },
+        "failureHandling": { "type": "string", "minLength": 1 }
+      }
+    },
+    "diagnosticPlaybook": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["codes", "category", "preferredAction", "preferredTool", "instruction"],
+      "properties": {
+        "codes": { "$ref": "#/$defs/stringList" },
+        "category": {
+          "enum": ["schema", "scope", "syntax", "safety", "policy", "aggregation", "raw-compatibility"]
+        },
+        "preferredAction": {
+          "enum": ["apply-deterministic-repair", "regenerate-ir", "request-approval", "ask-for-schema", "use-raw-migration"]
+        },
+        "preferredTool": { "type": "string", "minLength": 1 },
+        "instruction": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}
