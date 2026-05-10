@@ -9,9 +9,10 @@ Artifacts:
 - JSON Schema for `CypherSchemaContract`.
 - JSON Schema for `CypherQuery`.
 - JSON Schema for eval datasets and model attempts.
+- Versioned dialect profiles and compatibility policy.
 - Examples that validate against those schemas.
 
-Status: started in this repo under `schemas/`.
+Status: implemented in this repo under `schemas/`, `profiles/`, `docs/COMPATIBILITY.md`, and `CHANGELOG.md`.
 
 ## 2. Offline Evals
 

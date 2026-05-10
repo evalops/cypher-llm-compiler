@@ -1,0 +1,27 @@
+{
+  "version": "cypher-llm-dialect-profile/v1",
+  "id": "neo4j-cypher-25",
+  "displayName": "Neo4j Cypher 25",
+  "status": "stable",
+  "description": "Default profile for modern Neo4j Cypher with LLM-safe rendering.",
+  "features": {
+    "letClause": true,
+    "filterClause": true,
+    "subqueries": true,
+    "writeClauses": true,
+    "pathModes": true,
+    "shortestPathModes": true,
+    "gqlGraphReferences": false,
+    "legacyVariableLengthRelationships": true
+  },
+  "rendering": {
+    "escapeSchemaIdentifiers": true,
+    "relationshipRangeStyle": "legacy-star",
+    "requireReadonlyLimit": true
+  },
+  "unsupportedPatterns": [],
+  "notes": [
+    "This is the package default profile.",
+    "The renderer currently uses legacy star syntax for variable-length relationships for compatibility."
+  ]
+}

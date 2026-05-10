@@ -1,0 +1,28 @@
+{
+  "version": "cypher-llm-dialect-profile/v1",
+  "id": "gql",
+  "displayName": "GQL-Oriented Profile",
+  "status": "experimental",
+  "description": "Forward-looking profile for GQL-style rendering and compatibility checks.",
+  "features": {
+    "letClause": true,
+    "filterClause": true,
+    "subqueries": true,
+    "writeClauses": true,
+    "pathModes": true,
+    "shortestPathModes": true,
+    "gqlGraphReferences": true,
+    "legacyVariableLengthRelationships": false
+  },
+  "rendering": {
+    "escapeSchemaIdentifiers": true,
+    "relationshipRangeStyle": "gql-quantifier",
+    "requireReadonlyLimit": true
+  },
+  "unsupportedPatterns": [
+    "Dialect-specific graph reference rendering is not implemented yet"
+  ],
+  "notes": [
+    "This profile records intended compatibility behavior before the renderer fully targets GQL syntax."
+  ]
+}

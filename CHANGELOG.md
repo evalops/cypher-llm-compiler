@@ -1,0 +1,8 @@
+# Changelog
+
+## 0.1.0
+
+- Added the initial Cypher LLM IR, schema contract, renderer, validator, repair loop, safety planner, and CLI.
+- Added JSON Schema contracts for the IR, schema contract, eval datasets, eval attempts, and dialect profiles.
+- Added offline eval runner, parser-backed validation through Neo4j language support, and a driver-compatible Neo4j `EXPLAIN` adapter.
+- Added dialect profiles for Neo4j Cypher 25, openCypher 9, and a GQL-oriented target.

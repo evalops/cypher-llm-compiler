@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evalops.dev/schemas/cypher-llm/dialect-profile/v1.json",
+  "title": "Cypher LLM Dialect Profile",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "id", "displayName", "status", "features", "rendering"],
+  "properties": {
+    "version": { "const": "cypher-llm-dialect-profile/v1" },
+    "id": { "type": "string", "minLength": 1 },
+    "displayName": { "type": "string", "minLength": 1 },
+    "status": { "enum": ["stable", "preview", "experimental"] },
+    "description": { "type": "string" },
+    "features": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "letClause",
+        "filterClause",
+        "subqueries",
+        "writeClauses",
+        "pathModes",
+        "shortestPathModes",
+        "gqlGraphReferences",
+        "legacyVariableLengthRelationships"
+      ],
+      "properties": {
+        "letClause": { "type": "boolean" },
+        "filterClause": { "type": "boolean" },
+        "subqueries": { "type": "boolean" },
+        "writeClauses": { "type": "boolean" },
+        "pathModes": { "type": "boolean" },
+        "shortestPathModes": { "type": "boolean" },
+        "gqlGraphReferences": { "type": "boolean" },
+        "legacyVariableLengthRelationships": { "type": "boolean" }
+      }
+    },
+    "rendering": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["escapeSchemaIdentifiers", "relationshipRangeStyle", "requireReadonlyLimit"],
+      "properties": {
+        "escapeSchemaIdentifiers": { "type": "boolean" },
+        "relationshipRangeStyle": { "enum": ["legacy-star", "gql-quantifier"] },
+        "requireReadonlyLimit": { "type": "boolean" }
+      }
+    },
+    "unsupportedPatterns": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "notes": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    }
+  }
+}

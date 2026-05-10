@@ -229,6 +229,7 @@ Those are deliberate boundaries. The repo is the missing LLM compiler surface, n
 - `src/cli.ts`: JSON-in/JSON-out CLI for agents and eval harnesses.
 - `docs/`: Design notes and LLM integration guidance.
 - `examples/`: Small schema/query fixtures for CLI smoke tests and agent onboarding.
+- `profiles/`: Versioned dialect profiles for Neo4j Cypher 25, openCypher 9, and GQL-oriented output.
 - `schemas/`: JSON Schema contracts for IR, graph schema, eval datasets, and eval attempts.
 - `test/`: Node test-runner coverage for renderer, schema, validation, repair, safety, and corpus behavior.
 

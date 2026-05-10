@@ -1,0 +1,31 @@
+{
+  "version": "cypher-llm-dialect-profile/v1",
+  "id": "opencypher-9",
+  "displayName": "openCypher 9",
+  "status": "preview",
+  "description": "Compatibility-oriented profile for openCypher-style syntax.",
+  "features": {
+    "letClause": false,
+    "filterClause": false,
+    "subqueries": true,
+    "writeClauses": true,
+    "pathModes": false,
+    "shortestPathModes": false,
+    "gqlGraphReferences": false,
+    "legacyVariableLengthRelationships": true
+  },
+  "rendering": {
+    "escapeSchemaIdentifiers": true,
+    "relationshipRangeStyle": "legacy-star",
+    "requireReadonlyLimit": true
+  },
+  "unsupportedPatterns": [
+    "LET clauses",
+    "Cypher 25 FILTER clauses",
+    "GQL path modes"
+  ],
+  "notes": [
+    "Use this profile when targeting engines closer to the openCypher 9 grammar.",
+    "The package does not yet enforce every profile-specific restriction."
+  ]
+}

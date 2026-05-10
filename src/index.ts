@@ -1,5 +1,6 @@
 export * from "./ir.js";
 export * from "./diagnostics.js";
+export * from "./dialects.js";
 export * from "./evals.js";
 export * from "./failure-corpus.js";
 export * from "./neo4j-explain.js";

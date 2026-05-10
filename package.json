@@ -12,15 +12,18 @@
   },
   "files": [
     "dist/src",
+    "CHANGELOG.md",
     "README.md",
     "docs",
     "examples",
+    "profiles",
     "schemas"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "test": "npm run build && node --test dist/test/*.test.js",
-    "check": "npm run test"
+    "check": "npm run test",
+    "verify:pack": "npm run build && npm pack --dry-run"
   },
   "devDependencies": {
     "@types/node": "^25.6.2",
