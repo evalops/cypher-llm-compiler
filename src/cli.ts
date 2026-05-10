@@ -5,8 +5,10 @@ import type { CypherQuery, CypherSchemaContract, JsonLiteral } from "./ir.js";
 import type { EvalAttemptSet, EvalDataset } from "./evals.js";
 import { evaluateAttempts } from "./evals.js";
 import { evaluateFailureCorpus } from "./failure-corpus.js";
-import { repairRawCypher } from "./repair.js";
+import { repairQuery, repairRawCypher } from "./repair.js";
+import { renderQuery } from "./render.js";
 import { createSafeExecutionPlan } from "./safety.js";
+import { validateCypherTextWithParser } from "./parser-validation.js";
 import { normalizeSchema } from "./schema.js";
 import { validateQuery } from "./validate.js";
 
@@ -36,6 +38,9 @@ export async function runCli(argv: string[], io: CliIO = defaultIo()): Promise<n
         return 0;
       case "eval":
         await evalCommand(args, io);
+        return 0;
+      case "parse-check":
+        await parseCheckCommand(args, io);
         return 0;
       case "help":
       case undefined:
@@ -93,6 +98,33 @@ async function evalCommand(args: Map<string, string | boolean>, io: CliIO) {
     evalOptions.defaultMaxHops = defaultMaxHops;
   }
   writeJson(io, evaluateAttempts(dataset, attempts, evalOptions));
+}
+
+async function parseCheckCommand(args: Map<string, string | boolean>, io: CliIO) {
+  const schema = normalizeSchema(await readSchema(args, io));
+  const mode = args.get("mode") === "syntax" ? "syntax" : "lint";
+  const rawCypher = args.get("cypher");
+  if (typeof rawCypher === "string") {
+    writeJson(io, validateCypherTextWithParser(rawCypher, schema, { mode }));
+    return;
+  }
+  const query = await readQuery(args, io);
+  const defaultLimit = optionalNumber(args.get("default-limit"));
+  const defaultMaxHops = optionalNumber(args.get("default-max-hops"));
+  const repairOptions: { defaultLimit?: number; defaultMaxHops?: number } = {};
+  if (defaultLimit !== undefined) {
+    repairOptions.defaultLimit = defaultLimit;
+  }
+  if (defaultMaxHops !== undefined) {
+    repairOptions.defaultMaxHops = defaultMaxHops;
+  }
+  const repaired = repairQuery(query, schema, repairOptions);
+  const parserResult = validateCypherTextWithParser(renderQuery(repaired.query), schema, { mode });
+  writeJson(io, {
+    ...parserResult,
+    repairs: repaired.applied,
+    compilerDiagnostics: repaired.diagnostics
+  });
 }
 
 async function readSchema(args: Map<string, string | boolean>, io: CliIO): Promise<CypherSchemaContract> {
@@ -165,6 +197,7 @@ Commands:
   repair-raw  --schema schema.json --cypher "MATCH ..."
   corpus
   eval        --dataset dataset.json --attempts attempts.json [--default-limit 25] [--default-max-hops 5]
+  parse-check --schema schema.json (--query query.json | --cypher "MATCH ...") [--mode lint|syntax] [--default-limit 25] [--default-max-hops 5]
   help
 `;
 }

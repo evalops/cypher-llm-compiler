@@ -91,6 +91,25 @@ Produces a `SafeExecutionPlan`:
 
 No database is touched. A real adapter can run `preflightCypher`, then use `canExecute` and `requiresApproval` to decide what to do next.
 
+## `validateRenderedQueryWithParser(query, schema, options?)`
+
+Renders a structured query and validates the resulting Cypher with Neo4j's `@neo4j-cypher/language-support` package.
+
+Modes:
+
+- `lint`: parser plus language-support linting.
+- `syntax`: parser syntax diagnostics only.
+
+The adapter maps Neo4j language-support diagnostics back into this package's stable `Diagnostic` shape.
+
+## `validateCypherTextWithParser(cypher, schema, options?)`
+
+Runs parser-backed validation directly on raw Cypher text. This is useful for migration from legacy text2cypher chains.
+
+## `dbSchemaFromContract(schema)`
+
+Converts a `CypherSchemaContract` into the `DbSchema` object expected by Neo4j language support. It includes both canonical and backtick-escaped identifier forms so rendered LLM-safe Cypher does not produce false missing-label warnings.
+
 ## `evaluateFailureCorpus(cases?)`
 
 Runs the known LLM failure fixtures and returns pass/fail records with canonical Cypher and diagnostic codes.

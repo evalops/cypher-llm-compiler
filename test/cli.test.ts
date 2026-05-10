@@ -117,4 +117,32 @@ describe("cli", () => {
     assert.equal(output.metrics.passedTasks, 1);
     assert.equal(output.metrics.passRate, 1);
   });
+
+  it("runs parser-backed validation from raw Cypher", async () => {
+    const files = new Map<string, string>([
+      [
+        "schema.json",
+        JSON.stringify({
+          version: "cypher-llm-schema/v1",
+          nodes: [{ name: "Tool" }],
+          relationships: []
+        })
+      ]
+    ]);
+    let stdout = "";
+    let stderr = "";
+    const io: CliIO = {
+      stdout: { write: (chunk: string | Uint8Array) => ((stdout += String(chunk)), true) },
+      stderr: { write: (chunk: string | Uint8Array) => ((stderr += String(chunk)), true) },
+      readFile: async (path) => files.get(String(path)) ?? ""
+    };
+
+    const code = await runCli(["parse-check", "--schema", "schema.json", "--cypher", "MATCH (tool:`Tool`) RETURN tool"], io);
+    const output = JSON.parse(stdout) as { ok: boolean; diagnostics: unknown[] };
+
+    assert.equal(code, 0);
+    assert.equal(stderr, "");
+    assert.equal(output.ok, true);
+    assert.deepEqual(output.diagnostics, []);
+  });
 });

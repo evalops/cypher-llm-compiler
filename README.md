@@ -126,6 +126,7 @@ cypher-llm validate --schema schema.json --query query.json
 cypher-llm repair-raw --schema schema.json --cypher "MATCH (t:Tool)-[:has MD5 hash]->(h:Hash) RETURN h"
 cypher-llm corpus
 cypher-llm eval --dataset examples/eval-dataset.json --attempts examples/eval-attempts.json --default-limit 25
+cypher-llm parse-check --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json --default-limit 25
 ```
 
 `render` returns a `SafeExecutionPlan`:
@@ -138,6 +139,8 @@ cypher-llm eval --dataset examples/eval-dataset.json --attempts examples/eval-at
 - `canExecute`: false if errors remain or approval is required.
 
 `eval` returns a `cypher-llm-eval-report/v1` report with pass rate, executable rate, repair rate, diagnostic counts, and per-task outcomes.
+
+`parse-check` validates rendered IR or raw Cypher against Neo4j's language-support parser and maps parser diagnostics back into this package's `Diagnostic` shape.
 
 ## LLM Integration Contract
 

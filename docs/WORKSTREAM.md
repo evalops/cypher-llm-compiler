@@ -33,7 +33,7 @@ Artifacts:
 - Runtime error mapping into the `Diagnostic` shape.
 - Docker-based CI fixture.
 
-This is the next most valuable work after the offline harness, because it connects the compiler loop to actual Cypher truth.
+Status: parser-backed validation has started through `validateRenderedQueryWithParser`, `validateCypherTextWithParser`, and `cypher-llm parse-check`. Database-backed `EXPLAIN` remains the next vertical.
 
 ## 4. Semantic Analyzer Expansion
 

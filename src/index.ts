@@ -3,6 +3,7 @@ export * from "./diagnostics.js";
 export * from "./evals.js";
 export * from "./failure-corpus.js";
 export * from "./normalize.js";
+export * from "./parser-validation.js";
 export * from "./repair.js";
 export * from "./render.js";
 export * from "./safety.js";
