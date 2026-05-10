@@ -1,0 +1,20 @@
+{
+  "version": "cypher-llm-planner-estimate/v1",
+  "source": "fixture",
+  "estimatedRows": 25000,
+  "dbHits": 75000,
+  "operators": [
+    {
+      "name": "ProduceResults",
+      "estimatedRows": 25000,
+      "children": [
+        {
+          "name": "NodeByLabelScan",
+          "identifiers": ["tool"],
+          "estimatedRows": 25000,
+          "dbHits": 75000
+        }
+      ]
+    }
+  ]
+}

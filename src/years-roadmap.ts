@@ -231,9 +231,12 @@ export const yearsRoadmap = {
       firstArtifacts: [
         "src/safety.ts",
         "src/policy.ts",
+        "src/planner-estimate.ts",
         "src/policy-profile.ts",
         "src/neo4j-explain.ts",
+        "schemas/planner-estimate.schema.json",
         "schemas/policy-profile.schema.json",
+        "examples/policy/tool-hash.planner-estimate.json",
         "examples/policy/policy-profiles.json",
         "docs/LLM_SAFE_PROFILE.md"
       ],
@@ -397,6 +400,13 @@ export const yearsRoadmap = {
       status: "partial",
       evidence: ["src/policy-profile.ts", "schemas/policy-profile.schema.json", "test/policy-profile.test.ts"],
       workstreamIds: ["cost-safety-policy", "governance-standards"]
+    },
+    {
+      id: "planner-estimates",
+      title: "Planner Estimate Evidence For Policy Checks",
+      status: "partial",
+      evidence: ["src/planner-estimate.ts", "schemas/planner-estimate.schema.json", "test/planner-estimate.test.ts"],
+      workstreamIds: ["cost-safety-policy", "compiler-service", "governance-standards"]
     },
     {
       id: "compiler-service",

@@ -4,6 +4,7 @@ import path from "node:path";
 import { describe, it } from "node:test";
 import Ajv2020Module from "ajv/dist/2020.js";
 import type { CypherQuery, CypherSchemaContract } from "../src/ir.js";
+import type { CypherPlannerEstimate } from "../src/planner-estimate.js";
 import { assessCypherPolicy, type CypherPolicyReport } from "../src/policy.js";
 import { getPolicyProfile, policyOptionsFromProfile } from "../src/policy-profile.js";
 import { buildCypherProof } from "../src/proof.js";
@@ -92,6 +93,28 @@ describe("cost and safety policy", () => {
 
     assert.equal(report.policy?.id, "llm-readonly-exploration");
     assert.equal(report.findings.some((finding) => finding.code === "policy-high-return-limit"), false);
+  });
+
+  it("uses planner estimates as auditable cost policy evidence", () => {
+    const query: CypherQuery = {
+      version: "cypher-llm-ir/v1",
+      clauses: [
+        {
+          kind: "match",
+          patterns: [{ segments: [{ variable: "tool", labels: ["Tool"] }] }]
+        },
+        { kind: "return", items: [{ expression: { kind: "var", name: "tool" } }], limit: { kind: "literal", value: 25 } }
+      ]
+    };
+    const plannerEstimate = readJson<CypherPlannerEstimate>("examples/policy/tool-hash.planner-estimate.json");
+    const report = assessCypherPolicy(query, schema, { plannerEstimate, maxEstimatedRows: 10_000, maxDbHits: 50_000 });
+    const codes = report.findings.map((finding) => finding.code);
+
+    assert.equal(report.planner?.source, "fixture");
+    assert.equal(report.planner?.operators, 2);
+    assert.ok(codes.includes("policy-high-estimated-rows"));
+    assert.ok(codes.includes("policy-high-db-hits"));
+    assert.ok(codes.includes("policy-expensive-plan-operator"));
   });
 
   it("feeds policy claims into proof output after deterministic repairs", () => {

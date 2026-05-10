@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evalops.dev/schemas/cypher-llm/planner-estimate/v1.json",
+  "title": "Cypher Planner Estimate",
+  "type": "object",
+  "required": ["version", "source", "operators"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": "cypher-llm-planner-estimate/v1" },
+    "source": { "enum": ["neo4j-explain", "neo4j-profile", "manual", "fixture"] },
+    "estimatedRows": { "type": "number", "minimum": 0 },
+    "dbHits": { "type": "number", "minimum": 0 },
+    "operators": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/operator" }
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    }
+  },
+  "$defs": {
+    "operator": {
+      "type": "object",
+      "required": ["name"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "identifiers": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "estimatedRows": { "type": "number", "minimum": 0 },
+        "dbHits": { "type": "number", "minimum": 0 },
+        "children": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/operator" }
+        }
+      }
+    }
+  }
+}

@@ -15,6 +15,7 @@
 - Added a JSON HTTP compiler service over the shared tool dispatcher with health, metadata, tool, roadmap, and dialect certification routes.
 - Added static cost and safety policy reports for broad scans, traversal risk, high limits, cartesian patterns, and writes, including CLI/tool/service output and checked-in policy artifact.
 - Added named Cypher policy profiles with a catalog contract, CLI/tool/service output, report attribution, JSON Schema, and checked-in profile catalog artifact.
+- Added planner estimate evidence for policy checks with Neo4j-like summary extraction, estimated-row/db-hit/operator findings, JSON Schema, CLI/tool input, and checked-in planner fixture.
 - Added LSP-style diagnostics and code actions over compiler, parser, policy, and repair output, including CLI/tool/service output and checked-in LSP artifact.
 - Added lossless Cypher parse reports with exact source round-trip fragments, comments, statement/clause spans, optional parser output, IR-preview mapping, JSON Schema, CLI/tool/service output, and checked-in lossless artifact.
 - Added CypherBench scorecards with ranked lanes, aggregate diagnostics, baseline comparisons, JSON Schema, markdown rendering, CLI/tool/service output, and checked-in scorecard artifacts.

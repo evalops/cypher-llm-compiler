@@ -20,6 +20,7 @@ import {
 import { introspectNeo4jSchema } from "./neo4j-introspect.js";
 import { buildLspDiagnostics } from "./lsp.js";
 import { parseCypherLosslessly } from "./lossless-parser.js";
+import type { CypherPlannerEstimate } from "./planner-estimate.js";
 import { repairQuery, repairRawCypher } from "./repair.js";
 import { buildCypherRepairPlan } from "./repair-plan.js";
 import { evaluateRepairLoop } from "./repair-loop.js";
@@ -441,7 +442,11 @@ async function policyCheckCommand(args: Map<string, string | boolean>, io: CliIO
   const query = await readQuery(args, io);
   const maxReturnLimit = optionalNumber(args.get("max-return-limit"));
   const maxRelationshipHops = optionalNumber(args.get("max-relationship-hops"));
+  const maxEstimatedRows = optionalNumber(args.get("max-estimated-rows"));
+  const maxDbHits = optionalNumber(args.get("max-db-hits"));
+  const warnOnPlanOperators = optionalCsv(args.get("warn-on-plan-operators"));
   const profile = await readPolicyProfile(args, io);
+  const plannerEstimate = await readPlannerEstimate(args, io);
   const overrides: Parameters<typeof assessCypherPolicy>[2] = {};
   if (args.get("allow-writes") === true) {
     overrides.allowWrites = true;
@@ -454,6 +459,18 @@ async function policyCheckCommand(args: Map<string, string | boolean>, io: CliIO
   }
   if (maxRelationshipHops !== undefined) {
     overrides.maxRelationshipHops = maxRelationshipHops;
+  }
+  if (maxEstimatedRows !== undefined) {
+    overrides.maxEstimatedRows = maxEstimatedRows;
+  }
+  if (maxDbHits !== undefined) {
+    overrides.maxDbHits = maxDbHits;
+  }
+  if (warnOnPlanOperators !== undefined) {
+    overrides.warnOnPlanOperators = warnOnPlanOperators;
+  }
+  if (plannerEstimate !== undefined) {
+    overrides.plannerEstimate = plannerEstimate;
   }
   const policyOptions = profile ? policyOptionsFromProfile(profile, overrides) : overrides;
   const report = assessCypherPolicy(query, schema, policyOptions);
@@ -653,6 +670,14 @@ async function readPolicyProfile(args: Map<string, string | boolean>, io: CliIO)
   return undefined;
 }
 
+async function readPlannerEstimate(args: Map<string, string | boolean>, io: CliIO): Promise<CypherPlannerEstimate | undefined> {
+  const estimatePath = args.get("planner-estimate");
+  if (typeof estimatePath !== "string") {
+    return undefined;
+  }
+  return JSON.parse(await io.readFile(estimatePath, "utf8")) as CypherPlannerEstimate;
+}
+
 function parseArgs(args: string[]): Map<string, string | boolean> {
   const parsed = new Map<string, string | boolean>();
   for (let index = 0; index < args.length; index += 1) {
@@ -689,6 +714,16 @@ function optionalNumber(value: string | boolean | undefined): number | undefined
     throw new Error(`Expected number, received '${value}'`);
   }
   return parsed;
+}
+
+function optionalCsv(value: string | boolean | undefined): string[] | undefined {
+  if (value === undefined || typeof value === "boolean") {
+    return undefined;
+  }
+  return value
+    .split(",")
+    .map((item) => item.trim())
+    .filter((item) => item.length > 0);
 }
 
 function importOptions(args: Map<string, string | boolean>, fallbackName: string): ImportOptions {
@@ -763,7 +798,7 @@ Commands:
   repair-loop --dataset dataset.json --attempts attempts.json [--feedback-out feedback.json] [--report-out report.json] [--raw-cypher-can-execute] [--default-limit 25] [--default-max-hops 5]
   lift-raw-eval --dataset dataset.json --attempts attempts.json [--summary-out summary.json]
   parse-check --schema schema.json (--query query.json | --cypher "MATCH ...") [--mode lint|syntax] [--default-limit 25] [--default-max-hops 5]
-  policy-check --schema schema.json --query query.json [--policy-profile-id id | --policy-profile profile.json] [--report-out report.json] [--fail-on-error] [--allow-writes] [--no-require-limit] [--max-return-limit 100] [--max-relationship-hops 5]
+  policy-check --schema schema.json --query query.json [--policy-profile-id id | --policy-profile profile.json] [--planner-estimate estimate.json] [--report-out report.json] [--fail-on-error] [--allow-writes] [--no-require-limit] [--max-return-limit 100] [--max-relationship-hops 5] [--max-estimated-rows 10000] [--max-db-hits 50000] [--warn-on-plan-operators CartesianProduct,AllNodesScan]
   policy-profiles [--format json|markdown] [--profiles-out profiles.json]
   lsp-diagnostics --schema schema.json (--query query.json | --cypher "MATCH ...") [--uri file:///query.cypher] [--report-out report.json] [--parser-mode syntax|lint] [--default-limit 25] [--default-max-hops 5]
   prove       --schema schema.json --query query.json [--params params.json] [--proof-out proof.json] [--fail-on-blocked] [--default-limit 25] [--default-max-hops 5] [--allow-writes] [--approved] [--parser-mode syntax|lint] [--no-parser]

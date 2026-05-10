@@ -1,4 +1,6 @@
 import type { Clause, CypherQuery, CypherSchemaContract, Expression, MatchClause, NodePattern, RelationshipPattern, ReturnClause } from "./ir.js";
+import type { CypherPlannerEstimate, CypherPlannerOperatorEstimate } from "./planner-estimate.js";
+import { flattenPlannerOperators } from "./planner-estimate.js";
 import { isWriteClause } from "./validate.js";
 
 export type PolicySeverity = "info" | "warning" | "error";
@@ -8,6 +10,10 @@ export interface CypherPolicyOptions {
   requireLimit?: boolean;
   maxReturnLimit?: number;
   maxRelationshipHops?: number;
+  maxEstimatedRows?: number;
+  maxDbHits?: number;
+  warnOnPlanOperators?: string[];
+  plannerEstimate?: CypherPlannerEstimate;
   profile?: CypherPolicyProfileRef;
 }
 
@@ -36,17 +42,28 @@ export interface CypherPolicyReport {
   ok: boolean;
   dialect?: string;
   policy?: CypherPolicyProfileRef;
+  planner?: CypherPolicyPlannerSummary;
   summary: CypherPolicySummary;
   findings: CypherPolicyFinding[];
 }
 
-type EffectivePolicyOptions = Required<Omit<CypherPolicyOptions, "profile">>;
+export interface CypherPolicyPlannerSummary {
+  source: string;
+  operators: number;
+  estimatedRows?: number;
+  dbHits?: number;
+}
+
+type EffectivePolicyOptions = Required<Omit<CypherPolicyOptions, "profile" | "plannerEstimate">>;
 
 const DEFAULT_OPTIONS: EffectivePolicyOptions = {
   allowWrites: false,
   requireLimit: true,
   maxReturnLimit: 100,
-  maxRelationshipHops: 5
+  maxRelationshipHops: 5,
+  maxEstimatedRows: 10_000,
+  maxDbHits: 50_000,
+  warnOnPlanOperators: ["AllNodesScan", "NodeByLabelScan", "CartesianProduct", "Eager"]
 };
 
 export function assessCypherPolicy(
@@ -58,7 +75,10 @@ export function assessCypherPolicy(
     allowWrites: options.allowWrites ?? DEFAULT_OPTIONS.allowWrites,
     requireLimit: options.requireLimit ?? DEFAULT_OPTIONS.requireLimit,
     maxReturnLimit: options.maxReturnLimit ?? DEFAULT_OPTIONS.maxReturnLimit,
-    maxRelationshipHops: options.maxRelationshipHops ?? DEFAULT_OPTIONS.maxRelationshipHops
+    maxRelationshipHops: options.maxRelationshipHops ?? DEFAULT_OPTIONS.maxRelationshipHops,
+    maxEstimatedRows: options.maxEstimatedRows ?? DEFAULT_OPTIONS.maxEstimatedRows,
+    maxDbHits: options.maxDbHits ?? DEFAULT_OPTIONS.maxDbHits,
+    warnOnPlanOperators: options.warnOnPlanOperators ?? DEFAULT_OPTIONS.warnOnPlanOperators
   };
   const findings: CypherPolicyFinding[] = [];
 
@@ -81,6 +101,10 @@ export function assessCypherPolicy(
     }
   });
 
+  if (options.plannerEstimate) {
+    assessPlannerPolicy(options.plannerEstimate, findings, opts);
+  }
+
   const summary = {
     findings: findings.length,
     errors: findings.filter((finding) => finding.severity === "error").length,
@@ -93,6 +117,7 @@ export function assessCypherPolicy(
     ok: summary.errors === 0,
     ...(schema.dialect ? { dialect: schema.dialect } : {}),
     ...(options.profile ? { policy: options.profile } : {}),
+    ...(options.plannerEstimate ? { planner: plannerSummary(options.plannerEstimate) } : {}),
     summary,
     findings
   };
@@ -200,6 +225,77 @@ function assessReturnPolicy(
       suggestion: "Lower the LIMIT or require an explicit policy override."
     });
   }
+}
+
+function assessPlannerPolicy(
+  estimate: CypherPlannerEstimate,
+  findings: CypherPolicyFinding[],
+  options: EffectivePolicyOptions
+) {
+  if (estimate.estimatedRows !== undefined && estimate.estimatedRows > options.maxEstimatedRows) {
+    findings.push({
+      code: "policy-high-estimated-rows",
+      severity: "warning",
+      message: `Planner estimates up to ${estimate.estimatedRows} rows, above the policy maximum of ${options.maxEstimatedRows}.`,
+      path: "/plannerEstimate/estimatedRows",
+      suggestion: "Add predicates, indexes, lower traversal fanout, or require an explicit policy override."
+    });
+  }
+
+  if (estimate.dbHits !== undefined && estimate.dbHits > options.maxDbHits) {
+    findings.push({
+      code: "policy-high-db-hits",
+      severity: "warning",
+      message: `Planner estimates ${estimate.dbHits} db hits, above the policy maximum of ${options.maxDbHits}.`,
+      path: "/plannerEstimate/dbHits",
+      suggestion: "Review the plan, add an index-backed predicate, or require an explicit policy override."
+    });
+  }
+
+  const warnOperators = new Set(options.warnOnPlanOperators);
+  walkPlannerOperators(estimate.operators, "/plannerEstimate/operators", (operator, path) => {
+    if (!warnOperators.has(operator.name)) {
+      return;
+    }
+    findings.push({
+      code: "policy-expensive-plan-operator",
+      severity: "warning",
+      message: `Planner uses ${operator.name}.`,
+      path,
+      suggestion: "Prefer indexed lookups, connected patterns, and lower-cardinality anchors before autonomous execution."
+    });
+  });
+
+  estimate.warnings?.forEach((warning, index) => {
+    findings.push({
+      code: "policy-planner-estimate-warning",
+      severity: "info",
+      message: warning,
+      path: `/plannerEstimate/warnings/${index}`,
+      suggestion: "Treat incomplete planner evidence as a reason to keep the query in review or EXPLAIN-only mode."
+    });
+  });
+}
+
+function walkPlannerOperators(
+  operators: readonly CypherPlannerOperatorEstimate[],
+  basePath: string,
+  visit: (operator: CypherPlannerOperatorEstimate, path: string) => void
+) {
+  operators.forEach((operator, index) => {
+    const path = `${basePath}/${index}`;
+    visit(operator, path);
+    walkPlannerOperators(operator.children ?? [], `${path}/children`, visit);
+  });
+}
+
+function plannerSummary(estimate: CypherPlannerEstimate): CypherPolicyPlannerSummary {
+  return {
+    source: estimate.source,
+    operators: flattenPlannerOperators(estimate.operators).length,
+    ...(estimate.estimatedRows !== undefined ? { estimatedRows: estimate.estimatedRows } : {}),
+    ...(estimate.dbHits !== undefined ? { dbHits: estimate.dbHits } : {})
+  };
 }
 
 function numericLiteral(expression: Expression): number | undefined {

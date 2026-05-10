@@ -18,6 +18,17 @@
         "title": { "type": "string", "minLength": 1 }
       }
     },
+    "planner": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "operators"],
+      "properties": {
+        "source": { "type": "string", "minLength": 1 },
+        "operators": { "type": "integer", "minimum": 0 },
+        "estimatedRows": { "type": "number", "minimum": 0 },
+        "dbHits": { "type": "number", "minimum": 0 }
+      }
+    },
     "summary": {
       "type": "object",
       "additionalProperties": false,

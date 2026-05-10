@@ -117,12 +117,19 @@ describe("OpenAI tool schemas", () => {
       schema,
       query: repairableQuery,
       policyProfileId: "llm-readonly-strict",
+      plannerEstimate: {
+        version: "cypher-llm-planner-estimate/v1",
+        source: "fixture",
+        estimatedRows: 25_000,
+        operators: [{ name: "NodeByLabelScan", estimatedRows: 25_000 }]
+      },
       maxRelationshipHops: 3
     })) as { version: string; policy?: { id: string }; findings: { code: string }[] };
 
     assert.equal(policy.version, "cypher-llm-policy-report/v1");
     assert.equal(policy.policy?.id, "llm-readonly-strict");
     assert.ok(policy.findings.some((finding) => finding.code === "policy-unbounded-traversal"));
+    assert.ok(policy.findings.some((finding) => finding.code === "policy-high-estimated-rows"));
 
     const policyProfiles = (await executeCypherCompilerTool("cypher_policy_profiles", {})) as {
       version: string;

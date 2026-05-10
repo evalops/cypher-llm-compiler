@@ -19,7 +19,7 @@ The gap is not "LLMs need a better prompt." The gap is a missing compiler bounda
 
 ## What This Implements
 
-This package implements twenty concrete improvements:
+This package implements twenty-one concrete improvements:
 
 1. **Official JSON IR**: Agents can emit a small, typed Cypher AST instead of brittle text.
 2. **LLM-safe profile**: The renderer emits conservative Cypher with escaped schema identifiers, explicit projections, bounded path recommendations, and deterministic formatting.
@@ -34,13 +34,14 @@ This package implements twenty concrete improvements:
 11. **Proof-carrying compile output**: Agents can ask why a query is accepted, repaired, blocked, or approval-gated.
 12. **Cost and safety policy reports**: Broad scans, risky traversals, high limits, cartesian patterns, and writes are surfaced before execution.
 13. **Named policy profiles**: Agents can select audited built-in or custom cost/safety profiles instead of hand-assembling loose booleans.
-14. **LSP-style diagnostics**: Editor and agent UIs can consume compiler diagnostics and code actions in a familiar shape.
-15. **Lossless parse reports**: Existing Cypher can be preserved byte-for-byte while agents inspect statements, clauses, comments, source spans, parser output, and IR-preview coverage.
-16. **CypherBench scorecards**: Eval reports can be published as ranked JSON and markdown scorecards across raw, IR-first, repaired, parser-validated, and mixed lanes.
-17. **Dataset governance reports**: Benchmark datasets can be audited for provenance, split assignment, redaction findings, duplicate ids, and public-release diagnostics.
-18. **Ranked repair plans**: Agents can receive deterministic patches, model-required fixes, and unsafe blockers as separate ranked plan steps.
-19. **Service manifest and controls**: Agent runtimes can discover HTTP routes, auth posture, request limits, audit redaction, and data-boundary guarantees.
-20. **Benchmark gates**: CI can publish pass/fail CypherBench gates over metric regressions, pass-rate floors, executable-rate floors, and optional diagnostic regressions.
+14. **Planner estimate policy gates**: `EXPLAIN`-style cardinality, db-hit, and operator evidence can feed policy findings before execution.
+15. **LSP-style diagnostics**: Editor and agent UIs can consume compiler diagnostics and code actions in a familiar shape.
+16. **Lossless parse reports**: Existing Cypher can be preserved byte-for-byte while agents inspect statements, clauses, comments, source spans, parser output, and IR-preview coverage.
+17. **CypherBench scorecards**: Eval reports can be published as ranked JSON and markdown scorecards across raw, IR-first, repaired, parser-validated, and mixed lanes.
+18. **Dataset governance reports**: Benchmark datasets can be audited for provenance, split assignment, redaction findings, duplicate ids, and public-release diagnostics.
+19. **Ranked repair plans**: Agents can receive deterministic patches, model-required fixes, and unsafe blockers as separate ranked plan steps.
+20. **Service manifest and controls**: Agent runtimes can discover HTTP routes, auth posture, request limits, audit redaction, and data-boundary guarantees.
+21. **Benchmark gates**: CI can publish pass/fail CypherBench gates over metric regressions, pass-rate floors, executable-rate floors, and optional diagnostic regressions.
 
 ## Quick Start
 
@@ -148,7 +149,7 @@ cypher-llm dataset-governance --dataset examples/eval-dataset.json --report-out 
 cypher-llm repair-loop --dataset examples/eval-dataset.json --attempts examples/eval-attempts.json --default-limit 25
 cypher-llm lift-raw-eval --dataset examples/imported/text2cypher-gpt4o-sample.dataset.json --attempts examples/imported/text2cypher-gpt4o-sample.attempts.json
 cypher-llm parse-check --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json --default-limit 25
-cypher-llm policy-check --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json --report-out policy.json
+cypher-llm policy-check --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json --planner-estimate examples/policy/tool-hash.planner-estimate.json --report-out policy.json
 cypher-llm policy-profiles --profiles-out policy-profiles.json
 cypher-llm lsp-diagnostics --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json --report-out lsp.json
 cypher-llm prove --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json --params examples/tool-hash.params.json --default-limit 25
@@ -194,7 +195,7 @@ npm run test:live:neo4j
 
 `parse-check` validates rendered IR or raw Cypher against Neo4j's language-support parser and maps parser diagnostics back into this package's `Diagnostic` shape.
 
-`policy-check` emits a `cypher-llm-policy-report/v1` report for static cost, cardinality, and safety risks before execution.
+`policy-check` emits a `cypher-llm-policy-report/v1` report for static cost, cardinality, planner-estimate, and safety risks before execution.
 
 `policy-profiles` emits a `cypher-llm-policy-profile-catalog/v1` catalog of named safety policies for autonomous agents and governed write paths. `policy-check` accepts `--policy-profile-id` or `--policy-profile` and records the selected profile in the report.
 
@@ -359,6 +360,7 @@ Those are deliberate boundaries. The repo is the missing LLM compiler surface, n
 - `src/fixture-importers.ts`: Importers for text2cypher CSV/JSON and openCypher TCK fixtures.
 - `src/dataset-governance.ts`: Dataset provenance, split, and redaction governance reports.
 - `src/parser-validation.ts`: Parser-backed validation through Neo4j language support.
+- `src/planner-estimate.ts`: Neo4j-like planner summary extraction and planner-estimate helpers.
 - `src/policy.ts`: Static cost, cardinality, and safety policy checks.
 - `src/policy-profile.ts`: Named policy profile catalog and policy-option helpers.
 - `src/neo4j-explain.ts`: Driver-compatible Neo4j `EXPLAIN` preflight adapter.
@@ -377,12 +379,12 @@ Those are deliberate boundaries. The repo is the missing LLM compiler surface, n
 - `examples/imported/`: Imported text2cypher/openCypher fixture samples and baseline reports.
 - `examples/lossless/`: Checked-in lossless parse report.
 - `examples/lsp/`: Checked-in LSP diagnostics report.
-- `examples/policy/`: Checked-in cost and safety policy report plus policy profile catalog.
+- `examples/policy/`: Checked-in cost and safety policy report, planner estimate fixture, and policy profile catalog.
 - `examples/proofs/`: Checked-in proof-carrying compile output.
 - `examples/roadmap/`: Machine-readable years-scale roadmap snapshot.
 - `examples/service/`: Checked-in compiler service manifest.
 - `profiles/`: Versioned dialect profiles for Neo4j Cypher 25, openCypher 9, and GQL-oriented output.
-- `schemas/`: JSON Schema contracts for IR, graph schema, policy reports/profiles, repair plans, service manifests, benchmark gates, lossless parse reports, dataset governance, eval datasets, and eval attempts.
+- `schemas/`: JSON Schema contracts for IR, graph schema, planner estimates, policy reports/profiles, repair plans, service manifests, benchmark gates, lossless parse reports, dataset governance, eval datasets, and eval attempts.
 - `test/`: Node test-runner coverage for renderer, schema, validation, repair, safety, and corpus behavior.
 
 ## Design Rules

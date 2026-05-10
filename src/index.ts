@@ -17,6 +17,7 @@ export * from "./neo4j-explain.js";
 export * from "./neo4j-introspect.js";
 export * from "./normalize.js";
 export * from "./parser-validation.js";
+export * from "./planner-estimate.js";
 export * from "./policy.js";
 export * from "./policy-profile.js";
 export * from "./proof.js";

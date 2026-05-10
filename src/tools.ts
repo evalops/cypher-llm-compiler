@@ -7,6 +7,7 @@ import { buildLspDiagnostics } from "./lsp.js";
 import { parseCypherLosslessly } from "./lossless-parser.js";
 import type { ParserValidationOptions } from "./parser-validation.js";
 import { validateCypherTextWithParser } from "./parser-validation.js";
+import type { CypherPlannerEstimate } from "./planner-estimate.js";
 import { assessCypherPolicy } from "./policy.js";
 import {
   buildPolicyProfileCatalog,
@@ -287,6 +288,11 @@ export const CYPHER_COMPILER_TOOLS: readonly CypherCompilerToolDefinition[] = [
         type: "string",
         description: "Built-in policy profile id, such as llm-readonly-strict."
       },
+      plannerEstimate: {
+        type: "object",
+        description: "Optional cypher-llm-planner-estimate/v1 planner evidence from EXPLAIN or a fixture.",
+        additionalProperties: true
+      },
       allowWrites: {
         type: "boolean",
         description: "Allow write clauses in policy assessment."
@@ -302,6 +308,19 @@ export const CYPHER_COMPILER_TOOLS: readonly CypherCompilerToolDefinition[] = [
       maxRelationshipHops: {
         type: "number",
         description: "Warn when maxHops exceeds this value; unbounded traversals are errors."
+      },
+      maxEstimatedRows: {
+        type: "number",
+        description: "Warn when planner-estimated rows exceed this value."
+      },
+      maxDbHits: {
+        type: "number",
+        description: "Warn when planner-estimated db hits exceed this value."
+      },
+      warnOnPlanOperators: {
+        type: "array",
+        items: { type: "string" },
+        description: "Planner operator names that should produce warning findings."
       }
     })
   },
@@ -652,6 +671,17 @@ function optionalNumber(args: Record<string, unknown>, name: string): number | u
   return value;
 }
 
+function optionalStringArray(args: Record<string, unknown>, name: string): string[] | undefined {
+  const value = args[name];
+  if (value === undefined) {
+    return undefined;
+  }
+  if (!Array.isArray(value) || value.some((item) => typeof item !== "string")) {
+    throw new Error(`Expected '${name}' to be an array of strings.`);
+  }
+  return value as string[];
+}
+
 function optionalParams(args: Record<string, unknown>): Record<string, JsonLiteral> {
   const value = args.params;
   if (value === undefined) {
@@ -752,13 +782,21 @@ function policyOptions(args: Record<string, unknown>) {
     requireLimit?: boolean;
     maxReturnLimit?: number;
     maxRelationshipHops?: number;
+    maxEstimatedRows?: number;
+    maxDbHits?: number;
+    warnOnPlanOperators?: string[];
+    plannerEstimate?: CypherPlannerEstimate;
   } = {};
   const policyProfile = optionalObject<CypherPolicyProfile>(args, "policyProfile");
   const policyProfileId = optionalString(args, "policyProfileId");
+  const plannerEstimate = optionalObject<CypherPlannerEstimate>(args, "plannerEstimate");
   const allowWrites = optionalBoolean(args, "allowWrites");
   const requireLimit = optionalBoolean(args, "requireLimit");
   const maxReturnLimit = optionalNumber(args, "maxReturnLimit");
   const maxRelationshipHops = optionalNumber(args, "maxRelationshipHops");
+  const maxEstimatedRows = optionalNumber(args, "maxEstimatedRows");
+  const maxDbHits = optionalNumber(args, "maxDbHits");
+  const warnOnPlanOperators = optionalStringArray(args, "warnOnPlanOperators");
   if (policyProfile !== undefined && policyProfileId !== undefined) {
     throw new Error("Use either 'policyProfile' or 'policyProfileId', not both.");
   }
@@ -773,6 +811,18 @@ function policyOptions(args: Record<string, unknown>) {
   }
   if (maxRelationshipHops !== undefined) {
     overrides.maxRelationshipHops = maxRelationshipHops;
+  }
+  if (maxEstimatedRows !== undefined) {
+    overrides.maxEstimatedRows = maxEstimatedRows;
+  }
+  if (maxDbHits !== undefined) {
+    overrides.maxDbHits = maxDbHits;
+  }
+  if (warnOnPlanOperators !== undefined) {
+    overrides.warnOnPlanOperators = warnOnPlanOperators;
+  }
+  if (plannerEstimate !== undefined) {
+    overrides.plannerEstimate = plannerEstimate;
   }
   if (policyProfile !== undefined) {
     return policyOptionsFromProfile(policyProfile, overrides);

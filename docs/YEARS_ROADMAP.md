@@ -59,6 +59,12 @@ Cost and safety policy planning is exported from `src/policy.ts`, validated by `
 cypher-llm policy-check --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json
 ```
 
+Planner estimates are exported from `src/planner-estimate.ts`, validated by `schemas/planner-estimate.schema.json`, and checked in at `examples/policy/tool-hash.planner-estimate.json`.
+
+```bash
+cypher-llm policy-check --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json --planner-estimate examples/policy/tool-hash.planner-estimate.json
+```
+
 Policy profiles are exported from `src/policy-profile.ts`, validated by `schemas/policy-profile.schema.json`, and checked in at `examples/policy/policy-profiles.json`.
 
 ```bash

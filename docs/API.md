@@ -173,9 +173,16 @@ Current findings include:
 - Multiple `MATCH` patterns that may create cartesian products.
 - Missing or high literal `RETURN LIMIT` values.
 - Unbounded or high-hop variable-length traversals.
+- Planner-estimated rows, db hits, and expensive plan operators when `plannerEstimate` is supplied.
 - Write clauses without an explicit policy allowance.
 
 Pass `policyOptionsFromProfile(getPolicyProfile("llm-readonly-strict"))` to apply a named profile and record that policy identity in the report.
+
+## `buildPlannerEstimateFromNeo4jSummary(summary, source?)`
+
+Extracts a `cypher-llm-planner-estimate/v1` object from a Neo4j-like `summary.plan` or `summary.profile` tree.
+
+The estimate captures planner source, max estimated rows, summed db hits when available, and nested operator names/identifiers. Pass the result to `assessCypherPolicy` as `plannerEstimate` to turn planner evidence into stable policy findings.
 
 ## `buildPolicyProfileCatalog()`
 
