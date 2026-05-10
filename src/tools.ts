@@ -22,6 +22,7 @@ import { buildCypherRepairPlan } from "./repair-plan.js";
 import { renderQuery } from "./render.js";
 import type { SafeExecutionOptions } from "./safety.js";
 import { createSafeExecutionPlan } from "./safety.js";
+import type { CypherSchemaStatistics } from "./schema-statistics.js";
 import { buildCypherBenchScorecard } from "./scorecard.js";
 import type { ValidationOptions } from "./validate.js";
 import { validateQuery } from "./validate.js";
@@ -293,6 +294,11 @@ export const CYPHER_COMPILER_TOOLS: readonly CypherCompilerToolDefinition[] = [
         description: "Optional cypher-llm-planner-estimate/v1 planner evidence from EXPLAIN or a fixture.",
         additionalProperties: true
       },
+      schemaStatistics: {
+        type: "object",
+        description: "Optional cypher-llm-schema-statistics/v1 cardinality and index metadata.",
+        additionalProperties: true
+      },
       allowWrites: {
         type: "boolean",
         description: "Allow write clauses in policy assessment."
@@ -316,6 +322,14 @@ export const CYPHER_COMPILER_TOOLS: readonly CypherCompilerToolDefinition[] = [
       maxDbHits: {
         type: "number",
         description: "Warn when planner-estimated db hits exceed this value."
+      },
+      maxLabelScanRows: {
+        type: "number",
+        description: "Warn when unanchored label scans exceed this schema-statistics row count."
+      },
+      maxRelationshipFanout: {
+        type: "number",
+        description: "Warn when relationship average fanout exceeds this schema-statistics value."
       },
       warnOnPlanOperators: {
         type: "array",
@@ -784,18 +798,24 @@ function policyOptions(args: Record<string, unknown>) {
     maxRelationshipHops?: number;
     maxEstimatedRows?: number;
     maxDbHits?: number;
+    maxLabelScanRows?: number;
+    maxRelationshipFanout?: number;
     warnOnPlanOperators?: string[];
     plannerEstimate?: CypherPlannerEstimate;
+    schemaStatistics?: CypherSchemaStatistics;
   } = {};
   const policyProfile = optionalObject<CypherPolicyProfile>(args, "policyProfile");
   const policyProfileId = optionalString(args, "policyProfileId");
   const plannerEstimate = optionalObject<CypherPlannerEstimate>(args, "plannerEstimate");
+  const schemaStatistics = optionalObject<CypherSchemaStatistics>(args, "schemaStatistics");
   const allowWrites = optionalBoolean(args, "allowWrites");
   const requireLimit = optionalBoolean(args, "requireLimit");
   const maxReturnLimit = optionalNumber(args, "maxReturnLimit");
   const maxRelationshipHops = optionalNumber(args, "maxRelationshipHops");
   const maxEstimatedRows = optionalNumber(args, "maxEstimatedRows");
   const maxDbHits = optionalNumber(args, "maxDbHits");
+  const maxLabelScanRows = optionalNumber(args, "maxLabelScanRows");
+  const maxRelationshipFanout = optionalNumber(args, "maxRelationshipFanout");
   const warnOnPlanOperators = optionalStringArray(args, "warnOnPlanOperators");
   if (policyProfile !== undefined && policyProfileId !== undefined) {
     throw new Error("Use either 'policyProfile' or 'policyProfileId', not both.");
@@ -818,11 +838,20 @@ function policyOptions(args: Record<string, unknown>) {
   if (maxDbHits !== undefined) {
     overrides.maxDbHits = maxDbHits;
   }
+  if (maxLabelScanRows !== undefined) {
+    overrides.maxLabelScanRows = maxLabelScanRows;
+  }
+  if (maxRelationshipFanout !== undefined) {
+    overrides.maxRelationshipFanout = maxRelationshipFanout;
+  }
   if (warnOnPlanOperators !== undefined) {
     overrides.warnOnPlanOperators = warnOnPlanOperators;
   }
   if (plannerEstimate !== undefined) {
     overrides.plannerEstimate = plannerEstimate;
+  }
+  if (schemaStatistics !== undefined) {
+    overrides.schemaStatistics = schemaStatistics;
   }
   if (policyProfile !== undefined) {
     return policyOptionsFromProfile(policyProfile, overrides);

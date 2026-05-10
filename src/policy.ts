@@ -1,6 +1,9 @@
 import type { Clause, CypherQuery, CypherSchemaContract, Expression, MatchClause, NodePattern, RelationshipPattern, ReturnClause } from "./ir.js";
 import type { CypherPlannerEstimate, CypherPlannerOperatorEstimate } from "./planner-estimate.js";
 import { flattenPlannerOperators } from "./planner-estimate.js";
+import type { CypherNodeLabelStatistics, CypherSchemaStatistics } from "./schema-statistics.js";
+import { findNodeStatistics, findRelationshipStatistics, hasIndexedProperty } from "./schema-statistics.js";
+import { canonicalLabel, canonicalRelationshipType, normalizeSchema, type NormalizedSchema } from "./schema.js";
 import { isWriteClause } from "./validate.js";
 
 export type PolicySeverity = "info" | "warning" | "error";
@@ -12,8 +15,11 @@ export interface CypherPolicyOptions {
   maxRelationshipHops?: number;
   maxEstimatedRows?: number;
   maxDbHits?: number;
+  maxLabelScanRows?: number;
+  maxRelationshipFanout?: number;
   warnOnPlanOperators?: string[];
   plannerEstimate?: CypherPlannerEstimate;
+  schemaStatistics?: CypherSchemaStatistics;
   profile?: CypherPolicyProfileRef;
 }
 
@@ -43,6 +49,7 @@ export interface CypherPolicyReport {
   dialect?: string;
   policy?: CypherPolicyProfileRef;
   planner?: CypherPolicyPlannerSummary;
+  statistics?: CypherPolicyStatisticsSummary;
   summary: CypherPolicySummary;
   findings: CypherPolicyFinding[];
 }
@@ -54,7 +61,13 @@ export interface CypherPolicyPlannerSummary {
   dbHits?: number;
 }
 
-type EffectivePolicyOptions = Required<Omit<CypherPolicyOptions, "profile" | "plannerEstimate">>;
+export interface CypherPolicyStatisticsSummary {
+  source: string;
+  labels: number;
+  relationships: number;
+}
+
+type EffectivePolicyOptions = Required<Omit<CypherPolicyOptions, "profile" | "plannerEstimate" | "schemaStatistics">>;
 
 const DEFAULT_OPTIONS: EffectivePolicyOptions = {
   allowWrites: false,
@@ -63,6 +76,8 @@ const DEFAULT_OPTIONS: EffectivePolicyOptions = {
   maxRelationshipHops: 5,
   maxEstimatedRows: 10_000,
   maxDbHits: 50_000,
+  maxLabelScanRows: 10_000,
+  maxRelationshipFanout: 100,
   warnOnPlanOperators: ["AllNodesScan", "NodeByLabelScan", "CartesianProduct", "Eager"]
 };
 
@@ -71,6 +86,7 @@ export function assessCypherPolicy(
   schema: CypherSchemaContract,
   options: CypherPolicyOptions = {}
 ): CypherPolicyReport {
+  const normalizedSchema = normalizeSchema(schema);
   const opts: EffectivePolicyOptions = {
     allowWrites: options.allowWrites ?? DEFAULT_OPTIONS.allowWrites,
     requireLimit: options.requireLimit ?? DEFAULT_OPTIONS.requireLimit,
@@ -78,6 +94,8 @@ export function assessCypherPolicy(
     maxRelationshipHops: options.maxRelationshipHops ?? DEFAULT_OPTIONS.maxRelationshipHops,
     maxEstimatedRows: options.maxEstimatedRows ?? DEFAULT_OPTIONS.maxEstimatedRows,
     maxDbHits: options.maxDbHits ?? DEFAULT_OPTIONS.maxDbHits,
+    maxLabelScanRows: options.maxLabelScanRows ?? DEFAULT_OPTIONS.maxLabelScanRows,
+    maxRelationshipFanout: options.maxRelationshipFanout ?? DEFAULT_OPTIONS.maxRelationshipFanout,
     warnOnPlanOperators: options.warnOnPlanOperators ?? DEFAULT_OPTIONS.warnOnPlanOperators
   };
   const findings: CypherPolicyFinding[] = [];
@@ -94,7 +112,7 @@ export function assessCypherPolicy(
       });
     }
     if (clause.kind === "match") {
-      assessMatchPolicy(clause, path, findings, opts);
+      assessMatchPolicy(clause, path, findings, opts, options.schemaStatistics, normalizedSchema);
     }
     if (clause.kind === "return") {
       assessReturnPolicy(clause, path, findings, opts);
@@ -118,6 +136,7 @@ export function assessCypherPolicy(
     ...(schema.dialect ? { dialect: schema.dialect } : {}),
     ...(options.profile ? { policy: options.profile } : {}),
     ...(options.plannerEstimate ? { planner: plannerSummary(options.plannerEstimate) } : {}),
+    ...(options.schemaStatistics ? { statistics: statisticsSummary(options.schemaStatistics) } : {}),
     summary,
     findings
   };
@@ -127,7 +146,9 @@ function assessMatchPolicy(
   clause: MatchClause,
   path: string,
   findings: CypherPolicyFinding[],
-  options: EffectivePolicyOptions
+  options: EffectivePolicyOptions,
+  statistics: CypherSchemaStatistics | undefined,
+  schema: NormalizedSchema
 ) {
   if (clause.patterns.length > 1) {
     findings.push({
@@ -141,9 +162,16 @@ function assessMatchPolicy(
 
   clause.patterns.forEach((pattern, patternIndex) => {
     const [head, ...tail] = pattern.segments;
-    assessHeadNodePolicy(head, clause, `${path}/patterns/${patternIndex}/segments/0`, findings);
+    assessHeadNodePolicy(head, clause, `${path}/patterns/${patternIndex}/segments/0`, findings, options, statistics, schema);
     tail.forEach((segment, segmentIndex) => {
-      assessRelationshipPolicy(segment.rel, `${path}/patterns/${patternIndex}/segments/${segmentIndex + 1}/rel`, findings, options);
+      assessRelationshipPolicy(
+        segment.rel,
+        `${path}/patterns/${patternIndex}/segments/${segmentIndex + 1}/rel`,
+        findings,
+        options,
+        statistics,
+        schema
+      );
     });
   });
 }
@@ -152,10 +180,23 @@ function assessHeadNodePolicy(
   node: NodePattern,
   clause: MatchClause,
   path: string,
-  findings: CypherPolicyFinding[]
+  findings: CypherPolicyFinding[],
+  options: EffectivePolicyOptions,
+  statistics: CypherSchemaStatistics | undefined,
+  schema: NormalizedSchema
 ) {
   const hasPredicate = Boolean(clause.where || node.where || Object.keys(node.properties ?? {}).length > 0);
+  const label = node.labels?.length === 1 ? canonicalLabel(schema, node.labels[0] as string) ?? node.labels[0] : undefined;
+  const nodeStatistics = statistics && label ? findNodeStatistics(statistics, label) : undefined;
   if (hasPredicate) {
+    if (
+      label !== undefined &&
+      nodeStatistics &&
+      nodeStatistics.count !== undefined &&
+      nodeStatistics.count > options.maxLabelScanRows
+    ) {
+      assessPredicateIndexPolicy(node, label, nodeStatistics, path, findings);
+    }
     return;
   }
 
@@ -168,13 +209,25 @@ function assessHeadNodePolicy(
     path,
     suggestion: "Anchor the traversal with a parameterized property, WHERE predicate, or known path template."
   });
+
+  if (nodeStatistics?.count !== undefined && nodeStatistics.count > options.maxLabelScanRows) {
+    findings.push({
+      code: "policy-high-cardinality-label-scan",
+      severity: "warning",
+      message: `Label '${label}' has ${nodeStatistics.count} estimated nodes, above the policy maximum of ${options.maxLabelScanRows}.`,
+      path,
+      suggestion: "Add an indexed predicate or require an explicit policy override before scanning this label."
+    });
+  }
 }
 
 function assessRelationshipPolicy(
   relationship: RelationshipPattern,
   path: string,
   findings: CypherPolicyFinding[],
-  options: EffectivePolicyOptions
+  options: EffectivePolicyOptions,
+  statistics: CypherSchemaStatistics | undefined,
+  schema: NormalizedSchema
 ) {
   if (relationship.maxHops === null) {
     findings.push({
@@ -184,16 +237,30 @@ function assessRelationshipPolicy(
       path,
       suggestion: `Set maxHops to ${options.maxRelationshipHops} or lower before execution.`
     });
-    return;
   }
 
-  if (relationship.maxHops !== undefined && relationship.maxHops > options.maxRelationshipHops) {
+  if (relationship.maxHops !== null && relationship.maxHops !== undefined && relationship.maxHops > options.maxRelationshipHops) {
     findings.push({
       code: "policy-high-hop-traversal",
       severity: "warning",
       message: `Variable-length traversal allows ${relationship.maxHops} hops, above the policy maximum of ${options.maxRelationshipHops}.`,
       path,
       suggestion: "Lower maxHops or require an explicit policy override."
+    });
+  }
+
+  const relationshipType =
+    relationship.types?.length === 1
+      ? canonicalRelationshipType(schema, relationship.types[0] as string) ?? relationship.types[0]
+      : undefined;
+  const relationshipStatistics = relationshipType && statistics ? findRelationshipStatistics(statistics, relationshipType) : undefined;
+  if (relationshipStatistics?.averageFanout !== undefined && relationshipStatistics.averageFanout > options.maxRelationshipFanout) {
+    findings.push({
+      code: "policy-high-fanout-relationship",
+      severity: "warning",
+      message: `Relationship '${relationshipType}' has average fanout ${relationshipStatistics.averageFanout}, above the policy maximum of ${options.maxRelationshipFanout}.`,
+      path,
+      suggestion: "Anchor the traversal more tightly, lower maxHops, or require a policy override for this relationship."
     });
   }
 }
@@ -277,6 +344,27 @@ function assessPlannerPolicy(
   });
 }
 
+function assessPredicateIndexPolicy(
+  node: NodePattern,
+  label: string,
+  nodeStatistics: CypherNodeLabelStatistics,
+  path: string,
+  findings: CypherPolicyFinding[]
+) {
+  for (const property of Object.keys(node.properties ?? {})) {
+    if (hasIndexedProperty(nodeStatistics, property)) {
+      continue;
+    }
+    findings.push({
+      code: "policy-unindexed-high-cardinality-predicate",
+      severity: "warning",
+      message: `Predicate on '${property}' is not listed as indexed for high-cardinality label '${label}'.`,
+      path: `${path}/properties/${property}`,
+      suggestion: "Use an indexed property, add index metadata to schema statistics, or require an explicit policy override."
+    });
+  }
+}
+
 function walkPlannerOperators(
   operators: readonly CypherPlannerOperatorEstimate[],
   basePath: string,
@@ -295,6 +383,14 @@ function plannerSummary(estimate: CypherPlannerEstimate): CypherPolicyPlannerSum
     operators: flattenPlannerOperators(estimate.operators).length,
     ...(estimate.estimatedRows !== undefined ? { estimatedRows: estimate.estimatedRows } : {}),
     ...(estimate.dbHits !== undefined ? { dbHits: estimate.dbHits } : {})
+  };
+}
+
+function statisticsSummary(statistics: CypherSchemaStatistics): CypherPolicyStatisticsSummary {
+  return {
+    source: statistics.source,
+    labels: statistics.nodes.length,
+    relationships: statistics.relationships.length
   };
 }
 

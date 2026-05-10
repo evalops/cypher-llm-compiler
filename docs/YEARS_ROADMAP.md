@@ -65,6 +65,12 @@ Planner estimates are exported from `src/planner-estimate.ts`, validated by `sch
 cypher-llm policy-check --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json --planner-estimate examples/policy/tool-hash.planner-estimate.json
 ```
 
+Schema statistics are exported from `src/schema-statistics.ts`, validated by `schemas/schema-statistics.schema.json`, and checked in at `examples/policy/tool-hash.schema-statistics.json`.
+
+```bash
+cypher-llm policy-check --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json --schema-statistics examples/policy/tool-hash.schema-statistics.json
+```
+
 Policy profiles are exported from `src/policy-profile.ts`, validated by `schemas/policy-profile.schema.json`, and checked in at `examples/policy/policy-profiles.json`.
 
 ```bash

@@ -28,6 +28,7 @@ export * from "./repair-loop.js";
 export * from "./render.js";
 export * from "./safety.js";
 export * from "./schema.js";
+export * from "./schema-statistics.js";
 export * from "./scorecard.js";
 export * from "./service-manifest.js";
 export * from "./tools.js";

@@ -7,6 +7,7 @@ import type { CypherQuery, CypherSchemaContract } from "../src/ir.js";
 import type { CypherPlannerEstimate } from "../src/planner-estimate.js";
 import { assessCypherPolicy, type CypherPolicyReport } from "../src/policy.js";
 import { getPolicyProfile, policyOptionsFromProfile } from "../src/policy-profile.js";
+import type { CypherSchemaStatistics } from "../src/schema-statistics.js";
 import { buildCypherProof } from "../src/proof.js";
 
 interface AjvLike {
@@ -115,6 +116,38 @@ describe("cost and safety policy", () => {
     assert.ok(codes.includes("policy-high-estimated-rows"));
     assert.ok(codes.includes("policy-high-db-hits"));
     assert.ok(codes.includes("policy-expensive-plan-operator"));
+  });
+
+  it("uses schema statistics for high-cardinality and fanout policy evidence", () => {
+    const query: CypherQuery = {
+      version: "cypher-llm-ir/v1",
+      clauses: [
+        {
+          kind: "match",
+          patterns: [
+            {
+              segments: [
+                { variable: "tool", labels: ["Tool"], properties: { category: { kind: "literal", value: "security" } } },
+                { rel: { types: ["HAS_HASH"], direction: "out", minHops: 1, maxHops: 2 }, node: { variable: "hash", labels: ["Hash"] } }
+              ]
+            }
+          ]
+        },
+        { kind: "return", items: [{ expression: { kind: "var", name: "tool" } }], limit: { kind: "literal", value: 25 } }
+      ]
+    };
+    const schemaStatistics: CypherSchemaStatistics = {
+      version: "cypher-llm-schema-statistics/v1",
+      source: "fixture",
+      nodes: [{ label: "Tool", count: 25_000, indexedProperties: ["name"] }],
+      relationships: [{ type: "HAS_HASH", averageFanout: 250 }]
+    };
+    const report = assessCypherPolicy(query, schema, { schemaStatistics, maxLabelScanRows: 10_000, maxRelationshipFanout: 100 });
+    const codes = report.findings.map((finding) => finding.code);
+
+    assert.equal(report.statistics?.source, "fixture");
+    assert.ok(codes.includes("policy-unindexed-high-cardinality-predicate"));
+    assert.ok(codes.includes("policy-high-fanout-relationship"));
   });
 
   it("feeds policy claims into proof output after deterministic repairs", () => {

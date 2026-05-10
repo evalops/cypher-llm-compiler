@@ -174,6 +174,7 @@ Current findings include:
 - Missing or high literal `RETURN LIMIT` values.
 - Unbounded or high-hop variable-length traversals.
 - Planner-estimated rows, db hits, and expensive plan operators when `plannerEstimate` is supplied.
+- High-cardinality label scans, unindexed predicates, and high-fanout relationships when `schemaStatistics` is supplied.
 - Write clauses without an explicit policy allowance.
 
 Pass `policyOptionsFromProfile(getPolicyProfile("llm-readonly-strict"))` to apply a named profile and record that policy identity in the report.
@@ -183,6 +184,12 @@ Pass `policyOptionsFromProfile(getPolicyProfile("llm-readonly-strict"))` to appl
 Extracts a `cypher-llm-planner-estimate/v1` object from a Neo4j-like `summary.plan` or `summary.profile` tree.
 
 The estimate captures planner source, max estimated rows, summed db hits when available, and nested operator names/identifiers. Pass the result to `assessCypherPolicy` as `plannerEstimate` to turn planner evidence into stable policy findings.
+
+## `buildSchemaStatisticsSkeleton(schema, source?)`
+
+Produces a `cypher-llm-schema-statistics/v1` skeleton from a schema contract. Applications can fill in node counts, indexed properties, relationship counts, and average fanout from database metadata or offline catalog jobs.
+
+Pass the completed statistics object to `assessCypherPolicy` as `schemaStatistics` to flag high-cardinality label scans, predicates on non-indexed properties, and high-fanout relationship traversals.
 
 ## `buildPolicyProfileCatalog()`
 

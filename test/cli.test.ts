@@ -624,6 +624,15 @@ describe("cli", () => {
           dbHits: 75_000,
           operators: [{ name: "NodeByLabelScan", estimatedRows: 25_000, dbHits: 75_000 }]
         })
+      ],
+      [
+        "statistics.json",
+        JSON.stringify({
+          version: "cypher-llm-schema-statistics/v1",
+          source: "fixture",
+          nodes: [{ label: "Tool", count: 25_000, indexedProperties: ["name"] }],
+          relationships: []
+        })
       ]
     ]);
     const writes = new Map<string, string>();
@@ -650,6 +659,8 @@ describe("cli", () => {
         "llm-readonly-strict",
         "--planner-estimate",
         "planner.json",
+        "--schema-statistics",
+        "statistics.json",
         "--max-estimated-rows",
         "10000",
         "--report-out",
@@ -663,6 +674,7 @@ describe("cli", () => {
     assert.ok(stdout.includes("cypher-llm-policy-report/v1"));
     assert.ok(stdout.includes("llm-readonly-strict"));
     assert.ok(stdout.includes("policy-high-estimated-rows"));
+    assert.ok(stdout.includes("policy-high-cardinality-label-scan"));
     assert.ok(writes.get("out/policy.json")?.includes("policy-unfiltered-label-scan"));
   });
 

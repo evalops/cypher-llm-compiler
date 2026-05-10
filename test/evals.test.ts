@@ -60,6 +60,7 @@ describe("json schemas", () => {
     const plannerEstimateSchema = readJson("schemas/planner-estimate.schema.json");
     const policyReportSchema = readJson("schemas/policy-report.schema.json");
     const policyProfileSchema = readJson("schemas/policy-profile.schema.json");
+    const schemaStatisticsSchema = readJson("schemas/schema-statistics.schema.json");
     const lspDiagnosticsSchema = readJson("schemas/lsp-diagnostics.schema.json");
     const losslessParseSchema = readJson("schemas/lossless-parse.schema.json");
     const cypherBenchScorecardSchema = readJson("schemas/cypherbench-scorecard.schema.json");
@@ -78,6 +79,7 @@ describe("json schemas", () => {
     ajv.addSchema(plannerEstimateSchema);
     ajv.addSchema(policyReportSchema);
     ajv.addSchema(policyProfileSchema);
+    ajv.addSchema(schemaStatisticsSchema);
     ajv.addSchema(lspDiagnosticsSchema);
     ajv.addSchema(losslessParseSchema);
     ajv.addSchema(cypherBenchScorecardSchema);
@@ -97,6 +99,7 @@ describe("json schemas", () => {
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/planner-estimate/v1.json", readJson("examples/policy/tool-hash.planner-estimate.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/policy-report/v1.json", readJson("examples/policy/tool-hash.policy.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/policy-profile-catalog/v1.json", readJson("examples/policy/policy-profiles.json"));
+    assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/schema-statistics/v1.json", readJson("examples/policy/tool-hash.schema-statistics.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/lsp-diagnostics/v1.json", readJson("examples/lsp/tool-hash.lsp.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/lossless-parse/v1.json", readJson("examples/lossless/tool-hash.lossless.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/cypherbench-scorecard/v1.json", readJson("examples/benchmarks/tool-hash.scorecard.json"));

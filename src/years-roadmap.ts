@@ -233,11 +233,14 @@ export const yearsRoadmap = {
         "src/policy.ts",
         "src/planner-estimate.ts",
         "src/policy-profile.ts",
+        "src/schema-statistics.ts",
         "src/neo4j-explain.ts",
         "schemas/planner-estimate.schema.json",
         "schemas/policy-profile.schema.json",
+        "schemas/schema-statistics.schema.json",
         "examples/policy/tool-hash.planner-estimate.json",
         "examples/policy/policy-profiles.json",
+        "examples/policy/tool-hash.schema-statistics.json",
         "docs/LLM_SAFE_PROFILE.md"
       ],
       acceptanceGates: [
@@ -407,6 +410,13 @@ export const yearsRoadmap = {
       status: "partial",
       evidence: ["src/planner-estimate.ts", "schemas/planner-estimate.schema.json", "test/planner-estimate.test.ts"],
       workstreamIds: ["cost-safety-policy", "compiler-service", "governance-standards"]
+    },
+    {
+      id: "schema-statistics",
+      title: "Schema Statistics Evidence For Policy Checks",
+      status: "partial",
+      evidence: ["src/schema-statistics.ts", "schemas/schema-statistics.schema.json", "test/schema-statistics.test.ts"],
+      workstreamIds: ["cost-safety-policy", "governance-standards"]
     },
     {
       id: "compiler-service",

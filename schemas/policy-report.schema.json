@@ -29,6 +29,16 @@
         "dbHits": { "type": "number", "minimum": 0 }
       }
     },
+    "statistics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "labels", "relationships"],
+      "properties": {
+        "source": { "type": "string", "minLength": 1 },
+        "labels": { "type": "integer", "minimum": 0 },
+        "relationships": { "type": "integer", "minimum": 0 }
+      }
+    },
     "summary": {
       "type": "object",
       "additionalProperties": false,

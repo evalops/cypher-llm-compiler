@@ -123,6 +123,12 @@ describe("OpenAI tool schemas", () => {
         estimatedRows: 25_000,
         operators: [{ name: "NodeByLabelScan", estimatedRows: 25_000 }]
       },
+      schemaStatistics: {
+        version: "cypher-llm-schema-statistics/v1",
+        source: "fixture",
+        nodes: [{ label: "Tool", count: 25_000 }],
+        relationships: [{ type: "has MD5 hash", averageFanout: 250 }]
+      },
       maxRelationshipHops: 3
     })) as { version: string; policy?: { id: string }; findings: { code: string }[] };
 
@@ -130,6 +136,8 @@ describe("OpenAI tool schemas", () => {
     assert.equal(policy.policy?.id, "llm-readonly-strict");
     assert.ok(policy.findings.some((finding) => finding.code === "policy-unbounded-traversal"));
     assert.ok(policy.findings.some((finding) => finding.code === "policy-high-estimated-rows"));
+    assert.ok(policy.findings.some((finding) => finding.code === "policy-high-cardinality-label-scan"));
+    assert.ok(policy.findings.some((finding) => finding.code === "policy-high-fanout-relationship"));
 
     const policyProfiles = (await executeCypherCompilerTool("cypher_policy_profiles", {})) as {
       version: string;

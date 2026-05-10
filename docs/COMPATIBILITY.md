@@ -14,6 +14,7 @@ Stable public contracts:
 - `cypher-llm-dialect-certification/v1`
 - `cypher-llm-proof/v1`
 - `cypher-llm-planner-estimate/v1`
+- `cypher-llm-schema-statistics/v1`
 - `cypher-llm-policy-report/v1`
 - `cypher-llm-policy-profile-catalog/v1`
 - `cypher-llm-lsp-diagnostics/v1`
@@ -84,14 +85,18 @@ Run:
 
 ```bash
 cypher-llm policy-check --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json --report-out examples/policy/tool-hash.policy.json
-cypher-llm policy-check --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json --planner-estimate examples/policy/tool-hash.planner-estimate.json --report-out policy-with-planner.json
+cypher-llm policy-check --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json --planner-estimate examples/policy/tool-hash.planner-estimate.json --schema-statistics examples/policy/tool-hash.schema-statistics.json --report-out policy-with-evidence.json
 ```
 
-Policy reports are static pre-execution checks for broad scans, cartesian pattern risk, missing or high return limits, unbounded or high-hop traversals, planner-estimated cost, and write risk. They complement parser and semantic validation: a query can be syntactically valid but still too broad or expensive for an autonomous agent to run.
+Policy reports are static pre-execution checks for broad scans, cartesian pattern risk, missing or high return limits, unbounded or high-hop traversals, schema-statistics risk, planner-estimated cost, and write risk. They complement parser and semantic validation: a query can be syntactically valid but still too broad or expensive for an autonomous agent to run.
 
 ## Planner Estimates
 
 Planner estimates are optional machine-readable `EXPLAIN` or fixture evidence for policy checks. They capture max estimated rows, db hits, and nested operator names. JSON estimates validate against `schemas/planner-estimate.schema.json` and can be passed to policy checks through `--planner-estimate` or the `plannerEstimate` tool argument.
+
+## Schema Statistics
+
+Schema statistics are optional cardinality, index, and relationship-fanout metadata for policy checks. JSON statistics validate against `schemas/schema-statistics.schema.json` and can be passed to policy checks through `--schema-statistics` or the `schemaStatistics` tool argument.
 
 ## Policy Profiles
 

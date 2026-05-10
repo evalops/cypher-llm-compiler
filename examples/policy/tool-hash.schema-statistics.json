@@ -1,0 +1,23 @@
+{
+  "version": "cypher-llm-schema-statistics/v1",
+  "source": "fixture",
+  "nodes": [
+    {
+      "label": "Tool",
+      "count": 25000,
+      "indexedProperties": ["name"]
+    },
+    {
+      "label": "Hash",
+      "count": 25000,
+      "indexedProperties": ["value"]
+    }
+  ],
+  "relationships": [
+    {
+      "type": "has MD5 hash",
+      "count": 25000,
+      "averageFanout": 1
+    }
+  ]
+}
