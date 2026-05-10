@@ -188,6 +188,18 @@ The catalog includes:
 - Release gates and certification gates with concrete commands.
 - A shared deprecation policy for stable and preview contracts.
 
+## `buildCompatibilityDiffReport(baseline, candidate?)`
+
+Produces a `cypher-llm-compatibility-diff/v1` report for release automation.
+
+The report includes:
+
+- Baseline and candidate catalog summaries.
+- Added, removed, and changed contracts.
+- Release-gate and certification-gate changes.
+- Deprecation-policy changes.
+- A pass/fail status based on breaking changes.
+
 ## `assessCypherPolicy(query, schema, options?)`
 
 Produces a `cypher-llm-policy-report/v1` object for static cost, cardinality, and safety checks.
@@ -390,6 +402,7 @@ Returns OpenAI Responses API function-tool definitions for:
 - `cypher_prove`
 - `cypher_agent_feedback`
 - `cypher_compatibility_catalog`
+- `cypher_compatibility_diff`
 - `cypher_eval`
 - `cypher_scorecard`
 - `cypher_benchmark_gate`
@@ -440,6 +453,7 @@ Routes:
 - `POST /v1/agent-feedback`
 - `GET /v1/compatibility`
 - `POST /v1/compatibility`
+- `POST /v1/compatibility-diff`
 - `POST /v1/eval`
 - `POST /v1/scorecard`
 - `POST /v1/benchmark-gate`

@@ -304,8 +304,10 @@ export const yearsRoadmap = {
         "docs/COMPATIBILITY.md",
         "CHANGELOG.md",
         "src/compatibility.ts",
+        "src/compatibility-diff.ts",
         "schemas/years-roadmap.schema.json",
-        "schemas/compatibility-catalog.schema.json"
+        "schemas/compatibility-catalog.schema.json",
+        "schemas/compatibility-diff.schema.json"
       ],
       acceptanceGates: [
         "Every public workstream links to a GitHub issue.",
@@ -505,6 +507,13 @@ export const yearsRoadmap = {
       status: "partial",
       evidence: ["src/compatibility.ts", "schemas/compatibility-catalog.schema.json", "test/compatibility.test.ts"],
       workstreamIds: ["governance-standards", "ecosystem-ux", "compiler-service"]
+    },
+    {
+      id: "compatibility-diff-gates",
+      title: "Compatibility Diff Gates",
+      status: "partial",
+      evidence: ["src/compatibility-diff.ts", "schemas/compatibility-diff.schema.json", "test/compatibility.test.ts"],
+      workstreamIds: ["governance-standards", "ecosystem-ux"]
     }
   ]
 } as const satisfies YearsRoadmap;

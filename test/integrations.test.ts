@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
+import { buildCompatibilityCatalog } from "../src/compatibility.js";
 import type { CypherQuery, CypherSchemaContract } from "../src/ir.js";
 import { createLangChainCypherAdapter } from "../src/langchain.js";
 import { handleMcpRequest } from "../src/mcp-server.js";
@@ -59,6 +60,7 @@ describe("OpenAI tool schemas", () => {
       "cypher_prove",
       "cypher_agent_feedback",
       "cypher_compatibility_catalog",
+      "cypher_compatibility_diff",
       "cypher_eval",
       "cypher_scorecard",
       "cypher_benchmark_gate",
@@ -227,6 +229,13 @@ describe("OpenAI tool schemas", () => {
 
     assert.equal(compatibility.version, "cypher-llm-compatibility-catalog/v1");
     assert.ok(compatibility.contracts.some((contract) => contract.version === "cypher-llm-ir/v1"));
+
+    const compatibilityDiff = (await executeCypherCompilerTool("cypher_compatibility_diff", {
+      baseline: buildCompatibilityCatalog()
+    })) as { version: string; status: string };
+
+    assert.equal(compatibilityDiff.version, "cypher-llm-compatibility-diff/v1");
+    assert.equal(compatibilityDiff.status, "passed");
 
     const evalReport = (await executeCypherCompilerTool("cypher_eval", {
       dataset: {

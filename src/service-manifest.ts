@@ -15,6 +15,7 @@ export const COMPILER_HTTP_TOOL_ROUTES = {
   "/v1/prove": "cypher_prove",
   "/v1/agent-feedback": "cypher_agent_feedback",
   "/v1/compatibility": "cypher_compatibility_catalog",
+  "/v1/compatibility-diff": "cypher_compatibility_diff",
   "/v1/eval": "cypher_eval",
   "/v1/scorecard": "cypher_scorecard",
   "/v1/benchmark-gate": "cypher_benchmark_gate",

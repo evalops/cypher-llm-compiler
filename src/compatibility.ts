@@ -168,7 +168,10 @@ export const compatibilityCatalog = {
     ], ["src/years-roadmap.ts", "test/years-roadmap.test.ts"]),
     stableContract("compatibility-catalog", "cypher-llm-compatibility-catalog/v1", "governance", "governance-standards", "schemas/compatibility-catalog.schema.json", [
       "examples/governance/compatibility-catalog.json"
-    ], ["src/compatibility.ts", "test/compatibility.test.ts"])
+    ], ["src/compatibility.ts", "test/compatibility.test.ts"]),
+    stableContract("compatibility-diff", "cypher-llm-compatibility-diff/v1", "governance", "governance-standards", "schemas/compatibility-diff.schema.json", [
+      "examples/governance/compatibility-diff.json"
+    ], ["src/compatibility-diff.ts", "test/compatibility.test.ts"])
   ],
   releaseGates: [
     {
@@ -202,6 +205,12 @@ export const compatibilityCatalog = {
       title: "Compatibility catalog has no duplicate or orphan contract metadata",
       command: "cypher-llm compatibility --integrity",
       evidencePaths: ["src/compatibility.ts", "examples/governance/compatibility-catalog.json"]
+    },
+    {
+      id: "compatibility-diff",
+      title: "Compatibility changes are explicitly classified before release",
+      command: "cypher-llm compatibility-diff --baseline examples/governance/compatibility-catalog.json --fail-on-breaking",
+      evidencePaths: ["src/compatibility-diff.ts", "examples/governance/compatibility-diff.json"]
     }
   ],
   deprecationPolicy: {

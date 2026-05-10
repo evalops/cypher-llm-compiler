@@ -19,7 +19,7 @@ The gap is not "LLMs need a better prompt." The gap is a missing compiler bounda
 
 ## What This Implements
 
-This package implements twenty-five concrete improvements:
+This package implements twenty-six concrete improvements:
 
 1. **Official JSON IR**: Agents can emit a small, typed Cypher AST instead of brittle text.
 2. **LLM-safe profile**: The renderer emits conservative Cypher with escaped schema identifiers, explicit projections, bounded path recommendations, and deterministic formatting.
@@ -46,6 +46,7 @@ This package implements twenty-five concrete improvements:
 23. **Benchmark gates**: CI can publish pass/fail CypherBench gates over metric regressions, pass-rate floors, executable-rate floors, and optional diagnostic regressions.
 24. **Agent feedback packets**: LLM clients can receive proof, repair plan, policy evidence, and a concrete next action in one stable JSON object.
 25. **Compatibility catalog**: Contract versions, stability levels, release gates, certification gates, and deprecation rules are machine-readable.
+26. **Compatibility diff gates**: Release automation can compare catalogs and fail on removed or reshaped stable contracts.
 
 ## Quick Start
 
@@ -161,6 +162,7 @@ cypher-llm agent-feedback --schema examples/tool-hash.schema.json --query exampl
 cypher-llm introspect-neo4j --uri bolt://localhost:7687 --user neo4j --password "$NEO4J_PASSWORD" --schema-out schema.json
 cypher-llm roadmap --integrity
 cypher-llm compatibility --integrity --fail-on-error
+cypher-llm compatibility-diff --baseline examples/governance/compatibility-catalog.json --fail-on-breaking
 cypher-llm certify-dialects --fail-on-fail
 cypher-llm service-manifest --manifest-out service-manifest.json
 cypher-llm serve --host 127.0.0.1 --port 8787
@@ -217,13 +219,15 @@ npm run test:live:neo4j
 
 `compatibility` emits a `cypher-llm-compatibility-catalog/v1` catalog of public contract versions, stability levels, release gates, certification gates, and deprecation policy.
 
+`compatibility-diff` emits a `cypher-llm-compatibility-diff/v1` report comparing a baseline catalog against a candidate catalog or the current runtime catalog.
+
 `certify-dialects` emits a `cypher-llm-dialect-certification/v1` report that checks profile metadata, renderer behavior, parser acceptance, semantic feature gates, and known rendering limitations.
 
 `service-manifest` emits a `cypher-llm-service-manifest/v1` report covering HTTP routes, auth requirements, body limits, audit redaction, and data-boundary guarantees.
 
 `mcp` starts a stdio MCP server exposing the same compiler operation set as the OpenAI tool definitions and HTTP dispatcher.
 
-`serve` starts a local JSON HTTP service exposing `/healthz`, `/v1/service-manifest`, `/v1/tools`, `/v1/render`, `/v1/validate`, `/v1/repair`, `/v1/repair-plan`, `/v1/parse-lossless`, `/v1/parse-check`, `/v1/policy`, `/v1/policy-profiles`, `/v1/lsp-diagnostics`, `/v1/prove`, `/v1/agent-feedback`, `/v1/compatibility`, `/v1/eval`, `/v1/scorecard`, `/v1/benchmark-gate`, `/v1/dataset-governance`, `/v1/roadmap`, and `/v1/dialect-certification`. Set `--require-auth` with `--auth-token` or `CYPHER_LLM_HTTP_TOKEN` to require bearer auth for runtime routes; `--audit-log` writes JSONL audit events without request or response payloads.
+`serve` starts a local JSON HTTP service exposing `/healthz`, `/v1/service-manifest`, `/v1/tools`, `/v1/render`, `/v1/validate`, `/v1/repair`, `/v1/repair-plan`, `/v1/parse-lossless`, `/v1/parse-check`, `/v1/policy`, `/v1/policy-profiles`, `/v1/lsp-diagnostics`, `/v1/prove`, `/v1/agent-feedback`, `/v1/compatibility`, `/v1/compatibility-diff`, `/v1/eval`, `/v1/scorecard`, `/v1/benchmark-gate`, `/v1/dataset-governance`, `/v1/roadmap`, and `/v1/dialect-certification`. Set `--require-auth` with `--auth-token` or `CYPHER_LLM_HTTP_TOKEN` to require bearer auth for runtime routes; `--audit-log` writes JSONL audit events without request or response payloads.
 
 `test:live:neo4j` runs the optional Docker-backed Neo4j `EXPLAIN` fixture when `CYPHER_LLM_NEO4J_URI` and `CYPHER_LLM_NEO4J_PASSWORD` are set.
 
@@ -368,6 +372,7 @@ Those are deliberate boundaries. The repo is the missing LLM compiler surface, n
 - `src/proof.ts`: Proof-carrying compile output for agent feedback loops.
 - `src/agent-feedback.ts`: One-shot proof, repair-plan, policy-evidence, and next-action packets for LLM clients.
 - `src/compatibility.ts`: Machine-readable compatibility catalog, release gates, certification gates, and deprecation policy.
+- `src/compatibility-diff.ts`: Compatibility diff reports for release gates and contract review.
 - `src/years-roadmap.ts`: Public years-scale workstream and capability ledger.
 - `src/fixture-importers.ts`: Importers for text2cypher CSV/JSON and openCypher TCK fixtures.
 - `src/dataset-governance.ts`: Dataset provenance, split, and redaction governance reports.

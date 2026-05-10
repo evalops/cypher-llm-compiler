@@ -9,6 +9,11 @@ import {
   renderCompatibilityCatalogMarkdown,
   type CompatibilityCatalog
 } from "../src/compatibility.js";
+import {
+  buildCompatibilityDiffReport,
+  renderCompatibilityDiffMarkdown,
+  type CompatibilityDiffReport
+} from "../src/compatibility-diff.js";
 
 interface AjvLike {
   addSchema(schema: unknown): unknown;
@@ -53,6 +58,32 @@ describe("compatibility catalog", () => {
     assert.ok(validate, "missing compatibility schema");
     assert.equal(validate(checkedIn), true, JSON.stringify(validate.errors, null, 2));
     assert.deepEqual(checkedIn, buildCompatibilityCatalog());
+  });
+
+  it("classifies compatibility diffs for release gates", () => {
+    const baseline = buildCompatibilityCatalog();
+    const unchanged = buildCompatibilityDiffReport(baseline, buildCompatibilityCatalog());
+    const candidate = buildCompatibilityCatalog();
+    candidate.contracts = candidate.contracts.filter((contract) => contract.id !== "cypher-query-ir");
+    const removedStable = buildCompatibilityDiffReport(baseline, candidate);
+
+    assert.equal(unchanged.status, "passed");
+    assert.equal(unchanged.summary.changes, 0);
+    assert.equal(removedStable.status, "failed");
+    assert.ok(removedStable.changes.some((change) => change.id === "cypher-query-ir" && change.severity === "breaking"));
+    assert.ok(renderCompatibilityDiffMarkdown(removedStable).includes("# Compatibility Diff"));
+  });
+
+  it("keeps checked-in compatibility diff JSON aligned with runtime data and schema", () => {
+    const ajv = new Ajv2020({ allErrors: true, strict: false });
+    const schema = readJson("schemas/compatibility-diff.schema.json");
+    const checkedIn = readJson<CompatibilityDiffReport>("examples/governance/compatibility-diff.json");
+    ajv.addSchema(schema);
+    const validate = ajv.getSchema("https://evalops.dev/schemas/cypher-llm/compatibility-diff/v1.json");
+
+    assert.ok(validate, "missing compatibility diff schema");
+    assert.equal(validate(checkedIn), true, JSON.stringify(validate.errors, null, 2));
+    assert.deepEqual(checkedIn, buildCompatibilityDiffReport(buildCompatibilityCatalog(), buildCompatibilityCatalog()));
   });
 });
 

@@ -1,6 +1,7 @@
 import { buildCypherAgentFeedback } from "./agent-feedback.js";
 import { buildBenchmarkGateReport } from "./benchmark-gate.js";
-import { buildCompatibilityCatalog } from "./compatibility.js";
+import { buildCompatibilityCatalog, type CompatibilityCatalog } from "./compatibility.js";
+import { buildCompatibilityDiffReport } from "./compatibility-diff.js";
 import { buildDatasetGovernanceReport } from "./dataset-governance.js";
 import type { EvalAttemptSet, EvalDataset, EvalOptions, EvalReport } from "./evals.js";
 import { evaluateAttempts } from "./evals.js";
@@ -45,6 +46,7 @@ export type CypherCompilerToolName =
   | "cypher_prove"
   | "cypher_agent_feedback"
   | "cypher_compatibility_catalog"
+  | "cypher_compatibility_diff"
   | "cypher_eval"
   | "cypher_scorecard"
   | "cypher_benchmark_gate"
@@ -159,6 +161,22 @@ const evalReportSchema: JsonSchema = {
     prompt: { type: "string" },
     metrics: { type: "object", additionalProperties: true },
     results: { type: "array", items: { type: "object", additionalProperties: true } }
+  }
+};
+
+const compatibilityCatalogSchema: JsonSchema = {
+  type: "object",
+  description: "cypher-llm-compatibility-catalog/v1 catalog JSON.",
+  required: ["version", "contracts", "releaseGates", "certificationGates", "deprecationPolicy"],
+  additionalProperties: true,
+  properties: {
+    version: { const: "cypher-llm-compatibility-catalog/v1" },
+    packageName: { type: "string" },
+    packageVersion: { type: "string" },
+    contracts: { type: "array", items: { type: "object", additionalProperties: true } },
+    releaseGates: { type: "array", items: { type: "object", additionalProperties: true } },
+    certificationGates: { type: "array", items: { type: "object", additionalProperties: true } },
+    deprecationPolicy: { type: "object", additionalProperties: true }
   }
 };
 
@@ -495,6 +513,15 @@ export const CYPHER_COMPILER_TOOLS: readonly CypherCompilerToolDefinition[] = [
     inputSchema: objectSchema([], {})
   },
   {
+    name: "cypher_compatibility_diff",
+    description:
+      "Compare two compatibility catalogs and classify added, removed, changed, warning, and breaking public contract changes.",
+    inputSchema: objectSchema(["baseline"], {
+      baseline: compatibilityCatalogSchema,
+      candidate: compatibilityCatalogSchema
+    })
+  },
+  {
     name: "cypher_eval",
     description: "Score offline text2cypher or IR attempts against a Cypher LLM eval dataset.",
     inputSchema: objectSchema(["dataset", "attempts"], {
@@ -691,6 +718,12 @@ export async function executeCypherCompilerTool(name: string, input: unknown): P
     }
     case "cypher_compatibility_catalog": {
       return buildCompatibilityCatalog();
+    }
+    case "cypher_compatibility_diff": {
+      return buildCompatibilityDiffReport(
+        requiredObject<CompatibilityCatalog>(args, "baseline"),
+        optionalObject<CompatibilityCatalog>(args, "candidate") ?? buildCompatibilityCatalog()
+      );
     }
     case "cypher_eval": {
       return evaluateAttempts(

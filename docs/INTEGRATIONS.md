@@ -1,6 +1,6 @@
 # Agent Integrations
 
-The compiler exposes the same sixteen operations across OpenAI tool schemas, MCP, HTTP, LangChain-shaped adapters, and the CLI:
+The compiler exposes the same seventeen operations across OpenAI tool schemas, MCP, HTTP, LangChain-shaped adapters, and the CLI:
 
 - `cypher_render`: repair IR, validate, and return a `SafeExecutionPlan`.
 - `cypher_validate`: return stable compiler diagnostics for IR.
@@ -14,6 +14,7 @@ The compiler exposes the same sixteen operations across OpenAI tool schemas, MCP
 - `cypher_prove`: return proof-carrying compile output with repairs, diagnostics, parser preflight, execution-policy claims, optional policy evidence and thresholds, and a compact `policyEvidence` summary.
 - `cypher_agent_feedback`: return proof, repair plan, policy evidence, and the next action an LLM client should take.
 - `cypher_compatibility_catalog`: return public contract versions, compatibility levels, release gates, certification gates, and deprecation policy.
+- `cypher_compatibility_diff`: compare compatibility catalogs and classify release-impacting contract changes.
 - `cypher_eval`: score model attempts against an eval dataset.
 - `cypher_scorecard`: publish ranked CypherBench scorecards from eval reports.
 - `cypher_benchmark_gate`: publish pass/fail CypherBench regression gates for CI.
@@ -135,6 +136,7 @@ Routes:
 - `POST /v1/agent-feedback`
 - `GET /v1/compatibility`
 - `POST /v1/compatibility`
+- `POST /v1/compatibility-diff`
 - `POST /v1/eval`
 - `POST /v1/scorecard`
 - `POST /v1/benchmark-gate`

@@ -151,6 +151,12 @@
     },
     {
       "method": "POST",
+      "path": "/v1/compatibility-diff",
+      "operation": "cypher_compatibility_diff",
+      "authRequired": false
+    },
+    {
+      "method": "POST",
       "path": "/v1/eval",
       "operation": "cypher_eval",
       "authRequired": false

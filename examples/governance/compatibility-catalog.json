@@ -419,6 +419,23 @@
       ],
       "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
       "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
+    },
+    {
+      "id": "compatibility-diff",
+      "version": "cypher-llm-compatibility-diff/v1",
+      "category": "governance",
+      "level": "stable",
+      "ownerWorkstreamId": "governance-standards",
+      "schemaPath": "schemas/compatibility-diff.schema.json",
+      "examplePaths": [
+        "examples/governance/compatibility-diff.json"
+      ],
+      "evidencePaths": [
+        "src/compatibility-diff.ts",
+        "test/compatibility.test.ts"
+      ],
+      "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
     }
   ],
   "releaseGates": [
@@ -466,6 +483,15 @@
       "evidencePaths": [
         "src/compatibility.ts",
         "examples/governance/compatibility-catalog.json"
+      ]
+    },
+    {
+      "id": "compatibility-diff",
+      "title": "Compatibility changes are explicitly classified before release",
+      "command": "cypher-llm compatibility-diff --baseline examples/governance/compatibility-catalog.json --fail-on-breaking",
+      "evidencePaths": [
+        "src/compatibility-diff.ts",
+        "examples/governance/compatibility-diff.json"
       ]
     }
   ],

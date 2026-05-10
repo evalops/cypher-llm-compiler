@@ -1,0 +1,32 @@
+{
+  "version": "cypher-llm-compatibility-diff/v1",
+  "status": "passed",
+  "baseline": {
+    "version": "cypher-llm-compatibility-catalog/v1",
+    "packageName": "@evalops/cypher-llm-compiler",
+    "packageVersion": "0.1.0",
+    "contracts": 24,
+    "stableContracts": 24,
+    "previewContracts": 0,
+    "experimentalContracts": 0
+  },
+  "candidate": {
+    "version": "cypher-llm-compatibility-catalog/v1",
+    "packageName": "@evalops/cypher-llm-compiler",
+    "packageVersion": "0.1.0",
+    "contracts": 24,
+    "stableContracts": 24,
+    "previewContracts": 0,
+    "experimentalContracts": 0
+  },
+  "changes": [],
+  "summary": {
+    "changes": 0,
+    "added": 0,
+    "removed": 0,
+    "changed": 0,
+    "breaking": 0,
+    "warnings": 0,
+    "info": 0
+  }
+}

@@ -88,7 +88,10 @@ describe("compiler HTTP service", () => {
       query,
       defaultLimit: 25
     }) as { version: string; nextAction: { kind: string } };
-    const compatibility = await postJson(`${baseUrl}/v1/compatibility`, {}) as { version: string };
+    const compatibility = await postJson(`${baseUrl}/v1/compatibility`, {}) as { version: string; contracts: unknown[] };
+    const compatibilityDiff = await postJson(`${baseUrl}/v1/compatibility-diff`, {
+      baseline: compatibility
+    }) as { version: string; status: string };
     const policy = await postJson(`${baseUrl}/v1/policy`, {
       schema,
       query,
@@ -144,6 +147,8 @@ describe("compiler HTTP service", () => {
     assert.equal(feedback.version, "cypher-llm-agent-feedback/v1");
     assert.equal(feedback.nextAction.kind, "apply-deterministic-repairs");
     assert.equal(compatibility.version, "cypher-llm-compatibility-catalog/v1");
+    assert.equal(compatibilityDiff.version, "cypher-llm-compatibility-diff/v1");
+    assert.equal(compatibilityDiff.status, "passed");
     assert.equal(policy.version, "cypher-llm-policy-report/v1");
     assert.equal(policy.policy?.id, "llm-readonly-strict");
     assert.deepEqual(policy.findings.map((finding) => finding.code), ["policy-unfiltered-label-scan", "policy-missing-limit"]);

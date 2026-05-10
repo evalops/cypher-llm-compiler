@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evalops.dev/schemas/cypher-llm/compatibility-diff/v1.json",
+  "title": "Cypher LLM Compatibility Diff",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "status", "baseline", "candidate", "changes", "summary"],
+  "properties": {
+    "version": { "const": "cypher-llm-compatibility-diff/v1" },
+    "status": { "enum": ["passed", "failed"] },
+    "baseline": { "$ref": "#/$defs/catalogSummary" },
+    "candidate": { "$ref": "#/$defs/catalogSummary" },
+    "changes": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/change" }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["changes", "added", "removed", "changed", "breaking", "warnings", "info"],
+      "properties": {
+        "changes": { "type": "integer", "minimum": 0 },
+        "added": { "type": "integer", "minimum": 0 },
+        "removed": { "type": "integer", "minimum": 0 },
+        "changed": { "type": "integer", "minimum": 0 },
+        "breaking": { "type": "integer", "minimum": 0 },
+        "warnings": { "type": "integer", "minimum": 0 },
+        "info": { "type": "integer", "minimum": 0 }
+      }
+    }
+  },
+  "$defs": {
+    "catalogSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version",
+        "packageName",
+        "packageVersion",
+        "contracts",
+        "stableContracts",
+        "previewContracts",
+        "experimentalContracts"
+      ],
+      "properties": {
+        "version": { "type": "string", "minLength": 1 },
+        "packageName": { "type": "string", "minLength": 1 },
+        "packageVersion": { "type": "string", "minLength": 1 },
+        "contracts": { "type": "integer", "minimum": 0 },
+        "stableContracts": { "type": "integer", "minimum": 0 },
+        "previewContracts": { "type": "integer", "minimum": 0 },
+        "experimentalContracts": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "change": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "severity", "target", "id", "message"],
+      "properties": {
+        "kind": { "enum": ["added", "removed", "changed"] },
+        "severity": { "enum": ["info", "warning", "breaking"] },
+        "target": { "enum": ["contract", "release-gate", "certification-gate", "deprecation-policy"] },
+        "id": { "type": "string", "minLength": 1 },
+        "field": { "type": "string", "minLength": 1 },
+        "baselineValue": { "type": "string" },
+        "candidateValue": { "type": "string" },
+        "message": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

@@ -28,6 +28,9 @@ describe("compiler service manifest", () => {
       manifest.routes.some((route) => route.path === "/v1/compatibility" && route.operation === "cypher_compatibility_catalog" && route.method === "POST")
     );
     assert.ok(
+      manifest.routes.some((route) => route.path === "/v1/compatibility-diff" && route.operation === "cypher_compatibility_diff" && route.method === "POST")
+    );
+    assert.ok(
       manifest.routes.some((route) => route.path === "/v1/policy-profiles" && route.operation === "cypher_policy_profiles")
     );
     assert.equal(manifest.dataBoundary.storesPayloads, false);

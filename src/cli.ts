@@ -8,8 +8,10 @@ import { buildBenchmarkGateReport } from "./benchmark-gate.js";
 import {
   buildCompatibilityCatalog,
   compatibilityIntegrityReport,
+  type CompatibilityCatalog,
   renderCompatibilityCatalogMarkdown
 } from "./compatibility.js";
+import { buildCompatibilityDiffReport, renderCompatibilityDiffMarkdown } from "./compatibility-diff.js";
 import { buildDatasetGovernanceReport } from "./dataset-governance.js";
 import { certifyDialectProfiles, renderDialectCertificationMarkdown } from "./dialect-certification.js";
 import type { EvalAttemptSet, EvalDataset, EvalReport } from "./evals.js";
@@ -133,6 +135,9 @@ export async function runCli(argv: string[], io: CliIO = defaultIo()): Promise<n
         return 0;
       case "compatibility":
         await compatibilityCommand(args, io);
+        return 0;
+      case "compatibility-diff":
+        await compatibilityDiffCommand(args, io);
         return 0;
       case "certify-dialects":
         await certifyDialectsCommand(args, io);
@@ -655,6 +660,22 @@ async function compatibilityCommand(args: Map<string, string | boolean>, io: Cli
   }
 }
 
+async function compatibilityDiffCommand(args: Map<string, string | boolean>, io: CliIO) {
+  const baseline = JSON.parse(await io.readFile(stringArg(args, "baseline"), "utf8")) as CompatibilityCatalog;
+  const candidate = typeof args.get("candidate") === "string"
+    ? JSON.parse(await io.readFile(args.get("candidate") as string, "utf8")) as CompatibilityCatalog
+    : buildCompatibilityCatalog();
+  const report = buildCompatibilityDiffReport(baseline, candidate);
+  const output = args.get("format") === "markdown" ? renderCompatibilityDiffMarkdown(report) : `${JSON.stringify(report, null, 2)}\n`;
+  if (typeof args.get("diff-out") === "string") {
+    await writeTextFile(io, args.get("diff-out") as string, output);
+  }
+  io.stdout.write(output);
+  if (args.get("fail-on-breaking") === true && report.status === "failed") {
+    throw new Error(`Compatibility diff found ${report.summary.breaking} breaking change(s).`);
+  }
+}
+
 async function certifyDialectsCommand(args: Map<string, string | boolean>, io: CliIO) {
   const report = certifyDialectProfiles();
   const format = args.get("format") === "markdown" ? "markdown" : "json";
@@ -966,6 +987,7 @@ Commands:
   introspect-neo4j --uri bolt://localhost:7687 --user neo4j --password password [--schema-out schema.json] [--sample-limit 1000] [--no-procedures]
   roadmap    [--format json|markdown] [--integrity] [--roadmap-out path]
   compatibility [--format json|markdown] [--integrity] [--fail-on-error] [--catalog-out path]
+  compatibility-diff --baseline catalog.json [--candidate catalog.json] [--format json|markdown] [--diff-out path] [--fail-on-breaking]
   certify-dialects [--format json|markdown] [--report-out path] [--fail-on-fail]
   service-manifest [--manifest-out path] [--max-body-bytes 1000000] [--require-auth] [--audit-enabled]
   mcp
