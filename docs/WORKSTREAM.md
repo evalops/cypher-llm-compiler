@@ -80,3 +80,9 @@ Artifacts:
 - Migration guide for raw text2cypher chains.
 
 Status: implemented through `src/tools.ts`, `src/mcp-server.ts`, `src/langchain.ts`, `docs/INTEGRATIONS.md`, and `examples/raw-to-ir-migration.md`. The same operation contract now reaches OpenAI function tools, MCP clients, LangChain-style chains, and direct TypeScript callers.
+
+## Beyond: Years-Scale Program
+
+The years-scale program is tracked publicly in issues #10-#17 and in the machine-readable roadmap under `src/years-roadmap.ts`, `schemas/years-roadmap.schema.json`, and `examples/roadmap/cypher-llm-years-roadmap.json`.
+
+See `docs/YEARS_ROADMAP.md` for the larger program: lossless parsing, dialect certification, public CypherBench, proof-carrying repair, compiler service APIs, cost/safety policy planning, ecosystem UX, and governance.

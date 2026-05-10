@@ -23,6 +23,7 @@ import { validateCypherTextWithParser } from "./parser-validation.js";
 import { evaluateRawLiftAttempts, liftRawCypherToIr } from "./raw-lift.js";
 import { normalizeSchema } from "./schema.js";
 import { validateQuery } from "./validate.js";
+import { getYearsRoadmap, renderYearsRoadmapMarkdown, roadmapIntegrityReport } from "./years-roadmap.js";
 
 export interface CliIO {
   stdout: Pick<NodeJS.WriteStream, "write">;
@@ -70,6 +71,9 @@ export async function runCli(argv: string[], io: CliIO = defaultIo()): Promise<n
         return 0;
       case "introspect-neo4j":
         await introspectNeo4jCommand(args, io);
+        return 0;
+      case "roadmap":
+        await roadmapCommand(args, io);
         return 0;
       case "mcp":
         await mcpCommand();
@@ -282,6 +286,19 @@ async function introspectNeo4jCommand(args: Map<string, string | boolean>, io: C
   }
 }
 
+async function roadmapCommand(args: Map<string, string | boolean>, io: CliIO) {
+  const roadmap = getYearsRoadmap();
+  const includeIntegrity = args.get("integrity") === true;
+  const format = args.get("format") === "markdown" ? "markdown" : "json";
+  const output = format === "markdown"
+    ? renderYearsRoadmapMarkdown(roadmap)
+    : `${JSON.stringify(includeIntegrity ? { roadmap, integrity: roadmapIntegrityReport(roadmap) } : roadmap, null, 2)}\n`;
+  if (typeof args.get("roadmap-out") === "string") {
+    await writeTextFile(io, args.get("roadmap-out") as string, output);
+  }
+  io.stdout.write(output);
+}
+
 async function mcpCommand() {
   const { runMcpServer } = await import("./mcp-server.js");
   await runMcpServer(process.stdin, process.stdout);
@@ -382,11 +399,15 @@ async function writeImportedFixtureSet(args: Map<string, string | boolean>, io: 
 }
 
 async function writeJsonFile(io: CliIO, filepath: string, value: unknown) {
+  return writeTextFile(io, filepath, `${JSON.stringify(value, null, 2)}\n`);
+}
+
+async function writeTextFile(io: CliIO, filepath: string, value: string) {
   if (!io.writeFile || !io.mkdir) {
     throw new Error("This CLI host does not support writing fixture files.");
   }
   await io.mkdir(path.dirname(filepath), { recursive: true });
-  await io.writeFile(filepath, `${JSON.stringify(value, null, 2)}\n`, "utf8");
+  await io.writeFile(filepath, value, "utf8");
 }
 
 function writeJson(io: CliIO, value: unknown) {
@@ -408,6 +429,7 @@ Commands:
   lift-raw-eval --dataset dataset.json --attempts attempts.json [--summary-out summary.json]
   parse-check --schema schema.json (--query query.json | --cypher "MATCH ...") [--mode lint|syntax] [--default-limit 25] [--default-max-hops 5]
   introspect-neo4j --uri bolt://localhost:7687 --user neo4j --password password [--schema-out schema.json] [--sample-limit 1000] [--no-procedures]
+  roadmap    [--format json|markdown] [--integrity] [--roadmap-out path]
   mcp
   import-text2cypher --csv rows.csv --dataset-out dataset.json --attempts-out attempts.json [--summary-out summary.json] [--dataset-name name] [--source name] [--model name] [--limit 10] [--indexes 0,2,39]
   import-functional-cypher --json rows.json --dataset-out dataset.json --attempts-out attempts.json [--summary-out summary.json] [--dataset-name name] [--source name] [--limit 10]

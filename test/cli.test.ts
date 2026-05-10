@@ -329,6 +329,31 @@ describe("cli", () => {
     assert.ok(writes.has("out/lift.json"));
   });
 
+  it("prints and writes the years-scale roadmap", async () => {
+    const writes = new Map<string, string>();
+    let stdout = "";
+    let stderr = "";
+    const io: CliIO = {
+      stdout: { write: (chunk: string | Uint8Array) => ((stdout += String(chunk)), true) },
+      stderr: { write: (chunk: string | Uint8Array) => ((stderr += String(chunk)), true) },
+      readFile: async () => "",
+      writeFile: async (path, data) => {
+        writes.set(path, data);
+      },
+      mkdir: async () => undefined
+    };
+
+    const jsonCode = await runCli(["roadmap", "--integrity", "--roadmap-out", "out/roadmap.json"], io);
+    const markdownCode = await runCli(["roadmap", "--format", "markdown"], io);
+
+    assert.equal(jsonCode, 0);
+    assert.equal(markdownCode, 0);
+    assert.equal(stderr, "");
+    assert.ok(stdout.includes("cypher-llm-years-roadmap/v1"));
+    assert.ok(stdout.includes("# Years-Scale Roadmap"));
+    assert.ok(writes.get("out/roadmap.json")?.includes("cypher-llm-roadmap-integrity/v1"));
+  });
+
   it("imports text2cypher CSV fixtures to dataset and attempt files", async () => {
     const files = new Map<string, string>([
       [

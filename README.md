@@ -19,7 +19,7 @@ The gap is not "LLMs need a better prompt." The gap is a missing compiler bounda
 
 ## What This Implements
 
-This package implements eight concrete improvements:
+This package implements nine concrete improvements:
 
 1. **Official JSON IR**: Agents can emit a small, typed Cypher AST instead of brittle text.
 2. **LLM-safe profile**: The renderer emits conservative Cypher with escaped schema identifiers, explicit projections, bounded path recommendations, and deterministic formatting.
@@ -29,6 +29,7 @@ This package implements eight concrete improvements:
 6. **Equivalence normalizer**: Queries render into stable canonical text for evals and regression tests.
 7. **Safe execution modes**: Query planning separates render/validate/repair from `EXPLAIN`, read-only, and approval-required execution choices.
 8. **Failure corpus**: Known LLM failure cases live as runnable fixtures, not anecdotes.
+9. **Roadmap governance**: Multi-year compiler ambitions are tracked as public issues plus a machine-readable capability ledger.
 
 ## Quick Start
 
@@ -132,6 +133,7 @@ cypher-llm repair-loop --dataset examples/eval-dataset.json --attempts examples/
 cypher-llm lift-raw-eval --dataset examples/imported/text2cypher-gpt4o-sample.dataset.json --attempts examples/imported/text2cypher-gpt4o-sample.attempts.json
 cypher-llm parse-check --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json --default-limit 25
 cypher-llm introspect-neo4j --uri bolt://localhost:7687 --user neo4j --password "$NEO4J_PASSWORD" --schema-out schema.json
+cypher-llm roadmap --integrity
 cypher-llm import-text2cypher --csv rows.csv --dataset-out dataset.json --attempts-out attempts.json
 cypher-llm mcp
 npm run test:live:neo4j
@@ -159,6 +161,8 @@ npm run test:live:neo4j
 `parse-check` validates rendered IR or raw Cypher against Neo4j's language-support parser and maps parser diagnostics back into this package's `Diagnostic` shape.
 
 `introspect-neo4j` connects to Neo4j and writes a `CypherSchemaContract` from labels, relationship types, properties, observed endpoints, and procedure yields.
+
+`roadmap` emits the years-scale public workstream and capability ledger as JSON or markdown.
 
 `mcp` starts a stdio MCP server exposing the same render, validate, repair, parse-check, and eval operations to agent clients.
 
@@ -297,6 +301,7 @@ Those are deliberate boundaries. The repo is the missing LLM compiler surface, n
 - `src/failure-corpus.ts`: Runnable corpus of LLM failure cases.
 - `src/eval-compare.ts`: CypherBench report comparison and regression detection.
 - `src/repair-loop.ts`: Eval-driven repair feedback packets for model retry loops.
+- `src/years-roadmap.ts`: Public years-scale workstream and capability ledger.
 - `src/fixture-importers.ts`: Importers for text2cypher CSV/JSON and openCypher TCK fixtures.
 - `src/parser-validation.ts`: Parser-backed validation through Neo4j language support.
 - `src/neo4j-explain.ts`: Driver-compatible Neo4j `EXPLAIN` preflight adapter.
@@ -304,11 +309,12 @@ Those are deliberate boundaries. The repo is the missing LLM compiler surface, n
 - `src/mcp-server.ts`: Stdio MCP server for agent clients.
 - `src/langchain.ts`: LangChain-shaped adapter for structured IR repair plus parser validation.
 - `src/cli.ts`: JSON-in/JSON-out CLI for agents and eval harnesses.
-- `docs/`: Design notes and LLM integration guidance, including `docs/RAW_LIFT.md`.
+- `docs/`: Design notes and LLM integration guidance, including `docs/RAW_LIFT.md` and `docs/YEARS_ROADMAP.md`.
 - `docker-compose.neo4j.yml`: Optional local Neo4j fixture for live `EXPLAIN` tests.
 - `examples/`: Small schema/query fixtures for CLI smoke tests and agent onboarding.
 - `examples/benchmarks/`: CypherBench raw-vs-IR reports, comparisons, and repair-loop artifacts.
 - `examples/imported/`: Imported text2cypher/openCypher fixture samples and baseline reports.
+- `examples/roadmap/`: Machine-readable years-scale roadmap snapshot.
 - `profiles/`: Versioned dialect profiles for Neo4j Cypher 25, openCypher 9, and GQL-oriented output.
 - `schemas/`: JSON Schema contracts for IR, graph schema, eval datasets, and eval attempts.
 - `test/`: Node test-runner coverage for renderer, schema, validation, repair, safety, and corpus behavior.

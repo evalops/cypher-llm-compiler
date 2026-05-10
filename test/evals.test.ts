@@ -57,11 +57,13 @@ describe("json schemas", () => {
     const schemaContractSchema = readJson("schemas/cypher-schema-contract.schema.json");
     const querySchema = readJson("schemas/cypher-query.schema.json");
     const dialectProfileSchema = readJson("schemas/dialect-profile.schema.json");
+    const yearsRoadmapSchema = readJson("schemas/years-roadmap.schema.json");
     const evalDatasetSchema = readJson("schemas/eval-dataset.schema.json");
     const evalAttemptsSchema = readJson("schemas/eval-attempts.schema.json");
     ajv.addSchema(schemaContractSchema);
     ajv.addSchema(querySchema);
     ajv.addSchema(dialectProfileSchema);
+    ajv.addSchema(yearsRoadmapSchema);
     ajv.addSchema(evalDatasetSchema);
     ajv.addSchema(evalAttemptsSchema);
 
@@ -70,6 +72,7 @@ describe("json schemas", () => {
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/eval-dataset/v1.json", readJson("examples/eval-dataset.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/eval-attempts/v1.json", readJson("examples/eval-attempts.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/dialect-profile/v1.json", readJson("profiles/neo4j-cypher-25.json"));
+    assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/years-roadmap/v1.json", readJson("examples/roadmap/cypher-llm-years-roadmap.json"));
 
     const importedDir = path.join(process.cwd(), "examples/imported");
     for (const file of readdirSync(importedDir)) {
