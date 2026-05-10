@@ -29,6 +29,7 @@ Stable public contracts:
 - `cypher-llm-agent-guide/v1`
 - `cypher-llm-diagnostic-catalog/v1`
 - `cypher-llm-service-manifest/v1`
+- `cypher-llm-service-metrics/v1`
 - `cypher-llm-years-roadmap/v1`
 - `cypher-llm-compatibility-catalog/v1`
 - `cypher-llm-compatibility-diff/v1`
@@ -144,9 +145,10 @@ Run:
 
 ```bash
 cypher-llm service-manifest --manifest-out examples/service/service-manifest.json
+cypher-llm service-metrics --metrics-out examples/service/service-metrics.json
 ```
 
-Service manifests are the public runtime contract for the HTTP compiler service. They list stable routes, body-size limits, bearer-auth posture, public discovery routes, audit redaction fields, and data-boundary guarantees. JSON output validates against `schemas/service-manifest.schema.json`.
+Service manifests are the public runtime contract for the HTTP compiler service. They list stable routes, body-size limits, bearer-auth posture, public discovery routes, audit redaction fields, metrics routes, and data-boundary guarantees. JSON output validates against `schemas/service-manifest.schema.json`. Service metrics validate against `schemas/service-metrics.schema.json` and count HTTP requests, tool failures, diagnostics, repairs, retry packets, and live database outcomes without storing request or response payloads.
 
 ## Policy Reports
 

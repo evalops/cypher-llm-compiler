@@ -22,7 +22,8 @@
 - Added compatibility contract fingerprints so schema and example drift is recorded in catalogs and classified by compatibility diff gates.
 - Added contract conformance reports that verify public schema files, examples, fingerprints, schema validation, and evidence paths for release agents.
 - Added a compiler service manifest plus optional bearer auth, redacted audit events, body-limit reporting, JSON Schema, CLI output, and checked-in service manifest artifact.
-- Added a JSON HTTP compiler service over the shared tool dispatcher with health, metadata, tool, roadmap, and dialect certification routes.
+- Added a JSON HTTP compiler service over the shared tool dispatcher with health, metadata, metrics, tool, roadmap, and dialect certification routes.
+- Added service metrics for HTTP requests, tool failures, diagnostics, repairs, retry packets, and live database outcomes.
 - Added live-database evidence lanes to dialect certification so parser, renderer, semantic, and database checks are reported separately.
 - Added a versioned, CI-backed dialect live evidence artifact for Neo4j certification.
 - Added source-anchored repair-plan steps that map deterministic, model-required, and unsafe repairs back to lossless `cypherBefore` clause spans and IR paths.

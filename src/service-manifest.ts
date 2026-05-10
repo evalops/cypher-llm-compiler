@@ -116,6 +116,7 @@ export function buildCompilerServiceManifest(options: CompilerServiceManifestOpt
       { method: "GET", path: "/healthz", operation: "health", authRequired: false },
       { method: "GET", path: "/v1/service-manifest", operation: "service_manifest", authRequired: false },
       { method: "GET", path: "/v1/tools", operation: "tool_metadata", authRequired },
+      { method: "GET", path: "/v1/metrics", operation: "service_metrics", authRequired },
       { method: "GET", path: "/v1/roadmap", operation: "years_roadmap", authRequired },
       { method: "GET", path: "/v1/dialect-certification", operation: "dialect_certification", authRequired },
       { method: "GET", path: "/v1/agent-guide", operation: "agent_guide", authRequired },

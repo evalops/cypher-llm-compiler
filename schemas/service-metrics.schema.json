@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evalops.dev/schemas/cypher-llm/service-metrics/v1.json",
+  "title": "Cypher Compiler Service Metrics",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "generatedAt", "service", "requests", "tools", "signals"],
+  "properties": {
+    "version": { "const": "cypher-llm-service-metrics/v1" },
+    "generatedAt": { "type": "string", "minLength": 1 },
+    "service": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "startedAt", "uptimeMs"],
+      "properties": {
+        "id": { "const": "cypher-llm-compiler-http" },
+        "startedAt": { "type": "string", "minLength": 1 },
+        "uptimeMs": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "requests": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["total", "succeeded", "failed", "unauthorized", "statusCodes", "byRoute"],
+      "properties": {
+        "total": { "type": "integer", "minimum": 0 },
+        "succeeded": { "type": "integer", "minimum": 0 },
+        "failed": { "type": "integer", "minimum": 0 },
+        "unauthorized": { "type": "integer", "minimum": 0 },
+        "statusCodes": { "$ref": "#/$defs/countMap" },
+        "byRoute": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/route" }
+        }
+      }
+    },
+    "tools": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["total", "succeeded", "failed", "byName"],
+      "properties": {
+        "total": { "type": "integer", "minimum": 0 },
+        "succeeded": { "type": "integer", "minimum": 0 },
+        "failed": { "type": "integer", "minimum": 0 },
+        "byName": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/tool" }
+        }
+      }
+    },
+    "signals": { "$ref": "#/$defs/signals" }
+  },
+  "$defs": {
+    "countMap": {
+      "type": "object",
+      "additionalProperties": { "type": "integer", "minimum": 0 }
+    },
+    "liveDatabaseOutcomes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["passed", "warning", "failed"],
+      "properties": {
+        "passed": { "type": "integer", "minimum": 0 },
+        "warning": { "type": "integer", "minimum": 0 },
+        "failed": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "signals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["diagnostics", "repairs", "retryPackets", "liveDatabaseOutcomes"],
+      "properties": {
+        "diagnostics": { "type": "integer", "minimum": 0 },
+        "repairs": { "type": "integer", "minimum": 0 },
+        "retryPackets": { "type": "integer", "minimum": 0 },
+        "liveDatabaseOutcomes": { "$ref": "#/$defs/liveDatabaseOutcomes" }
+      }
+    },
+    "route": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["method", "path", "requests", "succeeded", "failed", "statusCodes"],
+      "properties": {
+        "method": { "type": "string", "minLength": 1 },
+        "path": { "type": "string", "minLength": 1 },
+        "requests": { "type": "integer", "minimum": 0 },
+        "succeeded": { "type": "integer", "minimum": 0 },
+        "failed": { "type": "integer", "minimum": 0 },
+        "statusCodes": { "$ref": "#/$defs/countMap" }
+      }
+    },
+    "tool": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "requests",
+        "succeeded",
+        "failed",
+        "diagnostics",
+        "repairs",
+        "retryPackets",
+        "liveDatabaseOutcomes"
+      ],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "requests": { "type": "integer", "minimum": 0 },
+        "succeeded": { "type": "integer", "minimum": 0 },
+        "failed": { "type": "integer", "minimum": 0 },
+        "diagnostics": { "type": "integer", "minimum": 0 },
+        "repairs": { "type": "integer", "minimum": 0 },
+        "retryPackets": { "type": "integer", "minimum": 0 },
+        "liveDatabaseOutcomes": { "$ref": "#/$defs/liveDatabaseOutcomes" }
+      }
+    }
+  }
+}

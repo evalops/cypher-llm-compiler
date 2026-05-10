@@ -1153,6 +1153,31 @@ describe("cli", () => {
     assert.ok(writes.get("out/service-manifest.json")?.includes("cypher-llm-service-manifest/v1"));
   });
 
+  it("prints and writes the compiler service metrics contract example", async () => {
+    const writes = new Map<string, string>();
+    let stdout = "";
+    let stderr = "";
+    const io: CliIO = {
+      stdout: { write: (chunk: string | Uint8Array) => ((stdout += String(chunk)), true) },
+      stderr: { write: (chunk: string | Uint8Array) => ((stderr += String(chunk)), true) },
+      readFile: async () => "",
+      writeFile: async (path, data) => {
+        writes.set(path, data);
+      },
+      mkdir: async () => undefined
+    };
+
+    const code = await runCli(["service-metrics", "--metrics-out", "out/service-metrics.json"], io);
+    const output = JSON.parse(stdout) as { version: string; requests: { total: number }; signals: { diagnostics: number } };
+
+    assert.equal(code, 0);
+    assert.equal(stderr, "");
+    assert.equal(output.version, "cypher-llm-service-metrics/v1");
+    assert.equal(output.requests.total, 0);
+    assert.equal(output.signals.diagnostics, 0);
+    assert.ok(writes.get("out/service-metrics.json")?.includes("cypher-llm-service-metrics/v1"));
+  });
+
   it("imports text2cypher CSV fixtures to dataset and attempt files", async () => {
     const files = new Map<string, string>([
       [

@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, it } from "node:test";
 import { buildCompilerServiceManifest } from "../src/service-manifest.js";
+import { buildEmptyCompilerServiceMetricsReport } from "../src/service-metrics.js";
 
 describe("compiler service manifest", () => {
   it("describes runtime auth, audit, limits, and routes", () => {
@@ -51,6 +52,9 @@ describe("compiler service manifest", () => {
     assert.ok(
       manifest.routes.some((route) => route.path === "/v1/policy-profiles" && route.operation === "cypher_policy_profiles")
     );
+    assert.ok(
+      manifest.routes.some((route) => route.path === "/v1/metrics" && route.operation === "service_metrics" && route.method === "GET")
+    );
     assert.equal(manifest.dataBoundary.storesPayloads, false);
     assert.equal(manifest.dataBoundary.returnsDatabaseRows, false);
   });
@@ -59,5 +63,11 @@ describe("compiler service manifest", () => {
     const expected = JSON.parse(readFileSync(path.join(process.cwd(), "examples/service/service-manifest.json"), "utf8")) as unknown;
 
     assert.deepEqual(buildCompilerServiceManifest(), expected);
+  });
+
+  it("keeps checked-in service metrics JSON aligned with the empty contract example", () => {
+    const expected = JSON.parse(readFileSync(path.join(process.cwd(), "examples/service/service-metrics.json"), "utf8")) as unknown;
+
+    assert.deepEqual(buildEmptyCompilerServiceMetricsReport(), expected);
   });
 });

@@ -484,6 +484,7 @@ Routes:
 - `GET /healthz`
 - `GET /v1/service-manifest`
 - `GET /v1/tools`
+- `GET /v1/metrics`
 - `POST /v1/render`
 - `POST /v1/validate`
 - `POST /v1/repair`

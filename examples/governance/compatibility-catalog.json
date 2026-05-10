@@ -732,7 +732,37 @@
         {
           "kind": "example",
           "path": "examples/service/service-manifest.json",
-          "sha256": "8888605da21780f945eb0f4b025d9951dce3ae77a0ff423261e3a5bffd5c62d2"
+          "sha256": "dc09705c7cdc5f31d96a7b0d2926c76afe51a4aeb6f77a4344a5ba8ee0265067"
+        }
+      ]
+    },
+    {
+      "id": "service-metrics",
+      "version": "cypher-llm-service-metrics/v1",
+      "category": "service",
+      "level": "stable",
+      "ownerWorkstreamId": "compiler-service",
+      "schemaPath": "schemas/service-metrics.schema.json",
+      "examplePaths": [
+        "examples/service/service-metrics.json"
+      ],
+      "evidencePaths": [
+        "src/service-metrics.ts",
+        "src/http-server.ts",
+        "test/http-server.test.ts"
+      ],
+      "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path.",
+      "fingerprints": [
+        {
+          "kind": "schema",
+          "path": "schemas/service-metrics.schema.json",
+          "sha256": "9db4dd2f2d8e3185a1c1632ac665a537f20f87a40c99c4ab20116fa52e61792b"
+        },
+        {
+          "kind": "example",
+          "path": "examples/service/service-metrics.json",
+          "sha256": "5ff3bd4283b34d4ec337e6a603f7421621c3b315a930f7de0679d51064856bcc"
         }
       ]
     },
@@ -761,7 +791,7 @@
         {
           "kind": "example",
           "path": "examples/roadmap/cypher-llm-years-roadmap.json",
-          "sha256": "1789fec43f4a335a8e60ff481aa1b43d5ba255e0f5ae50e5d3c3c4a22c1e9280"
+          "sha256": "b9ced98e8cbc89f65e3c2f6c11fef61c9449c91ef8344ef8f3360ace87dcf795"
         }
       ]
     },
@@ -814,7 +844,7 @@
         {
           "kind": "example",
           "path": "examples/governance/compatibility-diff.json",
-          "sha256": "a79e340f461815574f1efc570f0220955b073d271209e3ac06fbde4b9b22cb9b"
+          "sha256": "e56d9af5c8d86505de016b2bac76724025585f86d39069d03677076767a814bd"
         }
       ]
     },
@@ -843,7 +873,7 @@
         {
           "kind": "example",
           "path": "examples/governance/contract-conformance.json",
-          "sha256": "1347a640c8bdbf2441e6e26505c4f792c75fca3ae3b289c86b81817c81b3b82f"
+          "sha256": "2aa76674dd673916223a7e559deba53dc3a03f90a1fcb9f052dccd3e49df5640"
         }
       ]
     }

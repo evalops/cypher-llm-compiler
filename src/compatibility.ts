@@ -189,6 +189,9 @@ const compatibilityCatalogBase = {
     stableContract("service-manifest", "cypher-llm-service-manifest/v1", "service", "compiler-service", "schemas/service-manifest.schema.json", [
       "examples/service/service-manifest.json"
     ], ["src/service-manifest.ts", "test/service-manifest.test.ts"]),
+    stableContract("service-metrics", "cypher-llm-service-metrics/v1", "service", "compiler-service", "schemas/service-metrics.schema.json", [
+      "examples/service/service-metrics.json"
+    ], ["src/service-metrics.ts", "src/http-server.ts", "test/http-server.test.ts"]),
     stableContract("years-roadmap", "cypher-llm-years-roadmap/v1", "governance", "governance-standards", "schemas/years-roadmap.schema.json", [
       "examples/roadmap/cypher-llm-years-roadmap.json"
     ], ["src/years-roadmap.ts", "test/years-roadmap.test.ts"]),

@@ -200,8 +200,11 @@ export const yearsRoadmap = {
         "src/mcp-server.ts",
         "src/http-server.ts",
         "src/service-manifest.ts",
+        "src/service-metrics.ts",
         "schemas/service-manifest.schema.json",
+        "schemas/service-metrics.schema.json",
         "examples/service/service-manifest.json",
+        "examples/service/service-metrics.json",
         "src/cli.ts",
         "docs/INTEGRATIONS.md"
       ],
@@ -456,7 +459,9 @@ export const yearsRoadmap = {
         "src/mcp-server.ts",
         "src/http-server.ts",
         "src/service-manifest.ts",
+        "src/service-metrics.ts",
         "schemas/service-manifest.schema.json",
+        "schemas/service-metrics.schema.json",
         "test/http-server.test.ts",
         "docs/INTEGRATIONS.md"
       ],
@@ -464,9 +469,16 @@ export const yearsRoadmap = {
     },
     {
       id: "service-operational-controls",
-      title: "HTTP Service Auth Audit And Manifest Controls",
+      title: "HTTP Service Auth Audit Metrics And Manifest Controls",
       status: "partial",
-      evidence: ["src/service-manifest.ts", "schemas/service-manifest.schema.json", "test/service-manifest.test.ts"],
+      evidence: [
+        "src/service-manifest.ts",
+        "src/service-metrics.ts",
+        "schemas/service-manifest.schema.json",
+        "schemas/service-metrics.schema.json",
+        "test/http-server.test.ts",
+        "test/service-manifest.test.ts"
+      ],
       workstreamIds: ["compiler-service", "governance-standards"]
     },
     {

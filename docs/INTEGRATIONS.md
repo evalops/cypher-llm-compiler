@@ -126,6 +126,7 @@ Routes:
 - `GET /healthz`
 - `GET /v1/service-manifest`
 - `GET /v1/tools`
+- `GET /v1/metrics`
 - `POST /v1/render`
 - `POST /v1/validate`
 - `POST /v1/repair`
@@ -154,7 +155,7 @@ Routes:
 - `GET /v1/roadmap`
 - `GET /v1/dialect-certification`
 
-`GET /v1/service-manifest` returns `cypher-llm-service-manifest/v1`, including route auth requirements, body limits, audit redaction fields, and data-boundary guarantees. When auth is configured, `/healthz` and `/v1/service-manifest` remain public for discovery and liveness while runtime routes require `Authorization: Bearer <token>`.
+`GET /v1/service-manifest` returns `cypher-llm-service-manifest/v1`, including route auth requirements, body limits, audit redaction fields, metrics routes, and data-boundary guarantees. `GET /v1/metrics` returns `cypher-llm-service-metrics/v1` counters for requests, tool failures, diagnostics, repairs, retry packets, and live database outcomes. When auth is configured, `/healthz` and `/v1/service-manifest` remain public for discovery and liveness while runtime routes require `Authorization: Bearer <token>`.
 
 Use this when an agent runtime needs a process boundary instead of an in-process TypeScript import or stdio MCP server.
 

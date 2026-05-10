@@ -9,6 +9,13 @@ import { certifyDialectProfiles } from "./dialect-certification.js";
 import { CYPHER_COMPILER_TOOLS, executeCypherCompilerTool, type CypherCompilerToolName } from "./tools.js";
 import { getYearsRoadmap } from "./years-roadmap.js";
 import {
+  createCompilerServiceMetricsState,
+  recordCompilerServiceRequest,
+  recordCompilerServiceSignals,
+  snapshotCompilerServiceMetrics,
+  type CompilerServiceMetricsState
+} from "./service-metrics.js";
+import {
   buildCompilerServiceManifest,
   COMPILER_HTTP_TOOL_ROUTES,
   DEFAULT_MAX_BODY_BYTES,
@@ -22,6 +29,7 @@ export interface CompilerHttpServerOptions {
   auditSink?: CompilerHttpAuditSink;
   now?: () => Date;
   requestIdFactory?: () => string;
+  metricsState?: CompilerServiceMetricsState;
 }
 
 export interface CompilerHttpHealth {
@@ -49,8 +57,9 @@ export interface CompilerHttpAuditEvent {
 export type CompilerHttpAuditSink = (event: CompilerHttpAuditEvent) => void | Promise<void>;
 
 export function createCompilerHttpServer(options: CompilerHttpServerOptions = {}): Server {
+  const metricsState = options.metricsState ?? createCompilerServiceMetricsState(options.now?.() ?? new Date());
   return createServer((request, response) => {
-    handleCompilerHttpRequest(request, response, options).catch((error) => {
+    handleCompilerHttpRequest(request, response, { ...options, metricsState }).catch((error) => {
       writeJson(response, 500, {
         error: {
           code: "internal-error",
@@ -72,13 +81,24 @@ export async function handleCompilerHttpRequest(
   const routeAuthRequired = auth.required && !isPublicCompilerServiceRoute(url.pathname);
   const authenticated = routeAuthRequired ? isAuthorized(request, auth.token) : false;
   const requestId = requestIdFor(request, options);
+  const metricsState = options.metricsState ?? createCompilerServiceMetricsState(options.now?.() ?? new Date());
   const startedAt = Date.now();
   const finish = async (
     statusCode: number,
     value: unknown,
     audit: { tool?: CypherCompilerToolName; bodyBytes?: number; errorCode?: string } = {},
-    headers: Record<string, string> = {}
+    headers: Record<string, string> = {},
+    metricsValue?: unknown
   ) => {
+    recordCompilerServiceRequest(metricsState, {
+      method: request.method ?? "GET",
+      path: url.pathname,
+      statusCode,
+      ...(audit.tool ? { tool: audit.tool } : {})
+    });
+    if (metricsValue !== undefined) {
+      recordCompilerServiceSignals(metricsState, metricsValue, audit.tool);
+    }
     writeJson(response, statusCode, value, { ...headers, "x-request-id": requestId });
     await emitAudit(options, {
       requestId,
@@ -132,13 +152,19 @@ export async function handleCompilerHttpRequest(
     return;
   }
 
+  if (request.method === "GET" && url.pathname === "/v1/metrics") {
+    await finish(200, snapshotCompilerServiceMetrics(metricsState, options.now?.() ?? new Date()));
+    return;
+  }
+
   if (request.method === "GET" && url.pathname === "/v1/roadmap") {
     await finish(200, getYearsRoadmap());
     return;
   }
 
   if (request.method === "GET" && url.pathname === "/v1/dialect-certification") {
-    await finish(200, certifyDialectProfiles());
+    const report = certifyDialectProfiles();
+    await finish(200, report, {}, {}, report);
     return;
   }
 
@@ -196,7 +222,8 @@ export async function handleCompilerHttpRequest(
   }
 
   try {
-    await finish(200, await executeCypherCompilerTool(toolName, input), { tool: toolName, bodyBytes });
+    const result = await executeCypherCompilerTool(toolName, input);
+    await finish(200, result, { tool: toolName, bodyBytes }, {}, result);
   } catch (error) {
     await finish(
       422,

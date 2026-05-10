@@ -48,6 +48,7 @@ import { evaluateRepairLoop } from "./repair-loop.js";
 import { renderQuery } from "./render.js";
 import { createSafeExecutionPlan } from "./safety.js";
 import { buildCompilerServiceManifest } from "./service-manifest.js";
+import { buildEmptyCompilerServiceMetricsReport } from "./service-metrics.js";
 import type { CypherSchemaStatistics } from "./schema-statistics.js";
 import { buildCypherBenchScorecard, renderCypherBenchScorecardMarkdown } from "./scorecard.js";
 import { validateCypherTextWithParser } from "./parser-validation.js";
@@ -166,6 +167,9 @@ export async function runCli(argv: string[], io: CliIO = defaultIo()): Promise<n
         return 0;
       case "service-manifest":
         await serviceManifestCommand(args, io);
+        return 0;
+      case "service-metrics":
+        await serviceMetricsCommand(args, io);
         return 0;
       case "mcp":
         await mcpCommand();
@@ -763,6 +767,14 @@ async function serviceManifestCommand(args: Map<string, string | boolean>, io: C
   writeJson(io, manifest);
 }
 
+async function serviceMetricsCommand(args: Map<string, string | boolean>, io: CliIO) {
+  const metrics = buildEmptyCompilerServiceMetricsReport();
+  if (typeof args.get("metrics-out") === "string") {
+    await writeJsonFile(io, args.get("metrics-out") as string, metrics);
+  }
+  writeJson(io, metrics);
+}
+
 async function mcpCommand() {
   const { runMcpServer } = await import("./mcp-server.js");
   await runMcpServer(process.stdin, process.stdout);
@@ -1066,6 +1078,7 @@ Commands:
   contract-conformance [--format json|markdown] [--report-out path] [--fail-on-error]
   certify-dialects [--format json|markdown] [--report-out path] [--live-evidence evidence.json] [--fail-on-fail]
   service-manifest [--manifest-out path] [--max-body-bytes 1000000] [--require-auth] [--audit-enabled]
+  service-metrics [--metrics-out path]
   mcp
   serve      [--host 127.0.0.1] [--port 8787] [--max-body-bytes 1000000] [--auth-token token] [--require-auth] [--audit-log audit.jsonl]
   import-text2cypher --csv rows.csv --dataset-out dataset.json --attempts-out attempts.json [--summary-out summary.json] [--dataset-name name] [--source name] [--model name] [--limit 10] [--indexes 0,2,39]

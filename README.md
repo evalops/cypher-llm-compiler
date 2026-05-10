@@ -42,7 +42,7 @@ This package implements twenty-nine concrete improvements:
 19. **CypherBench scorecards**: Eval reports can be published as ranked JSON and markdown scorecards across raw, IR-first, repaired, parser-validated, and mixed lanes.
 20. **Dataset governance reports**: Benchmark datasets can be audited for provenance, split assignment, redaction findings, duplicate ids, and public-release diagnostics.
 21. **Ranked repair plans**: Agents can receive source-anchored deterministic patches, model-required fixes, and unsafe blockers as separate ranked plan steps.
-22. **Service manifest and controls**: Agent runtimes can discover HTTP routes, auth posture, request limits, audit redaction, and data-boundary guarantees.
+22. **Service manifest and controls**: Agent runtimes can discover HTTP routes, auth posture, request limits, audit redaction, metrics, and data-boundary guarantees.
 23. **Benchmark gates**: CI can publish pass/fail CypherBench gates over metric regressions, pass-rate floors, executable-rate floors, and optional diagnostic regressions.
 24. **Agent feedback packets**: LLM clients can receive proof, repair plan, policy evidence, and a concrete next action in one stable JSON object.
 25. **Compatibility catalog**: Contract versions, stability levels, schema/example fingerprints, release gates, certification gates, and deprecation rules are machine-readable.
@@ -171,6 +171,7 @@ cypher-llm compatibility-diff --baseline examples/governance/compatibility-catal
 cypher-llm contract-conformance --fail-on-error
 cypher-llm certify-dialects --live-evidence examples/certification/live-database-evidence.json --fail-on-fail
 cypher-llm service-manifest --manifest-out service-manifest.json
+cypher-llm service-metrics --metrics-out service-metrics.json
 cypher-llm serve --host 127.0.0.1 --port 8787
 cypher-llm serve --host 127.0.0.1 --port 8787 --require-auth --auth-token "$CYPHER_LLM_HTTP_TOKEN" --audit-log audit.jsonl
 cypher-llm import-text2cypher --csv rows.csv --dataset-out dataset.json --attempts-out attempts.json
@@ -235,11 +236,13 @@ npm run test:live:neo4j
 
 `certify-dialects` emits a `cypher-llm-dialect-certification/v1` report that checks profile metadata, renderer behavior, parser acceptance, semantic feature gates, known rendering limitations, and separated live-database evidence when supplied. Checked-in live evidence is versioned as `cypher-llm-dialect-live-evidence/v1`.
 
-`service-manifest` emits a `cypher-llm-service-manifest/v1` report covering HTTP routes, auth requirements, body limits, audit redaction, and data-boundary guarantees.
+`service-manifest` emits a `cypher-llm-service-manifest/v1` report covering HTTP routes, auth requirements, body limits, audit redaction, metrics, and data-boundary guarantees.
+
+`service-metrics` emits the empty `cypher-llm-service-metrics/v1` contract example. The live HTTP service exposes runtime counters at `/v1/metrics`.
 
 `mcp` starts a stdio MCP server exposing the same compiler operation set as the OpenAI tool definitions and HTTP dispatcher.
 
-`serve` starts a local JSON HTTP service exposing `/healthz`, `/v1/service-manifest`, `/v1/tools`, `/v1/render`, `/v1/validate`, `/v1/repair`, `/v1/repair-plan`, `/v1/parse-lossless`, `/v1/parse-check`, `/v1/policy`, `/v1/policy-profiles`, `/v1/lsp-diagnostics`, `/v1/prove`, `/v1/agent-feedback`, `/v1/agent-guide`, `/v1/diagnostic-catalog`, `/v1/compatibility`, `/v1/compatibility-diff`, `/v1/contract-conformance`, `/v1/eval`, `/v1/scorecard`, `/v1/benchmark-gate`, `/v1/dataset-governance`, `/v1/roadmap`, and `/v1/dialect-certification`. Set `--require-auth` with `--auth-token` or `CYPHER_LLM_HTTP_TOKEN` to require bearer auth for runtime routes; `--audit-log` writes JSONL audit events without request or response payloads.
+`serve` starts a local JSON HTTP service exposing `/healthz`, `/v1/service-manifest`, `/v1/tools`, `/v1/metrics`, `/v1/render`, `/v1/validate`, `/v1/repair`, `/v1/repair-plan`, `/v1/parse-lossless`, `/v1/parse-check`, `/v1/policy`, `/v1/policy-profiles`, `/v1/lsp-diagnostics`, `/v1/prove`, `/v1/agent-feedback`, `/v1/agent-guide`, `/v1/diagnostic-catalog`, `/v1/compatibility`, `/v1/compatibility-diff`, `/v1/contract-conformance`, `/v1/eval`, `/v1/scorecard`, `/v1/benchmark-gate`, `/v1/dataset-governance`, `/v1/roadmap`, and `/v1/dialect-certification`. Set `--require-auth` with `--auth-token` or `CYPHER_LLM_HTTP_TOKEN` to require bearer auth for runtime routes; `--audit-log` writes JSONL audit events without request or response payloads.
 
 `test:live:neo4j` runs the optional Docker-backed Neo4j `EXPLAIN` fixture when `CYPHER_LLM_NEO4J_URI` and `CYPHER_LLM_NEO4J_PASSWORD` are set.
 
@@ -402,6 +405,7 @@ Those are deliberate boundaries. The repo is the missing LLM compiler surface, n
 - `src/mcp-server.ts`: Stdio MCP server for agent clients.
 - `src/http-server.ts`: JSON HTTP compiler service for agent runtimes.
 - `src/service-manifest.ts`: Versioned HTTP service manifest, route list, auth/audit contract, and body-limit defaults.
+- `src/service-metrics.ts`: In-memory HTTP service metrics for requests, diagnostics, repairs, retries, and live database outcomes.
 - `src/lsp.ts`: LSP-style diagnostics and code actions for editor and agent UIs.
 - `src/langchain.ts`: LangChain-shaped adapter for structured IR repair plus parser validation.
 - `src/cli.ts`: JSON-in/JSON-out CLI for agents and eval harnesses.
@@ -416,7 +420,7 @@ Those are deliberate boundaries. The repo is the missing LLM compiler surface, n
 - `examples/policy/`: Checked-in cost and safety policy report, planner estimate fixture, schema statistics fixture, policy rules fixture, and policy profile catalog.
 - `examples/proofs/`: Checked-in proof-carrying compile output.
 - `examples/roadmap/`: Machine-readable years-scale roadmap snapshot.
-- `examples/service/`: Checked-in compiler service manifest.
+- `examples/service/`: Checked-in compiler service manifest and metrics contract example.
 - `profiles/`: Versioned dialect profiles for Neo4j Cypher 25, openCypher 9, and GQL-oriented output.
 - `schemas/`: JSON Schema contracts for IR, graph schema, planner estimates, schema statistics, policy rules, policy reports/profiles, repair plans, diagnostic catalogs, service manifests, benchmark gates, lossless parse reports, dialect live evidence, contract conformance, dataset governance, eval datasets, and eval attempts.
 - `test/`: Node test-runner coverage for renderer, schema, validation, repair, safety, and corpus behavior.

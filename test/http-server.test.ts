@@ -56,6 +56,7 @@ describe("compiler HTTP service", () => {
     const diagnosticCatalog = await getJson(`${baseUrl}/v1/diagnostic-catalog`) as { version: string; entries: unknown[] };
     const compatibility = await getJson(`${baseUrl}/v1/compatibility`) as { version: string; contracts: unknown[] };
     const conformance = await getJson(`${baseUrl}/v1/contract-conformance`) as { version: string; summary: { failures: number } };
+    const metrics = await getJson(`${baseUrl}/v1/metrics`) as { version: string; requests: { total: number } };
 
     assert.equal(health.version, "cypher-llm-compiler-http/v1");
     assert.equal(health.tools, tools.tools.length);
@@ -69,6 +70,8 @@ describe("compiler HTTP service", () => {
     assert.ok(compatibility.contracts.length > 0);
     assert.equal(conformance.version, "cypher-llm-contract-conformance/v1");
     assert.equal(conformance.summary.failures, 0);
+    assert.equal(metrics.version, "cypher-llm-service-metrics/v1");
+    assert.ok(metrics.requests.total >= 1);
   });
 
   it("runs compiler tools through stable HTTP routes", async () => {
@@ -190,6 +193,78 @@ describe("compiler HTTP service", () => {
 
     assert.equal(response.status, 422);
     assert.equal(body.error.code, "compiler-tool-error");
+  });
+
+  it("tracks diagnostics, repairs, retry packets, and live database outcomes as service metrics", async () => {
+    const metricsServer = createCompilerHttpServer({
+      now: () => new Date("2026-05-10T00:00:01.000Z")
+    });
+    await new Promise<void>((resolve) => metricsServer.listen(0, "127.0.0.1", resolve));
+    const address = metricsServer.address() as AddressInfo;
+    const metricsBaseUrl = `http://127.0.0.1:${address.port}`;
+    const diagnosticQuery: CypherQuery = {
+      version: "cypher-llm-ir/v1",
+      profile: "llm-safe-readonly",
+      clauses: [{
+        kind: "match",
+        patterns: [{ segments: [{ variable: "tool", labels: ["Tool"] }] }]
+      }]
+    };
+
+    try {
+      const validation = await postJson(`${metricsBaseUrl}/v1/validate`, {
+        schema,
+        query: diagnosticQuery
+      }) as { diagnostics: unknown[] };
+      const repairPlan = await postJson(`${metricsBaseUrl}/v1/repair-plan`, {
+        schema,
+        query,
+        defaultLimit: 25
+      }) as { deterministic: unknown[] };
+      const feedback = await postJson(`${metricsBaseUrl}/v1/agent-feedback`, {
+        schema,
+        query,
+        defaultLimit: 25
+      }) as { version: string };
+      const dialectCertification = await getJson(`${metricsBaseUrl}/v1/dialect-certification`) as { version: string };
+      const failedRender = await fetch(`${metricsBaseUrl}/v1/render`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({})
+      });
+      const metrics = await getJson(`${metricsBaseUrl}/v1/metrics`) as {
+        version: string;
+        requests: { total: number; failed: number; statusCodes: Record<string, number> };
+        tools: { failed: number; byName: Array<{ name: string; diagnostics: number; repairs: number; retryPackets: number; failed: number }> };
+        signals: {
+          diagnostics: number;
+          repairs: number;
+          retryPackets: number;
+          liveDatabaseOutcomes: { warning: number };
+        };
+      };
+
+      assert.ok(validation.diagnostics.length > 0);
+      assert.ok(repairPlan.deterministic.length > 0);
+      assert.equal(feedback.version, "cypher-llm-agent-feedback/v1");
+      assert.equal(dialectCertification.version, "cypher-llm-dialect-certification/v1");
+      assert.equal(failedRender.status, 422);
+      assert.equal(metrics.version, "cypher-llm-service-metrics/v1");
+      assert.equal(metrics.requests.total, 5);
+      assert.equal(metrics.requests.failed, 1);
+      assert.equal(metrics.requests.statusCodes["422"], 1);
+      assert.equal(metrics.tools.failed, 1);
+      assert.ok(metrics.tools.byName.some((tool) => tool.name === "cypher_validate" && tool.diagnostics > 0));
+      assert.ok(metrics.tools.byName.some((tool) => tool.name === "cypher_repair_plan" && tool.repairs > 0));
+      assert.ok(metrics.tools.byName.some((tool) => tool.name === "cypher_agent_feedback" && tool.retryPackets === 1));
+      assert.ok(metrics.tools.byName.some((tool) => tool.name === "cypher_render" && tool.failed === 1));
+      assert.ok(metrics.signals.diagnostics > 0);
+      assert.ok(metrics.signals.repairs > 0);
+      assert.equal(metrics.signals.retryPackets, 1);
+      assert.ok(metrics.signals.liveDatabaseOutcomes.warning >= 1);
+    } finally {
+      await new Promise<void>((resolve, reject) => metricsServer.close((error) => (error ? reject(error) : resolve())));
+    }
   });
 
   it("enforces optional bearer auth and emits redacted audit events", async () => {

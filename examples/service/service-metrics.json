@@ -1,0 +1,33 @@
+{
+  "version": "cypher-llm-service-metrics/v1",
+  "generatedAt": "2026-05-10T00:00:00.000Z",
+  "service": {
+    "id": "cypher-llm-compiler-http",
+    "startedAt": "2026-05-10T00:00:00.000Z",
+    "uptimeMs": 0
+  },
+  "requests": {
+    "total": 0,
+    "succeeded": 0,
+    "failed": 0,
+    "unauthorized": 0,
+    "statusCodes": {},
+    "byRoute": []
+  },
+  "tools": {
+    "total": 0,
+    "succeeded": 0,
+    "failed": 0,
+    "byName": []
+  },
+  "signals": {
+    "diagnostics": 0,
+    "repairs": 0,
+    "retryPackets": 0,
+    "liveDatabaseOutcomes": {
+      "passed": 0,
+      "warning": 0,
+      "failed": 0
+    }
+  }
+}
