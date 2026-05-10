@@ -341,6 +341,16 @@ describe("validation and repair", () => {
       repaired.applied.map((item) => item.kind),
       ["quote-raw-identifier"]
     );
+    assert.deepEqual(repaired.applied[0]?.textEdits, [
+      {
+        span: {
+          start: { offset: 20, line: 0, character: 20 },
+          end: { offset: 32, line: 0, character: 32 }
+        },
+        before: "has MD5 hash",
+        after: "`has MD5 hash`"
+      }
+    ]);
   });
 });
 

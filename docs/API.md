@@ -87,6 +87,8 @@ It intentionally does only narrow repairs:
 - Flag SQL `BETWEEN`.
 - Flag output that does not look like Cypher.
 
+Applied raw repairs include source-positioned `textEdits` with zero-based offsets, line/character ranges, and before/after text so an editor or agent can patch the original Cypher without regenerating the whole query.
+
 Use this to migrate legacy chains, not as the primary authoring path.
 
 ## `liftRawCypherToIr(raw, schema?, options?)`
@@ -291,6 +293,7 @@ The report includes:
 - Rendered Cypher preview.
 - LSP-style diagnostics with ranges, severity numbers, codes, source, message, and data.
 - Quick fixes for repairable diagnostics and preview actions for deterministic compiler repairs.
+- Raw-Cypher repair previews can include `edit.changes[uri]` text edits with exact ranges and replacement text.
 
 ## `validateRenderedQueryWithParser(query, schema, options?)`
 

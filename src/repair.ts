@@ -22,11 +22,29 @@ export interface RepairOptions {
   defaultMaxHops?: number;
 }
 
+export interface RepairSourcePosition {
+  offset: number;
+  line: number;
+  character: number;
+}
+
+export interface RepairSourceSpan {
+  start: RepairSourcePosition;
+  end: RepairSourcePosition;
+}
+
+export interface RepairTextEdit {
+  span: RepairSourceSpan;
+  before: string;
+  after: string;
+}
+
 export interface RepairAction {
   kind: "canonicalize-identifier" | "add-limit" | "fix-direction" | "bound-path" | "quote-raw-identifier";
   path: string;
   before: unknown;
   after: unknown;
+  textEdits?: RepairTextEdit[];
 }
 
 export interface RepairResult {
@@ -96,6 +114,8 @@ export function repairRawCypher(rawCypher: string, schemaInput: CypherSchemaCont
   const schema = asNormalizedSchema(schemaInput);
   const diagnostics: Diagnostic[] = [];
   const applied: RepairAction[] = [];
+  const rawTextEdits: RepairTextEdit[] = [];
+  const claimedSpans = new Set<string>();
   let cypher = rawCypher;
 
   if (!/\b(MATCH|RETURN|WITH|CALL|CREATE|MERGE|UNWIND)\b/i.test(cypher)) {
@@ -121,30 +141,34 @@ export function repairRawCypher(rawCypher: string, schemaInput: CypherSchemaCont
   }
 
   for (const relationship of schema.relationships) {
-    const repaired = quoteIdentifierOccurrences(cypher, relationship.type);
-    if (repaired !== cypher) {
+    const textEdits = claimTextEdits(identifierTextEdits(rawCypher, relationship.type), claimedSpans);
+    if (textEdits.length > 0) {
       applied.push({
         kind: "quote-raw-identifier",
         path: `/relationships/${relationship.type}`,
         before: relationship.type,
-        after: cypherIdentifier(relationship.type)
+        after: cypherIdentifier(relationship.type),
+        textEdits
       });
-      cypher = repaired;
+      rawTextEdits.push(...textEdits);
     }
   }
 
   for (const node of schema.nodes) {
-    const repaired = quoteIdentifierOccurrences(cypher, node.name);
-    if (repaired !== cypher) {
+    const textEdits = claimTextEdits(identifierTextEdits(rawCypher, node.name), claimedSpans);
+    if (textEdits.length > 0) {
       applied.push({
         kind: "quote-raw-identifier",
         path: `/nodes/${node.name}`,
         before: node.name,
-        after: cypherIdentifier(node.name)
+        after: cypherIdentifier(node.name),
+        textEdits
       });
-      cypher = repaired;
+      rawTextEdits.push(...textEdits);
     }
   }
+
+  cypher = applyTextEdits(rawCypher, rawTextEdits);
 
   if (applied.length > 0) {
     diagnostics.push(
@@ -297,14 +321,69 @@ function relationshipAllows(
   return leftLabels.some((label) => to.includes(label)) && rightLabels.some((label) => from.includes(label));
 }
 
-function quoteIdentifierOccurrences(input: string, identifier: string): string {
+function identifierTextEdits(input: string, identifier: string): RepairTextEdit[] {
   if (/^[A-Za-z_][A-Za-z0-9_]*$/.test(identifier)) {
-    return input;
+    return [];
   }
   const escaped = escapeRegExp(identifier);
-  return input.replace(new RegExp(`(:|\\.)${escaped}(?=\\s|\\]|\\)|\\}|\\||,|$)`, "g"), (_, prefix: string) => {
-    return `${prefix}${cypherIdentifier(identifier)}`;
+  const pattern = new RegExp(`(:|\\.)${escaped}(?=\\s|\\]|\\)|\\}|\\||,|$)`, "g");
+  const replacement = cypherIdentifier(identifier);
+  const edits: RepairTextEdit[] = [];
+
+  for (const match of input.matchAll(pattern)) {
+    const prefix = match[1] ?? "";
+    const start = (match.index ?? 0) + prefix.length;
+    const end = start + identifier.length;
+    edits.push({
+      span: spanForOffsets(input, start, end),
+      before: identifier,
+      after: replacement
+    });
+  }
+
+  return edits;
+}
+
+function claimTextEdits(edits: RepairTextEdit[], claimedSpans: Set<string>): RepairTextEdit[] {
+  return edits.filter((edit) => {
+    const key = `${edit.span.start.offset}:${edit.span.end.offset}`;
+    if (claimedSpans.has(key)) {
+      return false;
+    }
+    claimedSpans.add(key);
+    return true;
   });
+}
+
+function applyTextEdits(input: string, edits: RepairTextEdit[]): string {
+  return [...edits]
+    .sort((left, right) => right.span.start.offset - left.span.start.offset)
+    .reduce((output, edit) => {
+      return `${output.slice(0, edit.span.start.offset)}${edit.after}${output.slice(edit.span.end.offset)}`;
+    }, input);
+}
+
+function spanForOffsets(input: string, start: number, end: number): RepairSourceSpan {
+  return {
+    start: positionAtOffset(input, start),
+    end: positionAtOffset(input, end)
+  };
+}
+
+function positionAtOffset(input: string, offset: number): RepairSourcePosition {
+  let line = 0;
+  let lineStart = 0;
+  for (let index = 0; index < offset; index += 1) {
+    if (input[index] === "\n") {
+      line += 1;
+      lineStart = index + 1;
+    }
+  }
+  return {
+    offset,
+    line,
+    character: offset - lineStart
+  };
 }
 
 function cloneQuery(query: CypherQuery): CypherQuery {

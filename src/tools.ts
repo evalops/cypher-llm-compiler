@@ -287,7 +287,7 @@ export const CYPHER_COMPILER_TOOLS: readonly CypherCompilerToolDefinition[] = [
   {
     name: "cypher_repair",
     description:
-      "Repair Cypher. Structured IR gets deterministic AST repairs; raw Cypher gets narrow migration repairs and diagnostics.",
+      "Repair Cypher. Structured IR gets deterministic AST repairs; raw Cypher gets narrow migration repairs, source-positioned text edits, and diagnostics.",
     inputSchema: objectSchema(["schema"], {
       schema: schemaContractSchema,
       query: cypherQuerySchema,
@@ -432,7 +432,7 @@ export const CYPHER_COMPILER_TOOLS: readonly CypherCompilerToolDefinition[] = [
   {
     name: "cypher_lsp_diagnostics",
     description:
-      "Build LSP-style diagnostics and code actions for structured Cypher IR or raw Cypher using compiler, parser, policy, and repair outputs.",
+      "Build LSP-style diagnostics and code actions for structured Cypher IR or raw Cypher using compiler, parser, policy, repair outputs, and exact text edits when available.",
     inputSchema: objectSchema(["schema"], {
       schema: schemaContractSchema,
       query: cypherQuerySchema,

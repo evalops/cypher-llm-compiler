@@ -10,7 +10,7 @@ The compiler exposes the same nineteen operations across OpenAI tool schemas, MC
 - `cypher_parse_check`: run Neo4j language-support parser validation.
 - `cypher_policy_check`: assess static cost, cardinality, schema-statistics, policy-rule, planner-estimate, and safety policy.
 - `cypher_policy_profiles`: list built-in policy profiles for audited autonomous-agent safety settings.
-- `cypher_lsp_diagnostics`: emit LSP-style diagnostics and code actions for editor and agent UIs.
+- `cypher_lsp_diagnostics`: emit LSP-style diagnostics and code actions, including raw-Cypher text edits when repairs can be applied to exact source ranges.
 - `cypher_prove`: return proof-carrying compile output with repairs, diagnostics, parser preflight, execution-policy claims, optional policy evidence and thresholds, and a compact `policyEvidence` summary.
 - `cypher_agent_feedback`: return proof, repair plan, policy evidence, and the next action an LLM client should take.
 - `cypher_agent_guide`: return LLM-facing authoring rules, tool sequences, execution blockers, and diagnostic playbooks.

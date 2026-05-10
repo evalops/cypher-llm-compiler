@@ -552,7 +552,7 @@
         {
           "kind": "schema",
           "path": "schemas/lsp-diagnostics.schema.json",
-          "sha256": "debc75928cfe7445b870d3e64770cd28a30d832f81276ac48b4a24bb14dfb774"
+          "sha256": "cca46d7f05b22821a0596ed7eb3b7c39d4542d5e619944df598b5ade0e9edbab"
         },
         {
           "kind": "example",

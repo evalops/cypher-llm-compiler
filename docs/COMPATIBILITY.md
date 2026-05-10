@@ -189,7 +189,7 @@ Run:
 cypher-llm lsp-diagnostics --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json --uri file:///examples/tool-hash.query.json --report-out examples/lsp/tool-hash.lsp.json
 ```
 
-LSP diagnostic reports adapt compiler, parser, policy, and repair output into the shape expected by editor surfaces and agent UIs: diagnostics carry ranges, severities, codes, and data, while code actions expose quick fixes and deterministic repair previews.
+LSP diagnostic reports adapt compiler, parser, policy, and repair output into the shape expected by editor surfaces and agent UIs: diagnostics carry ranges, severities, codes, and data, while code actions expose quick fixes, deterministic repair previews, and raw-Cypher text edits when a repair can be applied to exact source ranges.
 
 ## Lossless Parse Reports
 

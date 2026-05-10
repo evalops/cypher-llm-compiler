@@ -62,6 +62,31 @@
           "type": "array",
           "items": { "$ref": "#/$defs/diagnostic" }
         },
+        "edit": { "$ref": "#/$defs/workspaceEdit" },
+        "data": { "type": "object", "additionalProperties": true }
+      }
+    },
+    "workspaceEdit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["changes"],
+      "properties": {
+        "changes": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": { "$ref": "#/$defs/textEdit" }
+          }
+        }
+      }
+    },
+    "textEdit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["range", "newText"],
+      "properties": {
+        "range": { "$ref": "#/$defs/range" },
+        "newText": { "type": "string" },
         "data": { "type": "object", "additionalProperties": true }
       }
     }

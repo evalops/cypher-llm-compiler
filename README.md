@@ -19,7 +19,7 @@ The gap is not "LLMs need a better prompt." The gap is a missing compiler bounda
 
 ## What This Implements
 
-This package implements twenty-eight concrete improvements:
+This package implements twenty-nine concrete improvements:
 
 1. **Official JSON IR**: Agents can emit a small, typed Cypher AST instead of brittle text.
 2. **LLM-safe profile**: The renderer emits conservative Cypher with escaped schema identifiers, explicit projections, bounded path recommendations, and deterministic formatting.
@@ -37,7 +37,7 @@ This package implements twenty-eight concrete improvements:
 14. **Planner estimate policy gates**: `EXPLAIN`-style cardinality, db-hit, and operator evidence can feed policy findings before execution.
 15. **Schema statistics policy gates**: Cardinality, index, and relationship-fanout metadata can flag expensive graph access before planning.
 16. **Policy rule sets**: Sensitive labels, relationships, returned properties, and tenant scoping requirements can be supplied as versioned policy input.
-17. **LSP-style diagnostics**: Editor and agent UIs can consume compiler diagnostics and code actions in a familiar shape.
+17. **LSP-style diagnostics**: Editor and agent UIs can consume compiler diagnostics, code actions, and source-positioned raw repair edits in a familiar shape.
 18. **Lossless parse reports**: Existing Cypher can be preserved byte-for-byte while agents inspect statements, clauses, comments, source spans, source-map anchors, parser output, and IR-preview coverage.
 19. **CypherBench scorecards**: Eval reports can be published as ranked JSON and markdown scorecards across raw, IR-first, repaired, parser-validated, and mixed lanes.
 20. **Dataset governance reports**: Benchmark datasets can be audited for provenance, split assignment, redaction findings, duplicate ids, and public-release diagnostics.
@@ -213,7 +213,7 @@ npm run test:live:neo4j
 
 `policy-profiles` emits a `cypher-llm-policy-profile-catalog/v1` catalog of named safety policies for autonomous agents and governed write paths. `policy-check` accepts `--policy-profile-id` or `--policy-profile` and records the selected profile in the report.
 
-`lsp-diagnostics` emits a `cypher-llm-lsp-diagnostics/v1` report with LSP-shaped diagnostics and code actions.
+`lsp-diagnostics` emits a `cypher-llm-lsp-diagnostics/v1` report with LSP-shaped diagnostics, code actions, and raw-Cypher text edits for source-addressable repairs.
 
 `prove` emits a `cypher-llm-proof/v1` proof object with rendered Cypher, preflight Cypher, repair kinds, diagnostic codes, parser preflight, and execution-policy claims. It can include planner, schema-statistics, policy-threshold, and policy-rule evidence in the cost/safety proof claim, plus a compact `policyEvidence` summary for agent explanations.
 

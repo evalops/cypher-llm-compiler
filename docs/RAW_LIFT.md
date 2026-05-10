@@ -6,6 +6,8 @@ It is intentionally a subset parser, not a replacement for Neo4j's parser. The g
 
 For byte-preserving inventory of existing queries before migration, use `cypher-llm parse-lossless` and `docs/LOSSLESS_PARSE.md`. Lossless parse reports preserve comments, source spans, and unsupported syntax even when raw lifting cannot build IR.
 
+For narrow raw repairs such as backtick-escaping known schema identifiers, `repairRawCypher` and `cypher_lsp_diagnostics` expose exact text edits so migration tools can patch source bytes instead of asking a model to rewrite the whole query.
+
 ## Supported Shapes
 
 The first slice supports:

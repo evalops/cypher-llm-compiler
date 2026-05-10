@@ -41,7 +41,24 @@ describe("LSP diagnostics", () => {
 
     assert.equal(report.languageId, "cypher");
     assert.equal(report.renderedCypher, "MATCH (tool:Tool)-[:`has MD5 hash`]->(hash:Hash) RETURN hash.value");
-    assert.ok(report.codeActions.some((action) => action.title.includes("quote-raw-identifier")));
+    const rawRepairAction = report.codeActions.find((action) => action.title.includes("quote-raw-identifier"));
+    assert.ok(rawRepairAction);
+    assert.deepEqual(rawRepairAction.edit?.changes["cypher://query.cypher"], [
+      {
+        range: {
+          start: { line: 0, character: 20 },
+          end: { line: 0, character: 32 }
+        },
+        newText: "`has MD5 hash`",
+        data: {
+          offsetRange: {
+            start: 20,
+            end: 32
+          },
+          before: "has MD5 hash"
+        }
+      }
+    ]);
   });
 
   it("keeps checked-in LSP JSON aligned with runtime data and schema", () => {

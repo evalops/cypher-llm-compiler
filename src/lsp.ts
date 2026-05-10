@@ -3,7 +3,7 @@ import type { CypherQuery, CypherSchemaContract } from "./ir.js";
 import type { ParserValidationOptions } from "./parser-validation.js";
 import { validateCypherTextWithParser } from "./parser-validation.js";
 import { assessCypherPolicy, type CypherPolicyFinding } from "./policy.js";
-import type { RepairAction, RepairOptions } from "./repair.js";
+import type { RepairAction, RepairOptions, RepairTextEdit } from "./repair.js";
 import { repairQuery, repairRawCypher } from "./repair.js";
 import { renderQuery } from "./render.js";
 import { validateQuery } from "./validate.js";
@@ -29,10 +29,21 @@ export interface LspDiagnostic {
   data?: Record<string, unknown>;
 }
 
+export interface LspTextEdit {
+  range: LspRange;
+  newText: string;
+  data?: Record<string, unknown>;
+}
+
+export interface LspWorkspaceEdit {
+  changes: Record<string, LspTextEdit[]>;
+}
+
 export interface LspCodeAction {
   title: string;
   kind: "quickfix" | "refactor.rewrite" | "source.fixAll";
   diagnostics: LspDiagnostic[];
+  edit?: LspWorkspaceEdit;
   data: Record<string, unknown>;
 }
 
@@ -70,6 +81,7 @@ function buildIrLspDiagnostics(
   const validation = validateQuery(repaired.query, schema);
   const parser = validateCypherTextWithParser(renderedCypher, schema, { mode: options.parserMode ?? "syntax" });
   const policy = assessCypherPolicy(repaired.query, schema);
+  const uri = options.uri ?? "cypher-ir://query.json";
   const diagnostics = uniqueDiagnostics([
     ...repaired.diagnostics.map((diagnostic) => lspDiagnostic(diagnostic)),
     ...validation.diagnostics.map((diagnostic) => lspDiagnostic(diagnostic)),
@@ -79,13 +91,13 @@ function buildIrLspDiagnostics(
 
   return {
     version: "cypher-llm-lsp-diagnostics/v1",
-    uri: options.uri ?? "cypher-ir://query.json",
+    uri,
     languageId: "cypher-ir",
     renderedCypher,
     diagnostics,
     codeActions: [
       ...diagnostics.flatMap((diagnostic) => codeActionsForDiagnostic(diagnostic)),
-      ...repaired.applied.map((repair) => codeActionForAppliedRepair(repair))
+      ...repaired.applied.map((repair) => codeActionForAppliedRepair(repair, uri))
     ],
   };
 }
@@ -97,6 +109,7 @@ function buildRawLspDiagnostics(
 ): LspDiagnosticReport {
   const repaired = repairRawCypher(rawCypher, schema);
   const parser = validateCypherTextWithParser(repaired.cypher, schema, { mode: options.parserMode ?? "syntax" });
+  const uri = options.uri ?? "cypher://query.cypher";
   const diagnostics = uniqueDiagnostics([
     ...repaired.diagnostics.map((diagnostic) => lspDiagnostic(diagnostic)),
     ...parser.diagnostics.map((diagnostic) => lspDiagnostic(diagnostic))
@@ -104,13 +117,13 @@ function buildRawLspDiagnostics(
 
   return {
     version: "cypher-llm-lsp-diagnostics/v1",
-    uri: options.uri ?? "cypher://query.cypher",
+    uri,
     languageId: "cypher",
     renderedCypher: repaired.cypher,
     diagnostics,
     codeActions: [
       ...diagnostics.flatMap((diagnostic) => codeActionsForDiagnostic(diagnostic)),
-      ...repaired.applied.map((repair) => codeActionForAppliedRepair(repair))
+      ...repaired.applied.map((repair) => codeActionForAppliedRepair(repair, uri))
     ]
   };
 }
@@ -182,11 +195,12 @@ function codeActionsForDiagnostic(diagnostic: LspDiagnostic): LspCodeAction[] {
   return [];
 }
 
-function codeActionForAppliedRepair(repair: RepairAction): LspCodeAction {
+function codeActionForAppliedRepair(repair: RepairAction, uri: string): LspCodeAction {
   return {
     title: `Preview compiler repair: ${repair.kind}`,
     kind: "refactor.rewrite",
     diagnostics: [],
+    ...(repair.textEdits ? { edit: { changes: { [uri]: repair.textEdits.map(lspTextEdit) } } } : {}),
     data: { repair }
   };
 }
@@ -215,6 +229,33 @@ function rangeFromPath(path: string | undefined): LspRange {
   return {
     start: { line: 0, character: 0 },
     end: { line: 0, character: 0 }
+  };
+}
+
+function lspTextEdit(edit: RepairTextEdit): LspTextEdit {
+  return {
+    range: rangeFromSpan(edit),
+    newText: edit.after,
+    data: {
+      offsetRange: {
+        start: edit.span.start.offset,
+        end: edit.span.end.offset
+      },
+      before: edit.before
+    }
+  };
+}
+
+function rangeFromSpan(edit: RepairTextEdit): LspRange {
+  return {
+    start: {
+      line: edit.span.start.line,
+      character: edit.span.start.character
+    },
+    end: {
+      line: edit.span.end.line,
+      character: edit.span.end.character
+    }
   };
 }
 
