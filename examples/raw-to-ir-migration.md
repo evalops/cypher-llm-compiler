@@ -17,6 +17,18 @@ The common failures are visible in one string:
 
 `repairRawCypher` deliberately does not attempt broad regex rewrites for all of this. It can help migration, but it cannot safely infer the full program.
 
+For common read-query shapes, `lift-raw` can convert legacy text into structured IR and validate the rendered output:
+
+```bash
+cypher-llm lift-raw \
+  --schema examples/tool-hash.schema.json \
+  --cypher 'MATCH (tool:Tool {name: $toolName})-[:has MD5 hash]->(hash:Hash) RETURN hash.value AS md5 LIMIT 10' \
+  --query-out examples/benchmarks/tool-hash-lifted.query.json \
+  --summary-out examples/benchmarks/tool-hash-lifted.summary.json
+```
+
+Unsupported syntax stays visible as raw clauses with `raw-lift-unsupported-clause` diagnostics, so the migration path is measurable rather than magical.
+
 ## Structured IR Output
 
 Ask the model for this JSON shape instead:

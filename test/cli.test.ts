@@ -270,6 +270,65 @@ describe("cli", () => {
     assert.deepEqual(output.diagnostics, []);
   });
 
+  it("lifts raw Cypher and evaluates raw-lift attempts", async () => {
+    const schema = {
+      version: "cypher-llm-schema/v1",
+      nodes: [{ name: "Tool" }],
+      relationships: []
+    };
+    const dataset = {
+      version: "cypher-llm-eval-dataset/v1",
+      name: "lift-cli",
+      tasks: [{ id: "one", question: "Return tools.", schema }]
+    };
+    const attempts = {
+      version: "cypher-llm-eval-attempts/v1",
+      attempts: [{ taskId: "one", rawCypher: "MATCH (tool:Tool) RETURN tool LIMIT 1" }]
+    };
+    const files = new Map<string, string>([
+      ["schema.json", JSON.stringify(schema)],
+      ["dataset.json", JSON.stringify(dataset)],
+      ["attempts.json", JSON.stringify(attempts)]
+    ]);
+    const writes = new Map<string, string>();
+    let stdout = "";
+    let stderr = "";
+    const io: CliIO = {
+      stdout: { write: (chunk: string | Uint8Array) => ((stdout += String(chunk)), true) },
+      stderr: { write: (chunk: string | Uint8Array) => ((stderr += String(chunk)), true) },
+      readFile: async (path) => files.get(String(path)) ?? "",
+      writeFile: async (path, data) => {
+        writes.set(path, data);
+      },
+      mkdir: async () => undefined
+    };
+
+    const liftCode = await runCli(
+      [
+        "lift-raw",
+        "--schema",
+        "schema.json",
+        "--cypher",
+        "MATCH (tool:Tool) RETURN tool LIMIT 1",
+        "--query-out",
+        "out/query.json"
+      ],
+      io
+    );
+    const evalCode = await runCli(
+      ["lift-raw-eval", "--dataset", "dataset.json", "--attempts", "attempts.json", "--summary-out", "out/lift.json"],
+      io
+    );
+
+    assert.equal(liftCode, 0);
+    assert.equal(evalCode, 0);
+    assert.equal(stderr, "");
+    assert.ok(stdout.includes("cypher-llm-raw-lift/v1"));
+    assert.ok(stdout.includes("cypher-llm-raw-lift-eval/v1"));
+    assert.ok(writes.has("out/query.json"));
+    assert.ok(writes.has("out/lift.json"));
+  });
+
   it("imports text2cypher CSV fixtures to dataset and attempt files", async () => {
     const files = new Map<string, string>([
       [

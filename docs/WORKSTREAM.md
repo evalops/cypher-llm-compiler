@@ -25,6 +25,17 @@ Artifacts:
 
 Status: implemented through `evaluateAttempts`, `cypher-llm eval`, importer helpers, checked-in text2cypher/openCypher samples, baseline reports, CypherBench report comparison, and repair-loop feedback packets.
 
+## 2.5 Raw-to-IR Migration
+
+Artifacts:
+
+- CLI command to lift common raw read queries into `CypherQuery` IR.
+- Explicit raw fallback clauses and diagnostics for unsupported syntax.
+- Lift-coverage eval report for imported text2cypher attempts.
+- Migration docs and checked-in benchmark artifacts.
+
+Status: initial implementation exists in `liftRawCypherToIr`, `cypher-llm lift-raw`, `cypher-llm lift-raw-eval`, `docs/RAW_LIFT.md`, and `examples/benchmarks/text2cypher-gpt4o-raw-lift.summary.json`.
+
 ## 3. Parser and Database Verification
 
 Artifacts:

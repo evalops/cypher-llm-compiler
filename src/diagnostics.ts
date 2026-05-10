@@ -8,6 +8,7 @@ export interface RepairHint {
     | "declare-parameter"
     | "restore-scope"
     | "bound-path"
+    | "rewrite-as-ir"
     | "manual";
   description: string;
   replacement?: unknown;

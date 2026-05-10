@@ -53,3 +53,16 @@ Each packet contains:
 - A short instruction asking for corrected `CypherQuery` IR.
 
 This gives agent loops a narrow repair context instead of sending a full transcript or a prose-only error message.
+
+## Raw Lift Coverage
+
+Measure how much of a legacy raw-Cypher attempt set can be migrated into structured IR:
+
+```bash
+cypher-llm lift-raw-eval \
+  --dataset examples/imported/text2cypher-gpt4o-sample.dataset.json \
+  --attempts examples/imported/text2cypher-gpt4o-sample.attempts.json \
+  --summary-out examples/benchmarks/text2cypher-gpt4o-raw-lift.summary.json
+```
+
+The checked-in sample currently lifts all 3 raw attempts with no parser diagnostics. Use this as a small smoke lane before expanding to larger text2cypher slices.

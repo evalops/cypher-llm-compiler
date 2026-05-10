@@ -1,0 +1,32 @@
+{
+  "version": "cypher-llm-raw-lift-eval/v1",
+  "datasetName": "text2cypher-gpt4o-sample",
+  "rawAttempts": 3,
+  "fullyLifted": 3,
+  "partiallyLifted": 0,
+  "unsupported": 0,
+  "diagnosticsByCode": {},
+  "results": [
+    {
+      "taskId": "text2cypher-gpt4o-sample-0000-find-the-top-3-users-interacted-with-by-sarahp-b",
+      "supportedClauses": 2,
+      "rawClauses": 0,
+      "renderedCypher": "MATCH (u1:`User` {`label`: 'sarahp.bsky.social'})-[:`INTERACTED`]->(u2:`User`)\nRETURN u2.`label` AS interactedUser, COUNT(*) AS interactionCount\nORDER BY interactionCount DESC\nLIMIT 3",
+      "diagnostics": []
+    },
+    {
+      "taskId": "text2cypher-gpt4o-sample-0002-list-the-top-5-users-having-the-most-interaction",
+      "supportedClauses": 3,
+      "rawClauses": 0,
+      "renderedCypher": "MATCH (u1:`User`)-[r:`INTERACTED`]->(u2:`User`)\nWHERE (r.`key` = 'specific_key')\nWITH u1, COUNT(r) AS interactions\nORDER BY interactions DESC\nLIMIT 5\nRETURN u1.`label` AS User, interactions",
+      "diagnostics": []
+    },
+    {
+      "taskId": "text2cypher-gpt4o-sample-0168-what-are-the-first-3-questions-with-the-shortest",
+      "supportedClauses": 3,
+      "rawClauses": 0,
+      "renderedCypher": "MATCH (q:`Question`)\nWITH q, length(q.`title`) AS titleLength\nORDER BY titleLength ASC\nLIMIT 3\nRETURN q.`title` AS title, q.`id` AS questionId, titleLength",
+      "diagnostics": []
+    }
+  ]
+}

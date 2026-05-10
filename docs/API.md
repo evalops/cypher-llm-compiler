@@ -69,6 +69,20 @@ It intentionally does only narrow repairs:
 
 Use this to migrate legacy chains, not as the primary authoring path.
 
+## `liftRawCypherToIr(raw, schema?, options?)`
+
+Converts common raw read-query shapes into `CypherQuery` IR and renders the lifted query.
+
+Supported shapes include `MATCH`, `OPTIONAL MATCH`, `WHERE`, `WITH`, `RETURN`, `ORDER BY`, `SKIP`, `LIMIT`, and simple procedure `CALL ... YIELD ...` clauses. Unsupported clauses are preserved as explicit raw clauses and reported with `raw-lift-unsupported-clause`.
+
+When `schema` is supplied, the function validates the lifted rendered Cypher with Neo4j language support and sets `parserOk`.
+
+## `evaluateRawLiftAttempts(dataset, attempts)`
+
+Runs `liftRawCypherToIr` over raw attempts in an eval attempt file and returns `cypher-llm-raw-lift-eval/v1`.
+
+The report includes raw attempt count, fully lifted count, partially lifted count, unsupported count, diagnostic counts, and rendered Cypher per task.
+
 ## `normalizeQuery(query)`
 
 Renders canonical text for eval comparison. This is useful for golden tests where free-form whitespace and property ordering should not create false negatives.

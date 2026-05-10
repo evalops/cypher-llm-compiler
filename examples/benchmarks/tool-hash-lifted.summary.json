@@ -1,0 +1,70 @@
+{
+  "version": "cypher-llm-raw-lift/v1",
+  "inputCypher": "MATCH (tool:Tool {name: $toolName})-[:has MD5 hash]->(hash:Hash) RETURN hash.value AS md5 LIMIT 10",
+  "query": {
+    "version": "cypher-llm-ir/v1",
+    "profile": "raw-compatible",
+    "clauses": [
+      {
+        "kind": "match",
+        "patterns": [
+          {
+            "segments": [
+              {
+                "variable": "tool",
+                "labels": [
+                  "Tool"
+                ],
+                "properties": {
+                  "name": {
+                    "kind": "param",
+                    "name": "toolName"
+                  }
+                }
+              },
+              {
+                "rel": {
+                  "types": [
+                    "has MD5 hash"
+                  ],
+                  "direction": "out"
+                },
+                "node": {
+                  "variable": "hash",
+                  "labels": [
+                    "Hash"
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "kind": "return",
+        "items": [
+          {
+            "expression": {
+              "kind": "prop",
+              "object": {
+                "kind": "var",
+                "name": "hash"
+              },
+              "key": "value"
+            },
+            "alias": "md5"
+          }
+        ],
+        "limit": {
+          "kind": "literal",
+          "value": 10
+        }
+      }
+    ]
+  },
+  "renderedCypher": "MATCH (tool:`Tool` {`name`: $toolName})-[:`has MD5 hash`]->(hash:`Hash`)\nRETURN hash.`value` AS md5\nLIMIT 10",
+  "diagnostics": [],
+  "parserOk": true,
+  "supportedClauses": 2,
+  "rawClauses": 0
+}

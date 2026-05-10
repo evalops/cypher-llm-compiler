@@ -11,6 +11,7 @@ export * from "./neo4j-explain.js";
 export * from "./neo4j-introspect.js";
 export * from "./normalize.js";
 export * from "./parser-validation.js";
+export * from "./raw-lift.js";
 export * from "./repair.js";
 export * from "./repair-loop.js";
 export * from "./render.js";

@@ -124,10 +124,12 @@ The CLI is intentionally boring JSON in, JSON out so it can be called by agents,
 cypher-llm render --schema schema.json --query query.json --params params.json --default-limit 25
 cypher-llm validate --schema schema.json --query query.json
 cypher-llm repair-raw --schema schema.json --cypher "MATCH (t:Tool)-[:has MD5 hash]->(h:Hash) RETURN h"
+cypher-llm lift-raw --schema schema.json --cypher "MATCH (t:Tool)-[:has MD5 hash]->(h:Hash) RETURN h"
 cypher-llm corpus
 cypher-llm eval --dataset examples/eval-dataset.json --attempts examples/eval-attempts.json --default-limit 25
 cypher-llm compare-evals --baseline baseline.report.json --candidate candidate.report.json
 cypher-llm repair-loop --dataset examples/eval-dataset.json --attempts examples/eval-attempts.json --default-limit 25
+cypher-llm lift-raw-eval --dataset examples/imported/text2cypher-gpt4o-sample.dataset.json --attempts examples/imported/text2cypher-gpt4o-sample.attempts.json
 cypher-llm parse-check --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json --default-limit 25
 cypher-llm introspect-neo4j --uri bolt://localhost:7687 --user neo4j --password "$NEO4J_PASSWORD" --schema-out schema.json
 cypher-llm import-text2cypher --csv rows.csv --dataset-out dataset.json --attempts-out attempts.json
@@ -149,6 +151,10 @@ npm run test:live:neo4j
 `compare-evals` compares two reports and marks directional metric deltas as improvements or regressions.
 
 `repair-loop` emits model-targeted repair packets from eval diagnostics and failed expectations.
+
+`lift-raw` converts common read-query Cypher strings into structured `CypherQuery` IR, preserving unsupported syntax as explicit raw clauses.
+
+`lift-raw-eval` measures raw-to-IR lift coverage across an eval attempt file.
 
 `parse-check` validates rendered IR or raw Cypher against Neo4j's language-support parser and maps parser diagnostics back into this package's `Diagnostic` shape.
 
@@ -248,19 +254,22 @@ Current diagnostic codes include:
 - `no-cypher-output`
 - `sqlism-between`
 - `raw-identifier-quoted`
+- `raw-lift-unsupported-clause`
+- `raw-lift-parser-diagnostic`
 
 ## Compatibility Strategy
 
 The renderer emits ordinary Cypher. The structured layer exists before the text boundary and can be discarded after rendering. That means existing database drivers, Neo4j deployments, LangChain-style chains, and text2cypher eval harnesses can adopt this incrementally:
 
 - Raw chains can start with `repairRawCypher` and diagnostics.
+- Migration chains can use `liftRawCypherToIr` to turn common raw reads into IR.
 - New chains should emit `CypherQuery` IR directly.
 - Evals can compare `normalizeQuery` output instead of brittle free-form strings.
 - Operators can gate writes through `createSafeExecutionPlan`.
 
 ## What This Does Not Do Yet
 
-- It does not embed a full Cypher parser.
+- It does not embed a full Cypher parser; raw lifting covers common read-query migration shapes only.
 - It does not execute against a database.
 - It does not claim semantic equivalence beyond canonical rendering of this IR.
 - It does not make regex raw-query repair broad on purpose.
@@ -275,6 +284,7 @@ Those are deliberate boundaries. The repo is the missing LLM compiler surface, n
 - `src/render.ts`: Deterministic Cypher renderer.
 - `src/validate.ts`: Semantic diagnostics and LLM-safe profile checks.
 - `src/repair.ts`: Structured repair actions over IR and limited raw-Cypher bootstrap repair.
+- `src/raw-lift.ts`: Raw Cypher to IR migration bridge and lift-coverage evals.
 - `src/normalize.ts`: Stable query normalization and equivalence helpers.
 - `src/safety.ts`: Safe execution planning.
 - `src/failure-corpus.ts`: Runnable corpus of LLM failure cases.
@@ -287,7 +297,7 @@ Those are deliberate boundaries. The repo is the missing LLM compiler surface, n
 - `src/mcp-server.ts`: Stdio MCP server for agent clients.
 - `src/langchain.ts`: LangChain-shaped adapter for structured IR repair plus parser validation.
 - `src/cli.ts`: JSON-in/JSON-out CLI for agents and eval harnesses.
-- `docs/`: Design notes and LLM integration guidance.
+- `docs/`: Design notes and LLM integration guidance, including `docs/RAW_LIFT.md`.
 - `docker-compose.neo4j.yml`: Optional local Neo4j fixture for live `EXPLAIN` tests.
 - `examples/`: Small schema/query fixtures for CLI smoke tests and agent onboarding.
 - `examples/benchmarks/`: CypherBench raw-vs-IR reports, comparisons, and repair-loop artifacts.

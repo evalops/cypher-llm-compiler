@@ -20,6 +20,7 @@ import { evaluateRepairLoop } from "./repair-loop.js";
 import { renderQuery } from "./render.js";
 import { createSafeExecutionPlan } from "./safety.js";
 import { validateCypherTextWithParser } from "./parser-validation.js";
+import { evaluateRawLiftAttempts, liftRawCypherToIr } from "./raw-lift.js";
 import { normalizeSchema } from "./schema.js";
 import { validateQuery } from "./validate.js";
 
@@ -46,6 +47,9 @@ export async function runCli(argv: string[], io: CliIO = defaultIo()): Promise<n
       case "repair-raw":
         await repairRawCommand(args, io);
         return 0;
+      case "lift-raw":
+        await liftRawCommand(args, io);
+        return 0;
       case "corpus":
         writeJson(io, { results: evaluateFailureCorpus() });
         return 0;
@@ -57,6 +61,9 @@ export async function runCli(argv: string[], io: CliIO = defaultIo()): Promise<n
         return 0;
       case "repair-loop":
         await repairLoopCommand(args, io);
+        return 0;
+      case "lift-raw-eval":
+        await liftRawEvalCommand(args, io);
         return 0;
       case "parse-check":
         await parseCheckCommand(args, io);
@@ -119,6 +126,23 @@ async function repairRawCommand(args: Map<string, string | boolean>, io: CliIO) 
   writeJson(io, repairRawCypher(raw, schema));
 }
 
+async function liftRawCommand(args: Map<string, string | boolean>, io: CliIO) {
+  const schemaPath = args.get("schema");
+  const schema = typeof schemaPath === "string" ? await readSchema(args, io) : undefined;
+  const raw = stringArg(args, "cypher");
+  const result = liftRawCypherToIr(raw, schema, {
+    profile: args.get("profile") === "llm-safe-readonly" ? "llm-safe-readonly" : "raw-compatible",
+    parserMode: args.get("mode") === "lint" ? "lint" : "syntax"
+  });
+  if (typeof args.get("query-out") === "string") {
+    await writeJsonFile(io, args.get("query-out") as string, result.query);
+  }
+  if (typeof args.get("summary-out") === "string") {
+    await writeJsonFile(io, args.get("summary-out") as string, result);
+  }
+  writeJson(io, result);
+}
+
 async function evalCommand(args: Map<string, string | boolean>, io: CliIO) {
   const dataset = JSON.parse(await io.readFile(stringArg(args, "dataset"), "utf8")) as EvalDataset;
   const attempts = JSON.parse(await io.readFile(stringArg(args, "attempts"), "utf8")) as EvalAttemptSet;
@@ -176,6 +200,16 @@ async function repairLoopCommand(args: Map<string, string | boolean>, io: CliIO)
   }
   if (typeof args.get("report-out") === "string") {
     await writeJsonFile(io, args.get("report-out") as string, report.evalReport);
+  }
+  writeJson(io, report);
+}
+
+async function liftRawEvalCommand(args: Map<string, string | boolean>, io: CliIO) {
+  const dataset = JSON.parse(await io.readFile(stringArg(args, "dataset"), "utf8")) as EvalDataset;
+  const attempts = JSON.parse(await io.readFile(stringArg(args, "attempts"), "utf8")) as EvalAttemptSet;
+  const report = evaluateRawLiftAttempts(dataset, attempts);
+  if (typeof args.get("summary-out") === "string") {
+    await writeJsonFile(io, args.get("summary-out") as string, report);
   }
   writeJson(io, report);
 }
@@ -366,10 +400,12 @@ Commands:
   render      --schema schema.json --query query.json [--params params.json] [--default-limit 25] [--default-max-hops 5]
   validate    --schema schema.json --query query.json
   repair-raw  --schema schema.json --cypher "MATCH ..."
+  lift-raw    --cypher "MATCH ..." [--schema schema.json] [--query-out query.json] [--summary-out summary.json] [--profile raw-compatible|llm-safe-readonly] [--mode syntax|lint]
   corpus
   eval        --dataset dataset.json --attempts attempts.json [--report-out report.json] [--raw-cypher-can-execute] [--default-limit 25] [--default-max-hops 5]
   compare-evals --baseline baseline.report.json --candidate candidate.report.json [--comparison-out comparison.json] [--fail-on-regression] [--tolerance 0.0001]
   repair-loop --dataset dataset.json --attempts attempts.json [--feedback-out feedback.json] [--report-out report.json] [--raw-cypher-can-execute] [--default-limit 25] [--default-max-hops 5]
+  lift-raw-eval --dataset dataset.json --attempts attempts.json [--summary-out summary.json]
   parse-check --schema schema.json (--query query.json | --cypher "MATCH ...") [--mode lint|syntax] [--default-limit 25] [--default-max-hops 5]
   introspect-neo4j --uri bolt://localhost:7687 --user neo4j --password password [--schema-out schema.json] [--sample-limit 1000] [--no-procedures]
   mcp

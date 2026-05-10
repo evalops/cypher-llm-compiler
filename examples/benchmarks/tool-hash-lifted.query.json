@@ -1,0 +1,61 @@
+{
+  "version": "cypher-llm-ir/v1",
+  "profile": "raw-compatible",
+  "clauses": [
+    {
+      "kind": "match",
+      "patterns": [
+        {
+          "segments": [
+            {
+              "variable": "tool",
+              "labels": [
+                "Tool"
+              ],
+              "properties": {
+                "name": {
+                  "kind": "param",
+                  "name": "toolName"
+                }
+              }
+            },
+            {
+              "rel": {
+                "types": [
+                  "has MD5 hash"
+                ],
+                "direction": "out"
+              },
+              "node": {
+                "variable": "hash",
+                "labels": [
+                  "Hash"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "return",
+      "items": [
+        {
+          "expression": {
+            "kind": "prop",
+            "object": {
+              "kind": "var",
+              "name": "hash"
+            },
+            "key": "value"
+          },
+          "alias": "md5"
+        }
+      ],
+      "limit": {
+        "kind": "literal",
+        "value": 10
+      }
+    }
+  ]
+}
