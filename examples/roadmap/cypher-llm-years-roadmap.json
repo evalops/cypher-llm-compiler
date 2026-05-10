@@ -187,7 +187,7 @@
       "id": "ecosystem-ux",
       "title": "Ecosystem UX",
       "horizon": "years",
-      "status": "planned",
+      "status": "seeded",
       "issue": {
         "number": 16,
         "url": "https://github.com/evalops/cypher-llm-compiler/issues/16"
@@ -200,6 +200,7 @@
       ],
       "firstArtifacts": [
         "src/tools.ts",
+        "src/lsp.ts",
         "docs/INTEGRATIONS.md",
         "examples/raw-to-ir-migration.md"
       ],
@@ -378,6 +379,20 @@
       "workstreamIds": [
         "compiler-service",
         "ecosystem-ux"
+      ]
+    },
+    {
+      "id": "lsp-diagnostics",
+      "title": "LSP-Style Diagnostics And Code Actions",
+      "status": "partial",
+      "evidence": [
+        "src/lsp.ts",
+        "schemas/lsp-diagnostics.schema.json",
+        "test/lsp.test.ts"
+      ],
+      "workstreamIds": [
+        "ecosystem-ux",
+        "semantic-proof-repair"
       ]
     },
     {

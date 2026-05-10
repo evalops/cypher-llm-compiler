@@ -52,6 +52,7 @@ describe("OpenAI tool schemas", () => {
       "cypher_repair",
       "cypher_parse_check",
       "cypher_policy_check",
+      "cypher_lsp_diagnostics",
       "cypher_prove",
       "cypher_eval"
     ]);
@@ -93,6 +94,17 @@ describe("OpenAI tool schemas", () => {
 
     assert.equal(policy.version, "cypher-llm-policy-report/v1");
     assert.ok(policy.findings.some((finding) => finding.code === "policy-unbounded-traversal"));
+
+    const lsp = (await executeCypherCompilerTool("cypher_lsp_diagnostics", {
+      schema,
+      query: repairableQuery,
+      defaultLimit: 25,
+      defaultMaxHops: 3,
+      parserMode: "syntax"
+    })) as { version: string; codeActions: { title: string }[] };
+
+    assert.equal(lsp.version, "cypher-llm-lsp-diagnostics/v1");
+    assert.ok(lsp.codeActions.some((action) => action.title.includes("bound-path")));
 
     const proof = (await executeCypherCompilerTool("cypher_prove", {
       schema,

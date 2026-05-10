@@ -1,12 +1,13 @@
 # Agent Integrations
 
-The compiler exposes the same seven operations across OpenAI tool schemas, MCP, HTTP, LangChain-shaped adapters, and the CLI:
+The compiler exposes the same eight operations across OpenAI tool schemas, MCP, HTTP, LangChain-shaped adapters, and the CLI:
 
 - `cypher_render`: repair IR, validate, and return a `SafeExecutionPlan`.
 - `cypher_validate`: return stable compiler diagnostics for IR.
 - `cypher_repair`: repair structured IR or narrow legacy raw Cypher failures.
 - `cypher_parse_check`: run Neo4j language-support parser validation.
 - `cypher_policy_check`: assess static cost, cardinality, and safety policy.
+- `cypher_lsp_diagnostics`: emit LSP-style diagnostics and code actions for editor and agent UIs.
 - `cypher_prove`: return proof-carrying compile output with repairs, diagnostics, parser preflight, and execution-policy claims.
 - `cypher_eval`: score model attempts against an eval dataset.
 
@@ -111,6 +112,7 @@ Routes:
 - `POST /v1/repair`
 - `POST /v1/parse-check`
 - `POST /v1/policy`
+- `POST /v1/lsp-diagnostics`
 - `POST /v1/prove`
 - `POST /v1/eval`
 - `POST /v1/tools/:toolName`

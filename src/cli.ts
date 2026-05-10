@@ -16,6 +16,7 @@ import {
   type ImportedFixtureSet
 } from "./fixture-importers.js";
 import { introspectNeo4jSchema } from "./neo4j-introspect.js";
+import { buildLspDiagnostics } from "./lsp.js";
 import { repairQuery, repairRawCypher } from "./repair.js";
 import { evaluateRepairLoop } from "./repair-loop.js";
 import { renderQuery } from "./render.js";
@@ -74,6 +75,9 @@ export async function runCli(argv: string[], io: CliIO = defaultIo()): Promise<n
         return 0;
       case "policy-check":
         await policyCheckCommand(args, io);
+        return 0;
+      case "lsp-diagnostics":
+        await lspDiagnosticsCommand(args, io);
         return 0;
       case "prove":
         await proveCommand(args, io);
@@ -321,6 +325,32 @@ async function policyCheckCommand(args: Map<string, string | boolean>, io: CliIO
   }
 }
 
+async function lspDiagnosticsCommand(args: Map<string, string | boolean>, io: CliIO) {
+  const schema = normalizeSchema(await readSchema(args, io)).original;
+  const uri = typeof args.get("uri") === "string" ? (args.get("uri") as string) : undefined;
+  const parserMode = args.get("parser-mode") === "lint" ? "lint" : "syntax";
+  const defaultLimit = optionalNumber(args.get("default-limit"));
+  const defaultMaxHops = optionalNumber(args.get("default-max-hops"));
+  const options: Parameters<typeof buildLspDiagnostics>[1] = { parserMode };
+  if (uri !== undefined) {
+    options.uri = uri;
+  }
+  if (defaultLimit !== undefined) {
+    options.defaultLimit = defaultLimit;
+  }
+  if (defaultMaxHops !== undefined) {
+    options.defaultMaxHops = defaultMaxHops;
+  }
+  const rawCypher = args.get("cypher");
+  const report = typeof rawCypher === "string"
+    ? buildLspDiagnostics({ schema, rawCypher }, options)
+    : buildLspDiagnostics({ schema, query: await readQuery(args, io) }, options);
+  if (typeof args.get("report-out") === "string") {
+    await writeJsonFile(io, args.get("report-out") as string, report);
+  }
+  writeJson(io, report);
+}
+
 async function importText2CypherCommand(args: Map<string, string | boolean>, io: CliIO) {
   const csv = await io.readFile(stringArg(args, "csv"), "utf8");
   const imported = importText2CypherCsv(csv, importOptions(args, "text2cypher-import"));
@@ -527,6 +557,7 @@ Commands:
   lift-raw-eval --dataset dataset.json --attempts attempts.json [--summary-out summary.json]
   parse-check --schema schema.json (--query query.json | --cypher "MATCH ...") [--mode lint|syntax] [--default-limit 25] [--default-max-hops 5]
   policy-check --schema schema.json --query query.json [--report-out report.json] [--fail-on-error] [--allow-writes] [--no-require-limit] [--max-return-limit 100] [--max-relationship-hops 5]
+  lsp-diagnostics --schema schema.json (--query query.json | --cypher "MATCH ...") [--uri file:///query.cypher] [--report-out report.json] [--parser-mode syntax|lint] [--default-limit 25] [--default-max-hops 5]
   prove       --schema schema.json --query query.json [--params params.json] [--proof-out proof.json] [--fail-on-blocked] [--default-limit 25] [--default-max-hops 5] [--allow-writes] [--approved] [--parser-mode syntax|lint] [--no-parser]
   introspect-neo4j --uri bolt://localhost:7687 --user neo4j --password password [--schema-out schema.json] [--sample-limit 1000] [--no-procedures]
   roadmap    [--format json|markdown] [--integrity] [--roadmap-out path]

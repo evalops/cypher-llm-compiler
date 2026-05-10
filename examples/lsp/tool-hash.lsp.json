@@ -1,0 +1,156 @@
+{
+  "version": "cypher-llm-lsp-diagnostics/v1",
+  "uri": "file:///examples/tool-hash.query.json",
+  "languageId": "cypher-ir",
+  "renderedCypher": "MATCH (tool:`Tool` {`name`: $toolName})-[:`has MD5 hash`]->(hash:`Hash`)\nRETURN hash.`value` AS md5",
+  "diagnostics": [
+    {
+      "range": {
+        "start": {
+          "line": 0,
+          "character": 0
+        },
+        "end": {
+          "line": 0,
+          "character": 0
+        }
+      },
+      "severity": 2,
+      "code": "missing-limit",
+      "source": "cypher-llm",
+      "message": "RETURN has no LIMIT in an LLM-safe read profile.",
+      "data": {
+        "path": "/clauses/1",
+        "suggestion": "Add a bounded LIMIT or let repairQuery add the configured default.",
+        "repair": {
+          "kind": "add-limit",
+          "description": "Add a default LIMIT to the RETURN clause."
+        }
+      }
+    },
+    {
+      "range": {
+        "start": {
+          "line": 0,
+          "character": 0
+        },
+        "end": {
+          "line": 0,
+          "character": 0
+        }
+      },
+      "severity": 2,
+      "code": "policy-missing-limit",
+      "source": "cypher-llm",
+      "message": "RETURN has no LIMIT.",
+      "data": {
+        "path": "/clauses/1",
+        "suggestion": "Add a bounded LIMIT before allowing autonomous execution."
+      }
+    }
+  ],
+  "codeActions": [
+    {
+      "title": "Apply compiler repair: add-limit",
+      "kind": "quickfix",
+      "diagnostics": [
+        {
+          "range": {
+            "start": {
+              "line": 0,
+              "character": 0
+            },
+            "end": {
+              "line": 0,
+              "character": 0
+            }
+          },
+          "severity": 2,
+          "code": "missing-limit",
+          "source": "cypher-llm",
+          "message": "RETURN has no LIMIT in an LLM-safe read profile.",
+          "data": {
+            "path": "/clauses/1",
+            "suggestion": "Add a bounded LIMIT or let repairQuery add the configured default.",
+            "repair": {
+              "kind": "add-limit",
+              "description": "Add a default LIMIT to the RETURN clause."
+            }
+          }
+        }
+      ],
+      "data": {
+        "repairKind": "add-limit",
+        "description": "Add a default LIMIT to the RETURN clause."
+      }
+    },
+    {
+      "title": "Add a bounded LIMIT",
+      "kind": "quickfix",
+      "diagnostics": [
+        {
+          "range": {
+            "start": {
+              "line": 0,
+              "character": 0
+            },
+            "end": {
+              "line": 0,
+              "character": 0
+            }
+          },
+          "severity": 2,
+          "code": "policy-missing-limit",
+          "source": "cypher-llm",
+          "message": "RETURN has no LIMIT.",
+          "data": {
+            "path": "/clauses/1",
+            "suggestion": "Add a bounded LIMIT before allowing autonomous execution."
+          }
+        }
+      ],
+      "data": {
+        "repairKind": "add-limit"
+      }
+    },
+    {
+      "title": "Preview compiler repair: canonicalize-identifier",
+      "kind": "refactor.rewrite",
+      "diagnostics": [],
+      "data": {
+        "repair": {
+          "kind": "canonicalize-identifier",
+          "path": "/clauses/0/patterns/0/segments/0/labels/0",
+          "before": "tool",
+          "after": "Tool"
+        }
+      }
+    },
+    {
+      "title": "Preview compiler repair: canonicalize-identifier",
+      "kind": "refactor.rewrite",
+      "diagnostics": [],
+      "data": {
+        "repair": {
+          "kind": "canonicalize-identifier",
+          "path": "/clauses/0/patterns/0/segments/1/rel/types/0",
+          "before": "md5",
+          "after": "has MD5 hash"
+        }
+      }
+    },
+    {
+      "title": "Preview compiler repair: fix-direction",
+      "kind": "refactor.rewrite",
+      "diagnostics": [],
+      "data": {
+        "repair": {
+          "kind": "fix-direction",
+          "path": "/clauses/0/patterns/0/segments/1/rel/direction",
+          "before": "in",
+          "after": "out"
+        }
+      }
+    }
+  ]
+}

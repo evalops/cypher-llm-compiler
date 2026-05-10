@@ -21,6 +21,7 @@ const TOOL_ROUTES: Record<string, CypherCompilerToolName> = {
   "/v1/repair": "cypher_repair",
   "/v1/parse-check": "cypher_parse_check",
   "/v1/policy": "cypher_policy_check",
+  "/v1/lsp-diagnostics": "cypher_lsp_diagnostics",
   "/v1/prove": "cypher_prove",
   "/v1/eval": "cypher_eval"
 };

@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evalops.dev/schemas/cypher-llm/lsp-diagnostics/v1.json",
+  "title": "Cypher LLM LSP Diagnostics",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "uri", "languageId", "renderedCypher", "diagnostics", "codeActions"],
+  "properties": {
+    "version": { "const": "cypher-llm-lsp-diagnostics/v1" },
+    "uri": { "type": "string", "minLength": 1 },
+    "languageId": { "enum": ["cypher", "cypher-ir"] },
+    "renderedCypher": { "type": "string" },
+    "diagnostics": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/diagnostic" }
+    },
+    "codeActions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/codeAction" }
+    }
+  },
+  "$defs": {
+    "position": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["line", "character"],
+      "properties": {
+        "line": { "type": "integer", "minimum": 0 },
+        "character": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "range": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["start", "end"],
+      "properties": {
+        "start": { "$ref": "#/$defs/position" },
+        "end": { "$ref": "#/$defs/position" }
+      }
+    },
+    "diagnostic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["range", "severity", "code", "source", "message"],
+      "properties": {
+        "range": { "$ref": "#/$defs/range" },
+        "severity": { "enum": [1, 2, 3, 4] },
+        "code": { "type": "string", "minLength": 1 },
+        "source": { "const": "cypher-llm" },
+        "message": { "type": "string", "minLength": 1 },
+        "data": { "type": "object", "additionalProperties": true }
+      }
+    },
+    "codeAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "kind", "diagnostics", "data"],
+      "properties": {
+        "title": { "type": "string", "minLength": 1 },
+        "kind": { "enum": ["quickfix", "refactor.rewrite", "source.fixAll"] },
+        "diagnostics": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/diagnostic" }
+        },
+        "data": { "type": "object", "additionalProperties": true }
+      }
+    }
+  }
+}

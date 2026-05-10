@@ -47,6 +47,12 @@ Cost and safety policy planning is exported from `src/policy.ts`, validated by `
 cypher-llm policy-check --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json
 ```
 
+Ecosystem diagnostics are exported from `src/lsp.ts`, validated by `schemas/lsp-diagnostics.schema.json`, and checked in at `examples/lsp/tool-hash.lsp.json`.
+
+```bash
+cypher-llm lsp-diagnostics --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json
+```
+
 ## Operating Rule
 
 Years-scale work should still land as small verticals. Each vertical should add at least one of:

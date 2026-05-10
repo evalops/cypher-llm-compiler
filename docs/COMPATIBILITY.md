@@ -14,6 +14,7 @@ Stable public contracts:
 - `cypher-llm-dialect-certification/v1`
 - `cypher-llm-proof/v1`
 - `cypher-llm-policy-report/v1`
+- `cypher-llm-lsp-diagnostics/v1`
 
 JSON Schema artifacts live under `schemas/` and should be treated as the source of truth for model/tool input validation.
 
@@ -58,6 +59,16 @@ cypher-llm policy-check --schema examples/tool-hash.schema.json --query examples
 ```
 
 Policy reports are static pre-execution checks for broad scans, cartesian pattern risk, missing or high return limits, unbounded or high-hop traversals, and write risk. They complement parser and semantic validation: a query can be syntactically valid but still too broad or expensive for an autonomous agent to run.
+
+## LSP Diagnostics
+
+Run:
+
+```bash
+cypher-llm lsp-diagnostics --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json --uri file:///examples/tool-hash.query.json --report-out examples/lsp/tool-hash.lsp.json
+```
+
+LSP diagnostic reports adapt compiler, parser, policy, and repair output into the shape expected by editor surfaces and agent UIs: diagnostics carry ranges, severities, codes, and data, while code actions expose quick fixes and deterministic repair previews.
 
 ## Breaking Changes
 

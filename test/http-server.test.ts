@@ -74,6 +74,11 @@ describe("compiler HTTP service", () => {
       schema,
       query
     }) as { version: string; findings: { code: string }[] };
+    const lsp = await postJson(`${baseUrl}/v1/lsp-diagnostics`, {
+      schema,
+      query,
+      uri: "file:///query.json"
+    }) as { version: string; codeActions: { title: string }[] };
 
     assert.equal(proof.version, "cypher-llm-proof/v1");
     assert.equal(proof.status, "repaired");
@@ -82,6 +87,8 @@ describe("compiler HTTP service", () => {
     assert.equal(rendered.cypher, proof.cypher);
     assert.equal(policy.version, "cypher-llm-policy-report/v1");
     assert.deepEqual(policy.findings.map((finding) => finding.code), ["policy-unfiltered-label-scan", "policy-missing-limit"]);
+    assert.equal(lsp.version, "cypher-llm-lsp-diagnostics/v1");
+    assert.ok(lsp.codeActions.some((action) => action.title === "Add a bounded LIMIT"));
   });
 
   it("returns structured errors for invalid tool input", async () => {

@@ -1,6 +1,7 @@
 import type { EvalAttemptSet, EvalDataset, EvalOptions } from "./evals.js";
 import { evaluateAttempts } from "./evals.js";
 import type { CypherQuery, CypherSchemaContract, JsonLiteral } from "./ir.js";
+import { buildLspDiagnostics } from "./lsp.js";
 import type { ParserValidationOptions } from "./parser-validation.js";
 import { validateCypherTextWithParser } from "./parser-validation.js";
 import { assessCypherPolicy } from "./policy.js";
@@ -21,6 +22,7 @@ export type CypherCompilerToolName =
   | "cypher_repair"
   | "cypher_parse_check"
   | "cypher_policy_check"
+  | "cypher_lsp_diagnostics"
   | "cypher_prove"
   | "cypher_eval";
 
@@ -220,6 +222,25 @@ export const CYPHER_COMPILER_TOOLS: readonly CypherCompilerToolDefinition[] = [
     })
   },
   {
+    name: "cypher_lsp_diagnostics",
+    description:
+      "Build LSP-style diagnostics and code actions for structured Cypher IR or raw Cypher using compiler, parser, policy, and repair outputs.",
+    inputSchema: objectSchema(["schema"], {
+      schema: schemaContractSchema,
+      query: cypherQuerySchema,
+      rawCypher: { type: "string" },
+      uri: {
+        type: "string",
+        description: "Document URI to attach to the diagnostic report."
+      },
+      parserMode: {
+        enum: ["lint", "syntax"],
+        description: "Parser preflight mode for diagnostics."
+      },
+      ...repairOptionProperties
+    })
+  },
+  {
     name: "cypher_prove",
     description:
       "Compile Cypher IR into proof-carrying output: rendered Cypher, repairs, diagnostics, parser preflight, execution-policy status, and blocking reasons.",
@@ -350,6 +371,14 @@ export async function executeCypherCompilerTool(name: string, input: unknown): P
         requiredObject<CypherSchemaContract>(args, "schema"),
         policyOptions(args)
       );
+    }
+    case "cypher_lsp_diagnostics": {
+      const schema = requiredObject<CypherSchemaContract>(args, "schema");
+      const rawCypher = optionalString(args, "rawCypher");
+      if (rawCypher !== undefined) {
+        return buildLspDiagnostics({ schema, rawCypher }, lspOptions(args));
+      }
+      return buildLspDiagnostics({ schema, query: requiredObject<CypherQuery>(args, "query") }, lspOptions(args));
     }
     case "cypher_prove": {
       return buildCypherProof(
@@ -513,6 +542,25 @@ function policyOptions(args: Record<string, unknown>) {
   }
   if (maxRelationshipHops !== undefined) {
     options.maxRelationshipHops = maxRelationshipHops;
+  }
+  return options;
+}
+
+function lspOptions(args: Record<string, unknown>) {
+  const options = repairOptions(args) as ReturnType<typeof repairOptions> & {
+    uri?: string;
+    parserMode?: ParserValidationOptions["mode"];
+  };
+  const uri = optionalString(args, "uri");
+  const parserMode = optionalString(args, "parserMode");
+  if (uri !== undefined) {
+    options.uri = uri;
+  }
+  if (parserMode !== undefined) {
+    if (parserMode !== "lint" && parserMode !== "syntax") {
+      throw new Error("Expected 'parserMode' to be lint or syntax.");
+    }
+    options.parserMode = parserMode;
   }
   return options;
 }

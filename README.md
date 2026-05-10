@@ -19,7 +19,7 @@ The gap is not "LLMs need a better prompt." The gap is a missing compiler bounda
 
 ## What This Implements
 
-This package implements twelve concrete improvements:
+This package implements thirteen concrete improvements:
 
 1. **Official JSON IR**: Agents can emit a small, typed Cypher AST instead of brittle text.
 2. **LLM-safe profile**: The renderer emits conservative Cypher with escaped schema identifiers, explicit projections, bounded path recommendations, and deterministic formatting.
@@ -33,6 +33,7 @@ This package implements twelve concrete improvements:
 10. **Dialect certification**: Neo4j Cypher, openCypher, and GQL profile claims produce CI-checkable certification reports.
 11. **Proof-carrying compile output**: Agents can ask why a query is accepted, repaired, blocked, or approval-gated.
 12. **Cost and safety policy reports**: Broad scans, risky traversals, high limits, cartesian patterns, and writes are surfaced before execution.
+13. **LSP-style diagnostics**: Editor and agent UIs can consume compiler diagnostics and code actions in a familiar shape.
 
 ## Quick Start
 
@@ -136,6 +137,7 @@ cypher-llm repair-loop --dataset examples/eval-dataset.json --attempts examples/
 cypher-llm lift-raw-eval --dataset examples/imported/text2cypher-gpt4o-sample.dataset.json --attempts examples/imported/text2cypher-gpt4o-sample.attempts.json
 cypher-llm parse-check --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json --default-limit 25
 cypher-llm policy-check --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json --report-out policy.json
+cypher-llm lsp-diagnostics --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json --report-out lsp.json
 cypher-llm prove --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json --params examples/tool-hash.params.json --default-limit 25
 cypher-llm introspect-neo4j --uri bolt://localhost:7687 --user neo4j --password "$NEO4J_PASSWORD" --schema-out schema.json
 cypher-llm roadmap --integrity
@@ -169,6 +171,8 @@ npm run test:live:neo4j
 
 `policy-check` emits a `cypher-llm-policy-report/v1` report for static cost, cardinality, and safety risks before execution.
 
+`lsp-diagnostics` emits a `cypher-llm-lsp-diagnostics/v1` report with LSP-shaped diagnostics and code actions.
+
 `prove` emits a `cypher-llm-proof/v1` proof object with rendered Cypher, preflight Cypher, repair kinds, diagnostic codes, parser preflight, and execution-policy claims.
 
 `introspect-neo4j` connects to Neo4j and writes a `CypherSchemaContract` from labels, relationship types, properties, observed endpoints, and procedure yields.
@@ -179,7 +183,7 @@ npm run test:live:neo4j
 
 `mcp` starts a stdio MCP server exposing the same render, validate, repair, parse-check, and eval operations to agent clients.
 
-`serve` starts a local JSON HTTP service exposing `/healthz`, `/v1/tools`, `/v1/render`, `/v1/validate`, `/v1/repair`, `/v1/parse-check`, `/v1/policy`, `/v1/prove`, `/v1/eval`, `/v1/roadmap`, and `/v1/dialect-certification`.
+`serve` starts a local JSON HTTP service exposing `/healthz`, `/v1/tools`, `/v1/render`, `/v1/validate`, `/v1/repair`, `/v1/parse-check`, `/v1/policy`, `/v1/lsp-diagnostics`, `/v1/prove`, `/v1/eval`, `/v1/roadmap`, and `/v1/dialect-certification`.
 
 `test:live:neo4j` runs the optional Docker-backed Neo4j `EXPLAIN` fixture when `CYPHER_LLM_NEO4J_URI` and `CYPHER_LLM_NEO4J_PASSWORD` are set.
 
@@ -326,6 +330,7 @@ Those are deliberate boundaries. The repo is the missing LLM compiler surface, n
 - `src/tools.ts`: OpenAI/MCP-compatible tool schemas and shared tool dispatcher.
 - `src/mcp-server.ts`: Stdio MCP server for agent clients.
 - `src/http-server.ts`: JSON HTTP compiler service for agent runtimes.
+- `src/lsp.ts`: LSP-style diagnostics and code actions for editor and agent UIs.
 - `src/langchain.ts`: LangChain-shaped adapter for structured IR repair plus parser validation.
 - `src/cli.ts`: JSON-in/JSON-out CLI for agents and eval harnesses.
 - `docs/`: Design notes and LLM integration guidance, including `docs/RAW_LIFT.md` and `docs/YEARS_ROADMAP.md`.
@@ -334,6 +339,7 @@ Those are deliberate boundaries. The repo is the missing LLM compiler surface, n
 - `examples/benchmarks/`: CypherBench raw-vs-IR reports, comparisons, and repair-loop artifacts.
 - `examples/certification/`: Checked-in dialect certification report.
 - `examples/imported/`: Imported text2cypher/openCypher fixture samples and baseline reports.
+- `examples/lsp/`: Checked-in LSP diagnostics report.
 - `examples/policy/`: Checked-in cost and safety policy report.
 - `examples/proofs/`: Checked-in proof-carrying compile output.
 - `examples/roadmap/`: Machine-readable years-scale roadmap snapshot.

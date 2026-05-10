@@ -150,6 +150,17 @@ Current findings include:
 - Unbounded or high-hop variable-length traversals.
 - Write clauses without an explicit policy allowance.
 
+## `buildLspDiagnostics(input, options?)`
+
+Produces a `cypher-llm-lsp-diagnostics/v1` report with LSP-shaped diagnostics and code actions for either structured IR or raw Cypher migration input.
+
+The report includes:
+
+- `uri` and `languageId`.
+- Rendered Cypher preview.
+- LSP-style diagnostics with ranges, severity numbers, codes, source, message, and data.
+- Quick fixes for repairable diagnostics and preview actions for deterministic compiler repairs.
+
 ## `validateRenderedQueryWithParser(query, schema, options?)`
 
 Renders a structured query and validates the resulting Cypher with Neo4j's `@neo4j-cypher/language-support` package.
@@ -259,6 +270,7 @@ Returns OpenAI Responses API function-tool definitions for:
 - `cypher_repair`
 - `cypher_parse_check`
 - `cypher_policy_check`
+- `cypher_lsp_diagnostics`
 - `cypher_prove`
 - `cypher_eval`
 
@@ -298,6 +310,7 @@ Routes:
 - `POST /v1/repair`
 - `POST /v1/parse-check`
 - `POST /v1/policy`
+- `POST /v1/lsp-diagnostics`
 - `POST /v1/prove`
 - `POST /v1/eval`
 - `POST /v1/tools/:toolName`

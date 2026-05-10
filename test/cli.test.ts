@@ -373,6 +373,48 @@ describe("cli", () => {
     assert.ok(writes.get("out/policy.json")?.includes("policy-unfiltered-label-scan"));
   });
 
+  it("emits LSP diagnostics and code actions", async () => {
+    const files = new Map<string, string>([
+      [
+        "schema.json",
+        JSON.stringify({
+          version: "cypher-llm-schema/v1",
+          nodes: [{ name: "Tool" }],
+          relationships: []
+        })
+      ],
+      [
+        "query.json",
+        JSON.stringify({
+          version: "cypher-llm-ir/v1",
+          clauses: [
+            { kind: "match", patterns: [{ segments: [{ variable: "tool", labels: ["Tool"] }] }] },
+            { kind: "return", items: [{ expression: { kind: "var", name: "tool" } }] }
+          ]
+        })
+      ]
+    ]);
+    const writes = new Map<string, string>();
+    let stdout = "";
+    let stderr = "";
+    const io: CliIO = {
+      stdout: { write: (chunk: string | Uint8Array) => ((stdout += String(chunk)), true) },
+      stderr: { write: (chunk: string | Uint8Array) => ((stderr += String(chunk)), true) },
+      readFile: async (path) => files.get(String(path)) ?? "",
+      writeFile: async (path, data) => {
+        writes.set(path, data);
+      },
+      mkdir: async () => undefined
+    };
+
+    const code = await runCli(["lsp-diagnostics", "--schema", "schema.json", "--query", "query.json", "--report-out", "out/lsp.json"], io);
+
+    assert.equal(code, 0);
+    assert.equal(stderr, "");
+    assert.ok(stdout.includes("cypher-llm-lsp-diagnostics/v1"));
+    assert.ok(writes.get("out/lsp.json")?.includes("Add a bounded LIMIT"));
+  });
+
   it("lifts raw Cypher and evaluates raw-lift attempts", async () => {
     const schema = {
       version: "cypher-llm-schema/v1",

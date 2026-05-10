@@ -205,7 +205,7 @@ export const yearsRoadmap = {
       id: "ecosystem-ux",
       title: "Ecosystem UX",
       horizon: "years",
-      status: "planned",
+      status: "seeded",
       issue: {
         number: 16,
         url: "https://github.com/evalops/cypher-llm-compiler/issues/16"
@@ -217,7 +217,7 @@ export const yearsRoadmap = {
         "Interactive raw-to-IR migration and schema-contract tooling.",
         "Report rendering for CI, docs, and agent feedback UX."
       ],
-      firstArtifacts: ["src/tools.ts", "docs/INTEGRATIONS.md", "examples/raw-to-ir-migration.md"],
+      firstArtifacts: ["src/tools.ts", "src/lsp.ts", "docs/INTEGRATIONS.md", "examples/raw-to-ir-migration.md"],
       acceptanceGates: [
         "Editor and MCP clients receive the same stable diagnostic contract.",
         "Migration UX exposes source spans, IR paths, and repair previews.",
@@ -319,6 +319,13 @@ export const yearsRoadmap = {
       status: "partial",
       evidence: ["src/tools.ts", "src/mcp-server.ts", "src/http-server.ts", "test/http-server.test.ts", "docs/INTEGRATIONS.md"],
       workstreamIds: ["compiler-service", "ecosystem-ux"]
+    },
+    {
+      id: "lsp-diagnostics",
+      title: "LSP-Style Diagnostics And Code Actions",
+      status: "partial",
+      evidence: ["src/lsp.ts", "schemas/lsp-diagnostics.schema.json", "test/lsp.test.ts"],
+      workstreamIds: ["ecosystem-ux", "semantic-proof-repair"]
     },
     {
       id: "proof-objects",

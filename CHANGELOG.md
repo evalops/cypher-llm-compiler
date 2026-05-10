@@ -12,3 +12,4 @@
 - Added proof-carrying compile output with repair, parser, diagnostics, execution-policy claims, JSON Schema, CLI/tool output, and checked-in proof artifact.
 - Added a JSON HTTP compiler service over the shared tool dispatcher with health, metadata, tool, roadmap, and dialect certification routes.
 - Added static cost and safety policy reports for broad scans, traversal risk, high limits, cartesian patterns, and writes, including CLI/tool/service output and checked-in policy artifact.
+- Added LSP-style diagnostics and code actions over compiler, parser, policy, and repair output, including CLI/tool/service output and checked-in LSP artifact.
