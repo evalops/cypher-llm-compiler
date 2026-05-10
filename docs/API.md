@@ -134,6 +134,8 @@ Behavior:
 
 This lets applications bring their own driver/session lifecycle while the compiler owns preflight behavior.
 
+The repo includes an optional live fixture in `test/neo4j-live.test.ts`. Set `CYPHER_LLM_NEO4J_URI` and `CYPHER_LLM_NEO4J_PASSWORD`, or use `docker-compose.neo4j.yml`; see `docs/NEO4J_LIVE_FIXTURE.md`.
+
 ## `evaluateFailureCorpus(cases?)`
 
 Runs the known LLM failure fixtures and returns pass/fail records with canonical Cypher and diagnostic codes.

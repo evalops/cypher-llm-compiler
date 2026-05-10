@@ -129,6 +129,7 @@ cypher-llm eval --dataset examples/eval-dataset.json --attempts examples/eval-at
 cypher-llm parse-check --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json --default-limit 25
 cypher-llm import-text2cypher --csv rows.csv --dataset-out dataset.json --attempts-out attempts.json
 cypher-llm mcp
+npm run test:live:neo4j
 ```
 
 `render` returns a `SafeExecutionPlan`:
@@ -145,6 +146,8 @@ cypher-llm mcp
 `parse-check` validates rendered IR or raw Cypher against Neo4j's language-support parser and maps parser diagnostics back into this package's `Diagnostic` shape.
 
 `mcp` starts a stdio MCP server exposing the same render, validate, repair, parse-check, and eval operations to agent clients.
+
+`test:live:neo4j` runs the optional Docker-backed Neo4j `EXPLAIN` fixture when `CYPHER_LLM_NEO4J_URI` and `CYPHER_LLM_NEO4J_PASSWORD` are set.
 
 ## Agent Integrations
 
@@ -265,6 +268,7 @@ Those are deliberate boundaries. The repo is the missing LLM compiler surface, n
 - `src/langchain.ts`: LangChain-shaped adapter for structured IR repair plus parser validation.
 - `src/cli.ts`: JSON-in/JSON-out CLI for agents and eval harnesses.
 - `docs/`: Design notes and LLM integration guidance.
+- `docker-compose.neo4j.yml`: Optional local Neo4j fixture for live `EXPLAIN` tests.
 - `examples/`: Small schema/query fixtures for CLI smoke tests and agent onboarding.
 - `examples/imported/`: Imported text2cypher/openCypher fixture samples and baseline reports.
 - `profiles/`: Versioned dialect profiles for Neo4j Cypher 25, openCypher 9, and GQL-oriented output.
@@ -287,9 +291,8 @@ This is an implementation prototype intended to become the LLM-facing compiler l
 
 ## Next Hardening Pass
 
-The highest-value next pass is to make the parser/database checks continuous and grow semantic coverage:
+The highest-value next pass is to grow semantic coverage:
 
-- Add a Docker-backed Neo4j `EXPLAIN` CI fixture.
 - Expand subquery scope and procedure-yield validation.
 - Add richer property and parameter type checks.
 - Keep importing larger text2cypher/openCypher slices as regression fixtures.

@@ -15,20 +15,25 @@
     "dist/src",
     "CHANGELOG.md",
     "README.md",
+    "docker-compose.neo4j.yml",
     "docs",
     "examples",
     "profiles",
+    "scripts",
     "schemas"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "test": "npm run build && node --test dist/test/*.test.js",
+    "test:live:neo4j": "npm run build && node --test dist/test/neo4j-live.test.js",
+    "neo4j:wait": "node scripts/wait-for-neo4j.mjs",
     "check": "npm run test",
     "verify:pack": "npm run build && npm pack --dry-run"
   },
   "devDependencies": {
     "@types/node": "^25.6.2",
     "ajv": "^8.20.0",
+    "neo4j-driver": "^6.0.1",
     "typescript": "^5.9.0"
   },
   "engines": {
