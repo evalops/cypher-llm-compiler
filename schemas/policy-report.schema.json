@@ -9,6 +9,15 @@
     "version": { "const": "cypher-llm-policy-report/v1" },
     "ok": { "type": "boolean" },
     "dialect": { "type": "string", "minLength": 1 },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1 }
+      }
+    },
     "summary": {
       "type": "object",
       "additionalProperties": false,

@@ -29,6 +29,13 @@ import { buildCompilerServiceManifest } from "./service-manifest.js";
 import { buildCypherBenchScorecard, renderCypherBenchScorecardMarkdown } from "./scorecard.js";
 import { validateCypherTextWithParser } from "./parser-validation.js";
 import { assessCypherPolicy } from "./policy.js";
+import {
+  buildPolicyProfileCatalog,
+  getPolicyProfile,
+  policyOptionsFromProfile,
+  renderPolicyProfileCatalogMarkdown,
+  type CypherPolicyProfile
+} from "./policy-profile.js";
 import { buildCypherProof } from "./proof.js";
 import { evaluateRawLiftAttempts, liftRawCypherToIr } from "./raw-lift.js";
 import { normalizeSchema } from "./schema.js";
@@ -96,6 +103,9 @@ export async function runCli(argv: string[], io: CliIO = defaultIo()): Promise<n
         return 0;
       case "policy-check":
         await policyCheckCommand(args, io);
+        return 0;
+      case "policy-profiles":
+        await policyProfilesCommand(args, io);
         return 0;
       case "lsp-diagnostics":
         await lspDiagnosticsCommand(args, io);
@@ -431,19 +441,21 @@ async function policyCheckCommand(args: Map<string, string | boolean>, io: CliIO
   const query = await readQuery(args, io);
   const maxReturnLimit = optionalNumber(args.get("max-return-limit"));
   const maxRelationshipHops = optionalNumber(args.get("max-relationship-hops"));
-  const policyOptions: Parameters<typeof assessCypherPolicy>[2] = {};
+  const profile = await readPolicyProfile(args, io);
+  const overrides: Parameters<typeof assessCypherPolicy>[2] = {};
   if (args.get("allow-writes") === true) {
-    policyOptions.allowWrites = true;
+    overrides.allowWrites = true;
   }
   if (args.get("no-require-limit") === true) {
-    policyOptions.requireLimit = false;
+    overrides.requireLimit = false;
   }
   if (maxReturnLimit !== undefined) {
-    policyOptions.maxReturnLimit = maxReturnLimit;
+    overrides.maxReturnLimit = maxReturnLimit;
   }
   if (maxRelationshipHops !== undefined) {
-    policyOptions.maxRelationshipHops = maxRelationshipHops;
+    overrides.maxRelationshipHops = maxRelationshipHops;
   }
+  const policyOptions = profile ? policyOptionsFromProfile(profile, overrides) : overrides;
   const report = assessCypherPolicy(query, schema, policyOptions);
   if (typeof args.get("report-out") === "string") {
     await writeJsonFile(io, args.get("report-out") as string, report);
@@ -452,6 +464,16 @@ async function policyCheckCommand(args: Map<string, string | boolean>, io: CliIO
   if (args.get("fail-on-error") === true && !report.ok) {
     throw new Error(`Cypher policy check found ${report.summary.errors} error(s).`);
   }
+}
+
+async function policyProfilesCommand(args: Map<string, string | boolean>, io: CliIO) {
+  const catalog = buildPolicyProfileCatalog();
+  const format = args.get("format") === "markdown" ? "markdown" : "json";
+  const output = format === "markdown" ? renderPolicyProfileCatalogMarkdown(catalog) : `${JSON.stringify(catalog, null, 2)}\n`;
+  if (typeof args.get("profiles-out") === "string") {
+    await writeTextFile(io, args.get("profiles-out") as string, output);
+  }
+  io.stdout.write(output);
 }
 
 async function lspDiagnosticsCommand(args: Map<string, string | boolean>, io: CliIO) {
@@ -616,6 +638,21 @@ async function readParams(
   return JSON.parse(await io.readFile(path, "utf8")) as Record<string, JsonLiteral>;
 }
 
+async function readPolicyProfile(args: Map<string, string | boolean>, io: CliIO): Promise<CypherPolicyProfile | undefined> {
+  const profilePath = args.get("policy-profile");
+  const profileId = args.get("policy-profile-id");
+  if (typeof profilePath === "string" && typeof profileId === "string") {
+    throw new Error("Use either --policy-profile or --policy-profile-id, not both.");
+  }
+  if (typeof profilePath === "string") {
+    return JSON.parse(await io.readFile(profilePath, "utf8")) as CypherPolicyProfile;
+  }
+  if (typeof profileId === "string") {
+    return getPolicyProfile(profileId);
+  }
+  return undefined;
+}
+
 function parseArgs(args: string[]): Map<string, string | boolean> {
   const parsed = new Map<string, string | boolean>();
   for (let index = 0; index < args.length; index += 1) {
@@ -726,7 +763,8 @@ Commands:
   repair-loop --dataset dataset.json --attempts attempts.json [--feedback-out feedback.json] [--report-out report.json] [--raw-cypher-can-execute] [--default-limit 25] [--default-max-hops 5]
   lift-raw-eval --dataset dataset.json --attempts attempts.json [--summary-out summary.json]
   parse-check --schema schema.json (--query query.json | --cypher "MATCH ...") [--mode lint|syntax] [--default-limit 25] [--default-max-hops 5]
-  policy-check --schema schema.json --query query.json [--report-out report.json] [--fail-on-error] [--allow-writes] [--no-require-limit] [--max-return-limit 100] [--max-relationship-hops 5]
+  policy-check --schema schema.json --query query.json [--policy-profile-id id | --policy-profile profile.json] [--report-out report.json] [--fail-on-error] [--allow-writes] [--no-require-limit] [--max-return-limit 100] [--max-relationship-hops 5]
+  policy-profiles [--format json|markdown] [--profiles-out profiles.json]
   lsp-diagnostics --schema schema.json (--query query.json | --cypher "MATCH ...") [--uri file:///query.cypher] [--report-out report.json] [--parser-mode syntax|lint] [--default-limit 25] [--default-max-hops 5]
   prove       --schema schema.json --query query.json [--params params.json] [--proof-out proof.json] [--fail-on-blocked] [--default-limit 25] [--default-max-hops 5] [--allow-writes] [--approved] [--parser-mode syntax|lint] [--no-parser]
   introspect-neo4j --uri bolt://localhost:7687 --user neo4j --password password [--schema-out schema.json] [--sample-limit 1000] [--no-procedures]

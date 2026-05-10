@@ -14,6 +14,7 @@ Stable public contracts:
 - `cypher-llm-dialect-certification/v1`
 - `cypher-llm-proof/v1`
 - `cypher-llm-policy-report/v1`
+- `cypher-llm-policy-profile-catalog/v1`
 - `cypher-llm-lsp-diagnostics/v1`
 - `cypher-llm-lossless-parse/v1`
 - `cypher-llm-cypherbench-scorecard/v1`
@@ -85,6 +86,17 @@ cypher-llm policy-check --schema examples/tool-hash.schema.json --query examples
 ```
 
 Policy reports are static pre-execution checks for broad scans, cartesian pattern risk, missing or high return limits, unbounded or high-hop traversals, and write risk. They complement parser and semantic validation: a query can be syntactically valid but still too broad or expensive for an autonomous agent to run.
+
+## Policy Profiles
+
+Run:
+
+```bash
+cypher-llm policy-profiles --profiles-out examples/policy/policy-profiles.json
+cypher-llm policy-check --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json --policy-profile-id llm-readonly-strict
+```
+
+Policy profile catalogs are named cost and safety presets for agent runtimes. Built-in profiles cover strict read-only, wider read-only exploration, and externally approved write-maintenance paths. Policy reports record the applied profile id and title so runtime policy choices are auditable.
 
 ## LSP Diagnostics
 

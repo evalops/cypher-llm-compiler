@@ -54,6 +54,7 @@ describe("OpenAI tool schemas", () => {
       "cypher_parse_lossless",
       "cypher_parse_check",
       "cypher_policy_check",
+      "cypher_policy_profiles",
       "cypher_lsp_diagnostics",
       "cypher_prove",
       "cypher_eval",
@@ -115,11 +116,21 @@ describe("OpenAI tool schemas", () => {
     const policy = (await executeCypherCompilerTool("cypher_policy_check", {
       schema,
       query: repairableQuery,
+      policyProfileId: "llm-readonly-strict",
       maxRelationshipHops: 3
-    })) as { version: string; findings: { code: string }[] };
+    })) as { version: string; policy?: { id: string }; findings: { code: string }[] };
 
     assert.equal(policy.version, "cypher-llm-policy-report/v1");
+    assert.equal(policy.policy?.id, "llm-readonly-strict");
     assert.ok(policy.findings.some((finding) => finding.code === "policy-unbounded-traversal"));
+
+    const policyProfiles = (await executeCypherCompilerTool("cypher_policy_profiles", {})) as {
+      version: string;
+      profiles: { id: string }[];
+    };
+
+    assert.equal(policyProfiles.version, "cypher-llm-policy-profile-catalog/v1");
+    assert.ok(policyProfiles.profiles.some((profile) => profile.id === "llm-readonly-strict"));
 
     const lsp = (await executeCypherCompilerTool("cypher_lsp_diagnostics", {
       schema,

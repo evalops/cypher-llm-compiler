@@ -8,6 +8,12 @@ export interface CypherPolicyOptions {
   requireLimit?: boolean;
   maxReturnLimit?: number;
   maxRelationshipHops?: number;
+  profile?: CypherPolicyProfileRef;
+}
+
+export interface CypherPolicyProfileRef {
+  id: string;
+  title?: string;
 }
 
 export interface CypherPolicyFinding {
@@ -29,11 +35,14 @@ export interface CypherPolicyReport {
   version: "cypher-llm-policy-report/v1";
   ok: boolean;
   dialect?: string;
+  policy?: CypherPolicyProfileRef;
   summary: CypherPolicySummary;
   findings: CypherPolicyFinding[];
 }
 
-const DEFAULT_OPTIONS: Required<CypherPolicyOptions> = {
+type EffectivePolicyOptions = Required<Omit<CypherPolicyOptions, "profile">>;
+
+const DEFAULT_OPTIONS: EffectivePolicyOptions = {
   allowWrites: false,
   requireLimit: true,
   maxReturnLimit: 100,
@@ -45,7 +54,12 @@ export function assessCypherPolicy(
   schema: CypherSchemaContract,
   options: CypherPolicyOptions = {}
 ): CypherPolicyReport {
-  const opts = { ...DEFAULT_OPTIONS, ...options };
+  const opts: EffectivePolicyOptions = {
+    allowWrites: options.allowWrites ?? DEFAULT_OPTIONS.allowWrites,
+    requireLimit: options.requireLimit ?? DEFAULT_OPTIONS.requireLimit,
+    maxReturnLimit: options.maxReturnLimit ?? DEFAULT_OPTIONS.maxReturnLimit,
+    maxRelationshipHops: options.maxRelationshipHops ?? DEFAULT_OPTIONS.maxRelationshipHops
+  };
   const findings: CypherPolicyFinding[] = [];
 
   query.clauses.forEach((clause, clauseIndex) => {
@@ -78,6 +92,7 @@ export function assessCypherPolicy(
     version: "cypher-llm-policy-report/v1",
     ok: summary.errors === 0,
     ...(schema.dialect ? { dialect: schema.dialect } : {}),
+    ...(options.profile ? { policy: options.profile } : {}),
     summary,
     findings
   };
@@ -87,7 +102,7 @@ function assessMatchPolicy(
   clause: MatchClause,
   path: string,
   findings: CypherPolicyFinding[],
-  options: Required<CypherPolicyOptions>
+  options: EffectivePolicyOptions
 ) {
   if (clause.patterns.length > 1) {
     findings.push({
@@ -134,7 +149,7 @@ function assessRelationshipPolicy(
   relationship: RelationshipPattern,
   path: string,
   findings: CypherPolicyFinding[],
-  options: Required<CypherPolicyOptions>
+  options: EffectivePolicyOptions
 ) {
   if (relationship.maxHops === null) {
     findings.push({
@@ -162,7 +177,7 @@ function assessReturnPolicy(
   clause: ReturnClause,
   path: string,
   findings: CypherPolicyFinding[],
-  options: Required<CypherPolicyOptions>
+  options: EffectivePolicyOptions
 ) {
   if (!clause.limit && options.requireLimit) {
     findings.push({

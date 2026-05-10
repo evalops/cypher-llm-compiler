@@ -8,6 +8,12 @@ import { parseCypherLosslessly } from "./lossless-parser.js";
 import type { ParserValidationOptions } from "./parser-validation.js";
 import { validateCypherTextWithParser } from "./parser-validation.js";
 import { assessCypherPolicy } from "./policy.js";
+import {
+  buildPolicyProfileCatalog,
+  getPolicyProfile,
+  policyOptionsFromProfile,
+  type CypherPolicyProfile
+} from "./policy-profile.js";
 import { buildCypherProof } from "./proof.js";
 import type { RepairOptions } from "./repair.js";
 import { repairQuery, repairRawCypher } from "./repair.js";
@@ -29,6 +35,7 @@ export type CypherCompilerToolName =
   | "cypher_parse_lossless"
   | "cypher_parse_check"
   | "cypher_policy_check"
+  | "cypher_policy_profiles"
   | "cypher_lsp_diagnostics"
   | "cypher_prove"
   | "cypher_eval"
@@ -271,6 +278,15 @@ export const CYPHER_COMPILER_TOOLS: readonly CypherCompilerToolDefinition[] = [
     inputSchema: objectSchema(["schema", "query"], {
       schema: schemaContractSchema,
       query: cypherQuerySchema,
+      policyProfile: {
+        type: "object",
+        description: "Optional cypher-llm-policy-profile/v1 profile to apply before explicit option overrides.",
+        additionalProperties: true
+      },
+      policyProfileId: {
+        type: "string",
+        description: "Built-in policy profile id, such as llm-readonly-strict."
+      },
       allowWrites: {
         type: "boolean",
         description: "Allow write clauses in policy assessment."
@@ -288,6 +304,11 @@ export const CYPHER_COMPILER_TOOLS: readonly CypherCompilerToolDefinition[] = [
         description: "Warn when maxHops exceeds this value; unbounded traversals are errors."
       }
     })
+  },
+  {
+    name: "cypher_policy_profiles",
+    description: "List built-in Cypher policy profiles that can be passed to cypher_policy_check.",
+    inputSchema: objectSchema([], {})
   },
   {
     name: "cypher_lsp_diagnostics",
@@ -507,6 +528,9 @@ export async function executeCypherCompilerTool(name: string, input: unknown): P
         policyOptions(args)
       );
     }
+    case "cypher_policy_profiles": {
+      return buildPolicyProfileCatalog();
+    }
     case "cypher_lsp_diagnostics": {
       const schema = requiredObject<CypherSchemaContract>(args, "schema");
       const rawCypher = optionalString(args, "rawCypher");
@@ -723,29 +747,40 @@ function repairPlanOptions(args: Record<string, unknown>) {
 }
 
 function policyOptions(args: Record<string, unknown>) {
-  const options: {
+  const overrides: {
     allowWrites?: boolean;
     requireLimit?: boolean;
     maxReturnLimit?: number;
     maxRelationshipHops?: number;
   } = {};
+  const policyProfile = optionalObject<CypherPolicyProfile>(args, "policyProfile");
+  const policyProfileId = optionalString(args, "policyProfileId");
   const allowWrites = optionalBoolean(args, "allowWrites");
   const requireLimit = optionalBoolean(args, "requireLimit");
   const maxReturnLimit = optionalNumber(args, "maxReturnLimit");
   const maxRelationshipHops = optionalNumber(args, "maxRelationshipHops");
+  if (policyProfile !== undefined && policyProfileId !== undefined) {
+    throw new Error("Use either 'policyProfile' or 'policyProfileId', not both.");
+  }
   if (allowWrites !== undefined) {
-    options.allowWrites = allowWrites;
+    overrides.allowWrites = allowWrites;
   }
   if (requireLimit !== undefined) {
-    options.requireLimit = requireLimit;
+    overrides.requireLimit = requireLimit;
   }
   if (maxReturnLimit !== undefined) {
-    options.maxReturnLimit = maxReturnLimit;
+    overrides.maxReturnLimit = maxReturnLimit;
   }
   if (maxRelationshipHops !== undefined) {
-    options.maxRelationshipHops = maxRelationshipHops;
+    overrides.maxRelationshipHops = maxRelationshipHops;
   }
-  return options;
+  if (policyProfile !== undefined) {
+    return policyOptionsFromProfile(policyProfile, overrides);
+  }
+  if (policyProfileId !== undefined) {
+    return policyOptionsFromProfile(getPolicyProfile(policyProfileId), overrides);
+  }
+  return overrides;
 }
 
 function lspOptions(args: Record<string, unknown>) {

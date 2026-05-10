@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evalops.dev/schemas/cypher-llm/policy-profile-catalog/v1.json",
+  "title": "Cypher Policy Profile Catalog",
+  "type": "object",
+  "required": ["version", "profiles"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": "cypher-llm-policy-profile-catalog/v1" },
+    "profiles": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/profile" }
+    }
+  },
+  "$defs": {
+    "profile": {
+      "type": "object",
+      "required": ["version", "id", "title", "options"],
+      "additionalProperties": false,
+      "properties": {
+        "version": { "const": "cypher-llm-policy-profile/v1" },
+        "id": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1 },
+        "description": { "type": "string", "minLength": 1 },
+        "options": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "allowWrites": { "type": "boolean" },
+            "requireLimit": { "type": "boolean" },
+            "maxReturnLimit": { "type": "integer", "minimum": 1 },
+            "maxRelationshipHops": { "type": "integer", "minimum": 1 }
+          }
+        }
+      }
+    }
+  }
+}

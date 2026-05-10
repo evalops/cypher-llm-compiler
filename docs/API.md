@@ -175,6 +175,18 @@ Current findings include:
 - Unbounded or high-hop variable-length traversals.
 - Write clauses without an explicit policy allowance.
 
+Pass `policyOptionsFromProfile(getPolicyProfile("llm-readonly-strict"))` to apply a named profile and record that policy identity in the report.
+
+## `buildPolicyProfileCatalog()`
+
+Produces a `cypher-llm-policy-profile-catalog/v1` catalog of built-in policy profiles.
+
+Use `getPolicyProfile(id)` to load a built-in profile and `policyOptionsFromProfile(profile, overrides?)` to turn it into `assessCypherPolicy` options. The built-in profiles are:
+
+- `llm-readonly-strict`
+- `llm-readonly-exploration`
+- `approved-write-maintenance`
+
 ## `buildLspDiagnostics(input, options?)`
 
 Produces a `cypher-llm-lsp-diagnostics/v1` report with LSP-shaped diagnostics and code actions for either structured IR or raw Cypher migration input.
@@ -322,11 +334,17 @@ Returns OpenAI Responses API function-tool definitions for:
 - `cypher_render`
 - `cypher_validate`
 - `cypher_repair`
+- `cypher_repair_plan`
+- `cypher_parse_lossless`
 - `cypher_parse_check`
 - `cypher_policy_check`
+- `cypher_policy_profiles`
 - `cypher_lsp_diagnostics`
 - `cypher_prove`
 - `cypher_eval`
+- `cypher_scorecard`
+- `cypher_benchmark_gate`
+- `cypher_dataset_governance`
 
 ## `getOpenAiChatTools()`
 
@@ -358,15 +376,22 @@ Starts a JSON HTTP service over the same compiler tool dispatcher.
 Routes:
 
 - `GET /healthz`
+- `GET /v1/service-manifest`
 - `GET /v1/tools`
 - `POST /v1/render`
 - `POST /v1/validate`
 - `POST /v1/repair`
+- `POST /v1/repair-plan`
+- `POST /v1/parse-lossless`
 - `POST /v1/parse-check`
 - `POST /v1/policy`
+- `POST /v1/policy-profiles`
 - `POST /v1/lsp-diagnostics`
 - `POST /v1/prove`
 - `POST /v1/eval`
+- `POST /v1/scorecard`
+- `POST /v1/benchmark-gate`
+- `POST /v1/dataset-governance`
 - `POST /v1/tools/:toolName`
 - `GET /v1/roadmap`
 - `GET /v1/dialect-certification`

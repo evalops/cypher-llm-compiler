@@ -5,6 +5,7 @@ import { describe, it } from "node:test";
 import Ajv2020Module from "ajv/dist/2020.js";
 import type { CypherQuery, CypherSchemaContract } from "../src/ir.js";
 import { assessCypherPolicy, type CypherPolicyReport } from "../src/policy.js";
+import { getPolicyProfile, policyOptionsFromProfile } from "../src/policy-profile.js";
 import { buildCypherProof } from "../src/proof.js";
 
 interface AjvLike {
@@ -74,6 +75,23 @@ describe("cost and safety policy", () => {
     assert.equal(report.ok, false);
     assert.ok(report.findings.some((finding) => finding.code === "policy-write-risk"));
     assert.ok(report.findings.some((finding) => finding.code === "policy-unbounded-traversal"));
+  });
+
+  it("records the selected policy profile in reports", () => {
+    const query: CypherQuery = {
+      version: "cypher-llm-ir/v1",
+      clauses: [
+        {
+          kind: "match",
+          patterns: [{ segments: [{ variable: "tool", labels: ["Tool"] }] }]
+        },
+        { kind: "return", items: [{ expression: { kind: "var", name: "tool" } }], limit: { kind: "literal", value: 400 } }
+      ]
+    };
+    const report = assessCypherPolicy(query, schema, policyOptionsFromProfile(getPolicyProfile("llm-readonly-exploration")));
+
+    assert.equal(report.policy?.id, "llm-readonly-exploration");
+    assert.equal(report.findings.some((finding) => finding.code === "policy-high-return-limit"), false);
   });
 
   it("feeds policy claims into proof output after deterministic repairs", () => {

@@ -81,8 +81,13 @@ describe("compiler HTTP service", () => {
     }) as { version: string; deterministic: unknown[] };
     const policy = await postJson(`${baseUrl}/v1/policy`, {
       schema,
-      query
-    }) as { version: string; findings: { code: string }[] };
+      query,
+      policyProfileId: "llm-readonly-strict"
+    }) as { version: string; policy?: { id: string }; findings: { code: string }[] };
+    const policyProfiles = await postJson(`${baseUrl}/v1/policy-profiles`, {}) as {
+      version: string;
+      profiles: { id: string }[];
+    };
     const lsp = await postJson(`${baseUrl}/v1/lsp-diagnostics`, {
       schema,
       query,
@@ -127,7 +132,10 @@ describe("compiler HTTP service", () => {
     assert.equal(repairPlan.version, "cypher-llm-repair-plan/v1");
     assert.equal(repairPlan.deterministic.length, 1);
     assert.equal(policy.version, "cypher-llm-policy-report/v1");
+    assert.equal(policy.policy?.id, "llm-readonly-strict");
     assert.deepEqual(policy.findings.map((finding) => finding.code), ["policy-unfiltered-label-scan", "policy-missing-limit"]);
+    assert.equal(policyProfiles.version, "cypher-llm-policy-profile-catalog/v1");
+    assert.ok(policyProfiles.profiles.some((profile) => profile.id === "llm-readonly-strict"));
     assert.equal(lsp.version, "cypher-llm-lsp-diagnostics/v1");
     assert.ok(lsp.codeActions.some((action) => action.title === "Add a bounded LIMIT"));
     assert.equal(scorecard.version, "cypher-llm-cypherbench-scorecard/v1");

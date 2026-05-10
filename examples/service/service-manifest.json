@@ -115,6 +115,12 @@
     },
     {
       "method": "POST",
+      "path": "/v1/policy-profiles",
+      "operation": "cypher_policy_profiles",
+      "authRequired": false
+    },
+    {
+      "method": "POST",
       "path": "/v1/lsp-diagnostics",
       "operation": "cypher_lsp_diagnostics",
       "authRequired": false

@@ -228,7 +228,15 @@ export const yearsRoadmap = {
         "Policy DSL for approvals, tenant restrictions, and sensitive data boundaries.",
         "Integration with schema statistics and live planner estimates."
       ],
-      firstArtifacts: ["src/safety.ts", "src/policy.ts", "src/neo4j-explain.ts", "docs/LLM_SAFE_PROFILE.md"],
+      firstArtifacts: [
+        "src/safety.ts",
+        "src/policy.ts",
+        "src/policy-profile.ts",
+        "src/neo4j-explain.ts",
+        "schemas/policy-profile.schema.json",
+        "examples/policy/policy-profiles.json",
+        "docs/LLM_SAFE_PROFILE.md"
+      ],
       acceptanceGates: [
         "Risky but syntactically valid queries are caught before execution.",
         "Safety diagnostics feed proof objects and repair plans.",
@@ -382,6 +390,13 @@ export const yearsRoadmap = {
       status: "partial",
       evidence: ["src/policy.ts", "schemas/policy-report.schema.json", "test/policy.test.ts"],
       workstreamIds: ["cost-safety-policy", "semantic-proof-repair"]
+    },
+    {
+      id: "policy-profiles",
+      title: "Named Cost And Safety Policy Profiles",
+      status: "partial",
+      evidence: ["src/policy-profile.ts", "schemas/policy-profile.schema.json", "test/policy-profile.test.ts"],
+      workstreamIds: ["cost-safety-policy", "governance-standards"]
     },
     {
       id: "compiler-service",

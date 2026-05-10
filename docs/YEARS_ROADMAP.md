@@ -59,6 +59,13 @@ Cost and safety policy planning is exported from `src/policy.ts`, validated by `
 cypher-llm policy-check --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json
 ```
 
+Policy profiles are exported from `src/policy-profile.ts`, validated by `schemas/policy-profile.schema.json`, and checked in at `examples/policy/policy-profiles.json`.
+
+```bash
+cypher-llm policy-profiles --profiles-out examples/policy/policy-profiles.json
+cypher-llm policy-check --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json --policy-profile-id llm-readonly-strict
+```
+
 CypherBench scorecards are exported from `src/scorecard.ts`, validated by `schemas/cypherbench-scorecard.schema.json`, and checked in at `examples/benchmarks/tool-hash.scorecard.json`.
 
 ```bash

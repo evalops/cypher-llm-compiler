@@ -10,6 +10,7 @@ export const COMPILER_HTTP_TOOL_ROUTES = {
   "/v1/parse-lossless": "cypher_parse_lossless",
   "/v1/parse-check": "cypher_parse_check",
   "/v1/policy": "cypher_policy_check",
+  "/v1/policy-profiles": "cypher_policy_profiles",
   "/v1/lsp-diagnostics": "cypher_lsp_diagnostics",
   "/v1/prove": "cypher_prove",
   "/v1/eval": "cypher_eval",

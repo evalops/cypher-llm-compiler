@@ -1,0 +1,41 @@
+{
+  "version": "cypher-llm-policy-profile-catalog/v1",
+  "profiles": [
+    {
+      "version": "cypher-llm-policy-profile/v1",
+      "id": "llm-readonly-strict",
+      "title": "LLM Readonly Strict",
+      "description": "Default autonomous-agent read policy: no writes, required LIMIT, modest row and traversal ceilings.",
+      "options": {
+        "allowWrites": false,
+        "requireLimit": true,
+        "maxReturnLimit": 100,
+        "maxRelationshipHops": 5
+      }
+    },
+    {
+      "version": "cypher-llm-policy-profile/v1",
+      "id": "llm-readonly-exploration",
+      "title": "LLM Readonly Exploration",
+      "description": "Read-only exploration profile with wider row and traversal ceilings while still requiring bounded results.",
+      "options": {
+        "allowWrites": false,
+        "requireLimit": true,
+        "maxReturnLimit": 500,
+        "maxRelationshipHops": 8
+      }
+    },
+    {
+      "version": "cypher-llm-policy-profile/v1",
+      "id": "approved-write-maintenance",
+      "title": "Approved Write Maintenance",
+      "description": "Maintenance profile for externally approved write workflows with explicit result limits.",
+      "options": {
+        "allowWrites": true,
+        "requireLimit": true,
+        "maxReturnLimit": 100,
+        "maxRelationshipHops": 5
+      }
+    }
+  ]
+}

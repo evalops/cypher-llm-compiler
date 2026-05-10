@@ -629,12 +629,51 @@ describe("cli", () => {
       mkdir: async () => undefined
     };
 
-    const code = await runCli(["policy-check", "--schema", "schema.json", "--query", "query.json", "--report-out", "out/policy.json"], io);
+    const code = await runCli(
+      [
+        "policy-check",
+        "--schema",
+        "schema.json",
+        "--query",
+        "query.json",
+        "--policy-profile-id",
+        "llm-readonly-strict",
+        "--report-out",
+        "out/policy.json"
+      ],
+      io
+    );
 
     assert.equal(code, 0);
     assert.equal(stderr, "");
     assert.ok(stdout.includes("cypher-llm-policy-report/v1"));
+    assert.ok(stdout.includes("llm-readonly-strict"));
     assert.ok(writes.get("out/policy.json")?.includes("policy-unfiltered-label-scan"));
+  });
+
+  it("prints and writes policy profile catalogs", async () => {
+    const writes = new Map<string, string>();
+    let stdout = "";
+    let stderr = "";
+    const io: CliIO = {
+      stdout: { write: (chunk: string | Uint8Array) => ((stdout += String(chunk)), true) },
+      stderr: { write: (chunk: string | Uint8Array) => ((stderr += String(chunk)), true) },
+      readFile: async () => "",
+      writeFile: async (path, data) => {
+        writes.set(path, data);
+      },
+      mkdir: async () => undefined
+    };
+
+    const jsonCode = await runCli(["policy-profiles", "--profiles-out", "out/policy-profiles.json"], io);
+    const markdownCode = await runCli(["policy-profiles", "--format", "markdown"], io);
+
+    assert.equal(jsonCode, 0);
+    assert.equal(markdownCode, 0);
+    assert.equal(stderr, "");
+    assert.ok(stdout.includes("cypher-llm-policy-profile-catalog/v1"));
+    assert.ok(stdout.includes("# Cypher Policy Profiles"));
+    assert.ok(writes.get("out/policy-profiles.json")?.includes("llm-readonly-strict"));
   });
 
   it("emits LSP diagnostics and code actions", async () => {
