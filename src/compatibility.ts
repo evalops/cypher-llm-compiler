@@ -1,3 +1,8 @@
+import { createHash } from "node:crypto";
+import { existsSync, readFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+
 export type CompatibilityLevel = "stable" | "preview" | "experimental";
 
 export type CompatibilityCategory =
@@ -22,6 +27,14 @@ export interface CompatibilityLevelDefinition {
   consumerGuidance: string;
 }
 
+export type CompatibilityContractFingerprintKind = "schema" | "example";
+
+export interface CompatibilityContractFingerprint {
+  kind: CompatibilityContractFingerprintKind;
+  path: string;
+  sha256: string;
+}
+
 export interface CompatibilityContract {
   id: string;
   version: string;
@@ -31,6 +44,7 @@ export interface CompatibilityContract {
   schemaPath?: string;
   examplePaths: string[];
   evidencePaths: string[];
+  fingerprints?: CompatibilityContractFingerprint[];
   breakingChangePolicy: string;
   deprecationPolicy: string;
 }
@@ -70,8 +84,11 @@ export interface CompatibilityIntegrityReport {
 }
 
 const PACKAGE_VERSION = "0.1.0";
+const SELF_GENERATED_CATALOG_EXAMPLE = "examples/governance/compatibility-catalog.json";
+const MODULE_DIR = dirname(fileURLToPath(import.meta.url));
+const PACKAGE_ROOT_CANDIDATES = [resolve(MODULE_DIR, "..", ".."), resolve(MODULE_DIR, ".."), process.cwd()];
 
-export const compatibilityCatalog = {
+const compatibilityCatalogBase = {
   version: "cypher-llm-compatibility-catalog/v1",
   generatedAt: "2026-05-10",
   packageName: "@evalops/cypher-llm-compiler",
@@ -227,11 +244,13 @@ export const compatibilityCatalog = {
   }
 } as const satisfies CompatibilityCatalog;
 
+export const compatibilityCatalog = withContractFingerprints(compatibilityCatalogBase);
+
 export function buildCompatibilityCatalog(): CompatibilityCatalog {
-  return JSON.parse(JSON.stringify(compatibilityCatalog)) as CompatibilityCatalog;
+  return withContractFingerprints(compatibilityCatalogBase);
 }
 
-export function compatibilityIntegrityReport(catalog: CompatibilityCatalog = compatibilityCatalog): CompatibilityIntegrityReport {
+export function compatibilityIntegrityReport(catalog: CompatibilityCatalog = buildCompatibilityCatalog()): CompatibilityIntegrityReport {
   const diagnostics: string[] = [];
   const levels = new Set(catalog.levels.map((level) => level.level));
   const contracts = new Set<string>();
@@ -253,6 +272,28 @@ export function compatibilityIntegrityReport(catalog: CompatibilityCatalog = com
     }
     if (contract.level === "stable" && contract.breakingChangePolicy.length === 0) {
       diagnostics.push(`stable contract ${contract.id} has no breaking-change policy`);
+    }
+    const fingerprintKeys = new Set<string>();
+    for (const fingerprint of contract.fingerprints ?? []) {
+      const key = `${fingerprint.kind}:${fingerprint.path}`;
+      if (fingerprintKeys.has(key)) {
+        diagnostics.push(`contract ${contract.id} has duplicate fingerprint ${key}`);
+      }
+      fingerprintKeys.add(key);
+      if (!/^[a-f0-9]{64}$/.test(fingerprint.sha256)) {
+        diagnostics.push(`contract ${contract.id} fingerprint ${key} is not a sha256 digest`);
+      }
+    }
+    if (contract.schemaPath && !fingerprintKeys.has(`schema:${contract.schemaPath}`)) {
+      diagnostics.push(`contract ${contract.id} schema path has no fingerprint: ${contract.schemaPath}`);
+    }
+    for (const examplePath of contract.examplePaths) {
+      if (examplePath === SELF_GENERATED_CATALOG_EXAMPLE) {
+        continue;
+      }
+      if (!fingerprintKeys.has(`example:${examplePath}`)) {
+        diagnostics.push(`contract ${contract.id} example path has no fingerprint: ${examplePath}`);
+      }
     }
   }
 
@@ -292,10 +333,14 @@ export function renderCompatibilityCatalogMarkdown(catalog: CompatibilityCatalog
 
   lines.push("", "## Contracts", "");
   for (const contract of catalog.contracts) {
+    const fingerprints = (contract.fingerprints ?? [])
+      .map((fingerprint) => `${fingerprint.kind}:${fingerprint.path}@${fingerprint.sha256.slice(0, 12)}`)
+      .join(", ");
     lines.push(
       `- ${contract.version}: ${contract.level} ${contract.category}`,
       `  Evidence: ${contract.evidencePaths.join(", ")}`,
-      `  Examples: ${contract.examplePaths.join(", ")}`
+      `  Examples: ${contract.examplePaths.join(", ")}`,
+      `  Fingerprints: ${fingerprints || "none"}`
     );
   }
 
@@ -328,4 +373,49 @@ function stableContract(
     breakingChangePolicy: "Requires a new versioned contract or an explicit migration note before release.",
     deprecationPolicy: "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
   };
+}
+
+function withContractFingerprints(catalog: CompatibilityCatalog): CompatibilityCatalog {
+  const clone = JSON.parse(JSON.stringify(catalog)) as CompatibilityCatalog;
+  clone.contracts = clone.contracts.map((contract) => ({
+    ...contract,
+    fingerprints: contractFingerprints(contract)
+  }));
+  return clone;
+}
+
+function contractFingerprints(contract: CompatibilityContract): CompatibilityContractFingerprint[] {
+  const fingerprints: CompatibilityContractFingerprint[] = [];
+  if (contract.schemaPath) {
+    fingerprints.push({
+      kind: "schema",
+      path: contract.schemaPath,
+      sha256: fingerprintPackagePath(contract.schemaPath)
+    });
+  }
+  for (const examplePath of contract.examplePaths) {
+    if (examplePath === SELF_GENERATED_CATALOG_EXAMPLE) {
+      continue;
+    }
+    fingerprints.push({
+      kind: "example",
+      path: examplePath,
+      sha256: fingerprintPackagePath(examplePath)
+    });
+  }
+  return fingerprints;
+}
+
+function fingerprintPackagePath(relativePath: string): string {
+  return createHash("sha256").update(readPackageFile(relativePath)).digest("hex");
+}
+
+function readPackageFile(relativePath: string): Buffer {
+  for (const root of PACKAGE_ROOT_CANDIDATES) {
+    const absolutePath = resolve(root, relativePath);
+    if (existsSync(absolutePath)) {
+      return readFileSync(absolutePath);
+    }
+  }
+  throw new Error(`Unable to fingerprint package path: ${relativePath}`);
 }

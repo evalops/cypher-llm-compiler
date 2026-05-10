@@ -525,13 +525,13 @@ export const CYPHER_COMPILER_TOOLS: readonly CypherCompilerToolDefinition[] = [
   {
     name: "cypher_compatibility_catalog",
     description:
-      "Return the machine-readable compatibility catalog: contract versions, stability levels, release gates, certification gates, and deprecation policy.",
+      "Return the machine-readable compatibility catalog: contract versions, stability levels, schema/example fingerprints, release gates, certification gates, and deprecation policy.",
     inputSchema: objectSchema([], {})
   },
   {
     name: "cypher_compatibility_diff",
     description:
-      "Compare two compatibility catalogs and classify added, removed, changed, warning, and breaking public contract changes.",
+      "Compare two compatibility catalogs and classify added, removed, changed, fingerprint, warning, and breaking public contract changes.",
     inputSchema: objectSchema(["baseline"], {
       baseline: compatibilityCatalogSchema,
       candidate: compatibilityCatalogSchema

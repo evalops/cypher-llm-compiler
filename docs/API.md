@@ -207,7 +207,7 @@ Produces a `cypher-llm-compatibility-catalog/v1` object for governance and relea
 The catalog includes:
 
 - Compatibility levels: `stable`, `preview`, and `experimental`.
-- Public contract entries with category, owner workstream, schema path, examples, evidence, breaking-change policy, and deprecation policy.
+- Public contract entries with category, owner workstream, schema path, examples, evidence, schema/example fingerprints, breaking-change policy, and deprecation policy.
 - Release gates and certification gates with concrete commands.
 - A shared deprecation policy for stable and preview contracts.
 
@@ -219,6 +219,7 @@ The report includes:
 
 - Baseline and candidate catalog summaries.
 - Added, removed, and changed contracts.
+- Contract fingerprint additions, removals, and digest changes.
 - Release-gate and certification-gate changes.
 - Deprecation-policy changes.
 - A pass/fail status based on breaking changes.

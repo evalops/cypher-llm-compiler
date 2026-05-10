@@ -45,8 +45,8 @@ This package implements twenty-eight concrete improvements:
 22. **Service manifest and controls**: Agent runtimes can discover HTTP routes, auth posture, request limits, audit redaction, and data-boundary guarantees.
 23. **Benchmark gates**: CI can publish pass/fail CypherBench gates over metric regressions, pass-rate floors, executable-rate floors, and optional diagnostic regressions.
 24. **Agent feedback packets**: LLM clients can receive proof, repair plan, policy evidence, and a concrete next action in one stable JSON object.
-25. **Compatibility catalog**: Contract versions, stability levels, release gates, certification gates, and deprecation rules are machine-readable.
-26. **Compatibility diff gates**: Release automation can compare catalogs and fail on removed or reshaped stable contracts.
+25. **Compatibility catalog**: Contract versions, stability levels, schema/example fingerprints, release gates, certification gates, and deprecation rules are machine-readable.
+26. **Compatibility diff gates**: Release automation can compare catalogs and fail on removed, reshaped, or fingerprint-changed stable contracts.
 27. **Agent guide bundle**: LLM clients can fetch workflow rules, tool sequences, execution blockers, and diagnostic playbooks as JSON.
 28. **Diagnostic catalog**: Every stable diagnostic code has machine-readable severity, source, category, preferred action, and model instruction metadata.
 
@@ -225,9 +225,9 @@ npm run test:live:neo4j
 
 `roadmap` emits the years-scale public workstream and capability ledger as JSON or markdown.
 
-`compatibility` emits a `cypher-llm-compatibility-catalog/v1` catalog of public contract versions, stability levels, release gates, certification gates, and deprecation policy.
+`compatibility` emits a `cypher-llm-compatibility-catalog/v1` catalog of public contract versions, stability levels, schema/example fingerprints, release gates, certification gates, and deprecation policy.
 
-`compatibility-diff` emits a `cypher-llm-compatibility-diff/v1` report comparing a baseline catalog against a candidate catalog or the current runtime catalog.
+`compatibility-diff` emits a `cypher-llm-compatibility-diff/v1` report comparing a baseline catalog against a candidate catalog or the current runtime catalog, including contract fingerprint drift.
 
 `certify-dialects` emits a `cypher-llm-dialect-certification/v1` report that checks profile metadata, renderer behavior, parser acceptance, semantic feature gates, and known rendering limitations.
 

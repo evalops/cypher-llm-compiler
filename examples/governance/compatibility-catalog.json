@@ -40,7 +40,19 @@
         "test/render.test.ts"
       ],
       "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
-      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path.",
+      "fingerprints": [
+        {
+          "kind": "schema",
+          "path": "schemas/cypher-query.schema.json",
+          "sha256": "063f3e696b1010b20fe6613f6a0148c92fbde721604f3bc9acfa96b787f55718"
+        },
+        {
+          "kind": "example",
+          "path": "examples/tool-hash.query.json",
+          "sha256": "9a9fa4142335941517bc2bef6980f1b0fc8570358a444950bbbbcd862c21f76d"
+        }
+      ]
     },
     {
       "id": "schema-contract",
@@ -58,7 +70,19 @@
         "test/compiler-loop.test.ts"
       ],
       "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
-      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path.",
+      "fingerprints": [
+        {
+          "kind": "schema",
+          "path": "schemas/cypher-schema-contract.schema.json",
+          "sha256": "a6c70c7befedcc361cbe48ed299dff275007fd1cafcd4ceb10f4f2e89af773e5"
+        },
+        {
+          "kind": "example",
+          "path": "examples/tool-hash.schema.json",
+          "sha256": "1a121163ee78ed5ccaf6a3720006ee7bf89a9dc164edc0e23ac9d41de1552ed3"
+        }
+      ]
     },
     {
       "id": "diagnostic-shape",
@@ -76,7 +100,19 @@
         "docs/COMPATIBILITY.md"
       ],
       "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
-      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path.",
+      "fingerprints": [
+        {
+          "kind": "example",
+          "path": "examples/lsp/tool-hash.lsp.json",
+          "sha256": "10222d092e4eb3e868576dec2d47c4e0ef0d485bbe8e6bdda5e6c8310da9b2d3"
+        },
+        {
+          "kind": "example",
+          "path": "examples/proofs/tool-hash.proof.json",
+          "sha256": "fd1d0435757906a8b0b749ff478accd6d6a0c7031349edb5dc7547d1d80553f4"
+        }
+      ]
     },
     {
       "id": "diagnostic-catalog",
@@ -93,7 +129,19 @@
         "test/diagnostic-catalog.test.ts"
       ],
       "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
-      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path.",
+      "fingerprints": [
+        {
+          "kind": "schema",
+          "path": "schemas/diagnostic-catalog.schema.json",
+          "sha256": "ddee36178d6a849ae1a32c427cd7a0c790bf1cb4f581d0ca2e3967534f226fda"
+        },
+        {
+          "kind": "example",
+          "path": "examples/diagnostics/diagnostic-catalog.json",
+          "sha256": "3f0a55a694b4427bf8432e0404c5050b10bea635cd1d6d2c7ae253fef35b396b"
+        }
+      ]
     },
     {
       "id": "eval-dataset",
@@ -110,7 +158,19 @@
         "test/evals.test.ts"
       ],
       "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
-      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path.",
+      "fingerprints": [
+        {
+          "kind": "schema",
+          "path": "schemas/eval-dataset.schema.json",
+          "sha256": "7d2b2c1344bf5a7e0013ac65fdf4d4c29decfdc32bc00dc8d5ee3b6f55f64674"
+        },
+        {
+          "kind": "example",
+          "path": "examples/eval-dataset.json",
+          "sha256": "e9164c375da435865d8d6022658ab6ffff5d30d2ecbc09a9c451d795228d276a"
+        }
+      ]
     },
     {
       "id": "eval-attempts",
@@ -127,7 +187,19 @@
         "test/evals.test.ts"
       ],
       "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
-      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path.",
+      "fingerprints": [
+        {
+          "kind": "schema",
+          "path": "schemas/eval-attempts.schema.json",
+          "sha256": "b10dfa4ade00e1012bff58c8c34bfeae546a5c8ad592788d216c30b8b4aebe4b"
+        },
+        {
+          "kind": "example",
+          "path": "examples/eval-attempts.json",
+          "sha256": "b71b4276d43d1a09066fe1f4ef44f5a4e344e1585969065c946ef2e52a415b47"
+        }
+      ]
     },
     {
       "id": "dialect-profile",
@@ -146,7 +218,29 @@
         "test/dialects.test.ts"
       ],
       "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
-      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path.",
+      "fingerprints": [
+        {
+          "kind": "schema",
+          "path": "schemas/dialect-profile.schema.json",
+          "sha256": "1af1bc049bac1b6f4b3b7671ffdc3087b712dfff03a4620d64845e04b869114c"
+        },
+        {
+          "kind": "example",
+          "path": "profiles/neo4j-cypher-25.json",
+          "sha256": "eb379d32ddfc28f7372862d4ed645397994e0014fe8ed180bffc2a8e3051073a"
+        },
+        {
+          "kind": "example",
+          "path": "profiles/opencypher-9.json",
+          "sha256": "b68b0014fe5d6b10f9075111fd1c3e6582b26e9d2b5c8f419ae8d5e8c645b301"
+        },
+        {
+          "kind": "example",
+          "path": "profiles/gql.json",
+          "sha256": "a4f46fdf54043fd767315414ba30ceccbd3d85409ebb3e789d1161f7ac73282a"
+        }
+      ]
     },
     {
       "id": "dialect-certification",
@@ -163,7 +257,19 @@
         "test/dialect-certification.test.ts"
       ],
       "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
-      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path.",
+      "fingerprints": [
+        {
+          "kind": "schema",
+          "path": "schemas/dialect-certification.schema.json",
+          "sha256": "36fa6d99dde60ae2466a210472736daec85f2ce83a6ad21d6c0829433ff8c7df"
+        },
+        {
+          "kind": "example",
+          "path": "examples/certification/dialect-certification.json",
+          "sha256": "3dc01a80986276474089a74aaad69354cbc61e9e3cd3d62eca9743d81b1f3325"
+        }
+      ]
     },
     {
       "id": "proof",
@@ -180,7 +286,19 @@
         "test/proof.test.ts"
       ],
       "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
-      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path.",
+      "fingerprints": [
+        {
+          "kind": "schema",
+          "path": "schemas/cypher-proof.schema.json",
+          "sha256": "b5262214d1ee50c1b851b5357bb387f8d5a4c3970ad5483b1384e521255f6148"
+        },
+        {
+          "kind": "example",
+          "path": "examples/proofs/tool-hash.proof.json",
+          "sha256": "fd1d0435757906a8b0b749ff478accd6d6a0c7031349edb5dc7547d1d80553f4"
+        }
+      ]
     },
     {
       "id": "repair-plan",
@@ -197,7 +315,19 @@
         "test/repair-plan.test.ts"
       ],
       "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
-      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path.",
+      "fingerprints": [
+        {
+          "kind": "schema",
+          "path": "schemas/repair-plan.schema.json",
+          "sha256": "dcdbc329d39bab7a6ee1ffb071b19ebcdca372cf1a12b0898c237a2d46530073"
+        },
+        {
+          "kind": "example",
+          "path": "examples/proofs/tool-hash.repair-plan.json",
+          "sha256": "507728a29e149c2dba414e719945ceba27afec263ccf7c59794a859ff4b4b347"
+        }
+      ]
     },
     {
       "id": "agent-feedback",
@@ -214,7 +344,19 @@
         "test/agent-feedback.test.ts"
       ],
       "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
-      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path.",
+      "fingerprints": [
+        {
+          "kind": "schema",
+          "path": "schemas/agent-feedback.schema.json",
+          "sha256": "ea4e8f3c0623f804cb8b6e5235956a64d90e03ca350bd29bc1e756cb5ff3d821"
+        },
+        {
+          "kind": "example",
+          "path": "examples/proofs/tool-hash.agent-feedback.json",
+          "sha256": "9a4989647dc6f099c0b90cad18b86f50a4f44453b3154456eafde5fa195b6c0c"
+        }
+      ]
     },
     {
       "id": "agent-guide",
@@ -231,7 +373,19 @@
         "test/agent-guide.test.ts"
       ],
       "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
-      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path.",
+      "fingerprints": [
+        {
+          "kind": "schema",
+          "path": "schemas/agent-guide.schema.json",
+          "sha256": "a29e8a5c8eb0aaf874de7301dbad8226b911b44970d93ddfed7bee5b40d35b63"
+        },
+        {
+          "kind": "example",
+          "path": "examples/agent/agent-guide.json",
+          "sha256": "aabcd433c7039cb37f30f3e7ade577f95cabdc7777f7f7df6c8c20a0ca08f5c0"
+        }
+      ]
     },
     {
       "id": "policy-report",
@@ -248,7 +402,19 @@
         "test/policy.test.ts"
       ],
       "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
-      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path.",
+      "fingerprints": [
+        {
+          "kind": "schema",
+          "path": "schemas/policy-report.schema.json",
+          "sha256": "798c0e0cd3026c10781bd117ed931dfefe3648946d43bb4f76a4aaadec0751e1"
+        },
+        {
+          "kind": "example",
+          "path": "examples/policy/tool-hash.policy.json",
+          "sha256": "f55acb3512377d9fbfa95ff12c899d9d359379ab5f180b83c8ee21aa6b0eaf24"
+        }
+      ]
     },
     {
       "id": "policy-profile-catalog",
@@ -265,7 +431,19 @@
         "test/policy-profile.test.ts"
       ],
       "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
-      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path.",
+      "fingerprints": [
+        {
+          "kind": "schema",
+          "path": "schemas/policy-profile.schema.json",
+          "sha256": "b19ea5f8e19206199c9f3c43bf7cd860ac83577edf4859c47827e400c0d1eff6"
+        },
+        {
+          "kind": "example",
+          "path": "examples/policy/policy-profiles.json",
+          "sha256": "d5199f47b07511f3b772a80c30d771e940a11f2330a9e9a276f8f0fb179089bf"
+        }
+      ]
     },
     {
       "id": "policy-rules",
@@ -282,7 +460,19 @@
         "test/policy.test.ts"
       ],
       "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
-      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path.",
+      "fingerprints": [
+        {
+          "kind": "schema",
+          "path": "schemas/policy-rules.schema.json",
+          "sha256": "69958ccc2159af097b64fd6aeccdf4c06c0aa74217a0b61f6124472cf4860664"
+        },
+        {
+          "kind": "example",
+          "path": "examples/policy/tool-hash.policy-rules.json",
+          "sha256": "5303342bbdd750e1ebd0ff11faf80cb51d000a21dfc22253ae96d0885809856f"
+        }
+      ]
     },
     {
       "id": "planner-estimate",
@@ -299,7 +489,19 @@
         "test/planner-estimate.test.ts"
       ],
       "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
-      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path.",
+      "fingerprints": [
+        {
+          "kind": "schema",
+          "path": "schemas/planner-estimate.schema.json",
+          "sha256": "0ae1e62be783c31053ae0098bb01485a97a5109e2892978ac86d939582639280"
+        },
+        {
+          "kind": "example",
+          "path": "examples/policy/tool-hash.planner-estimate.json",
+          "sha256": "e653729cfbfa2ee2c4db64c61c3592c3aaa43785c7b0226ffc9b85526879a074"
+        }
+      ]
     },
     {
       "id": "schema-statistics",
@@ -316,7 +518,19 @@
         "test/schema-statistics.test.ts"
       ],
       "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
-      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path.",
+      "fingerprints": [
+        {
+          "kind": "schema",
+          "path": "schemas/schema-statistics.schema.json",
+          "sha256": "9161b7b3485ff3457d660ca1032acd67e096624d52965e4ccf58b86f7844b2b0"
+        },
+        {
+          "kind": "example",
+          "path": "examples/policy/tool-hash.schema-statistics.json",
+          "sha256": "d19e095c6954d48a6ead5030c098f38a2dd9682c97d3173081a1d100128eac39"
+        }
+      ]
     },
     {
       "id": "lsp-diagnostics",
@@ -333,7 +547,19 @@
         "test/lsp.test.ts"
       ],
       "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
-      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path.",
+      "fingerprints": [
+        {
+          "kind": "schema",
+          "path": "schemas/lsp-diagnostics.schema.json",
+          "sha256": "debc75928cfe7445b870d3e64770cd28a30d832f81276ac48b4a24bb14dfb774"
+        },
+        {
+          "kind": "example",
+          "path": "examples/lsp/tool-hash.lsp.json",
+          "sha256": "10222d092e4eb3e868576dec2d47c4e0ef0d485bbe8e6bdda5e6c8310da9b2d3"
+        }
+      ]
     },
     {
       "id": "lossless-parse",
@@ -350,7 +576,19 @@
         "test/lossless-parser.test.ts"
       ],
       "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
-      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path.",
+      "fingerprints": [
+        {
+          "kind": "schema",
+          "path": "schemas/lossless-parse.schema.json",
+          "sha256": "8ec9f4f1bf4f23331190a5752d30806d4654471ecbe12039444086035e2f7d9c"
+        },
+        {
+          "kind": "example",
+          "path": "examples/lossless/tool-hash.lossless.json",
+          "sha256": "718df3ec479bdb9398668b33f3987c5e7d93806a0e8bf6cefd4efe009fc1f69e"
+        }
+      ]
     },
     {
       "id": "scorecard",
@@ -367,7 +605,19 @@
         "test/scorecard.test.ts"
       ],
       "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
-      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path.",
+      "fingerprints": [
+        {
+          "kind": "schema",
+          "path": "schemas/cypherbench-scorecard.schema.json",
+          "sha256": "f3959026032687db82ed5718f446a68674cdbd3498a0dd828013f33efe0338a8"
+        },
+        {
+          "kind": "example",
+          "path": "examples/benchmarks/tool-hash.scorecard.json",
+          "sha256": "00db9e1d88ad48fff417df941ffbcf1e0f5e9fb82111521e622b24cfa25c8988"
+        }
+      ]
     },
     {
       "id": "benchmark-gate",
@@ -384,7 +634,19 @@
         "test/benchmark-gate.test.ts"
       ],
       "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
-      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path.",
+      "fingerprints": [
+        {
+          "kind": "schema",
+          "path": "schemas/benchmark-gate.schema.json",
+          "sha256": "c7cfb2a21000c03affa7a27ac91683606f8eaadc3432f0f3ad6ac4bd1035794f"
+        },
+        {
+          "kind": "example",
+          "path": "examples/benchmarks/tool-hash.benchmark-gate.json",
+          "sha256": "411e871550a0c20d20ba4a6979861f04483514c53d5baa54dfc15df92f283ed4"
+        }
+      ]
     },
     {
       "id": "dataset-governance",
@@ -401,7 +663,19 @@
         "test/dataset-governance.test.ts"
       ],
       "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
-      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path.",
+      "fingerprints": [
+        {
+          "kind": "schema",
+          "path": "schemas/dataset-governance.schema.json",
+          "sha256": "178c6138d16cf57c982d0fad613c237be3907963ec8220f2fdaa7eced9e542ef"
+        },
+        {
+          "kind": "example",
+          "path": "examples/benchmarks/tool-hash.dataset-governance.json",
+          "sha256": "41ceb376dfed3b8e08474b3bee9b667bca3f80bcb8cb4b06d00deb5535de473a"
+        }
+      ]
     },
     {
       "id": "service-manifest",
@@ -418,7 +692,19 @@
         "test/service-manifest.test.ts"
       ],
       "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
-      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path.",
+      "fingerprints": [
+        {
+          "kind": "schema",
+          "path": "schemas/service-manifest.schema.json",
+          "sha256": "d279fd47b97573c783788572daecff9c9de7fa8cad0fb6c67fb2bd57e24b07e1"
+        },
+        {
+          "kind": "example",
+          "path": "examples/service/service-manifest.json",
+          "sha256": "47148fb856856313f7a98b9dbfb5603646030efc7de2a0b5029638cc1d4c1ab7"
+        }
+      ]
     },
     {
       "id": "years-roadmap",
@@ -435,7 +721,19 @@
         "test/years-roadmap.test.ts"
       ],
       "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
-      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path.",
+      "fingerprints": [
+        {
+          "kind": "schema",
+          "path": "schemas/years-roadmap.schema.json",
+          "sha256": "77a3a2c5f440137b23e615f071e8a188f75fe10bbc6a860f4d8a2cd761cb4e18"
+        },
+        {
+          "kind": "example",
+          "path": "examples/roadmap/cypher-llm-years-roadmap.json",
+          "sha256": "03b8ab08ddf63b9e5bfc12292dc6908bce3088d0d25be0bf6d45acf6b9fae4c4"
+        }
+      ]
     },
     {
       "id": "compatibility-catalog",
@@ -452,7 +750,14 @@
         "test/compatibility.test.ts"
       ],
       "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
-      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path.",
+      "fingerprints": [
+        {
+          "kind": "schema",
+          "path": "schemas/compatibility-catalog.schema.json",
+          "sha256": "0e6a225d5ff0c325df4e44b6e62e6b98dd8e81b473cdb74817e56cb938229d91"
+        }
+      ]
     },
     {
       "id": "compatibility-diff",
@@ -469,7 +774,19 @@
         "test/compatibility.test.ts"
       ],
       "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
-      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path."
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path.",
+      "fingerprints": [
+        {
+          "kind": "schema",
+          "path": "schemas/compatibility-diff.schema.json",
+          "sha256": "64d5d8646e4868239ba8f680e3c55b6f7fe9e5484434b8694abd7d7bf4edf95d"
+        },
+        {
+          "kind": "example",
+          "path": "examples/governance/compatibility-diff.json",
+          "sha256": "2e0210df8c3698138e6fbb3e2bfa701327dba275c3d3bfba26a41c37c5c6dbe3"
+        }
+      ]
     }
   ],
   "releaseGates": [

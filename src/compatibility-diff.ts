@@ -2,6 +2,7 @@ import {
   buildCompatibilityCatalog,
   type CompatibilityCatalog,
   type CompatibilityContract,
+  type CompatibilityContractFingerprint,
   type CompatibilityGate,
   type CompatibilityLevel
 } from "./compatibility.js";
@@ -9,7 +10,12 @@ import {
 export type CompatibilityDiffStatus = "passed" | "failed";
 export type CompatibilityDiffSeverity = "info" | "warning" | "breaking";
 export type CompatibilityDiffKind = "added" | "removed" | "changed";
-export type CompatibilityDiffTarget = "contract" | "release-gate" | "certification-gate" | "deprecation-policy";
+export type CompatibilityDiffTarget =
+  | "contract"
+  | "contract-fingerprint"
+  | "release-gate"
+  | "certification-gate"
+  | "deprecation-policy";
 
 export interface CompatibilityDiffChange {
   kind: CompatibilityDiffKind;
@@ -172,6 +178,7 @@ function diffContracts(
         message: `Evidence path was removed from the contract: ${removedEvidence}.`
       });
     }
+    diffContractFingerprints(baseline, candidate, changes);
   }
 
   for (const candidate of candidateContracts) {
@@ -183,6 +190,57 @@ function diffContracts(
         id: candidate.id,
         candidateValue: candidate.version,
         message: `Added ${candidate.level} contract ${candidate.version}.`
+      });
+    }
+  }
+}
+
+function diffContractFingerprints(
+  baseline: CompatibilityContract,
+  candidate: CompatibilityContract,
+  changes: CompatibilityDiffChange[]
+) {
+  const baselineFingerprints = fingerprintMap(baseline.fingerprints ?? []);
+  const candidateFingerprints = fingerprintMap(candidate.fingerprints ?? []);
+
+  for (const [key, baselineFingerprint] of baselineFingerprints) {
+    const candidateFingerprint = candidateFingerprints.get(key);
+    if (!candidateFingerprint) {
+      changes.push({
+        kind: "removed",
+        severity: removalSeverity(baseline.level),
+        target: "contract-fingerprint",
+        id: baseline.id,
+        field: key,
+        baselineValue: baselineFingerprint.sha256,
+        message: `Removed ${baselineFingerprint.kind} fingerprint for ${baselineFingerprint.path}.`
+      });
+      continue;
+    }
+    if (baselineFingerprint.sha256 !== candidateFingerprint.sha256) {
+      changes.push({
+        kind: "changed",
+        severity: versionChangeSeverity(baseline.level),
+        target: "contract-fingerprint",
+        id: baseline.id,
+        field: key,
+        baselineValue: baselineFingerprint.sha256,
+        candidateValue: candidateFingerprint.sha256,
+        message: `${baselineFingerprint.kind} fingerprint changed for ${baselineFingerprint.path}.`
+      });
+    }
+  }
+
+  for (const [key, candidateFingerprint] of candidateFingerprints) {
+    if (!baselineFingerprints.has(key)) {
+      changes.push({
+        kind: "added",
+        severity: "info",
+        target: "contract-fingerprint",
+        id: candidate.id,
+        field: key,
+        candidateValue: candidateFingerprint.sha256,
+        message: `Added ${candidateFingerprint.kind} fingerprint for ${candidateFingerprint.path}.`
       });
     }
   }
@@ -331,6 +389,10 @@ function summarizeCatalog(catalog: CompatibilityCatalog): CompatibilityCatalogSu
 function removedItems<T extends string>(baseline: readonly T[], candidate: readonly T[]): T[] {
   const candidateSet = new Set(candidate);
   return baseline.filter((item) => !candidateSet.has(item));
+}
+
+function fingerprintMap(fingerprints: readonly CompatibilityContractFingerprint[]): Map<string, CompatibilityContractFingerprint> {
+  return new Map(fingerprints.map((fingerprint) => [`${fingerprint.kind}:${fingerprint.path}`, fingerprint]));
 }
 
 function levelRank(level: CompatibilityLevel): number {

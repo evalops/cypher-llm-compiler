@@ -36,6 +36,17 @@ describe("compatibility catalog", () => {
     assert.ok(catalog.contracts.some((contract) => contract.id === "diagnostic-shape" && contract.category === "diagnostic"));
     assert.ok(catalog.contracts.some((contract) => contract.id === "service-manifest" && contract.category === "service"));
     assert.ok(catalog.contracts.some((contract) => contract.id === "compatibility-catalog" && contract.schemaPath));
+    assert.ok(
+      catalog.contracts.some((contract) =>
+        contract.id === "cypher-query-ir" &&
+        contract.fingerprints?.some(
+          (fingerprint) =>
+            fingerprint.kind === "schema" &&
+            fingerprint.path === "schemas/cypher-query.schema.json" &&
+            /^[a-f0-9]{64}$/.test(fingerprint.sha256)
+        )
+      )
+    );
     assert.ok(catalog.releaseGates.some((gate) => gate.command === "npm test"));
     assert.equal(integrity.ok, true);
   });
@@ -45,6 +56,7 @@ describe("compatibility catalog", () => {
 
     assert.ok(markdown.includes("# Compatibility Catalog"));
     assert.ok(markdown.includes("cypher-llm-ir/v1"));
+    assert.ok(markdown.includes("Fingerprints:"));
     assert.ok(markdown.includes("npm test"));
   });
 
@@ -66,11 +78,24 @@ describe("compatibility catalog", () => {
     const candidate = buildCompatibilityCatalog();
     candidate.contracts = candidate.contracts.filter((contract) => contract.id !== "cypher-query-ir");
     const removedStable = buildCompatibilityDiffReport(baseline, candidate);
+    const fingerprintCandidate = buildCompatibilityCatalog();
+    const fingerprintContract = fingerprintCandidate.contracts.find((contract) => contract.id === "cypher-query-ir");
+    assert.ok(fingerprintContract?.fingerprints?.[0]);
+    fingerprintContract.fingerprints = fingerprintContract.fingerprints.map((fingerprint, index) =>
+      index === 0 ? { ...fingerprint, sha256: "0".repeat(64) } : fingerprint
+    );
+    const changedFingerprint = buildCompatibilityDiffReport(baseline, fingerprintCandidate);
 
     assert.equal(unchanged.status, "passed");
     assert.equal(unchanged.summary.changes, 0);
     assert.equal(removedStable.status, "failed");
     assert.ok(removedStable.changes.some((change) => change.id === "cypher-query-ir" && change.severity === "breaking"));
+    assert.equal(changedFingerprint.status, "failed");
+    assert.ok(
+      changedFingerprint.changes.some(
+        (change) => change.id === "cypher-query-ir" && change.target === "contract-fingerprint" && change.severity === "breaking"
+      )
+    );
     assert.ok(renderCompatibilityDiffMarkdown(removedStable).includes("# Compatibility Diff"));
   });
 

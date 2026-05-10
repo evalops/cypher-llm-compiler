@@ -105,6 +105,7 @@
         "ownerWorkstreamId",
         "examplePaths",
         "evidencePaths",
+        "fingerprints",
         "breakingChangePolicy",
         "deprecationPolicy"
       ],
@@ -117,8 +118,23 @@
         "schemaPath": { "type": "string", "minLength": 1 },
         "examplePaths": { "$ref": "#/$defs/stringList" },
         "evidencePaths": { "$ref": "#/$defs/stringList" },
+        "fingerprints": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/fingerprint" },
+          "minItems": 1
+        },
         "breakingChangePolicy": { "type": "string", "minLength": 1 },
         "deprecationPolicy": { "type": "string", "minLength": 1 }
+      }
+    },
+    "fingerprint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "path", "sha256"],
+      "properties": {
+        "kind": { "enum": ["schema", "example"] },
+        "path": { "type": "string", "minLength": 1 },
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
       }
     },
     "gate": {

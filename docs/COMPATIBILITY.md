@@ -43,7 +43,7 @@ Run:
 cypher-llm compatibility --integrity --fail-on-error --catalog-out examples/governance/compatibility-catalog.json
 ```
 
-Compatibility catalogs are the machine-readable governance contract for public versions. They define stability levels, contract categories, schema and example evidence, release gates, certification gates, and deprecation policy. JSON output validates against `schemas/compatibility-catalog.schema.json`.
+Compatibility catalogs are the machine-readable governance contract for public versions. They define stability levels, contract categories, schema and example evidence, sha256 fingerprints for contract files, release gates, certification gates, and deprecation policy. JSON output validates against `schemas/compatibility-catalog.schema.json`.
 
 ## Compatibility Diff Gates
 
@@ -53,7 +53,7 @@ Run:
 cypher-llm compatibility-diff --baseline examples/governance/compatibility-catalog.json --fail-on-breaking
 ```
 
-Compatibility diff reports compare a baseline catalog against a candidate catalog or the current runtime catalog. They classify added, removed, and changed contracts, release gates, certification gates, and deprecation-policy fields as `info`, `warning`, or `breaking`. JSON output validates against `schemas/compatibility-diff.schema.json`.
+Compatibility diff reports compare a baseline catalog against a candidate catalog or the current runtime catalog. They classify added, removed, and changed contracts, contract fingerprints, release gates, certification gates, and deprecation-policy fields as `info`, `warning`, or `breaking`. JSON output validates against `schemas/compatibility-diff.schema.json`.
 
 ## Agent Guide
 
