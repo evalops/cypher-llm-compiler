@@ -1,0 +1,309 @@
+{
+  "version": "cypher-llm-eval-comparison/v1",
+  "baseline": {
+    "datasetName": "tool-hash-smoke",
+    "model": "raw-text2cypher-baseline",
+    "prompt": "Emit raw Cypher text."
+  },
+  "candidate": {
+    "datasetName": "tool-hash-smoke",
+    "model": "fixture-model",
+    "prompt": "Emit CypherQuery IR when possible."
+  },
+  "metrics": [
+    {
+      "metric": "totalTasks",
+      "baseline": 3,
+      "candidate": 3,
+      "delta": 0,
+      "percentChange": 0,
+      "direction": "informational",
+      "status": "info"
+    },
+    {
+      "metric": "attemptedTasks",
+      "baseline": 3,
+      "candidate": 3,
+      "delta": 0,
+      "percentChange": 0,
+      "direction": "informational",
+      "status": "info"
+    },
+    {
+      "metric": "missingAttempts",
+      "baseline": 0,
+      "candidate": 0,
+      "delta": 0,
+      "direction": "lower-is-better",
+      "status": "unchanged"
+    },
+    {
+      "metric": "passedTasks",
+      "baseline": 1,
+      "candidate": 3,
+      "delta": 2,
+      "percentChange": 2,
+      "direction": "higher-is-better",
+      "status": "improved"
+    },
+    {
+      "metric": "failedTasks",
+      "baseline": 2,
+      "candidate": 0,
+      "delta": -2,
+      "percentChange": -1,
+      "direction": "lower-is-better",
+      "status": "improved"
+    },
+    {
+      "metric": "irAttempts",
+      "baseline": 0,
+      "candidate": 2,
+      "delta": 2,
+      "direction": "informational",
+      "status": "info"
+    },
+    {
+      "metric": "rawAttempts",
+      "baseline": 2,
+      "candidate": 1,
+      "delta": -1,
+      "percentChange": -0.5,
+      "direction": "informational",
+      "status": "info"
+    },
+    {
+      "metric": "noCypherAttempts",
+      "baseline": 1,
+      "candidate": 0,
+      "delta": -1,
+      "percentChange": -1,
+      "direction": "lower-is-better",
+      "status": "improved"
+    },
+    {
+      "metric": "timeoutAttempts",
+      "baseline": 0,
+      "candidate": 0,
+      "delta": 0,
+      "direction": "lower-is-better",
+      "status": "unchanged"
+    },
+    {
+      "metric": "executablePlans",
+      "baseline": 0,
+      "candidate": 1,
+      "delta": 1,
+      "direction": "higher-is-better",
+      "status": "improved"
+    },
+    {
+      "metric": "repairApplied",
+      "baseline": 2,
+      "candidate": 2,
+      "delta": 0,
+      "percentChange": 0,
+      "direction": "informational",
+      "status": "info"
+    },
+    {
+      "metric": "expectedCypherMatches",
+      "baseline": 1,
+      "candidate": 3,
+      "delta": 2,
+      "percentChange": 2,
+      "direction": "higher-is-better",
+      "status": "improved"
+    },
+    {
+      "metric": "expectedDiagnosticMatches",
+      "baseline": 1,
+      "candidate": 2,
+      "delta": 1,
+      "percentChange": 1,
+      "direction": "higher-is-better",
+      "status": "improved"
+    },
+    {
+      "metric": "observedSyntaxErrors",
+      "baseline": 0,
+      "candidate": 0,
+      "delta": 0,
+      "direction": "lower-is-better",
+      "status": "unchanged"
+    },
+    {
+      "metric": "observedTimeouts",
+      "baseline": 0,
+      "candidate": 0,
+      "delta": 0,
+      "direction": "lower-is-better",
+      "status": "unchanged"
+    },
+    {
+      "metric": "observedNoCypher",
+      "baseline": 0,
+      "candidate": 0,
+      "delta": 0,
+      "direction": "lower-is-better",
+      "status": "unchanged"
+    },
+    {
+      "metric": "observedReturnsResults",
+      "baseline": 0,
+      "candidate": 0,
+      "delta": 0,
+      "direction": "informational",
+      "status": "info"
+    },
+    {
+      "metric": "expectedAnswerTasks",
+      "baseline": 0,
+      "candidate": 0,
+      "delta": 0,
+      "direction": "informational",
+      "status": "info"
+    },
+    {
+      "metric": "passRate",
+      "baseline": 0.3333,
+      "candidate": 1,
+      "delta": 0.6667,
+      "percentChange": 2.0003,
+      "direction": "higher-is-better",
+      "status": "improved"
+    },
+    {
+      "metric": "executableRate",
+      "baseline": 0,
+      "candidate": 0.3333,
+      "delta": 0.3333,
+      "direction": "higher-is-better",
+      "status": "improved"
+    },
+    {
+      "metric": "repairRate",
+      "baseline": 0.6667,
+      "candidate": 0.6667,
+      "delta": 0,
+      "percentChange": 0,
+      "direction": "informational",
+      "status": "info"
+    }
+  ],
+  "diagnostics": [
+    {
+      "code": "missing-limit",
+      "baseline": 0,
+      "candidate": 1,
+      "delta": 1,
+      "status": "regressed"
+    },
+    {
+      "code": "no-cypher-output",
+      "baseline": 1,
+      "candidate": 0,
+      "delta": -1,
+      "status": "improved"
+    },
+    {
+      "code": "raw-identifier-quoted",
+      "baseline": 2,
+      "candidate": 1,
+      "delta": -1,
+      "status": "improved"
+    },
+    {
+      "code": "relationship-direction-mismatch",
+      "baseline": 0,
+      "candidate": 1,
+      "delta": 1,
+      "status": "regressed"
+    },
+    {
+      "code": "undefined-variable",
+      "baseline": 0,
+      "candidate": 1,
+      "delta": 1,
+      "status": "regressed"
+    }
+  ],
+  "regressions": [],
+  "improvements": [
+    {
+      "metric": "passedTasks",
+      "baseline": 1,
+      "candidate": 3,
+      "delta": 2,
+      "percentChange": 2,
+      "direction": "higher-is-better",
+      "status": "improved"
+    },
+    {
+      "metric": "failedTasks",
+      "baseline": 2,
+      "candidate": 0,
+      "delta": -2,
+      "percentChange": -1,
+      "direction": "lower-is-better",
+      "status": "improved"
+    },
+    {
+      "metric": "noCypherAttempts",
+      "baseline": 1,
+      "candidate": 0,
+      "delta": -1,
+      "percentChange": -1,
+      "direction": "lower-is-better",
+      "status": "improved"
+    },
+    {
+      "metric": "executablePlans",
+      "baseline": 0,
+      "candidate": 1,
+      "delta": 1,
+      "direction": "higher-is-better",
+      "status": "improved"
+    },
+    {
+      "metric": "expectedCypherMatches",
+      "baseline": 1,
+      "candidate": 3,
+      "delta": 2,
+      "percentChange": 2,
+      "direction": "higher-is-better",
+      "status": "improved"
+    },
+    {
+      "metric": "expectedDiagnosticMatches",
+      "baseline": 1,
+      "candidate": 2,
+      "delta": 1,
+      "percentChange": 1,
+      "direction": "higher-is-better",
+      "status": "improved"
+    },
+    {
+      "metric": "passRate",
+      "baseline": 0.3333,
+      "candidate": 1,
+      "delta": 0.6667,
+      "percentChange": 2.0003,
+      "direction": "higher-is-better",
+      "status": "improved"
+    },
+    {
+      "metric": "executableRate",
+      "baseline": 0,
+      "candidate": 0.3333,
+      "delta": 0.3333,
+      "direction": "higher-is-better",
+      "status": "improved"
+    }
+  ],
+  "summary": {
+    "status": "improved",
+    "regressionCount": 0,
+    "improvementCount": 8
+  }
+}

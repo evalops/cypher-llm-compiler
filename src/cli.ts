@@ -3,7 +3,8 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 import type { CypherQuery, CypherSchemaContract, JsonLiteral } from "./ir.js";
-import type { EvalAttemptSet, EvalDataset } from "./evals.js";
+import type { EvalAttemptSet, EvalDataset, EvalReport } from "./evals.js";
+import { compareEvalReports } from "./eval-compare.js";
 import { evaluateAttempts } from "./evals.js";
 import { evaluateFailureCorpus } from "./failure-corpus.js";
 import {
@@ -13,7 +14,9 @@ import {
   type ImportOptions,
   type ImportedFixtureSet
 } from "./fixture-importers.js";
+import { introspectNeo4jSchema } from "./neo4j-introspect.js";
 import { repairQuery, repairRawCypher } from "./repair.js";
+import { evaluateRepairLoop } from "./repair-loop.js";
 import { renderQuery } from "./render.js";
 import { createSafeExecutionPlan } from "./safety.js";
 import { validateCypherTextWithParser } from "./parser-validation.js";
@@ -49,8 +52,17 @@ export async function runCli(argv: string[], io: CliIO = defaultIo()): Promise<n
       case "eval":
         await evalCommand(args, io);
         return 0;
+      case "compare-evals":
+        await compareEvalsCommand(args, io);
+        return 0;
+      case "repair-loop":
+        await repairLoopCommand(args, io);
+        return 0;
       case "parse-check":
         await parseCheckCommand(args, io);
+        return 0;
+      case "introspect-neo4j":
+        await introspectNeo4jCommand(args, io);
         return 0;
       case "mcp":
         await mcpCommand();
@@ -129,6 +141,45 @@ async function evalCommand(args: Map<string, string | boolean>, io: CliIO) {
   writeJson(io, report);
 }
 
+async function compareEvalsCommand(args: Map<string, string | boolean>, io: CliIO) {
+  const baseline = JSON.parse(await io.readFile(stringArg(args, "baseline"), "utf8")) as EvalReport;
+  const candidate = JSON.parse(await io.readFile(stringArg(args, "candidate"), "utf8")) as EvalReport;
+  const tolerance = optionalNumber(args.get("tolerance"));
+  const comparison = compareEvalReports(baseline, candidate, tolerance !== undefined ? { tolerance } : {});
+  if (typeof args.get("comparison-out") === "string") {
+    await writeJsonFile(io, args.get("comparison-out") as string, comparison);
+  }
+  writeJson(io, comparison);
+  if (args.get("fail-on-regression") === true && comparison.regressions.length > 0) {
+    throw new Error(`Eval comparison found ${comparison.regressions.length} regression(s).`);
+  }
+}
+
+async function repairLoopCommand(args: Map<string, string | boolean>, io: CliIO) {
+  const dataset = JSON.parse(await io.readFile(stringArg(args, "dataset"), "utf8")) as EvalDataset;
+  const attempts = JSON.parse(await io.readFile(stringArg(args, "attempts"), "utf8")) as EvalAttemptSet;
+  const defaultLimit = optionalNumber(args.get("default-limit"));
+  const defaultMaxHops = optionalNumber(args.get("default-max-hops"));
+  const evalOptions: { defaultLimit?: number; defaultMaxHops?: number; rawCypherCanExecute?: boolean } = {};
+  if (defaultLimit !== undefined) {
+    evalOptions.defaultLimit = defaultLimit;
+  }
+  if (defaultMaxHops !== undefined) {
+    evalOptions.defaultMaxHops = defaultMaxHops;
+  }
+  if (args.get("raw-cypher-can-execute") === true) {
+    evalOptions.rawCypherCanExecute = true;
+  }
+  const report = evaluateRepairLoop(dataset, attempts, evalOptions);
+  if (typeof args.get("feedback-out") === "string") {
+    await writeJsonFile(io, args.get("feedback-out") as string, report);
+  }
+  if (typeof args.get("report-out") === "string") {
+    await writeJsonFile(io, args.get("report-out") as string, report.evalReport);
+  }
+  writeJson(io, report);
+}
+
 async function parseCheckCommand(args: Map<string, string | boolean>, io: CliIO) {
   const schema = normalizeSchema(await readSchema(args, io));
   const mode = args.get("mode") === "syntax" ? "syntax" : "lint";
@@ -172,6 +223,29 @@ async function importOpenCypherTckCommand(args: Map<string, string | boolean>, i
   const feature = await io.readFile(stringArg(args, "feature"), "utf8");
   const imported = importOpenCypherTckFeature(feature, importOptions(args, "opencypher-tck-import"));
   await writeImportedFixtureSet(args, io, imported);
+}
+
+async function introspectNeo4jCommand(args: Map<string, string | boolean>, io: CliIO) {
+  const neo4j = await import("neo4j-driver");
+  const uri = stringArg(args, "uri");
+  const user = typeof args.get("user") === "string" ? (args.get("user") as string) : "neo4j";
+  const password = stringArg(args, "password");
+  const sampleLimit = optionalNumber(args.get("sample-limit"));
+  const driver = neo4j.default.driver(uri, neo4j.default.auth.basic(user, password));
+  const session = driver.session();
+  try {
+    const schema = await introspectNeo4jSchema(session, {
+      ...(sampleLimit !== undefined ? { sampleLimit } : {}),
+      includeProcedures: args.get("no-procedures") !== true
+    });
+    if (typeof args.get("schema-out") === "string") {
+      await writeJsonFile(io, args.get("schema-out") as string, schema);
+    }
+    writeJson(io, schema);
+  } finally {
+    await session.close();
+    await driver.close();
+  }
 }
 
 async function mcpCommand() {
@@ -294,7 +368,10 @@ Commands:
   repair-raw  --schema schema.json --cypher "MATCH ..."
   corpus
   eval        --dataset dataset.json --attempts attempts.json [--report-out report.json] [--raw-cypher-can-execute] [--default-limit 25] [--default-max-hops 5]
+  compare-evals --baseline baseline.report.json --candidate candidate.report.json [--comparison-out comparison.json] [--fail-on-regression] [--tolerance 0.0001]
+  repair-loop --dataset dataset.json --attempts attempts.json [--feedback-out feedback.json] [--report-out report.json] [--raw-cypher-can-execute] [--default-limit 25] [--default-max-hops 5]
   parse-check --schema schema.json (--query query.json | --cypher "MATCH ...") [--mode lint|syntax] [--default-limit 25] [--default-max-hops 5]
+  introspect-neo4j --uri bolt://localhost:7687 --user neo4j --password password [--schema-out schema.json] [--sample-limit 1000] [--no-procedures]
   mcp
   import-text2cypher --csv rows.csv --dataset-out dataset.json --attempts-out attempts.json [--summary-out summary.json] [--dataset-name name] [--source name] [--model name] [--limit 10] [--indexes 0,2,39]
   import-functional-cypher --json rows.json --dataset-out dataset.json --attempts-out attempts.json [--summary-out summary.json] [--dataset-name name] [--source name] [--limit 10]

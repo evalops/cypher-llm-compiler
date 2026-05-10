@@ -1,0 +1,321 @@
+{
+  "version": "cypher-llm-repair-loop/v1",
+  "datasetName": "tool-hash-smoke",
+  "model": "raw-text2cypher-baseline",
+  "prompt": "Emit raw Cypher text.",
+  "evalReport": {
+    "version": "cypher-llm-eval-report/v1",
+    "datasetName": "tool-hash-smoke",
+    "model": "raw-text2cypher-baseline",
+    "prompt": "Emit raw Cypher text.",
+    "metrics": {
+      "totalTasks": 3,
+      "attemptedTasks": 3,
+      "missingAttempts": 0,
+      "passedTasks": 1,
+      "failedTasks": 2,
+      "irAttempts": 0,
+      "rawAttempts": 2,
+      "noCypherAttempts": 1,
+      "timeoutAttempts": 0,
+      "executablePlans": 0,
+      "repairApplied": 2,
+      "expectedCypherMatches": 1,
+      "expectedDiagnosticMatches": 1,
+      "observedSyntaxErrors": 0,
+      "observedTimeouts": 0,
+      "observedNoCypher": 0,
+      "observedReturnsResults": 0,
+      "expectedAnswerTasks": 0,
+      "diagnosticsByCode": {
+        "no-cypher-output": 1,
+        "raw-identifier-quoted": 2
+      },
+      "passRate": 0.3333,
+      "executableRate": 0,
+      "repairRate": 0.6667
+    },
+    "results": [
+      {
+        "taskId": "tool-md5-by-name",
+        "question": "Find the MD5 hash value for the tool named test.py.",
+        "kind": "raw",
+        "passed": false,
+        "cypher": "MATCH (tool:Tool)<-[:`has MD5 hash`]-(hash:Hash) RETURN hash.value",
+        "canExecute": false,
+        "diagnostics": [
+          "raw-identifier-quoted"
+        ],
+        "repairs": [
+          "quote-raw-identifier"
+        ],
+        "expectationResults": [
+          {
+            "kind": "cypher-contains",
+            "expected": "[:`has MD5 hash`]->",
+            "passed": false
+          },
+          {
+            "kind": "cypher-contains",
+            "expected": "LIMIT 25",
+            "passed": false
+          },
+          {
+            "kind": "repair-kind",
+            "expected": "canonicalize-identifier",
+            "passed": false
+          },
+          {
+            "kind": "repair-kind",
+            "expected": "fix-direction",
+            "passed": false
+          },
+          {
+            "kind": "repair-kind",
+            "expected": "add-limit",
+            "passed": false
+          },
+          {
+            "kind": "can-execute",
+            "expected": true,
+            "passed": false
+          }
+        ]
+      },
+      {
+        "taskId": "tool-scope-drift",
+        "question": "Return a tool after projecting a constant through WITH.",
+        "kind": "no-cypher",
+        "passed": false,
+        "canExecute": false,
+        "diagnostics": [
+          "no-cypher-output"
+        ],
+        "repairs": [],
+        "expectationResults": [
+          {
+            "kind": "diagnostic-code",
+            "expected": "undefined-variable",
+            "passed": false
+          },
+          {
+            "kind": "can-execute",
+            "expected": false,
+            "passed": true
+          }
+        ]
+      },
+      {
+        "taskId": "raw-spaced-relationship",
+        "question": "Legacy raw Cypher attempt with an unescaped relationship type.",
+        "kind": "raw",
+        "passed": true,
+        "cypher": "MATCH (tool:Tool)-[:`has MD5 hash`]->(hash:Hash) RETURN hash",
+        "canExecute": false,
+        "diagnostics": [
+          "raw-identifier-quoted"
+        ],
+        "repairs": [
+          "quote-raw-identifier"
+        ],
+        "expectationResults": [
+          {
+            "kind": "cypher-contains",
+            "expected": "[:`has MD5 hash`]->",
+            "passed": true
+          },
+          {
+            "kind": "diagnostic-code",
+            "expected": "raw-identifier-quoted",
+            "passed": true
+          },
+          {
+            "kind": "repair-kind",
+            "expected": "quote-raw-identifier",
+            "passed": true
+          }
+        ]
+      }
+    ]
+  },
+  "packets": [
+    {
+      "version": "cypher-llm-repair-packet/v1",
+      "taskId": "tool-md5-by-name",
+      "question": "Find the MD5 hash value for the tool named test.py.",
+      "schema": {
+        "version": "cypher-llm-schema/v1",
+        "dialect": "neo4j-cypher-25",
+        "nodes": [
+          {
+            "name": "Tool",
+            "aliases": [
+              "tool"
+            ],
+            "properties": {
+              "name": {
+                "type": "STRING"
+              }
+            }
+          },
+          {
+            "name": "Hash",
+            "properties": {
+              "value": {
+                "type": "STRING"
+              }
+            }
+          }
+        ],
+        "relationships": [
+          {
+            "type": "has MD5 hash",
+            "aliases": [
+              "md5"
+            ],
+            "from": "Tool",
+            "to": "Hash"
+          }
+        ],
+        "parameters": {
+          "toolName": {
+            "type": "STRING",
+            "required": true
+          }
+        }
+      },
+      "attempt": {
+        "kind": "raw",
+        "cypher": "MATCH (tool:Tool)<-[:`has MD5 hash`]-(hash:Hash) RETURN hash.value",
+        "canExecute": false
+      },
+      "diagnostics": [
+        {
+          "code": "raw-identifier-quoted",
+          "message": "The compiler reported a diagnostic for this attempt.",
+          "suggestion": "Use the diagnostic code, rendered Cypher, and schema contract to produce a corrected CypherQuery IR attempt."
+        }
+      ],
+      "failedExpectations": [
+        {
+          "kind": "cypher-contains",
+          "expected": "[:`has MD5 hash`]->",
+          "passed": false
+        },
+        {
+          "kind": "cypher-contains",
+          "expected": "LIMIT 25",
+          "passed": false
+        },
+        {
+          "kind": "repair-kind",
+          "expected": "canonicalize-identifier",
+          "passed": false
+        },
+        {
+          "kind": "repair-kind",
+          "expected": "fix-direction",
+          "passed": false
+        },
+        {
+          "kind": "repair-kind",
+          "expected": "add-limit",
+          "passed": false
+        },
+        {
+          "kind": "can-execute",
+          "expected": true,
+          "passed": false
+        }
+      ],
+      "instruction": "Produce a corrected CypherQuery IR attempt. Preserve the user's question and use only schema identifiers from the provided schema contract. The current attempt is not executable; fix diagnostics before optimizing result shape."
+    },
+    {
+      "version": "cypher-llm-repair-packet/v1",
+      "taskId": "tool-scope-drift",
+      "question": "Return a tool after projecting a constant through WITH.",
+      "schema": {
+        "version": "cypher-llm-schema/v1",
+        "dialect": "neo4j-cypher-25",
+        "nodes": [
+          {
+            "name": "Tool",
+            "properties": {
+              "name": {
+                "type": "STRING"
+              }
+            }
+          }
+        ],
+        "relationships": []
+      },
+      "attempt": {
+        "kind": "no-cypher",
+        "canExecute": false
+      },
+      "diagnostics": [
+        {
+          "code": "no-cypher-output",
+          "message": "The model did not return a Cypher query.",
+          "suggestion": "Return CypherQuery IR JSON or a raw Cypher query only."
+        }
+      ],
+      "failedExpectations": [
+        {
+          "kind": "diagnostic-code",
+          "expected": "undefined-variable",
+          "passed": false
+        }
+      ],
+      "instruction": "Produce a corrected CypherQuery IR attempt. Preserve the user's question and use only schema identifiers from the provided schema contract. The current attempt is not executable; fix diagnostics before optimizing result shape."
+    },
+    {
+      "version": "cypher-llm-repair-packet/v1",
+      "taskId": "raw-spaced-relationship",
+      "question": "Legacy raw Cypher attempt with an unescaped relationship type.",
+      "schema": {
+        "version": "cypher-llm-schema/v1",
+        "dialect": "neo4j-cypher-25",
+        "nodes": [
+          {
+            "name": "Tool"
+          },
+          {
+            "name": "Hash"
+          }
+        ],
+        "relationships": [
+          {
+            "type": "has MD5 hash",
+            "from": "Tool",
+            "to": "Hash"
+          }
+        ]
+      },
+      "attempt": {
+        "kind": "raw",
+        "cypher": "MATCH (tool:Tool)-[:`has MD5 hash`]->(hash:Hash) RETURN hash",
+        "canExecute": false
+      },
+      "diagnostics": [
+        {
+          "code": "raw-identifier-quoted",
+          "message": "The compiler reported a diagnostic for this attempt.",
+          "suggestion": "Use the diagnostic code, rendered Cypher, and schema contract to produce a corrected CypherQuery IR attempt."
+        }
+      ],
+      "failedExpectations": [],
+      "instruction": "Produce a corrected CypherQuery IR attempt. Preserve the user's question and use only schema identifiers from the provided schema contract. The current attempt is not executable; fix diagnostics before optimizing result shape."
+    }
+  ],
+  "metrics": {
+    "failedTasks": 2,
+    "packets": 3,
+    "executableFailures": 3,
+    "expectationFailures": 2,
+    "diagnosticFailures": {
+      "raw-identifier-quoted": 2,
+      "no-cypher-output": 1
+    }
+  }
+}

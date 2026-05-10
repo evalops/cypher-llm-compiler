@@ -33,7 +33,6 @@
   "devDependencies": {
     "@types/node": "^25.6.2",
     "ajv": "^8.20.0",
-    "neo4j-driver": "^6.0.1",
     "typescript": "^5.9.0"
   },
   "engines": {
@@ -41,6 +40,7 @@
   },
   "dependencies": {
     "@neo4j-cypher/language-support": "^2.0.0-next.6",
-    "csv-parse": "^6.2.1"
+    "csv-parse": "^6.2.1",
+    "neo4j-driver": "^6.0.1"
   }
 }

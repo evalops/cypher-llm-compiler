@@ -1,0 +1,135 @@
+{
+  "version": "cypher-llm-eval-report/v1",
+  "datasetName": "tool-hash-smoke",
+  "model": "raw-text2cypher-baseline",
+  "prompt": "Emit raw Cypher text.",
+  "metrics": {
+    "totalTasks": 3,
+    "attemptedTasks": 3,
+    "missingAttempts": 0,
+    "passedTasks": 1,
+    "failedTasks": 2,
+    "irAttempts": 0,
+    "rawAttempts": 2,
+    "noCypherAttempts": 1,
+    "timeoutAttempts": 0,
+    "executablePlans": 0,
+    "repairApplied": 2,
+    "expectedCypherMatches": 1,
+    "expectedDiagnosticMatches": 1,
+    "observedSyntaxErrors": 0,
+    "observedTimeouts": 0,
+    "observedNoCypher": 0,
+    "observedReturnsResults": 0,
+    "expectedAnswerTasks": 0,
+    "diagnosticsByCode": {
+      "no-cypher-output": 1,
+      "raw-identifier-quoted": 2
+    },
+    "passRate": 0.3333,
+    "executableRate": 0,
+    "repairRate": 0.6667
+  },
+  "results": [
+    {
+      "taskId": "tool-md5-by-name",
+      "question": "Find the MD5 hash value for the tool named test.py.",
+      "kind": "raw",
+      "passed": false,
+      "cypher": "MATCH (tool:Tool)<-[:`has MD5 hash`]-(hash:Hash) RETURN hash.value",
+      "canExecute": false,
+      "diagnostics": [
+        "raw-identifier-quoted"
+      ],
+      "repairs": [
+        "quote-raw-identifier"
+      ],
+      "expectationResults": [
+        {
+          "kind": "cypher-contains",
+          "expected": "[:`has MD5 hash`]->",
+          "passed": false
+        },
+        {
+          "kind": "cypher-contains",
+          "expected": "LIMIT 25",
+          "passed": false
+        },
+        {
+          "kind": "repair-kind",
+          "expected": "canonicalize-identifier",
+          "passed": false
+        },
+        {
+          "kind": "repair-kind",
+          "expected": "fix-direction",
+          "passed": false
+        },
+        {
+          "kind": "repair-kind",
+          "expected": "add-limit",
+          "passed": false
+        },
+        {
+          "kind": "can-execute",
+          "expected": true,
+          "passed": false
+        }
+      ]
+    },
+    {
+      "taskId": "tool-scope-drift",
+      "question": "Return a tool after projecting a constant through WITH.",
+      "kind": "no-cypher",
+      "passed": false,
+      "canExecute": false,
+      "diagnostics": [
+        "no-cypher-output"
+      ],
+      "repairs": [],
+      "expectationResults": [
+        {
+          "kind": "diagnostic-code",
+          "expected": "undefined-variable",
+          "passed": false
+        },
+        {
+          "kind": "can-execute",
+          "expected": false,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "taskId": "raw-spaced-relationship",
+      "question": "Legacy raw Cypher attempt with an unescaped relationship type.",
+      "kind": "raw",
+      "passed": true,
+      "cypher": "MATCH (tool:Tool)-[:`has MD5 hash`]->(hash:Hash) RETURN hash",
+      "canExecute": false,
+      "diagnostics": [
+        "raw-identifier-quoted"
+      ],
+      "repairs": [
+        "quote-raw-identifier"
+      ],
+      "expectationResults": [
+        {
+          "kind": "cypher-contains",
+          "expected": "[:`has MD5 hash`]->",
+          "passed": true
+        },
+        {
+          "kind": "diagnostic-code",
+          "expected": "raw-identifier-quoted",
+          "passed": true
+        },
+        {
+          "kind": "repair-kind",
+          "expected": "quote-raw-identifier",
+          "passed": true
+        }
+      ]
+    }
+  ]
+}

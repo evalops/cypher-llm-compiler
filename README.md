@@ -126,7 +126,10 @@ cypher-llm validate --schema schema.json --query query.json
 cypher-llm repair-raw --schema schema.json --cypher "MATCH (t:Tool)-[:has MD5 hash]->(h:Hash) RETURN h"
 cypher-llm corpus
 cypher-llm eval --dataset examples/eval-dataset.json --attempts examples/eval-attempts.json --default-limit 25
+cypher-llm compare-evals --baseline baseline.report.json --candidate candidate.report.json
+cypher-llm repair-loop --dataset examples/eval-dataset.json --attempts examples/eval-attempts.json --default-limit 25
 cypher-llm parse-check --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json --default-limit 25
+cypher-llm introspect-neo4j --uri bolt://localhost:7687 --user neo4j --password "$NEO4J_PASSWORD" --schema-out schema.json
 cypher-llm import-text2cypher --csv rows.csv --dataset-out dataset.json --attempts-out attempts.json
 cypher-llm mcp
 npm run test:live:neo4j
@@ -143,7 +146,13 @@ npm run test:live:neo4j
 
 `eval` returns a `cypher-llm-eval-report/v1` report with pass rate, executable rate, repair rate, diagnostic counts, and per-task outcomes.
 
+`compare-evals` compares two reports and marks directional metric deltas as improvements or regressions.
+
+`repair-loop` emits model-targeted repair packets from eval diagnostics and failed expectations.
+
 `parse-check` validates rendered IR or raw Cypher against Neo4j's language-support parser and maps parser diagnostics back into this package's `Diagnostic` shape.
+
+`introspect-neo4j` connects to Neo4j and writes a `CypherSchemaContract` from labels, relationship types, properties, observed endpoints, and procedure yields.
 
 `mcp` starts a stdio MCP server exposing the same render, validate, repair, parse-check, and eval operations to agent clients.
 
@@ -262,12 +271,15 @@ Those are deliberate boundaries. The repo is the missing LLM compiler surface, n
 
 - `src/ir.ts`: Public IR and schema types.
 - `src/schema.ts`: Schema normalization, alias lookup, identifier metadata.
+- `src/neo4j-introspect.ts`: Driver-compatible Neo4j schema introspection.
 - `src/render.ts`: Deterministic Cypher renderer.
 - `src/validate.ts`: Semantic diagnostics and LLM-safe profile checks.
 - `src/repair.ts`: Structured repair actions over IR and limited raw-Cypher bootstrap repair.
 - `src/normalize.ts`: Stable query normalization and equivalence helpers.
 - `src/safety.ts`: Safe execution planning.
 - `src/failure-corpus.ts`: Runnable corpus of LLM failure cases.
+- `src/eval-compare.ts`: CypherBench report comparison and regression detection.
+- `src/repair-loop.ts`: Eval-driven repair feedback packets for model retry loops.
 - `src/fixture-importers.ts`: Importers for text2cypher CSV/JSON and openCypher TCK fixtures.
 - `src/parser-validation.ts`: Parser-backed validation through Neo4j language support.
 - `src/neo4j-explain.ts`: Driver-compatible Neo4j `EXPLAIN` preflight adapter.
@@ -278,6 +290,7 @@ Those are deliberate boundaries. The repo is the missing LLM compiler surface, n
 - `docs/`: Design notes and LLM integration guidance.
 - `docker-compose.neo4j.yml`: Optional local Neo4j fixture for live `EXPLAIN` tests.
 - `examples/`: Small schema/query fixtures for CLI smoke tests and agent onboarding.
+- `examples/benchmarks/`: CypherBench raw-vs-IR reports, comparisons, and repair-loop artifacts.
 - `examples/imported/`: Imported text2cypher/openCypher fixture samples and baseline reports.
 - `profiles/`: Versioned dialect profiles for Neo4j Cypher 25, openCypher 9, and GQL-oriented output.
 - `schemas/`: JSON Schema contracts for IR, graph schema, eval datasets, and eval attempts.

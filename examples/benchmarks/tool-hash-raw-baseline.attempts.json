@@ -1,0 +1,20 @@
+{
+  "version": "cypher-llm-eval-attempts/v1",
+  "datasetName": "tool-hash-smoke",
+  "model": "raw-text2cypher-baseline",
+  "prompt": "Emit raw Cypher text.",
+  "attempts": [
+    {
+      "taskId": "tool-md5-by-name",
+      "rawCypher": "MATCH (tool:Tool)<-[:has MD5 hash]-(hash:Hash) RETURN hash.value"
+    },
+    {
+      "taskId": "tool-scope-drift",
+      "noCypher": true
+    },
+    {
+      "taskId": "raw-spaced-relationship",
+      "rawCypher": "MATCH (tool:Tool)-[:has MD5 hash]->(hash:Hash) RETURN hash"
+    }
+  ]
+}

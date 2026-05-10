@@ -37,6 +37,15 @@ The report includes:
 - `diagnosticsByCode`: stable failure taxonomy counts.
 - per-task canonical Cypher, diagnostics, repairs, and expectation checks.
 
+## CypherBench
+
+CypherBench adds two higher-level workflows on top of reports:
+
+- `cypher-llm compare-evals` compares baseline and candidate reports.
+- `cypher-llm repair-loop` turns failed attempts and diagnostics into model retry packets.
+
+See `docs/CYPHERBENCH.md`.
+
 ## Imported Fixtures
 
 `docs/DATASETS.md` documents the import commands and provenance for checked-in samples from `neo4j-labs/text2cypher` and `opencypher/openCypher`.

@@ -140,6 +140,18 @@ This lets applications bring their own driver/session lifecycle while the compil
 
 The repo includes an optional live fixture in `test/neo4j-live.test.ts`. Set `CYPHER_LLM_NEO4J_URI` and `CYPHER_LLM_NEO4J_PASSWORD`, or use `docker-compose.neo4j.yml`; see `docs/NEO4J_LIVE_FIXTURE.md`.
 
+## `introspectNeo4jSchema(session, options?)`
+
+Builds a `CypherSchemaContract` from a live Neo4j database using a driver-compatible session.
+
+It discovers labels, relationship types, properties, observed relationship endpoints, and procedure yielded variables. The CLI equivalent is:
+
+```bash
+cypher-llm introspect-neo4j --uri bolt://localhost:7687 --user neo4j --password "$NEO4J_PASSWORD"
+```
+
+See `docs/NEO4J_INTROSPECTION.md` for sampling and redaction notes.
+
 ## `evaluateFailureCorpus(cases?)`
 
 Runs the known LLM failure fixtures and returns pass/fail records with canonical Cypher and diagnostic codes.
@@ -172,6 +184,18 @@ Output:
 ```
 
 This is the main entrypoint for comparing raw text2cypher against compiler-mediated generation.
+
+## `compareEvalReports(baseline, candidate, options?)`
+
+Compares two `EvalReport` objects and returns `cypher-llm-eval-comparison/v1` with metric deltas, diagnostic deltas, improvements, and regressions.
+
+This backs the `cypher-llm compare-evals` CLI command and can be used as a CI regression gate.
+
+## `evaluateRepairLoop(dataset, attempts, options?)`
+
+Runs `evaluateAttempts` and emits `cypher-llm-repair-loop/v1` feedback packets for attempts with diagnostics, execution failures, or failed expectations.
+
+Each packet contains the task question, task schema, rendered attempt when available, diagnostic retry hints, failed expectations, and a concise instruction asking for corrected `CypherQuery` IR.
 
 ## `getOpenAiResponsesTools()`
 

@@ -138,6 +138,110 @@ describe("cli", () => {
     assert.ok(writes.has("out/report.json"));
   });
 
+  it("compares eval reports and writes repair-loop feedback", async () => {
+    const dataset = {
+      version: "cypher-llm-eval-dataset/v1",
+      name: "cli-compare",
+      tasks: [
+        {
+          id: "one",
+          question: "Return one.",
+          schema: { version: "cypher-llm-schema/v1", nodes: [], relationships: [] },
+          expected: { cypherContains: ["RETURN 1"], canExecute: true }
+        }
+      ]
+    };
+    const attempts = {
+      version: "cypher-llm-eval-attempts/v1",
+      attempts: [
+        {
+          taskId: "one",
+          query: {
+            version: "cypher-llm-ir/v1",
+            profile: "llm-safe-readonly",
+            clauses: [{ kind: "return", items: [{ expression: { kind: "literal", value: 1 } }] }]
+          }
+        }
+      ]
+    };
+    const baselineReport = {
+      version: "cypher-llm-eval-report/v1",
+      datasetName: "cli-compare",
+      metrics: {
+        totalTasks: 1,
+        attemptedTasks: 1,
+        missingAttempts: 0,
+        passedTasks: 0,
+        failedTasks: 1,
+        irAttempts: 0,
+        rawAttempts: 1,
+        noCypherAttempts: 0,
+        timeoutAttempts: 0,
+        executablePlans: 0,
+        repairApplied: 0,
+        expectedCypherMatches: 0,
+        expectedDiagnosticMatches: 0,
+        observedSyntaxErrors: 0,
+        observedTimeouts: 0,
+        observedNoCypher: 0,
+        observedReturnsResults: 0,
+        expectedAnswerTasks: 0,
+        diagnosticsByCode: { "no-cypher-output": 1 },
+        passRate: 0,
+        executableRate: 0,
+        repairRate: 0
+      },
+      results: []
+    };
+    const candidateReport = {
+      ...baselineReport,
+      metrics: {
+        ...baselineReport.metrics,
+        passedTasks: 1,
+        failedTasks: 0,
+        executablePlans: 1,
+        diagnosticsByCode: {},
+        passRate: 1,
+        executableRate: 1
+      }
+    };
+    const files = new Map<string, string>([
+      ["dataset.json", JSON.stringify(dataset)],
+      ["attempts.json", JSON.stringify(attempts)],
+      ["baseline.json", JSON.stringify(baselineReport)],
+      ["candidate.json", JSON.stringify(candidateReport)]
+    ]);
+    const writes = new Map<string, string>();
+    let stdout = "";
+    let stderr = "";
+    const io: CliIO = {
+      stdout: { write: (chunk: string | Uint8Array) => ((stdout += String(chunk)), true) },
+      stderr: { write: (chunk: string | Uint8Array) => ((stderr += String(chunk)), true) },
+      readFile: async (path) => files.get(String(path)) ?? "",
+      writeFile: async (path, data) => {
+        writes.set(path, data);
+      },
+      mkdir: async () => undefined
+    };
+
+    const compareCode = await runCli(
+      ["compare-evals", "--baseline", "baseline.json", "--candidate", "candidate.json", "--comparison-out", "out/comparison.json"],
+      io
+    );
+    const repairCode = await runCli(
+      ["repair-loop", "--dataset", "dataset.json", "--attempts", "attempts.json", "--feedback-out", "out/feedback.json", "--default-limit", "10"],
+      io
+    );
+
+    assert.equal(compareCode, 0);
+    assert.equal(repairCode, 0);
+    assert.equal(stderr, "");
+    assert.ok(stdout.includes("cypher-llm-eval-comparison/v1"));
+    assert.ok(stdout.includes("cypher-llm-repair-loop/v1"));
+    assert.ok(writes.has("out/comparison.json"));
+    assert.ok(writes.has("out/feedback.json"));
+  });
+
   it("runs parser-backed validation from raw Cypher", async () => {
     const files = new Map<string, string>([
       [

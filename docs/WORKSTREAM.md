@@ -23,7 +23,7 @@ Artifacts:
 - Eval runner that reports pass rate, executable rate, repair rate, diagnostic counts, and per-task results.
 - CLI command for repeatable local/CI runs.
 
-Status: implemented through `evaluateAttempts`, `cypher-llm eval`, importer helpers, checked-in text2cypher/openCypher samples, and baseline reports.
+Status: implemented through `evaluateAttempts`, `cypher-llm eval`, importer helpers, checked-in text2cypher/openCypher samples, baseline reports, CypherBench report comparison, and repair-loop feedback packets.
 
 ## 3. Parser and Database Verification
 
@@ -35,6 +35,17 @@ Artifacts:
 - Docker-based CI fixture.
 
 Status: parser-backed validation is implemented through `validateRenderedQueryWithParser`, `validateCypherTextWithParser`, and `cypher-llm parse-check`. Driver-compatible database preflight is implemented through `explainWithNeo4j`, with an optional Docker-backed live Neo4j fixture and CI workflow covering real `EXPLAIN`.
+
+## 3.5 Schema Introspection
+
+Artifacts:
+
+- Driver-compatible Neo4j schema introspection.
+- CLI command that writes `CypherSchemaContract` JSON from a live database.
+- Procedure yield metadata import for semantic validation.
+- Redaction and sampling guidance.
+
+Status: initial implementation exists in `introspectNeo4jSchema`, `cypher-llm introspect-neo4j`, and `docs/NEO4J_INTROSPECTION.md`.
 
 ## 4. Semantic Analyzer Expansion
 
