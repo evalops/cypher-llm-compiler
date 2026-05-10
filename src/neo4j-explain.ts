@@ -1,5 +1,6 @@
 import type { CypherQuery, CypherSchemaContract, JsonLiteral } from "./ir.js";
 import { diagnostic, hasErrors, type Diagnostic } from "./diagnostics.js";
+import { buildPlannerEstimateFromNeo4jSummary, type CypherPlannerEstimate } from "./planner-estimate.js";
 import { createSafeExecutionPlan, type SafeExecutionOptions, type SafeExecutionPlan } from "./safety.js";
 import { normalizeSchema, type NormalizedSchema } from "./schema.js";
 
@@ -26,6 +27,7 @@ export interface Neo4jExplainResult {
   executed: boolean;
   plan: SafeExecutionPlan;
   diagnostics: Diagnostic[];
+  plannerEstimate?: CypherPlannerEstimate;
   summary?: unknown;
   records?: unknown[];
 }
@@ -55,11 +57,15 @@ export async function explainWithNeo4j(
       options.useExecuteRead !== false && session.executeRead
         ? await session.executeRead((tx) => tx.run(plan.preflightCypher, params))
         : await session.run(plan.preflightCypher, params);
+    const plannerEstimate = result.summary !== undefined
+      ? buildPlannerEstimateFromNeo4jSummary(result.summary, "neo4j-explain")
+      : undefined;
     return {
       ok: !hasErrors(diagnostics),
       executed: true,
       plan,
       diagnostics,
+      ...(plannerEstimate !== undefined ? { plannerEstimate } : {}),
       ...(result.summary !== undefined ? { summary: result.summary } : {}),
       ...(result.records !== undefined ? { records: result.records } : {})
     };

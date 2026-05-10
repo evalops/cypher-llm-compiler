@@ -46,7 +46,16 @@ describe("Neo4j EXPLAIN adapter", () => {
         return work({
           async run(cypher, params) {
             calls.push(params ? { cypher, params } : { cypher });
-            return { summary: { counters: "none" }, records: [] };
+            return {
+              summary: {
+                plan: {
+                  operatorType: "ProduceResults",
+                  arguments: { EstimatedRows: 10 },
+                  children: [{ operatorType: "NodeIndexSeek", identifiers: ["tool"], arguments: { EstimatedRows: 10 } }]
+                }
+              },
+              records: []
+            };
           }
         });
       }
@@ -59,6 +68,9 @@ describe("Neo4j EXPLAIN adapter", () => {
     assert.equal(calls.length, 1);
     assert.equal(calls[0]?.cypher.startsWith("EXPLAIN\nMATCH"), true);
     assert.equal(calls[0]?.cypher.endsWith("LIMIT 10"), true);
+    assert.equal(result.plannerEstimate?.version, "cypher-llm-planner-estimate/v1");
+    assert.equal(result.plannerEstimate?.estimatedRows, 10);
+    assert.equal(result.plannerEstimate?.operators[0]?.children?.[0]?.name, "NodeIndexSeek");
   });
 
   it("does not contact Neo4j when compiler diagnostics already block execution", async () => {

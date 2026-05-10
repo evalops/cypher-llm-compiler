@@ -242,6 +242,7 @@ Behavior:
 - Builds a `SafeExecutionPlan`.
 - Refuses to contact Neo4j when compiler diagnostics already block execution.
 - Runs `EXPLAIN` with params when the plan is executable.
+- Extracts a `cypher-llm-planner-estimate/v1` object from the returned summary when a plan tree is available.
 - Maps thrown Neo4j driver errors back into stable `Diagnostic` objects.
 
 This lets applications bring their own driver/session lifecycle while the compiler owns preflight behavior.
