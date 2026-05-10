@@ -53,6 +53,12 @@ Cost and safety policy planning is exported from `src/policy.ts`, validated by `
 cypher-llm policy-check --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json
 ```
 
+CypherBench scorecards are exported from `src/scorecard.ts`, validated by `schemas/cypherbench-scorecard.schema.json`, and checked in at `examples/benchmarks/tool-hash.scorecard.json`.
+
+```bash
+cypher-llm scorecard --reports examples/benchmarks/tool-hash-raw-baseline.report.json,examples/imported/smoke-ir-vs-raw.report.json
+```
+
 Ecosystem diagnostics are exported from `src/lsp.ts`, validated by `schemas/lsp-diagnostics.schema.json`, and checked in at `examples/lsp/tool-hash.lsp.json`.
 
 ```bash

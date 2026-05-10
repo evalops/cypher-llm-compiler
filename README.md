@@ -19,7 +19,7 @@ The gap is not "LLMs need a better prompt." The gap is a missing compiler bounda
 
 ## What This Implements
 
-This package implements fourteen concrete improvements:
+This package implements fifteen concrete improvements:
 
 1. **Official JSON IR**: Agents can emit a small, typed Cypher AST instead of brittle text.
 2. **LLM-safe profile**: The renderer emits conservative Cypher with escaped schema identifiers, explicit projections, bounded path recommendations, and deterministic formatting.
@@ -35,6 +35,7 @@ This package implements fourteen concrete improvements:
 12. **Cost and safety policy reports**: Broad scans, risky traversals, high limits, cartesian patterns, and writes are surfaced before execution.
 13. **LSP-style diagnostics**: Editor and agent UIs can consume compiler diagnostics and code actions in a familiar shape.
 14. **Lossless parse reports**: Existing Cypher can be preserved byte-for-byte while agents inspect statements, clauses, comments, source spans, parser output, and IR-preview coverage.
+15. **CypherBench scorecards**: Eval reports can be published as ranked JSON and markdown scorecards across raw, IR-first, repaired, parser-validated, and mixed lanes.
 
 ## Quick Start
 
@@ -135,6 +136,7 @@ cypher-llm parse-lossless --schema examples/tool-hash.schema.json --cypher "MATC
 cypher-llm corpus
 cypher-llm eval --dataset examples/eval-dataset.json --attempts examples/eval-attempts.json --default-limit 25
 cypher-llm compare-evals --baseline baseline.report.json --candidate candidate.report.json
+cypher-llm scorecard --reports baseline.report.json,candidate.report.json --markdown-out scorecard.md
 cypher-llm repair-loop --dataset examples/eval-dataset.json --attempts examples/eval-attempts.json --default-limit 25
 cypher-llm lift-raw-eval --dataset examples/imported/text2cypher-gpt4o-sample.dataset.json --attempts examples/imported/text2cypher-gpt4o-sample.attempts.json
 cypher-llm parse-check --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json --default-limit 25
@@ -163,6 +165,8 @@ npm run test:live:neo4j
 
 `compare-evals` compares two reports and marks directional metric deltas as improvements or regressions.
 
+`scorecard` emits a `cypher-llm-cypherbench-scorecard/v1` JSON report or markdown table from one or more eval reports.
+
 `repair-loop` emits model-targeted repair packets from eval diagnostics and failed expectations.
 
 `lift-raw` converts common read-query Cypher strings into structured `CypherQuery` IR, preserving unsupported syntax as explicit raw clauses.
@@ -187,7 +191,7 @@ npm run test:live:neo4j
 
 `mcp` starts a stdio MCP server exposing the same render, validate, repair, parse-lossless, parse-check, policy, proof, LSP, and eval operations to agent clients.
 
-`serve` starts a local JSON HTTP service exposing `/healthz`, `/v1/tools`, `/v1/render`, `/v1/validate`, `/v1/repair`, `/v1/parse-lossless`, `/v1/parse-check`, `/v1/policy`, `/v1/lsp-diagnostics`, `/v1/prove`, `/v1/eval`, `/v1/roadmap`, and `/v1/dialect-certification`.
+`serve` starts a local JSON HTTP service exposing `/healthz`, `/v1/tools`, `/v1/render`, `/v1/validate`, `/v1/repair`, `/v1/parse-lossless`, `/v1/parse-check`, `/v1/policy`, `/v1/lsp-diagnostics`, `/v1/prove`, `/v1/eval`, `/v1/scorecard`, `/v1/roadmap`, and `/v1/dialect-certification`.
 
 `test:live:neo4j` runs the optional Docker-backed Neo4j `EXPLAIN` fixture when `CYPHER_LLM_NEO4J_URI` and `CYPHER_LLM_NEO4J_PASSWORD` are set.
 
@@ -324,6 +328,7 @@ Those are deliberate boundaries. The repo is the missing LLM compiler surface, n
 - `src/safety.ts`: Safe execution planning.
 - `src/failure-corpus.ts`: Runnable corpus of LLM failure cases.
 - `src/eval-compare.ts`: CypherBench report comparison and regression detection.
+- `src/scorecard.ts`: CypherBench JSON and markdown scorecard generation.
 - `src/repair-loop.ts`: Eval-driven repair feedback packets for model retry loops.
 - `src/dialect-certification.ts`: Executable dialect certification checks for profile claims.
 - `src/proof.ts`: Proof-carrying compile output for agent feedback loops.
@@ -341,7 +346,7 @@ Those are deliberate boundaries. The repo is the missing LLM compiler surface, n
 - `docs/`: Design notes and LLM integration guidance, including `docs/LOSSLESS_PARSE.md`, `docs/RAW_LIFT.md`, and `docs/YEARS_ROADMAP.md`.
 - `docker-compose.neo4j.yml`: Optional local Neo4j fixture for live `EXPLAIN` tests.
 - `examples/`: Small schema/query fixtures for CLI smoke tests and agent onboarding.
-- `examples/benchmarks/`: CypherBench raw-vs-IR reports, comparisons, and repair-loop artifacts.
+- `examples/benchmarks/`: CypherBench raw-vs-IR reports, comparisons, scorecards, and repair-loop artifacts.
 - `examples/certification/`: Checked-in dialect certification report.
 - `examples/imported/`: Imported text2cypher/openCypher fixture samples and baseline reports.
 - `examples/lossless/`: Checked-in lossless parse report.

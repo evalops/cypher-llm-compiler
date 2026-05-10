@@ -30,6 +30,20 @@ The comparison marks metrics as `improved`, `regressed`, `unchanged`, or `info` 
 
 Use `--fail-on-regression` in CI when a benchmark lane should block regressions.
 
+## Scorecards
+
+Publish a compact scorecard from one or more eval reports:
+
+```bash
+cypher-llm scorecard \
+  --reports examples/benchmarks/tool-hash-raw-baseline.report.json,examples/imported/smoke-ir-vs-raw.report.json \
+  --name tool-hash-scorecard \
+  --scorecard-out examples/benchmarks/tool-hash.scorecard.json \
+  --markdown-out examples/benchmarks/tool-hash.scorecard.md
+```
+
+The scorecard ranks lanes by pass rate, executable rate, and repair rate; aggregates diagnostics; and compares every candidate lane to the baseline report. JSON output validates against `schemas/cypherbench-scorecard.schema.json`, while markdown output is intended for release notes, READMEs, and benchmark dashboards.
+
 ## Repair Loop
 
 Generate model-targeted repair packets:

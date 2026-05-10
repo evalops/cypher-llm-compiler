@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evalops.dev/schemas/cypher-llm/cypherbench-scorecard/v1.json",
+  "title": "CypherBench Scorecard",
+  "type": "object",
+  "required": ["version", "name", "generatedAt", "baselineLaneId", "summary", "lanes", "comparisons", "diagnostics", "rankings"],
+  "additionalProperties": true,
+  "properties": {
+    "version": { "const": "cypher-llm-cypherbench-scorecard/v1" },
+    "name": { "type": "string" },
+    "generatedAt": { "type": "string" },
+    "baselineLaneId": { "type": "string" },
+    "summary": {
+      "type": "object",
+      "required": ["reports", "datasets", "totalTasks", "bestPassRate", "bestExecutableRate", "regressionCount", "improvementCount", "status"],
+      "additionalProperties": false,
+      "properties": {
+        "reports": { "type": "integer", "minimum": 1 },
+        "datasets": { "type": "array", "items": { "type": "string" } },
+        "totalTasks": { "type": "integer", "minimum": 0 },
+        "bestPassRate": { "type": "number" },
+        "bestExecutableRate": { "type": "number" },
+        "regressionCount": { "type": "integer", "minimum": 0 },
+        "improvementCount": { "type": "integer", "minimum": 0 },
+        "status": { "enum": ["improved", "regressed", "unchanged"] }
+      }
+    },
+    "lanes": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/lane" }
+    },
+    "comparisons": {
+      "type": "array",
+      "items": { "type": "object", "additionalProperties": true }
+    },
+    "diagnostics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["code", "total", "lanes"],
+        "additionalProperties": false,
+        "properties": {
+          "code": { "type": "string" },
+          "total": { "type": "integer", "minimum": 0 },
+          "lanes": {
+            "type": "object",
+            "additionalProperties": { "type": "integer", "minimum": 0 }
+          }
+        }
+      }
+    },
+    "rankings": {
+      "type": "object",
+      "required": ["passRate", "executableRate", "repairRate"],
+      "additionalProperties": false,
+      "properties": {
+        "passRate": { "type": "array", "items": { "type": "string" } },
+        "executableRate": { "type": "array", "items": { "type": "string" } },
+        "repairRate": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  },
+  "$defs": {
+    "lane": {
+      "type": "object",
+      "required": ["id", "datasetName", "kind", "metrics"],
+      "additionalProperties": true,
+      "properties": {
+        "id": { "type": "string" },
+        "datasetName": { "type": "string" },
+        "model": { "type": "string" },
+        "prompt": { "type": "string" },
+        "kind": { "enum": ["ir-first", "raw", "mixed", "terminal", "unknown"] },
+        "metrics": { "type": "object", "additionalProperties": true }
+      }
+    }
+  }
+}

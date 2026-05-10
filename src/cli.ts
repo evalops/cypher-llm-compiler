@@ -22,6 +22,7 @@ import { repairQuery, repairRawCypher } from "./repair.js";
 import { evaluateRepairLoop } from "./repair-loop.js";
 import { renderQuery } from "./render.js";
 import { createSafeExecutionPlan } from "./safety.js";
+import { buildCypherBenchScorecard, renderCypherBenchScorecardMarkdown } from "./scorecard.js";
 import { validateCypherTextWithParser } from "./parser-validation.js";
 import { assessCypherPolicy } from "./policy.js";
 import { buildCypherProof } from "./proof.js";
@@ -67,6 +68,9 @@ export async function runCli(argv: string[], io: CliIO = defaultIo()): Promise<n
         return 0;
       case "compare-evals":
         await compareEvalsCommand(args, io);
+        return 0;
+      case "scorecard":
+        await scorecardCommand(args, io);
         return 0;
       case "repair-loop":
         await repairLoopCommand(args, io);
@@ -222,6 +226,27 @@ async function compareEvalsCommand(args: Map<string, string | boolean>, io: CliI
   if (args.get("fail-on-regression") === true && comparison.regressions.length > 0) {
     throw new Error(`Eval comparison found ${comparison.regressions.length} regression(s).`);
   }
+}
+
+async function scorecardCommand(args: Map<string, string | boolean>, io: CliIO) {
+  const reports = await Promise.all(
+    stringArg(args, "reports").split(",").map(async (reportPath) => JSON.parse(await io.readFile(reportPath.trim(), "utf8")) as EvalReport)
+  );
+  const scorecard = buildCypherBenchScorecard(reports, {
+    ...(typeof args.get("name") === "string" ? { name: args.get("name") as string } : {})
+  });
+  if (typeof args.get("scorecard-out") === "string") {
+    await writeJsonFile(io, args.get("scorecard-out") as string, scorecard);
+  }
+  const markdown = renderCypherBenchScorecardMarkdown(scorecard);
+  if (typeof args.get("markdown-out") === "string") {
+    await writeTextFile(io, args.get("markdown-out") as string, markdown);
+  }
+  if (args.get("format") === "markdown") {
+    io.stdout.write(markdown);
+    return;
+  }
+  writeJson(io, scorecard);
 }
 
 async function repairLoopCommand(args: Map<string, string | boolean>, io: CliIO) {
@@ -576,6 +601,7 @@ Commands:
   corpus
   eval        --dataset dataset.json --attempts attempts.json [--report-out report.json] [--raw-cypher-can-execute] [--default-limit 25] [--default-max-hops 5]
   compare-evals --baseline baseline.report.json --candidate candidate.report.json [--comparison-out comparison.json] [--fail-on-regression] [--tolerance 0.0001]
+  scorecard   --reports report-a.json,report-b.json [--name cypherbench] [--scorecard-out scorecard.json] [--markdown-out scorecard.md] [--format json|markdown]
   repair-loop --dataset dataset.json --attempts attempts.json [--feedback-out feedback.json] [--report-out report.json] [--raw-cypher-can-execute] [--default-limit 25] [--default-max-hops 5]
   lift-raw-eval --dataset dataset.json --attempts attempts.json [--summary-out summary.json]
   parse-check --schema schema.json (--query query.json | --cypher "MATCH ...") [--mode lint|syntax] [--default-limit 25] [--default-max-hops 5]

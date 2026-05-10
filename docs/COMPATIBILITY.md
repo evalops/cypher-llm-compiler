@@ -16,6 +16,7 @@ Stable public contracts:
 - `cypher-llm-policy-report/v1`
 - `cypher-llm-lsp-diagnostics/v1`
 - `cypher-llm-lossless-parse/v1`
+- `cypher-llm-cypherbench-scorecard/v1`
 
 JSON Schema artifacts live under `schemas/` and should be treated as the source of truth for model/tool input validation.
 
@@ -80,6 +81,16 @@ cypher-llm parse-lossless --schema examples/tool-hash.schema.json --cypher "MATC
 ```
 
 Lossless parse reports preserve exact source fragments, comments, statement and clause spans, delimiter diagnostics, optional parser output, and best-effort IR-preview coverage. This is the first compatibility contract for existing Cypher workloads that must not be rewritten just to be inspected by an LLM agent.
+
+## CypherBench Scorecards
+
+Run:
+
+```bash
+cypher-llm scorecard --reports baseline.report.json,candidate.report.json --scorecard-out scorecard.json --markdown-out scorecard.md
+```
+
+Scorecards are the public benchmark contract for ranked eval lanes, aggregate diagnostics, and baseline comparisons. JSON scorecards validate against `schemas/cypherbench-scorecard.schema.json`; markdown scorecards are generated from the same object.
 
 ## Breaking Changes
 

@@ -1,4 +1,4 @@
-import type { EvalAttemptSet, EvalDataset, EvalOptions } from "./evals.js";
+import type { EvalAttemptSet, EvalDataset, EvalOptions, EvalReport } from "./evals.js";
 import { evaluateAttempts } from "./evals.js";
 import type { CypherQuery, CypherSchemaContract, JsonLiteral } from "./ir.js";
 import { buildLspDiagnostics } from "./lsp.js";
@@ -12,6 +12,7 @@ import { repairQuery, repairRawCypher } from "./repair.js";
 import { renderQuery } from "./render.js";
 import type { SafeExecutionOptions } from "./safety.js";
 import { createSafeExecutionPlan } from "./safety.js";
+import { buildCypherBenchScorecard } from "./scorecard.js";
 import type { ValidationOptions } from "./validate.js";
 import { validateQuery } from "./validate.js";
 
@@ -26,7 +27,8 @@ export type CypherCompilerToolName =
   | "cypher_policy_check"
   | "cypher_lsp_diagnostics"
   | "cypher_prove"
-  | "cypher_eval";
+  | "cypher_eval"
+  | "cypher_scorecard";
 
 export interface CypherCompilerToolDefinition {
   name: CypherCompilerToolName;
@@ -122,6 +124,21 @@ const evalAttemptSetSchema: JsonSchema = {
     model: { type: "string" },
     prompt: { type: "string" },
     attempts: { type: "array", items: { type: "object", additionalProperties: true } }
+  }
+};
+
+const evalReportSchema: JsonSchema = {
+  type: "object",
+  description: "EvalReport JSON produced by cypher_eval or the eval CLI.",
+  required: ["version", "datasetName", "metrics", "results"],
+  additionalProperties: true,
+  properties: {
+    version: { const: "cypher-llm-eval-report/v1" },
+    datasetName: { type: "string" },
+    model: { type: "string" },
+    prompt: { type: "string" },
+    metrics: { type: "object", additionalProperties: true },
+    results: { type: "array", items: { type: "object", additionalProperties: true } }
   }
 };
 
@@ -305,6 +322,26 @@ export const CYPHER_COMPILER_TOOLS: readonly CypherCompilerToolDefinition[] = [
         description: "Count raw Cypher attempts as executable when raw repair did not find blocking diagnostics."
       }
     })
+  },
+  {
+    name: "cypher_scorecard",
+    description:
+      "Build a publishable CypherBench scorecard from one or more eval reports, including lane rankings, diagnostics, and baseline comparisons.",
+    inputSchema: objectSchema(["reports"], {
+      reports: {
+        type: "array",
+        minItems: 1,
+        items: evalReportSchema
+      },
+      name: {
+        type: "string",
+        description: "Human-readable scorecard name."
+      },
+      baselineIndex: {
+        type: "number",
+        description: "Zero-based report index to use as the comparison baseline."
+      }
+    })
   }
 ];
 
@@ -420,6 +457,9 @@ export async function executeCypherCompilerTool(name: string, input: unknown): P
         evalOptions(args)
       );
     }
+    case "cypher_scorecard": {
+      return buildCypherBenchScorecard(requiredArray<EvalReport>(args, "reports"), scorecardOptions(args));
+    }
     default:
       throw new Error(`Unknown Cypher compiler tool '${name}'.`);
   }
@@ -466,6 +506,14 @@ function requiredString(args: Record<string, unknown>, name: string): string {
     throw new Error(`Missing required string argument '${name}'.`);
   }
   return value;
+}
+
+function requiredArray<T>(args: Record<string, unknown>, name: string): T[] {
+  const value = args[name];
+  if (!Array.isArray(value)) {
+    throw new Error(`Missing required array argument '${name}'.`);
+  }
+  return value as T[];
 }
 
 function optionalString(args: Record<string, unknown>, name: string): string | undefined {
@@ -659,6 +707,22 @@ function evalOptions(args: Record<string, unknown>): EvalOptions {
   const rawCypherCanExecute = optionalBoolean(args, "rawCypherCanExecute");
   if (rawCypherCanExecute !== undefined) {
     options.rawCypherCanExecute = rawCypherCanExecute;
+  }
+  return options;
+}
+
+function scorecardOptions(args: Record<string, unknown>) {
+  const options: {
+    name?: string;
+    baselineIndex?: number;
+  } = {};
+  const name = optionalString(args, "name");
+  const baselineIndex = optionalNumber(args, "baselineIndex");
+  if (name !== undefined) {
+    options.name = name;
+  }
+  if (baselineIndex !== undefined) {
+    options.baselineIndex = baselineIndex;
   }
   return options;
 }

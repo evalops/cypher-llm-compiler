@@ -83,6 +83,22 @@ describe("compiler HTTP service", () => {
       query,
       uri: "file:///query.json"
     }) as { version: string; codeActions: { title: string }[] };
+    const evalReport = await postJson(`${baseUrl}/v1/eval`, {
+      dataset: {
+        version: "cypher-llm-eval-dataset/v1",
+        name: "http-scorecard",
+        tasks: [{ id: "one", question: "Return hash.", schema, expected: { canExecute: true } }]
+      },
+      attempts: {
+        version: "cypher-llm-eval-attempts/v1",
+        attempts: [{ taskId: "one", query }]
+      },
+      defaultLimit: 25
+    }) as { version: string };
+    const scorecard = await postJson(`${baseUrl}/v1/scorecard`, {
+      reports: [evalReport],
+      name: "http-scorecard"
+    }) as { version: string; summary: { reports: number } };
 
     assert.equal(proof.version, "cypher-llm-proof/v1");
     assert.equal(proof.status, "repaired");
@@ -95,6 +111,8 @@ describe("compiler HTTP service", () => {
     assert.deepEqual(policy.findings.map((finding) => finding.code), ["policy-unfiltered-label-scan", "policy-missing-limit"]);
     assert.equal(lsp.version, "cypher-llm-lsp-diagnostics/v1");
     assert.ok(lsp.codeActions.some((action) => action.title === "Add a bounded LIMIT"));
+    assert.equal(scorecard.version, "cypher-llm-cypherbench-scorecard/v1");
+    assert.equal(scorecard.summary.reports, 1);
   });
 
   it("returns structured errors for invalid tool input", async () => {

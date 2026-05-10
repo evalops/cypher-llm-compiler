@@ -1,6 +1,6 @@
 # Agent Integrations
 
-The compiler exposes the same nine operations across OpenAI tool schemas, MCP, HTTP, LangChain-shaped adapters, and the CLI:
+The compiler exposes the same ten operations across OpenAI tool schemas, MCP, HTTP, LangChain-shaped adapters, and the CLI:
 
 - `cypher_render`: repair IR, validate, and return a `SafeExecutionPlan`.
 - `cypher_validate`: return stable compiler diagnostics for IR.
@@ -11,6 +11,7 @@ The compiler exposes the same nine operations across OpenAI tool schemas, MCP, H
 - `cypher_lsp_diagnostics`: emit LSP-style diagnostics and code actions for editor and agent UIs.
 - `cypher_prove`: return proof-carrying compile output with repairs, diagnostics, parser preflight, and execution-policy claims.
 - `cypher_eval`: score model attempts against an eval dataset.
+- `cypher_scorecard`: publish ranked CypherBench scorecards from eval reports.
 
 ## OpenAI Tools
 
@@ -117,6 +118,7 @@ Routes:
 - `POST /v1/lsp-diagnostics`
 - `POST /v1/prove`
 - `POST /v1/eval`
+- `POST /v1/scorecard`
 - `POST /v1/tools/:toolName`
 - `GET /v1/roadmap`
 - `GET /v1/dialect-certification`

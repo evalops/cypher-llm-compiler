@@ -81,8 +81,10 @@
       "firstArtifacts": [
         "src/evals.ts",
         "src/eval-compare.ts",
+        "src/scorecard.ts",
         "src/repair-loop.ts",
-        "docs/CYPHERBENCH.md"
+        "docs/CYPHERBENCH.md",
+        "examples/benchmarks/tool-hash.scorecard.json"
       ],
       "acceptanceGates": [
         "Scorecards include syntax, semantic, dialect, safety, and live execution metrics.",
@@ -325,6 +327,20 @@
       ],
       "workstreamIds": [
         "public-cypherbench"
+      ]
+    },
+    {
+      "id": "cypherbench-scorecards",
+      "title": "CypherBench JSON And Markdown Scorecards",
+      "status": "partial",
+      "evidence": [
+        "src/scorecard.ts",
+        "schemas/cypherbench-scorecard.schema.json",
+        "test/scorecard.test.ts"
+      ],
+      "workstreamIds": [
+        "public-cypherbench",
+        "governance-standards"
       ]
     },
     {

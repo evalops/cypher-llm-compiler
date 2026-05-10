@@ -270,6 +270,20 @@ Compares two `EvalReport` objects and returns `cypher-llm-eval-comparison/v1` wi
 
 This backs the `cypher-llm compare-evals` CLI command and can be used as a CI regression gate.
 
+## `buildCypherBenchScorecard(reports, options?)`
+
+Builds a `cypher-llm-cypherbench-scorecard/v1` report from one or more eval reports.
+
+The scorecard includes:
+
+- Ranked benchmark lanes.
+- Baseline comparisons against the first report or `baselineIndex`.
+- Aggregate diagnostic counts by lane.
+- Best pass and executable rates.
+- A summary status of `improved`, `regressed`, or `unchanged`.
+
+Use `renderCypherBenchScorecardMarkdown(scorecard)` to publish the same report as a compact markdown table.
+
 ## `evaluateRepairLoop(dataset, attempts, options?)`
 
 Runs `evaluateAttempts` and emits `cypher-llm-repair-loop/v1` feedback packets for attempts with diagnostics, execution failures, or failed expectations.

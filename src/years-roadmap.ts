@@ -128,7 +128,14 @@ export const yearsRoadmap = {
         "Model and compiler scorecards that make retries and repairs comparable.",
         "Benchmark reports that can be published from CI."
       ],
-      firstArtifacts: ["src/evals.ts", "src/eval-compare.ts", "src/repair-loop.ts", "docs/CYPHERBENCH.md"],
+      firstArtifacts: [
+        "src/evals.ts",
+        "src/eval-compare.ts",
+        "src/scorecard.ts",
+        "src/repair-loop.ts",
+        "docs/CYPHERBENCH.md",
+        "examples/benchmarks/tool-hash.scorecard.json"
+      ],
       acceptanceGates: [
         "Scorecards include syntax, semantic, dialect, safety, and live execution metrics.",
         "CI can fail on benchmark regressions for stable lanes.",
@@ -298,6 +305,13 @@ export const yearsRoadmap = {
       status: "partial",
       evidence: ["src/evals.ts", "src/eval-compare.ts", "docs/CYPHERBENCH.md"],
       workstreamIds: ["public-cypherbench"]
+    },
+    {
+      id: "cypherbench-scorecards",
+      title: "CypherBench JSON And Markdown Scorecards",
+      status: "partial",
+      evidence: ["src/scorecard.ts", "schemas/cypherbench-scorecard.schema.json", "test/scorecard.test.ts"],
+      workstreamIds: ["public-cypherbench", "governance-standards"]
     },
     {
       id: "repair-loop",

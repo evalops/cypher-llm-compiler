@@ -24,7 +24,8 @@ const TOOL_ROUTES: Record<string, CypherCompilerToolName> = {
   "/v1/policy": "cypher_policy_check",
   "/v1/lsp-diagnostics": "cypher_lsp_diagnostics",
   "/v1/prove": "cypher_prove",
-  "/v1/eval": "cypher_eval"
+  "/v1/eval": "cypher_eval",
+  "/v1/scorecard": "cypher_scorecard"
 };
 
 export function createCompilerHttpServer(options: CompilerHttpServerOptions = {}): Server {

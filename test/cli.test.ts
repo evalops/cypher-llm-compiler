@@ -242,6 +242,75 @@ describe("cli", () => {
     assert.ok(writes.has("out/feedback.json"));
   });
 
+  it("builds CypherBench scorecards from eval reports", async () => {
+    const report = {
+      version: "cypher-llm-eval-report/v1",
+      datasetName: "cli-scorecard",
+      metrics: {
+        totalTasks: 1,
+        attemptedTasks: 1,
+        missingAttempts: 0,
+        passedTasks: 1,
+        failedTasks: 0,
+        irAttempts: 1,
+        rawAttempts: 0,
+        noCypherAttempts: 0,
+        timeoutAttempts: 0,
+        executablePlans: 1,
+        repairApplied: 0,
+        expectedCypherMatches: 1,
+        expectedDiagnosticMatches: 0,
+        observedSyntaxErrors: 0,
+        observedTimeouts: 0,
+        observedNoCypher: 0,
+        observedReturnsResults: 0,
+        expectedAnswerTasks: 0,
+        diagnosticsByCode: {},
+        passRate: 1,
+        executableRate: 1,
+        repairRate: 0
+      },
+      results: []
+    };
+    const files = new Map<string, string>([
+      ["report-a.json", JSON.stringify(report)],
+      ["report-b.json", JSON.stringify({ ...report, model: "candidate" })]
+    ]);
+    const writes = new Map<string, string>();
+    let stdout = "";
+    let stderr = "";
+    const io: CliIO = {
+      stdout: { write: (chunk: string | Uint8Array) => ((stdout += String(chunk)), true) },
+      stderr: { write: (chunk: string | Uint8Array) => ((stderr += String(chunk)), true) },
+      readFile: async (path) => files.get(String(path)) ?? "",
+      writeFile: async (path, data) => {
+        writes.set(path, data);
+      },
+      mkdir: async () => undefined
+    };
+
+    const code = await runCli(
+      [
+        "scorecard",
+        "--reports",
+        "report-a.json,report-b.json",
+        "--name",
+        "cli-scorecard",
+        "--scorecard-out",
+        "out/scorecard.json",
+        "--markdown-out",
+        "out/scorecard.md"
+      ],
+      io
+    );
+
+    assert.equal(code, 0);
+    assert.equal(stderr, "");
+    assert.ok(stdout.includes("cypher-llm-cypherbench-scorecard/v1"));
+    assert.ok(writes.get("out/scorecard.json")?.includes("cli-scorecard"));
+    assert.ok(writes.get("out/scorecard.md")?.includes("# cli-scorecard"));
+  });
+
   it("runs parser-backed validation from raw Cypher", async () => {
     const files = new Map<string, string>([
       [

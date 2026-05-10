@@ -14,3 +14,4 @@
 - Added static cost and safety policy reports for broad scans, traversal risk, high limits, cartesian patterns, and writes, including CLI/tool/service output and checked-in policy artifact.
 - Added LSP-style diagnostics and code actions over compiler, parser, policy, and repair output, including CLI/tool/service output and checked-in LSP artifact.
 - Added lossless Cypher parse reports with exact source round-trip fragments, comments, statement/clause spans, optional parser output, IR-preview mapping, JSON Schema, CLI/tool/service output, and checked-in lossless artifact.
+- Added CypherBench scorecards with ranked lanes, aggregate diagnostics, baseline comparisons, JSON Schema, markdown rendering, CLI/tool/service output, and checked-in scorecard artifacts.

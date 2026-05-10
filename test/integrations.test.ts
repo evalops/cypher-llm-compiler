@@ -55,7 +55,8 @@ describe("OpenAI tool schemas", () => {
       "cypher_policy_check",
       "cypher_lsp_diagnostics",
       "cypher_prove",
-      "cypher_eval"
+      "cypher_eval",
+      "cypher_scorecard"
     ]);
     assert.equal(chatTools[0]?.function.name, "cypher_render");
     assert.equal(responseTools.every((tool) => tool.type === "function" && tool.parameters.type === "object"), true);
@@ -128,6 +129,27 @@ describe("OpenAI tool schemas", () => {
     assert.equal(proof.status, "repaired");
     assert.equal(proof.canExecute, true);
     assert.ok(proof.claims.some((claim) => claim.id === "parser-preflight"));
+
+    const evalReport = (await executeCypherCompilerTool("cypher_eval", {
+      dataset: {
+        version: "cypher-llm-eval-dataset/v1",
+        name: "tool-dispatch",
+        tasks: [{ id: "one", question: "Return hash.", schema, expected: { canExecute: true } }]
+      },
+      attempts: {
+        version: "cypher-llm-eval-attempts/v1",
+        attempts: [{ taskId: "one", query: repairableQuery }]
+      },
+      defaultLimit: 25,
+      defaultMaxHops: 3
+    })) as { version: string };
+    const scorecard = (await executeCypherCompilerTool("cypher_scorecard", {
+      reports: [evalReport],
+      name: "tool-dispatch-scorecard"
+    })) as { version: string; lanes: { id: string }[] };
+
+    assert.equal(scorecard.version, "cypher-llm-cypherbench-scorecard/v1");
+    assert.equal(scorecard.lanes[0]?.id, "1-tool-dispatch");
   });
 });
 
