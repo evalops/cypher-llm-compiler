@@ -71,6 +71,12 @@ Schema statistics are exported from `src/schema-statistics.ts`, validated by `sc
 cypher-llm policy-check --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json --schema-statistics examples/policy/tool-hash.schema-statistics.json
 ```
 
+Policy rules are exported from `src/policy-rules.ts`, validated by `schemas/policy-rules.schema.json`, and checked in at `examples/policy/tool-hash.policy-rules.json`.
+
+```bash
+cypher-llm policy-check --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json --policy-rules examples/policy/tool-hash.policy-rules.json
+```
+
 Policy profiles are exported from `src/policy-profile.ts`, validated by `schemas/policy-profile.schema.json`, and checked in at `examples/policy/policy-profiles.json`.
 
 ```bash

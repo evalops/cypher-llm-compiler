@@ -175,6 +175,7 @@ Current findings include:
 - Unbounded or high-hop variable-length traversals.
 - Planner-estimated rows, db hits, and expensive plan operators when `plannerEstimate` is supplied.
 - High-cardinality label scans, unindexed predicates, and high-fanout relationships when `schemaStatistics` is supplied.
+- Sensitive label/relationship access, sensitive returned properties, and missing tenant-scope predicates when `policyRules` is supplied.
 - Write clauses without an explicit policy allowance.
 
 Pass `policyOptionsFromProfile(getPolicyProfile("llm-readonly-strict"))` to apply a named profile and record that policy identity in the report.
@@ -190,6 +191,12 @@ The estimate captures planner source, max estimated rows, summed db hits when av
 Produces a `cypher-llm-schema-statistics/v1` skeleton from a schema contract. Applications can fill in node counts, indexed properties, relationship counts, and average fanout from database metadata or offline catalog jobs.
 
 Pass the completed statistics object to `assessCypherPolicy` as `schemaStatistics` to flag high-cardinality label scans, predicates on non-indexed properties, and high-fanout relationship traversals.
+
+## `CypherPolicyRuleSet`
+
+`cypher-llm-policy-rules/v1` objects let applications supply tenant and sensitive-data policy rules at runtime. Rules can mark labels, relationship types, and returned properties as sensitive, and can require a label to be constrained by a property or parameter such as `tenantId`.
+
+Pass the rule set to `assessCypherPolicy` as `policyRules`, or to the CLI with `--policy-rules`, to include stable policy findings and a compact rule summary in `cypher-llm-policy-report/v1`.
 
 ## `buildPolicyProfileCatalog()`
 

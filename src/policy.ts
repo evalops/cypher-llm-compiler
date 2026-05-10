@@ -1,6 +1,8 @@
 import type { Clause, CypherQuery, CypherSchemaContract, Expression, MatchClause, NodePattern, RelationshipPattern, ReturnClause } from "./ir.js";
 import type { CypherPlannerEstimate, CypherPlannerOperatorEstimate } from "./planner-estimate.js";
 import { flattenPlannerOperators } from "./planner-estimate.js";
+import type { CypherPolicyRuleSet, CypherPolicyRuleSetSummary, CypherTenantScopeRule } from "./policy-rules.js";
+import { summarizePolicyRules } from "./policy-rules.js";
 import type { CypherNodeLabelStatistics, CypherSchemaStatistics } from "./schema-statistics.js";
 import { findNodeStatistics, findRelationshipStatistics, hasIndexedProperty } from "./schema-statistics.js";
 import { canonicalLabel, canonicalRelationshipType, normalizeSchema, type NormalizedSchema } from "./schema.js";
@@ -20,6 +22,7 @@ export interface CypherPolicyOptions {
   warnOnPlanOperators?: string[];
   plannerEstimate?: CypherPlannerEstimate;
   schemaStatistics?: CypherSchemaStatistics;
+  policyRules?: CypherPolicyRuleSet;
   profile?: CypherPolicyProfileRef;
 }
 
@@ -48,6 +51,7 @@ export interface CypherPolicyReport {
   ok: boolean;
   dialect?: string;
   policy?: CypherPolicyProfileRef;
+  rules?: CypherPolicyRuleSetSummary;
   planner?: CypherPolicyPlannerSummary;
   statistics?: CypherPolicyStatisticsSummary;
   summary: CypherPolicySummary;
@@ -67,7 +71,14 @@ export interface CypherPolicyStatisticsSummary {
   relationships: number;
 }
 
-type EffectivePolicyOptions = Required<Omit<CypherPolicyOptions, "profile" | "plannerEstimate" | "schemaStatistics">>;
+type EffectivePolicyOptions = Required<
+  Omit<CypherPolicyOptions, "profile" | "plannerEstimate" | "schemaStatistics" | "policyRules">
+>;
+
+interface PolicyVariableBinding {
+  kind: "node" | "relationship";
+  names: string[];
+}
 
 const DEFAULT_OPTIONS: EffectivePolicyOptions = {
   allowWrites: false,
@@ -87,6 +98,7 @@ export function assessCypherPolicy(
   options: CypherPolicyOptions = {}
 ): CypherPolicyReport {
   const normalizedSchema = normalizeSchema(schema);
+  const variableBindings = collectVariableBindings(query, normalizedSchema);
   const opts: EffectivePolicyOptions = {
     allowWrites: options.allowWrites ?? DEFAULT_OPTIONS.allowWrites,
     requireLimit: options.requireLimit ?? DEFAULT_OPTIONS.requireLimit,
@@ -112,10 +124,10 @@ export function assessCypherPolicy(
       });
     }
     if (clause.kind === "match") {
-      assessMatchPolicy(clause, path, findings, opts, options.schemaStatistics, normalizedSchema);
+      assessMatchPolicy(clause, path, findings, opts, options.schemaStatistics, options.policyRules, normalizedSchema);
     }
     if (clause.kind === "return") {
-      assessReturnPolicy(clause, path, findings, opts);
+      assessReturnPolicy(clause, path, findings, opts, options.policyRules, variableBindings, normalizedSchema);
     }
   });
 
@@ -135,6 +147,7 @@ export function assessCypherPolicy(
     ok: summary.errors === 0,
     ...(schema.dialect ? { dialect: schema.dialect } : {}),
     ...(options.profile ? { policy: options.profile } : {}),
+    ...(options.policyRules ? { rules: summarizePolicyRules(options.policyRules) } : {}),
     ...(options.plannerEstimate ? { planner: plannerSummary(options.plannerEstimate) } : {}),
     ...(options.schemaStatistics ? { statistics: statisticsSummary(options.schemaStatistics) } : {}),
     summary,
@@ -148,6 +161,7 @@ function assessMatchPolicy(
   findings: CypherPolicyFinding[],
   options: EffectivePolicyOptions,
   statistics: CypherSchemaStatistics | undefined,
+  policyRules: CypherPolicyRuleSet | undefined,
   schema: NormalizedSchema
 ) {
   if (clause.patterns.length > 1) {
@@ -162,16 +176,21 @@ function assessMatchPolicy(
 
   clause.patterns.forEach((pattern, patternIndex) => {
     const [head, ...tail] = pattern.segments;
-    assessHeadNodePolicy(head, clause, `${path}/patterns/${patternIndex}/segments/0`, findings, options, statistics, schema);
+    const headPath = `${path}/patterns/${patternIndex}/segments/0`;
+    assessHeadNodePolicy(head, clause, headPath, findings, options, statistics, schema);
+    assessNodeRulePolicy(head, clause, headPath, findings, policyRules, schema);
     tail.forEach((segment, segmentIndex) => {
+      const segmentPath = `${path}/patterns/${patternIndex}/segments/${segmentIndex + 1}`;
       assessRelationshipPolicy(
         segment.rel,
-        `${path}/patterns/${patternIndex}/segments/${segmentIndex + 1}/rel`,
+        `${segmentPath}/rel`,
         findings,
         options,
         statistics,
+        policyRules,
         schema
       );
+      assessNodeRulePolicy(segment.node, clause, `${segmentPath}/node`, findings, policyRules, schema);
     });
   });
 }
@@ -227,6 +246,7 @@ function assessRelationshipPolicy(
   findings: CypherPolicyFinding[],
   options: EffectivePolicyOptions,
   statistics: CypherSchemaStatistics | undefined,
+  policyRules: CypherPolicyRuleSet | undefined,
   schema: NormalizedSchema
 ) {
   if (relationship.maxHops === null) {
@@ -253,6 +273,9 @@ function assessRelationshipPolicy(
     relationship.types?.length === 1
       ? canonicalRelationshipType(schema, relationship.types[0] as string) ?? relationship.types[0]
       : undefined;
+  if (relationshipType && policyRules) {
+    assessRelationshipRulePolicy(relationshipType, path, findings, policyRules, schema);
+  }
   const relationshipStatistics = relationshipType && statistics ? findRelationshipStatistics(statistics, relationshipType) : undefined;
   if (relationshipStatistics?.averageFanout !== undefined && relationshipStatistics.averageFanout > options.maxRelationshipFanout) {
     findings.push({
@@ -269,8 +292,13 @@ function assessReturnPolicy(
   clause: ReturnClause,
   path: string,
   findings: CypherPolicyFinding[],
-  options: EffectivePolicyOptions
+  options: EffectivePolicyOptions,
+  policyRules: CypherPolicyRuleSet | undefined,
+  variableBindings: Map<string, PolicyVariableBinding>,
+  schema: NormalizedSchema
 ) {
+  assessReturnRulePolicy(clause, path, findings, policyRules, variableBindings, schema);
+
   if (!clause.limit && options.requireLimit) {
     findings.push({
       code: "policy-missing-limit",
@@ -279,7 +307,6 @@ function assessReturnPolicy(
       path,
       suggestion: "Add a bounded LIMIT before allowing autonomous execution."
     });
-    return;
   }
 
   const limit = clause.limit ? numericLiteral(clause.limit) : undefined;
@@ -363,6 +390,305 @@ function assessPredicateIndexPolicy(
       suggestion: "Use an indexed property, add index metadata to schema statistics, or require an explicit policy override."
     });
   }
+}
+
+function assessNodeRulePolicy(
+  node: NodePattern,
+  clause: MatchClause,
+  path: string,
+  findings: CypherPolicyFinding[],
+  policyRules: CypherPolicyRuleSet | undefined,
+  schema: NormalizedSchema
+) {
+  if (!policyRules) {
+    return;
+  }
+
+  const labels = (node.labels ?? []).map((label) => canonicalLabel(schema, label) ?? label);
+  for (const label of labels) {
+    for (const rule of policyRules.sensitiveLabels ?? []) {
+      const ruleLabel = canonicalLabel(schema, rule.label) ?? rule.label;
+      if (ruleLabel !== label) {
+        continue;
+      }
+      findings.push({
+        code: "policy-sensitive-label-access",
+        severity: ruleSeverity(rule.severity, "warning"),
+        message: `MATCH touches sensitive label '${label}'.`,
+        path,
+        suggestion: rule.reason ?? "Require a narrower predicate, approval, or redacted projection before execution."
+      });
+    }
+
+    for (const rule of policyRules.tenantScopes ?? []) {
+      const ruleLabel = canonicalLabel(schema, rule.label) ?? rule.label;
+      if (ruleLabel !== label || nodeSatisfiesTenantScope(node, clause, rule)) {
+        continue;
+      }
+      const parameter = rule.parameter ? ` parameter '$${rule.parameter}'` : " a tenant/scoping value";
+      findings.push({
+        code: "policy-missing-tenant-scope",
+        severity: ruleSeverity(rule.severity, "error"),
+        message: `Label '${label}' must be constrained by '${rule.property}' using${parameter}.`,
+        path,
+        suggestion: rule.reason ?? "Add the required tenant/scoping predicate or require an explicit policy override."
+      });
+    }
+  }
+}
+
+function assessRelationshipRulePolicy(
+  relationshipType: string,
+  path: string,
+  findings: CypherPolicyFinding[],
+  policyRules: CypherPolicyRuleSet,
+  schema: NormalizedSchema
+) {
+  for (const rule of policyRules.sensitiveRelationships ?? []) {
+    const ruleType = canonicalRelationshipType(schema, rule.type) ?? rule.type;
+    if (ruleType !== relationshipType) {
+      continue;
+    }
+    findings.push({
+      code: "policy-sensitive-relationship-access",
+      severity: ruleSeverity(rule.severity, "warning"),
+      message: `MATCH traverses sensitive relationship '${relationshipType}'.`,
+      path,
+      suggestion: rule.reason ?? "Require a narrower predicate, approval, or redacted projection before execution."
+    });
+  }
+}
+
+function assessReturnRulePolicy(
+  clause: ReturnClause,
+  path: string,
+  findings: CypherPolicyFinding[],
+  policyRules: CypherPolicyRuleSet | undefined,
+  variableBindings: Map<string, PolicyVariableBinding>,
+  schema: NormalizedSchema
+) {
+  if (!policyRules) {
+    return;
+  }
+
+  clause.items.forEach((item, itemIndex) => {
+    for (const reference of collectPropertyReferences(item.expression)) {
+      const binding = reference.variable ? variableBindings.get(reference.variable) : undefined;
+      for (const rule of policyRules.sensitiveProperties ?? []) {
+        if (!sensitivePropertyRuleMatches(rule, reference.property, binding, schema)) {
+          continue;
+        }
+        const propertyName = reference.variable ? `${reference.variable}.${reference.property}` : reference.property;
+        findings.push({
+          code: "policy-sensitive-property-return",
+          severity: ruleSeverity(rule.severity, "error"),
+          message: `RETURN projects sensitive property '${propertyName}'.`,
+          path: `${path}/items/${itemIndex}/expression`,
+          suggestion: rule.reason ?? "Return a redacted value, aggregate, or explicit approval-backed projection."
+        });
+      }
+    }
+  });
+}
+
+function nodeSatisfiesTenantScope(node: NodePattern, clause: MatchClause, rule: CypherTenantScopeRule): boolean {
+  const patternValue = node.properties?.[rule.property];
+  if (patternValue && valueSatisfiesTenantScope(patternValue, rule)) {
+    return true;
+  }
+  if (!node.variable) {
+    return false;
+  }
+  return (
+    expressionContainsTenantScope(node.where, node.variable, rule) ||
+    expressionContainsTenantScope(clause.where, node.variable, rule)
+  );
+}
+
+function expressionContainsTenantScope(
+  expression: Expression | undefined,
+  variable: string,
+  rule: CypherTenantScopeRule
+): boolean {
+  if (!expression) {
+    return false;
+  }
+  if (expression.kind !== "binary") {
+    return false;
+  }
+  if (expression.op === "AND") {
+    return (
+      expressionContainsTenantScope(expression.left, variable, rule) ||
+      expressionContainsTenantScope(expression.right, variable, rule)
+    );
+  }
+  if (expression.op !== "=" && expression.op !== "IN") {
+    return false;
+  }
+  return (
+    (propertyMatchesTenantScope(expression.left, variable, rule.property) &&
+      valueSatisfiesTenantScope(expression.right, rule)) ||
+    (propertyMatchesTenantScope(expression.right, variable, rule.property) &&
+      valueSatisfiesTenantScope(expression.left, rule))
+  );
+}
+
+function propertyMatchesTenantScope(expression: Expression, variable: string, property: string): boolean {
+  return (
+    expression.kind === "prop" &&
+    expression.key === property &&
+    expression.object.kind === "var" &&
+    expression.object.name === variable
+  );
+}
+
+function valueSatisfiesTenantScope(expression: Expression, rule: CypherTenantScopeRule): boolean {
+  return rule.parameter ? expression.kind === "param" && expression.name === rule.parameter : true;
+}
+
+function sensitivePropertyRuleMatches(
+  rule: NonNullable<CypherPolicyRuleSet["sensitiveProperties"]>[number],
+  property: string,
+  binding: PolicyVariableBinding | undefined,
+  schema: NormalizedSchema
+): boolean {
+  if (rule.property !== property) {
+    return false;
+  }
+  const ownerKind = rule.ownerKind ?? "any";
+  if (ownerKind !== "any" && binding?.kind !== ownerKind) {
+    return false;
+  }
+  if (!rule.owner) {
+    return true;
+  }
+  if (!binding) {
+    return false;
+  }
+  const owner =
+    binding.kind === "relationship"
+      ? canonicalRelationshipType(schema, rule.owner) ?? rule.owner
+      : canonicalLabel(schema, rule.owner) ?? rule.owner;
+  return binding.names.includes(owner);
+}
+
+function collectPropertyReferences(expression: Expression): { variable?: string; property: string }[] {
+  const references: { variable?: string; property: string }[] = [];
+  walkExpression(expression, (item) => {
+    if (item.kind !== "prop") {
+      return;
+    }
+    references.push({
+      ...(item.object.kind === "var" ? { variable: item.object.name } : {}),
+      property: item.key
+    });
+  });
+  return references;
+}
+
+function collectVariableBindings(query: CypherQuery, schema: NormalizedSchema): Map<string, PolicyVariableBinding> {
+  const bindings = new Map<string, PolicyVariableBinding>();
+  for (const clause of query.clauses) {
+    if (clause.kind === "match") {
+      for (const pattern of clause.patterns) {
+        const [head, ...tail] = pattern.segments;
+        registerNodeBinding(bindings, head, schema);
+        for (const segment of tail) {
+          registerRelationshipBinding(bindings, segment.rel, schema);
+          registerNodeBinding(bindings, segment.node, schema);
+        }
+      }
+    }
+    if (clause.kind === "call" && clause.subquery) {
+      for (const [name, binding] of collectVariableBindings(clause.subquery, schema)) {
+        registerBinding(bindings, name, binding);
+      }
+    }
+  }
+  return bindings;
+}
+
+function registerNodeBinding(
+  bindings: Map<string, PolicyVariableBinding>,
+  node: NodePattern,
+  schema: NormalizedSchema
+) {
+  if (!node.variable) {
+    return;
+  }
+  const labels = (node.labels ?? []).map((label) => canonicalLabel(schema, label) ?? label);
+  registerBinding(bindings, node.variable, { kind: "node", names: labels });
+}
+
+function registerRelationshipBinding(
+  bindings: Map<string, PolicyVariableBinding>,
+  relationship: RelationshipPattern,
+  schema: NormalizedSchema
+) {
+  if (!relationship.variable) {
+    return;
+  }
+  const types = (relationship.types ?? []).map((type) => canonicalRelationshipType(schema, type) ?? type);
+  registerBinding(bindings, relationship.variable, { kind: "relationship", names: types });
+}
+
+function registerBinding(
+  bindings: Map<string, PolicyVariableBinding>,
+  name: string,
+  binding: PolicyVariableBinding
+) {
+  const existing = bindings.get(name);
+  if (!existing || existing.kind !== binding.kind) {
+    bindings.set(name, binding);
+    return;
+  }
+  bindings.set(name, { kind: existing.kind, names: [...new Set([...existing.names, ...binding.names])] });
+}
+
+function walkExpression(expression: Expression, visit: (expression: Expression) => void) {
+  visit(expression);
+  switch (expression.kind) {
+    case "prop":
+      walkExpression(expression.object, visit);
+      return;
+    case "binary":
+      walkExpression(expression.left, visit);
+      walkExpression(expression.right, visit);
+      return;
+    case "unary":
+      walkExpression(expression.expression, visit);
+      return;
+    case "function":
+      expression.arguments.forEach((argument) => walkExpression(argument, visit));
+      return;
+    case "list":
+      expression.items.forEach((item) => walkExpression(item, visit));
+      return;
+    case "map":
+      Object.values(expression.entries).forEach((value) => walkExpression(value, visit));
+      return;
+    case "case":
+      if (expression.expression) {
+        walkExpression(expression.expression, visit);
+      }
+      expression.cases.forEach((caseItem) => {
+        walkExpression(caseItem.when, visit);
+        walkExpression(caseItem.then, visit);
+      });
+      if (expression.else) {
+        walkExpression(expression.else, visit);
+      }
+      return;
+    case "var":
+    case "param":
+    case "literal":
+    case "raw":
+      return;
+  }
+}
+
+function ruleSeverity(severity: PolicySeverity | undefined, fallback: PolicySeverity): PolicySeverity {
+  return severity ?? fallback;
 }
 
 function walkPlannerOperators(

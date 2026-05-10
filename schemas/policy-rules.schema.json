@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evalops.dev/schemas/cypher-llm/policy-rules/v1.json",
+  "title": "Cypher Policy Rules",
+  "type": "object",
+  "required": ["version", "id"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": "cypher-llm-policy-rules/v1" },
+    "id": { "type": "string", "minLength": 1 },
+    "title": { "type": "string", "minLength": 1 },
+    "sensitiveLabels": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/sensitiveLabel" }
+    },
+    "sensitiveRelationships": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/sensitiveRelationship" }
+    },
+    "sensitiveProperties": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/sensitiveProperty" }
+    },
+    "tenantScopes": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/tenantScope" }
+    }
+  },
+  "$defs": {
+    "severity": { "enum": ["info", "warning", "error"] },
+    "sensitiveLabel": {
+      "type": "object",
+      "required": ["label"],
+      "additionalProperties": false,
+      "properties": {
+        "label": { "type": "string", "minLength": 1 },
+        "severity": { "$ref": "#/$defs/severity" },
+        "reason": { "type": "string", "minLength": 1 }
+      }
+    },
+    "sensitiveRelationship": {
+      "type": "object",
+      "required": ["type"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "type": "string", "minLength": 1 },
+        "severity": { "$ref": "#/$defs/severity" },
+        "reason": { "type": "string", "minLength": 1 }
+      }
+    },
+    "sensitiveProperty": {
+      "type": "object",
+      "required": ["property"],
+      "additionalProperties": false,
+      "properties": {
+        "ownerKind": { "enum": ["node", "relationship", "any"] },
+        "owner": { "type": "string", "minLength": 1 },
+        "property": { "type": "string", "minLength": 1 },
+        "severity": { "$ref": "#/$defs/severity" },
+        "reason": { "type": "string", "minLength": 1 }
+      }
+    },
+    "tenantScope": {
+      "type": "object",
+      "required": ["label", "property"],
+      "additionalProperties": false,
+      "properties": {
+        "label": { "type": "string", "minLength": 1 },
+        "property": { "type": "string", "minLength": 1 },
+        "parameter": { "type": "string", "minLength": 1 },
+        "severity": { "$ref": "#/$defs/severity" },
+        "reason": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

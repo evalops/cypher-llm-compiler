@@ -633,6 +633,15 @@ describe("cli", () => {
           nodes: [{ label: "Tool", count: 25_000, indexedProperties: ["name"] }],
           relationships: []
         })
+      ],
+      [
+        "rules.json",
+        JSON.stringify({
+          version: "cypher-llm-policy-rules/v1",
+          id: "cli-rules",
+          sensitiveLabels: [{ label: "Tool", severity: "warning" }],
+          tenantScopes: [{ label: "Tool", property: "tenantId", parameter: "tenantId", severity: "error" }]
+        })
       ]
     ]);
     const writes = new Map<string, string>();
@@ -661,6 +670,8 @@ describe("cli", () => {
         "planner.json",
         "--schema-statistics",
         "statistics.json",
+        "--policy-rules",
+        "rules.json",
         "--max-estimated-rows",
         "10000",
         "--report-out",
@@ -675,6 +686,8 @@ describe("cli", () => {
     assert.ok(stdout.includes("llm-readonly-strict"));
     assert.ok(stdout.includes("policy-high-estimated-rows"));
     assert.ok(stdout.includes("policy-high-cardinality-label-scan"));
+    assert.ok(stdout.includes("policy-sensitive-label-access"));
+    assert.ok(stdout.includes("policy-missing-tenant-scope"));
     assert.ok(writes.get("out/policy.json")?.includes("policy-unfiltered-label-scan"));
   });
 

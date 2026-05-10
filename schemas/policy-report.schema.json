@@ -18,6 +18,19 @@
         "title": { "type": "string", "minLength": 1 }
       }
     },
+    "rules": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "sensitiveLabels", "sensitiveRelationships", "sensitiveProperties", "tenantScopes"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1 },
+        "sensitiveLabels": { "type": "integer", "minimum": 0 },
+        "sensitiveRelationships": { "type": "integer", "minimum": 0 },
+        "sensitiveProperties": { "type": "integer", "minimum": 0 },
+        "tenantScopes": { "type": "integer", "minimum": 0 }
+      }
+    },
     "planner": {
       "type": "object",
       "additionalProperties": false,

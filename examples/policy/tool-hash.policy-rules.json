@@ -1,0 +1,37 @@
+{
+  "version": "cypher-llm-policy-rules/v1",
+  "id": "tenant-sensitive-tool-hash",
+  "title": "Tenant Scoped Tool Hash Reads",
+  "sensitiveLabels": [
+    {
+      "label": "Hash",
+      "severity": "warning",
+      "reason": "Hash nodes can identify artifacts and should be read only through scoped workflows."
+    }
+  ],
+  "sensitiveRelationships": [
+    {
+      "type": "has MD5 hash",
+      "severity": "warning",
+      "reason": "Hash traversals should stay scoped to an approved tenant or tool."
+    }
+  ],
+  "sensitiveProperties": [
+    {
+      "ownerKind": "node",
+      "owner": "Hash",
+      "property": "value",
+      "severity": "error",
+      "reason": "Return redacted hash metadata instead of raw hash values for autonomous reads."
+    }
+  ],
+  "tenantScopes": [
+    {
+      "label": "Tool",
+      "property": "tenantId",
+      "parameter": "tenantId",
+      "severity": "error",
+      "reason": "Tool reads must include an explicit tenant predicate before execution."
+    }
+  ]
+}

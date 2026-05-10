@@ -31,6 +31,7 @@ import type { CypherSchemaStatistics } from "./schema-statistics.js";
 import { buildCypherBenchScorecard, renderCypherBenchScorecardMarkdown } from "./scorecard.js";
 import { validateCypherTextWithParser } from "./parser-validation.js";
 import { assessCypherPolicy } from "./policy.js";
+import type { CypherPolicyRuleSet } from "./policy-rules.js";
 import {
   buildPolicyProfileCatalog,
   getPolicyProfile,
@@ -451,6 +452,7 @@ async function policyCheckCommand(args: Map<string, string | boolean>, io: CliIO
   const profile = await readPolicyProfile(args, io);
   const plannerEstimate = await readPlannerEstimate(args, io);
   const schemaStatistics = await readSchemaStatistics(args, io);
+  const policyRules = await readPolicyRules(args, io);
   const overrides: Parameters<typeof assessCypherPolicy>[2] = {};
   if (args.get("allow-writes") === true) {
     overrides.allowWrites = true;
@@ -484,6 +486,9 @@ async function policyCheckCommand(args: Map<string, string | boolean>, io: CliIO
   }
   if (schemaStatistics !== undefined) {
     overrides.schemaStatistics = schemaStatistics;
+  }
+  if (policyRules !== undefined) {
+    overrides.policyRules = policyRules;
   }
   const policyOptions = profile ? policyOptionsFromProfile(profile, overrides) : overrides;
   const report = assessCypherPolicy(query, schema, policyOptions);
@@ -699,6 +704,14 @@ async function readSchemaStatistics(args: Map<string, string | boolean>, io: Cli
   return JSON.parse(await io.readFile(statisticsPath, "utf8")) as CypherSchemaStatistics;
 }
 
+async function readPolicyRules(args: Map<string, string | boolean>, io: CliIO): Promise<CypherPolicyRuleSet | undefined> {
+  const rulesPath = args.get("policy-rules");
+  if (typeof rulesPath !== "string") {
+    return undefined;
+  }
+  return JSON.parse(await io.readFile(rulesPath, "utf8")) as CypherPolicyRuleSet;
+}
+
 function parseArgs(args: string[]): Map<string, string | boolean> {
   const parsed = new Map<string, string | boolean>();
   for (let index = 0; index < args.length; index += 1) {
@@ -819,7 +832,7 @@ Commands:
   repair-loop --dataset dataset.json --attempts attempts.json [--feedback-out feedback.json] [--report-out report.json] [--raw-cypher-can-execute] [--default-limit 25] [--default-max-hops 5]
   lift-raw-eval --dataset dataset.json --attempts attempts.json [--summary-out summary.json]
   parse-check --schema schema.json (--query query.json | --cypher "MATCH ...") [--mode lint|syntax] [--default-limit 25] [--default-max-hops 5]
-  policy-check --schema schema.json --query query.json [--policy-profile-id id | --policy-profile profile.json] [--planner-estimate estimate.json] [--schema-statistics stats.json] [--report-out report.json] [--fail-on-error] [--allow-writes] [--no-require-limit] [--max-return-limit 100] [--max-relationship-hops 5] [--max-estimated-rows 10000] [--max-db-hits 50000] [--max-label-scan-rows 10000] [--max-relationship-fanout 100] [--warn-on-plan-operators CartesianProduct,AllNodesScan]
+  policy-check --schema schema.json --query query.json [--policy-profile-id id | --policy-profile profile.json] [--planner-estimate estimate.json] [--schema-statistics stats.json] [--policy-rules rules.json] [--report-out report.json] [--fail-on-error] [--allow-writes] [--no-require-limit] [--max-return-limit 100] [--max-relationship-hops 5] [--max-estimated-rows 10000] [--max-db-hits 50000] [--max-label-scan-rows 10000] [--max-relationship-fanout 100] [--warn-on-plan-operators CartesianProduct,AllNodesScan]
   policy-profiles [--format json|markdown] [--profiles-out profiles.json]
   lsp-diagnostics --schema schema.json (--query query.json | --cypher "MATCH ...") [--uri file:///query.cypher] [--report-out report.json] [--parser-mode syntax|lint] [--default-limit 25] [--default-max-hops 5]
   prove       --schema schema.json --query query.json [--params params.json] [--proof-out proof.json] [--fail-on-blocked] [--default-limit 25] [--default-max-hops 5] [--allow-writes] [--approved] [--parser-mode syntax|lint] [--no-parser]

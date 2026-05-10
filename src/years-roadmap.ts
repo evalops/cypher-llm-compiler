@@ -233,13 +233,16 @@ export const yearsRoadmap = {
         "src/policy.ts",
         "src/planner-estimate.ts",
         "src/policy-profile.ts",
+        "src/policy-rules.ts",
         "src/schema-statistics.ts",
         "src/neo4j-explain.ts",
         "schemas/planner-estimate.schema.json",
         "schemas/policy-profile.schema.json",
+        "schemas/policy-rules.schema.json",
         "schemas/schema-statistics.schema.json",
         "examples/policy/tool-hash.planner-estimate.json",
         "examples/policy/policy-profiles.json",
+        "examples/policy/tool-hash.policy-rules.json",
         "examples/policy/tool-hash.schema-statistics.json",
         "docs/LLM_SAFE_PROFILE.md"
       ],
@@ -402,6 +405,13 @@ export const yearsRoadmap = {
       title: "Named Cost And Safety Policy Profiles",
       status: "partial",
       evidence: ["src/policy-profile.ts", "schemas/policy-profile.schema.json", "test/policy-profile.test.ts"],
+      workstreamIds: ["cost-safety-policy", "governance-standards"]
+    },
+    {
+      id: "policy-rules",
+      title: "Sensitive Data And Tenant Scope Policy Rules",
+      status: "partial",
+      evidence: ["src/policy-rules.ts", "schemas/policy-rules.schema.json", "test/policy.test.ts"],
       workstreamIds: ["cost-safety-policy", "governance-standards"]
     },
     {

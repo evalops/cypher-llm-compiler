@@ -7,6 +7,7 @@ import type { CypherQuery, CypherSchemaContract } from "../src/ir.js";
 import type { CypherPlannerEstimate } from "../src/planner-estimate.js";
 import { assessCypherPolicy, type CypherPolicyReport } from "../src/policy.js";
 import { getPolicyProfile, policyOptionsFromProfile } from "../src/policy-profile.js";
+import type { CypherPolicyRuleSet } from "../src/policy-rules.js";
 import type { CypherSchemaStatistics } from "../src/schema-statistics.js";
 import { buildCypherProof } from "../src/proof.js";
 
@@ -148,6 +149,43 @@ describe("cost and safety policy", () => {
     assert.equal(report.statistics?.source, "fixture");
     assert.ok(codes.includes("policy-unindexed-high-cardinality-predicate"));
     assert.ok(codes.includes("policy-high-fanout-relationship"));
+  });
+
+  it("applies policy rules for sensitive data and tenant scoping", () => {
+    const query: CypherQuery = {
+      version: "cypher-llm-ir/v1",
+      clauses: [
+        {
+          kind: "match",
+          patterns: [
+            {
+              segments: [
+                { variable: "tool", labels: ["Tool"] },
+                { rel: { types: ["HAS_HASH"], direction: "out", minHops: 1, maxHops: 1 }, node: { variable: "hash", labels: ["Hash"] } }
+              ]
+            }
+          ]
+        },
+        { kind: "return", items: [{ expression: { kind: "prop", object: { kind: "var", name: "hash" }, key: "value" } }], limit: { kind: "literal", value: 25 } }
+      ]
+    };
+    const policyRules: CypherPolicyRuleSet = {
+      version: "cypher-llm-policy-rules/v1",
+      id: "tenant-sensitive",
+      sensitiveLabels: [{ label: "Hash", severity: "warning" }],
+      sensitiveRelationships: [{ type: "HAS_HASH", severity: "warning" }],
+      sensitiveProperties: [{ ownerKind: "node", owner: "Hash", property: "value", severity: "error" }],
+      tenantScopes: [{ label: "Tool", property: "tenantId", parameter: "tenantId", severity: "error" }]
+    };
+    const report = assessCypherPolicy(query, schema, { policyRules, requireLimit: true });
+    const codes = report.findings.map((finding) => finding.code);
+
+    assert.equal(report.rules?.id, "tenant-sensitive");
+    assert.ok(codes.includes("policy-missing-tenant-scope"));
+    assert.ok(codes.includes("policy-sensitive-label-access"));
+    assert.ok(codes.includes("policy-sensitive-relationship-access"));
+    assert.ok(codes.includes("policy-sensitive-property-return"));
+    assert.equal(report.ok, false);
   });
 
   it("feeds policy claims into proof output after deterministic repairs", () => {

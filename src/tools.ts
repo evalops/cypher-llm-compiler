@@ -9,6 +9,7 @@ import type { ParserValidationOptions } from "./parser-validation.js";
 import { validateCypherTextWithParser } from "./parser-validation.js";
 import type { CypherPlannerEstimate } from "./planner-estimate.js";
 import { assessCypherPolicy } from "./policy.js";
+import type { CypherPolicyRuleSet } from "./policy-rules.js";
 import {
   buildPolicyProfileCatalog,
   getPolicyProfile,
@@ -297,6 +298,11 @@ export const CYPHER_COMPILER_TOOLS: readonly CypherCompilerToolDefinition[] = [
       schemaStatistics: {
         type: "object",
         description: "Optional cypher-llm-schema-statistics/v1 cardinality and index metadata.",
+        additionalProperties: true
+      },
+      policyRules: {
+        type: "object",
+        description: "Optional cypher-llm-policy-rules/v1 sensitivity and tenant-scoping policy rules.",
         additionalProperties: true
       },
       allowWrites: {
@@ -803,11 +809,13 @@ function policyOptions(args: Record<string, unknown>) {
     warnOnPlanOperators?: string[];
     plannerEstimate?: CypherPlannerEstimate;
     schemaStatistics?: CypherSchemaStatistics;
+    policyRules?: CypherPolicyRuleSet;
   } = {};
   const policyProfile = optionalObject<CypherPolicyProfile>(args, "policyProfile");
   const policyProfileId = optionalString(args, "policyProfileId");
   const plannerEstimate = optionalObject<CypherPlannerEstimate>(args, "plannerEstimate");
   const schemaStatistics = optionalObject<CypherSchemaStatistics>(args, "schemaStatistics");
+  const policyRules = optionalObject<CypherPolicyRuleSet>(args, "policyRules");
   const allowWrites = optionalBoolean(args, "allowWrites");
   const requireLimit = optionalBoolean(args, "requireLimit");
   const maxReturnLimit = optionalNumber(args, "maxReturnLimit");
@@ -852,6 +860,9 @@ function policyOptions(args: Record<string, unknown>) {
   }
   if (schemaStatistics !== undefined) {
     overrides.schemaStatistics = schemaStatistics;
+  }
+  if (policyRules !== undefined) {
+    overrides.policyRules = policyRules;
   }
   if (policyProfile !== undefined) {
     return policyOptionsFromProfile(policyProfile, overrides);

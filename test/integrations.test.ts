@@ -129,6 +129,13 @@ describe("OpenAI tool schemas", () => {
         nodes: [{ label: "Tool", count: 25_000 }],
         relationships: [{ type: "has MD5 hash", averageFanout: 250 }]
       },
+      policyRules: {
+        version: "cypher-llm-policy-rules/v1",
+        id: "tool-policy",
+        sensitiveLabels: [{ label: "Hash", severity: "warning" }],
+        sensitiveRelationships: [{ type: "has MD5 hash", severity: "warning" }],
+        tenantScopes: [{ label: "Tool", property: "tenantId", parameter: "tenantId", severity: "error" }]
+      },
       maxRelationshipHops: 3
     })) as { version: string; policy?: { id: string }; findings: { code: string }[] };
 
@@ -138,6 +145,9 @@ describe("OpenAI tool schemas", () => {
     assert.ok(policy.findings.some((finding) => finding.code === "policy-high-estimated-rows"));
     assert.ok(policy.findings.some((finding) => finding.code === "policy-high-cardinality-label-scan"));
     assert.ok(policy.findings.some((finding) => finding.code === "policy-high-fanout-relationship"));
+    assert.ok(policy.findings.some((finding) => finding.code === "policy-sensitive-label-access"));
+    assert.ok(policy.findings.some((finding) => finding.code === "policy-sensitive-relationship-access"));
+    assert.ok(policy.findings.some((finding) => finding.code === "policy-missing-tenant-scope"));
 
     const policyProfiles = (await executeCypherCompilerTool("cypher_policy_profiles", {})) as {
       version: string;
