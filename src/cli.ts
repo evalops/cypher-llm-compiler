@@ -3,6 +3,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 import type { CypherQuery, CypherSchemaContract, JsonLiteral } from "./ir.js";
+import { buildDatasetGovernanceReport } from "./dataset-governance.js";
 import { certifyDialectProfiles, renderDialectCertificationMarkdown } from "./dialect-certification.js";
 import type { EvalAttemptSet, EvalDataset, EvalReport } from "./evals.js";
 import { compareEvalReports } from "./eval-compare.js";
@@ -71,6 +72,9 @@ export async function runCli(argv: string[], io: CliIO = defaultIo()): Promise<n
         return 0;
       case "scorecard":
         await scorecardCommand(args, io);
+        return 0;
+      case "dataset-governance":
+        await datasetGovernanceCommand(args, io);
         return 0;
       case "repair-loop":
         await repairLoopCommand(args, io);
@@ -247,6 +251,20 @@ async function scorecardCommand(args: Map<string, string | boolean>, io: CliIO) 
     return;
   }
   writeJson(io, scorecard);
+}
+
+async function datasetGovernanceCommand(args: Map<string, string | boolean>, io: CliIO) {
+  const dataset = JSON.parse(await io.readFile(stringArg(args, "dataset"), "utf8")) as EvalDataset;
+  const report = buildDatasetGovernanceReport(dataset, {
+    ...(typeof args.get("default-split") === "string" ? { defaultSplit: args.get("default-split") as string } : {})
+  });
+  if (typeof args.get("report-out") === "string") {
+    await writeJsonFile(io, args.get("report-out") as string, report);
+  }
+  writeJson(io, report);
+  if (args.get("fail-on-error") === true && !report.ok) {
+    throw new Error(`Dataset governance found ${report.summary.redactionFindings} redaction finding(s) or blocking error(s).`);
+  }
 }
 
 async function repairLoopCommand(args: Map<string, string | boolean>, io: CliIO) {
@@ -602,6 +620,7 @@ Commands:
   eval        --dataset dataset.json --attempts attempts.json [--report-out report.json] [--raw-cypher-can-execute] [--default-limit 25] [--default-max-hops 5]
   compare-evals --baseline baseline.report.json --candidate candidate.report.json [--comparison-out comparison.json] [--fail-on-regression] [--tolerance 0.0001]
   scorecard   --reports report-a.json,report-b.json [--name cypherbench] [--scorecard-out scorecard.json] [--markdown-out scorecard.md] [--format json|markdown]
+  dataset-governance --dataset dataset.json [--report-out governance.json] [--default-split smoke] [--fail-on-error]
   repair-loop --dataset dataset.json --attempts attempts.json [--feedback-out feedback.json] [--report-out report.json] [--raw-cypher-can-execute] [--default-limit 25] [--default-max-hops 5]
   lift-raw-eval --dataset dataset.json --attempts attempts.json [--summary-out summary.json]
   parse-check --schema schema.json (--query query.json | --cypher "MATCH ...") [--mode lint|syntax] [--default-limit 25] [--default-max-hops 5]

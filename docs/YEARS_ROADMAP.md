@@ -59,6 +59,12 @@ CypherBench scorecards are exported from `src/scorecard.ts`, validated by `schem
 cypher-llm scorecard --reports examples/benchmarks/tool-hash-raw-baseline.report.json,examples/imported/smoke-ir-vs-raw.report.json
 ```
 
+Dataset governance reports are exported from `src/dataset-governance.ts`, validated by `schemas/dataset-governance.schema.json`, and checked in at `examples/benchmarks/tool-hash.dataset-governance.json`.
+
+```bash
+cypher-llm dataset-governance --dataset examples/eval-dataset.json --fail-on-error
+```
+
 Ecosystem diagnostics are exported from `src/lsp.ts`, validated by `schemas/lsp-diagnostics.schema.json`, and checked in at `examples/lsp/tool-hash.lsp.json`.
 
 ```bash

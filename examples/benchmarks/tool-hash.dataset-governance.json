@@ -1,0 +1,70 @@
+{
+  "version": "cypher-llm-dataset-governance/v1",
+  "datasetName": "tool-hash-smoke",
+  "generatedAt": "2026-05-10",
+  "ok": true,
+  "summary": {
+    "tasks": 3,
+    "sources": 1,
+    "splits": 1,
+    "missingSourceTasks": 0,
+    "missingSplitTasks": 0,
+    "redactionFindings": 0,
+    "diagnosticsByCode": {}
+  },
+  "splits": [
+    {
+      "name": "smoke",
+      "tasks": 3
+    }
+  ],
+  "provenance": [
+    {
+      "source": "repo smoke fixture",
+      "license": "repo-local",
+      "tasks": 3
+    }
+  ],
+  "redaction": {
+    "policy": "default-public-benchmark",
+    "status": "pass",
+    "findings": []
+  },
+  "tasks": [
+    {
+      "id": "tool-md5-by-name",
+      "source": "repo smoke fixture",
+      "split": "smoke",
+      "tags": [
+        "identifier-escaping",
+        "direction-repair",
+        "split:smoke"
+      ],
+      "provenanceLicense": "repo-local",
+      "redactionFindings": []
+    },
+    {
+      "id": "tool-scope-drift",
+      "source": "repo smoke fixture",
+      "split": "smoke",
+      "tags": [
+        "scope-drift",
+        "split:smoke"
+      ],
+      "provenanceLicense": "repo-local",
+      "redactionFindings": []
+    },
+    {
+      "id": "raw-spaced-relationship",
+      "source": "repo smoke fixture",
+      "split": "smoke",
+      "tags": [
+        "raw-compatibility",
+        "split:smoke"
+      ],
+      "provenanceLicense": "repo-local",
+      "redactionFindings": []
+    }
+  ],
+  "diagnostics": []
+}

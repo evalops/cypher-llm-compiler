@@ -1,5 +1,6 @@
 export * from "./ir.js";
 export * from "./diagnostics.js";
+export * from "./dataset-governance.js";
 export * from "./dialect-certification.js";
 export * from "./dialects.js";
 export * from "./eval-compare.js";

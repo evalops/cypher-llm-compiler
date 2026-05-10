@@ -284,6 +284,21 @@ The scorecard includes:
 
 Use `renderCypherBenchScorecardMarkdown(scorecard)` to publish the same report as a compact markdown table.
 
+## `buildDatasetGovernanceReport(dataset, options?)`
+
+Builds a `cypher-llm-dataset-governance/v1` report for an eval dataset.
+
+The report includes:
+
+- Task-level provenance source and inferred license.
+- Split assignment from `split:*` tags.
+- Missing source and missing split diagnostics.
+- Duplicate task-id diagnostics.
+- Redaction findings for email, secret-looking token, and private-key patterns.
+- Aggregated source, split, redaction, and diagnostic summaries.
+
+Use this before publishing or refreshing benchmark datasets so dataset governance is testable instead of only documented in prose.
+
 ## `evaluateRepairLoop(dataset, attempts, options?)`
 
 Runs `evaluateAttempts` and emits `cypher-llm-repair-loop/v1` feedback packets for attempts with diagnostics, execution failures, or failed expectations.

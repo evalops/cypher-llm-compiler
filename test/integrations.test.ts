@@ -56,7 +56,8 @@ describe("OpenAI tool schemas", () => {
       "cypher_lsp_diagnostics",
       "cypher_prove",
       "cypher_eval",
-      "cypher_scorecard"
+      "cypher_scorecard",
+      "cypher_dataset_governance"
     ]);
     assert.equal(chatTools[0]?.function.name, "cypher_render");
     assert.equal(responseTools.every((tool) => tool.type === "function" && tool.parameters.type === "object"), true);
@@ -150,6 +151,17 @@ describe("OpenAI tool schemas", () => {
 
     assert.equal(scorecard.version, "cypher-llm-cypherbench-scorecard/v1");
     assert.equal(scorecard.lanes[0]?.id, "1-tool-dispatch");
+
+    const governance = (await executeCypherCompilerTool("cypher_dataset_governance", {
+      dataset: {
+        version: "cypher-llm-eval-dataset/v1",
+        name: "tool-dispatch",
+        tasks: [{ id: "one", question: "Return hash.", source: "repo smoke fixture", tags: ["split:smoke"], schema }]
+      }
+    })) as { version: string; ok: boolean };
+
+    assert.equal(governance.version, "cypher-llm-dataset-governance/v1");
+    assert.equal(governance.ok, true);
   });
 });
 

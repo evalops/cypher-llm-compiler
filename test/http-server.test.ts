@@ -99,6 +99,13 @@ describe("compiler HTTP service", () => {
       reports: [evalReport],
       name: "http-scorecard"
     }) as { version: string; summary: { reports: number } };
+    const governance = await postJson(`${baseUrl}/v1/dataset-governance`, {
+      dataset: {
+        version: "cypher-llm-eval-dataset/v1",
+        name: "http-governance",
+        tasks: [{ id: "one", question: "Return hash.", source: "repo smoke fixture", tags: ["split:smoke"], schema }]
+      }
+    }) as { version: string; ok: boolean };
 
     assert.equal(proof.version, "cypher-llm-proof/v1");
     assert.equal(proof.status, "repaired");
@@ -113,6 +120,8 @@ describe("compiler HTTP service", () => {
     assert.ok(lsp.codeActions.some((action) => action.title === "Add a bounded LIMIT"));
     assert.equal(scorecard.version, "cypher-llm-cypherbench-scorecard/v1");
     assert.equal(scorecard.summary.reports, 1);
+    assert.equal(governance.version, "cypher-llm-dataset-governance/v1");
+    assert.equal(governance.ok, true);
   });
 
   it("returns structured errors for invalid tool input", async () => {

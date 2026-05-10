@@ -17,6 +17,7 @@ Stable public contracts:
 - `cypher-llm-lsp-diagnostics/v1`
 - `cypher-llm-lossless-parse/v1`
 - `cypher-llm-cypherbench-scorecard/v1`
+- `cypher-llm-dataset-governance/v1`
 
 JSON Schema artifacts live under `schemas/` and should be treated as the source of truth for model/tool input validation.
 
@@ -91,6 +92,16 @@ cypher-llm scorecard --reports baseline.report.json,candidate.report.json --scor
 ```
 
 Scorecards are the public benchmark contract for ranked eval lanes, aggregate diagnostics, and baseline comparisons. JSON scorecards validate against `schemas/cypherbench-scorecard.schema.json`; markdown scorecards are generated from the same object.
+
+## Dataset Governance Reports
+
+Run:
+
+```bash
+cypher-llm dataset-governance --dataset examples/eval-dataset.json --report-out governance.json --fail-on-error
+```
+
+Governance reports are the public dataset-readiness contract for provenance, split assignment, duplicate task ids, and redaction findings. JSON reports validate against `schemas/dataset-governance.schema.json`.
 
 ## Breaking Changes
 

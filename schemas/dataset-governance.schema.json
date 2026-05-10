@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evalops.dev/schemas/cypher-llm/dataset-governance/v1.json",
+  "title": "CypherBench Dataset Governance Report",
+  "type": "object",
+  "required": ["version", "datasetName", "generatedAt", "ok", "summary", "splits", "provenance", "redaction", "tasks", "diagnostics"],
+  "additionalProperties": true,
+  "properties": {
+    "version": { "const": "cypher-llm-dataset-governance/v1" },
+    "datasetName": { "type": "string" },
+    "generatedAt": { "type": "string" },
+    "ok": { "type": "boolean" },
+    "summary": {
+      "type": "object",
+      "required": ["tasks", "sources", "splits", "missingSourceTasks", "missingSplitTasks", "redactionFindings", "diagnosticsByCode"],
+      "additionalProperties": false,
+      "properties": {
+        "tasks": { "type": "integer", "minimum": 0 },
+        "sources": { "type": "integer", "minimum": 0 },
+        "splits": { "type": "integer", "minimum": 0 },
+        "missingSourceTasks": { "type": "integer", "minimum": 0 },
+        "missingSplitTasks": { "type": "integer", "minimum": 0 },
+        "redactionFindings": { "type": "integer", "minimum": 0 },
+        "diagnosticsByCode": {
+          "type": "object",
+          "additionalProperties": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "splits": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "tasks"],
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string" },
+          "tasks": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "provenance": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["source", "license", "tasks"],
+        "additionalProperties": false,
+        "properties": {
+          "source": { "type": "string" },
+          "license": { "type": "string" },
+          "tasks": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "redaction": {
+      "type": "object",
+      "required": ["policy", "status", "findings"],
+      "additionalProperties": false,
+      "properties": {
+        "policy": { "const": "default-public-benchmark" },
+        "status": { "enum": ["pass", "fail"] },
+        "findings": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/redactionFinding" }
+        }
+      }
+    },
+    "tasks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "split", "tags", "provenanceLicense", "redactionFindings"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "source": { "type": "string" },
+          "split": { "type": "string" },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "provenanceLicense": { "type": "string" },
+          "redactionFindings": {
+            "type": "array",
+            "items": { "$ref": "#/$defs/redactionFinding" }
+          }
+        }
+      }
+    },
+    "diagnostics": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/diagnostic" }
+    }
+  },
+  "$defs": {
+    "redactionFinding": {
+      "type": "object",
+      "required": ["taskId", "field", "code", "severity"],
+      "additionalProperties": false,
+      "properties": {
+        "taskId": { "type": "string" },
+        "field": { "type": "string" },
+        "code": { "enum": ["possible-email", "possible-secret", "private-key"] },
+        "severity": { "const": "error" }
+      }
+    },
+    "diagnostic": {
+      "type": "object",
+      "required": ["code", "severity", "message"],
+      "additionalProperties": true,
+      "properties": {
+        "code": { "type": "string" },
+        "severity": { "enum": ["error", "warning", "info"] },
+        "message": { "type": "string" },
+        "path": { "type": "string" },
+        "suggestion": { "type": "string" }
+      }
+    }
+  }
+}

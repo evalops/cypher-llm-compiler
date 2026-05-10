@@ -132,8 +132,10 @@ export const yearsRoadmap = {
         "src/evals.ts",
         "src/eval-compare.ts",
         "src/scorecard.ts",
+        "src/dataset-governance.ts",
         "src/repair-loop.ts",
         "docs/CYPHERBENCH.md",
+        "examples/benchmarks/tool-hash.dataset-governance.json",
         "examples/benchmarks/tool-hash.scorecard.json"
       ],
       acceptanceGates: [
@@ -311,6 +313,13 @@ export const yearsRoadmap = {
       title: "CypherBench JSON And Markdown Scorecards",
       status: "partial",
       evidence: ["src/scorecard.ts", "schemas/cypherbench-scorecard.schema.json", "test/scorecard.test.ts"],
+      workstreamIds: ["public-cypherbench", "governance-standards"]
+    },
+    {
+      id: "dataset-governance",
+      title: "CypherBench Dataset Governance",
+      status: "partial",
+      evidence: ["src/dataset-governance.ts", "schemas/dataset-governance.schema.json", "test/dataset-governance.test.ts"],
       workstreamIds: ["public-cypherbench", "governance-standards"]
     },
     {

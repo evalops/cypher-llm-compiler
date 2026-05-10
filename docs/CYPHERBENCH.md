@@ -44,6 +44,25 @@ cypher-llm scorecard \
 
 The scorecard ranks lanes by pass rate, executable rate, and repair rate; aggregates diagnostics; and compares every candidate lane to the baseline report. JSON output validates against `schemas/cypherbench-scorecard.schema.json`, while markdown output is intended for release notes, READMEs, and benchmark dashboards.
 
+## Dataset Governance
+
+Audit a dataset before publishing or refreshing a benchmark lane:
+
+```bash
+cypher-llm dataset-governance \
+  --dataset examples/eval-dataset.json \
+  --report-out examples/benchmarks/tool-hash.dataset-governance.json \
+  --fail-on-error
+```
+
+Governance reports validate against `schemas/dataset-governance.schema.json` and cover:
+
+- Provenance source and inferred license.
+- Split assignment through `split:*` tags.
+- Missing source and missing split diagnostics.
+- Duplicate task ids.
+- Redaction findings for email, secret-looking token, and private-key patterns.
+
 ## Repair Loop
 
 Generate model-targeted repair packets:

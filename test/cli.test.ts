@@ -311,6 +311,47 @@ describe("cli", () => {
     assert.ok(writes.get("out/scorecard.md")?.includes("# cli-scorecard"));
   });
 
+  it("audits dataset governance from dataset files", async () => {
+    const dataset = {
+      version: "cypher-llm-eval-dataset/v1",
+      name: "cli-governance",
+      tasks: [
+        {
+          id: "one",
+          question: "Return one.",
+          source: "repo smoke fixture",
+          tags: ["split:smoke"],
+          schema: { version: "cypher-llm-schema/v1", nodes: [], relationships: [] }
+        }
+      ]
+    };
+    const files = new Map<string, string>([["dataset.json", JSON.stringify(dataset)]]);
+    const writes = new Map<string, string>();
+    let stdout = "";
+    let stderr = "";
+    const io: CliIO = {
+      stdout: { write: (chunk: string | Uint8Array) => ((stdout += String(chunk)), true) },
+      stderr: { write: (chunk: string | Uint8Array) => ((stderr += String(chunk)), true) },
+      readFile: async (path) => files.get(String(path)) ?? "",
+      writeFile: async (path, data) => {
+        writes.set(path, data);
+      },
+      mkdir: async () => undefined
+    };
+
+    const code = await runCli(
+      ["dataset-governance", "--dataset", "dataset.json", "--report-out", "out/governance.json", "--fail-on-error"],
+      io
+    );
+    const output = JSON.parse(stdout) as { version: string; ok: boolean };
+
+    assert.equal(code, 0);
+    assert.equal(stderr, "");
+    assert.equal(output.version, "cypher-llm-dataset-governance/v1");
+    assert.equal(output.ok, true);
+    assert.ok(writes.get("out/governance.json")?.includes("default-public-benchmark"));
+  });
+
   it("runs parser-backed validation from raw Cypher", async () => {
     const files = new Map<string, string>([
       [

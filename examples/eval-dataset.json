@@ -7,7 +7,7 @@
       "id": "tool-md5-by-name",
       "question": "Find the MD5 hash value for the tool named test.py.",
       "source": "repo smoke fixture",
-      "tags": ["identifier-escaping", "direction-repair"],
+      "tags": ["identifier-escaping", "direction-repair", "split:smoke"],
       "schema": {
         "version": "cypher-llm-schema/v1",
         "dialect": "neo4j-cypher-25",
@@ -54,7 +54,7 @@
       "id": "tool-scope-drift",
       "question": "Return a tool after projecting a constant through WITH.",
       "source": "repo smoke fixture",
-      "tags": ["scope-drift"],
+      "tags": ["scope-drift", "split:smoke"],
       "schema": {
         "version": "cypher-llm-schema/v1",
         "dialect": "neo4j-cypher-25",
@@ -77,7 +77,7 @@
       "id": "raw-spaced-relationship",
       "question": "Legacy raw Cypher attempt with an unescaped relationship type.",
       "source": "repo smoke fixture",
-      "tags": ["raw-compatibility"],
+      "tags": ["raw-compatibility", "split:smoke"],
       "schema": {
         "version": "cypher-llm-schema/v1",
         "dialect": "neo4j-cypher-25",

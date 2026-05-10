@@ -24,6 +24,26 @@ The imported GPT-4o sample preserves upstream observed labels:
 
 The sample intentionally includes successful, no-result, timeout, syntax-error, and no-Cypher rows.
 
+## Governance
+
+Public benchmark datasets should carry:
+
+- `source` on every task, pointing to the fixture, upstream row, or generation recipe.
+- A split tag such as `split:train`, `split:validation`, `split:test`, `split:holdout`, or `split:smoke`.
+- Source/license provenance documented in this file or encoded by a known source prefix.
+- No emails, secret-looking tokens, or private-key material in questions, params, sources, or expected outputs.
+
+Run the governance report before publishing:
+
+```bash
+node dist/src/cli.js dataset-governance \
+  --dataset examples/eval-dataset.json \
+  --report-out examples/benchmarks/tool-hash.dataset-governance.json \
+  --fail-on-error
+```
+
+The report is machine-readable as `cypher-llm-dataset-governance/v1` and is validated in CI.
+
 ### neo4j-labs/text2cypher functional_cypher
 
 - Repository: `https://github.com/neo4j-labs/text2cypher`

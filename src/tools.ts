@@ -1,3 +1,4 @@
+import { buildDatasetGovernanceReport } from "./dataset-governance.js";
 import type { EvalAttemptSet, EvalDataset, EvalOptions, EvalReport } from "./evals.js";
 import { evaluateAttempts } from "./evals.js";
 import type { CypherQuery, CypherSchemaContract, JsonLiteral } from "./ir.js";
@@ -28,7 +29,8 @@ export type CypherCompilerToolName =
   | "cypher_lsp_diagnostics"
   | "cypher_prove"
   | "cypher_eval"
-  | "cypher_scorecard";
+  | "cypher_scorecard"
+  | "cypher_dataset_governance";
 
 export interface CypherCompilerToolDefinition {
   name: CypherCompilerToolName;
@@ -342,6 +344,18 @@ export const CYPHER_COMPILER_TOOLS: readonly CypherCompilerToolDefinition[] = [
         description: "Zero-based report index to use as the comparison baseline."
       }
     })
+  },
+  {
+    name: "cypher_dataset_governance",
+    description:
+      "Audit a CypherBench eval dataset for machine-readable provenance, split assignment, redaction findings, duplicate ids, and governance diagnostics.",
+    inputSchema: objectSchema(["dataset"], {
+      dataset: evalDatasetSchema,
+      defaultSplit: {
+        type: "string",
+        description: "Fallback split for tasks without a split:* tag."
+      }
+    })
   }
 ];
 
@@ -459,6 +473,9 @@ export async function executeCypherCompilerTool(name: string, input: unknown): P
     }
     case "cypher_scorecard": {
       return buildCypherBenchScorecard(requiredArray<EvalReport>(args, "reports"), scorecardOptions(args));
+    }
+    case "cypher_dataset_governance": {
+      return buildDatasetGovernanceReport(requiredObject<EvalDataset>(args, "dataset"), datasetGovernanceOptions(args));
     }
     default:
       throw new Error(`Unknown Cypher compiler tool '${name}'.`);
@@ -723,6 +740,17 @@ function scorecardOptions(args: Record<string, unknown>) {
   }
   if (baselineIndex !== undefined) {
     options.baselineIndex = baselineIndex;
+  }
+  return options;
+}
+
+function datasetGovernanceOptions(args: Record<string, unknown>) {
+  const options: {
+    defaultSplit?: string;
+  } = {};
+  const defaultSplit = optionalString(args, "defaultSplit");
+  if (defaultSplit !== undefined) {
+    options.defaultSplit = defaultSplit;
   }
   return options;
 }

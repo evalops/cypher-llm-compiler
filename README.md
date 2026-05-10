@@ -19,7 +19,7 @@ The gap is not "LLMs need a better prompt." The gap is a missing compiler bounda
 
 ## What This Implements
 
-This package implements fifteen concrete improvements:
+This package implements sixteen concrete improvements:
 
 1. **Official JSON IR**: Agents can emit a small, typed Cypher AST instead of brittle text.
 2. **LLM-safe profile**: The renderer emits conservative Cypher with escaped schema identifiers, explicit projections, bounded path recommendations, and deterministic formatting.
@@ -36,6 +36,7 @@ This package implements fifteen concrete improvements:
 13. **LSP-style diagnostics**: Editor and agent UIs can consume compiler diagnostics and code actions in a familiar shape.
 14. **Lossless parse reports**: Existing Cypher can be preserved byte-for-byte while agents inspect statements, clauses, comments, source spans, parser output, and IR-preview coverage.
 15. **CypherBench scorecards**: Eval reports can be published as ranked JSON and markdown scorecards across raw, IR-first, repaired, parser-validated, and mixed lanes.
+16. **Dataset governance reports**: Benchmark datasets can be audited for provenance, split assignment, redaction findings, duplicate ids, and public-release diagnostics.
 
 ## Quick Start
 
@@ -137,6 +138,7 @@ cypher-llm corpus
 cypher-llm eval --dataset examples/eval-dataset.json --attempts examples/eval-attempts.json --default-limit 25
 cypher-llm compare-evals --baseline baseline.report.json --candidate candidate.report.json
 cypher-llm scorecard --reports baseline.report.json,candidate.report.json --markdown-out scorecard.md
+cypher-llm dataset-governance --dataset examples/eval-dataset.json --report-out governance.json
 cypher-llm repair-loop --dataset examples/eval-dataset.json --attempts examples/eval-attempts.json --default-limit 25
 cypher-llm lift-raw-eval --dataset examples/imported/text2cypher-gpt4o-sample.dataset.json --attempts examples/imported/text2cypher-gpt4o-sample.attempts.json
 cypher-llm parse-check --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json --default-limit 25
@@ -167,6 +169,8 @@ npm run test:live:neo4j
 
 `scorecard` emits a `cypher-llm-cypherbench-scorecard/v1` JSON report or markdown table from one or more eval reports.
 
+`dataset-governance` emits a `cypher-llm-dataset-governance/v1` report covering provenance, split assignment, redaction findings, duplicate ids, and stable diagnostics.
+
 `repair-loop` emits model-targeted repair packets from eval diagnostics and failed expectations.
 
 `lift-raw` converts common read-query Cypher strings into structured `CypherQuery` IR, preserving unsupported syntax as explicit raw clauses.
@@ -191,7 +195,7 @@ npm run test:live:neo4j
 
 `mcp` starts a stdio MCP server exposing the same render, validate, repair, parse-lossless, parse-check, policy, proof, LSP, and eval operations to agent clients.
 
-`serve` starts a local JSON HTTP service exposing `/healthz`, `/v1/tools`, `/v1/render`, `/v1/validate`, `/v1/repair`, `/v1/parse-lossless`, `/v1/parse-check`, `/v1/policy`, `/v1/lsp-diagnostics`, `/v1/prove`, `/v1/eval`, `/v1/scorecard`, `/v1/roadmap`, and `/v1/dialect-certification`.
+`serve` starts a local JSON HTTP service exposing `/healthz`, `/v1/tools`, `/v1/render`, `/v1/validate`, `/v1/repair`, `/v1/parse-lossless`, `/v1/parse-check`, `/v1/policy`, `/v1/lsp-diagnostics`, `/v1/prove`, `/v1/eval`, `/v1/scorecard`, `/v1/dataset-governance`, `/v1/roadmap`, and `/v1/dialect-certification`.
 
 `test:live:neo4j` runs the optional Docker-backed Neo4j `EXPLAIN` fixture when `CYPHER_LLM_NEO4J_URI` and `CYPHER_LLM_NEO4J_PASSWORD` are set.
 
@@ -334,6 +338,7 @@ Those are deliberate boundaries. The repo is the missing LLM compiler surface, n
 - `src/proof.ts`: Proof-carrying compile output for agent feedback loops.
 - `src/years-roadmap.ts`: Public years-scale workstream and capability ledger.
 - `src/fixture-importers.ts`: Importers for text2cypher CSV/JSON and openCypher TCK fixtures.
+- `src/dataset-governance.ts`: Dataset provenance, split, and redaction governance reports.
 - `src/parser-validation.ts`: Parser-backed validation through Neo4j language support.
 - `src/policy.ts`: Static cost, cardinality, and safety policy checks.
 - `src/neo4j-explain.ts`: Driver-compatible Neo4j `EXPLAIN` preflight adapter.
@@ -355,7 +360,7 @@ Those are deliberate boundaries. The repo is the missing LLM compiler surface, n
 - `examples/proofs/`: Checked-in proof-carrying compile output.
 - `examples/roadmap/`: Machine-readable years-scale roadmap snapshot.
 - `profiles/`: Versioned dialect profiles for Neo4j Cypher 25, openCypher 9, and GQL-oriented output.
-- `schemas/`: JSON Schema contracts for IR, graph schema, lossless parse reports, eval datasets, and eval attempts.
+- `schemas/`: JSON Schema contracts for IR, graph schema, lossless parse reports, dataset governance, eval datasets, and eval attempts.
 - `test/`: Node test-runner coverage for renderer, schema, validation, repair, safety, and corpus behavior.
 
 ## Design Rules
