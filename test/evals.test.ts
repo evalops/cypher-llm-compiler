@@ -63,6 +63,7 @@ describe("json schemas", () => {
     const cypherBenchScorecardSchema = readJson("schemas/cypherbench-scorecard.schema.json");
     const datasetGovernanceSchema = readJson("schemas/dataset-governance.schema.json");
     const repairPlanSchema = readJson("schemas/repair-plan.schema.json");
+    const serviceManifestSchema = readJson("schemas/service-manifest.schema.json");
     const dialectProfileSchema = readJson("schemas/dialect-profile.schema.json");
     const dialectCertificationSchema = readJson("schemas/dialect-certification.schema.json");
     const yearsRoadmapSchema = readJson("schemas/years-roadmap.schema.json");
@@ -77,6 +78,7 @@ describe("json schemas", () => {
     ajv.addSchema(cypherBenchScorecardSchema);
     ajv.addSchema(datasetGovernanceSchema);
     ajv.addSchema(repairPlanSchema);
+    ajv.addSchema(serviceManifestSchema);
     ajv.addSchema(dialectProfileSchema);
     ajv.addSchema(dialectCertificationSchema);
     ajv.addSchema(yearsRoadmapSchema);
@@ -92,6 +94,7 @@ describe("json schemas", () => {
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/cypherbench-scorecard/v1.json", readJson("examples/benchmarks/tool-hash.scorecard.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/dataset-governance/v1.json", readJson("examples/benchmarks/tool-hash.dataset-governance.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/repair-plan/v1.json", readJson("examples/proofs/tool-hash.repair-plan.json"));
+    assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/service-manifest/v1.json", readJson("examples/service/service-manifest.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/eval-dataset/v1.json", readJson("examples/eval-dataset.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/eval-attempts/v1.json", readJson("examples/eval-attempts.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/dialect-profile/v1.json", readJson("profiles/neo4j-cypher-25.json"));

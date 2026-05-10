@@ -1,0 +1,147 @@
+{
+  "version": "cypher-llm-service-manifest/v1",
+  "service": {
+    "id": "cypher-llm-compiler-http",
+    "contract": "cypher-llm-compiler-http/v1"
+  },
+  "limits": {
+    "maxBodyBytes": 1000000
+  },
+  "auth": {
+    "required": false,
+    "scheme": "Bearer",
+    "header": "authorization",
+    "envVar": "CYPHER_LLM_HTTP_TOKEN",
+    "publicRoutes": [
+      "/healthz",
+      "/v1/service-manifest"
+    ]
+  },
+  "audit": {
+    "enabled": false,
+    "eventVersion": "cypher-llm-http-audit/v1",
+    "redaction": "request-response-payloads-omitted",
+    "fields": [
+      "requestId",
+      "at",
+      "method",
+      "path",
+      "tool",
+      "statusCode",
+      "durationMs",
+      "authenticated",
+      "authRequired",
+      "bodyBytes",
+      "errorCode"
+    ]
+  },
+  "dataBoundary": {
+    "storesPayloads": false,
+    "returnsDatabaseRows": false,
+    "logsDatabaseCredentials": false
+  },
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/healthz",
+      "operation": "health",
+      "authRequired": false
+    },
+    {
+      "method": "GET",
+      "path": "/v1/service-manifest",
+      "operation": "service_manifest",
+      "authRequired": false
+    },
+    {
+      "method": "GET",
+      "path": "/v1/tools",
+      "operation": "tool_metadata",
+      "authRequired": false
+    },
+    {
+      "method": "GET",
+      "path": "/v1/roadmap",
+      "operation": "years_roadmap",
+      "authRequired": false
+    },
+    {
+      "method": "GET",
+      "path": "/v1/dialect-certification",
+      "operation": "dialect_certification",
+      "authRequired": false
+    },
+    {
+      "method": "POST",
+      "path": "/v1/render",
+      "operation": "cypher_render",
+      "authRequired": false
+    },
+    {
+      "method": "POST",
+      "path": "/v1/validate",
+      "operation": "cypher_validate",
+      "authRequired": false
+    },
+    {
+      "method": "POST",
+      "path": "/v1/repair",
+      "operation": "cypher_repair",
+      "authRequired": false
+    },
+    {
+      "method": "POST",
+      "path": "/v1/repair-plan",
+      "operation": "cypher_repair_plan",
+      "authRequired": false
+    },
+    {
+      "method": "POST",
+      "path": "/v1/parse-lossless",
+      "operation": "cypher_parse_lossless",
+      "authRequired": false
+    },
+    {
+      "method": "POST",
+      "path": "/v1/parse-check",
+      "operation": "cypher_parse_check",
+      "authRequired": false
+    },
+    {
+      "method": "POST",
+      "path": "/v1/policy",
+      "operation": "cypher_policy_check",
+      "authRequired": false
+    },
+    {
+      "method": "POST",
+      "path": "/v1/lsp-diagnostics",
+      "operation": "cypher_lsp_diagnostics",
+      "authRequired": false
+    },
+    {
+      "method": "POST",
+      "path": "/v1/prove",
+      "operation": "cypher_prove",
+      "authRequired": false
+    },
+    {
+      "method": "POST",
+      "path": "/v1/eval",
+      "operation": "cypher_eval",
+      "authRequired": false
+    },
+    {
+      "method": "POST",
+      "path": "/v1/scorecard",
+      "operation": "cypher_scorecard",
+      "authRequired": false
+    },
+    {
+      "method": "POST",
+      "path": "/v1/dataset-governance",
+      "operation": "cypher_dataset_governance",
+      "authRequired": false
+    }
+  ]
+}

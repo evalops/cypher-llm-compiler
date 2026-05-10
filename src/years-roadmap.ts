@@ -193,7 +193,16 @@ export const yearsRoadmap = {
         "Tenant/schema isolation, redaction, audit logs, and observability.",
         "Versioned service contracts and deployment guidance."
       ],
-      firstArtifacts: ["src/tools.ts", "src/mcp-server.ts", "src/http-server.ts", "src/cli.ts", "docs/INTEGRATIONS.md"],
+      firstArtifacts: [
+        "src/tools.ts",
+        "src/mcp-server.ts",
+        "src/http-server.ts",
+        "src/service-manifest.ts",
+        "schemas/service-manifest.schema.json",
+        "examples/service/service-manifest.json",
+        "src/cli.ts",
+        "docs/INTEGRATIONS.md"
+      ],
       acceptanceGates: [
         "Service contracts are schema-validated and backwards compatible.",
         "Operational metrics cover diagnostics, repairs, retries, and live database outcomes.",
@@ -369,8 +378,23 @@ export const yearsRoadmap = {
       id: "compiler-service",
       title: "Long-Running Compiler Service",
       status: "partial",
-      evidence: ["src/tools.ts", "src/mcp-server.ts", "src/http-server.ts", "test/http-server.test.ts", "docs/INTEGRATIONS.md"],
+      evidence: [
+        "src/tools.ts",
+        "src/mcp-server.ts",
+        "src/http-server.ts",
+        "src/service-manifest.ts",
+        "schemas/service-manifest.schema.json",
+        "test/http-server.test.ts",
+        "docs/INTEGRATIONS.md"
+      ],
       workstreamIds: ["compiler-service", "ecosystem-ux"]
+    },
+    {
+      id: "service-operational-controls",
+      title: "HTTP Service Auth Audit And Manifest Controls",
+      status: "partial",
+      evidence: ["src/service-manifest.ts", "schemas/service-manifest.schema.json", "test/service-manifest.test.ts"],
+      workstreamIds: ["compiler-service", "governance-standards"]
     },
     {
       id: "lsp-diagnostics",

@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evalops.dev/schemas/cypher-llm/service-manifest/v1.json",
+  "title": "Cypher Compiler Service Manifest",
+  "type": "object",
+  "required": ["version", "service", "limits", "auth", "audit", "dataBoundary", "routes"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": "cypher-llm-service-manifest/v1" },
+    "service": {
+      "type": "object",
+      "required": ["id", "contract"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "const": "cypher-llm-compiler-http" },
+        "contract": { "const": "cypher-llm-compiler-http/v1" }
+      }
+    },
+    "limits": {
+      "type": "object",
+      "required": ["maxBodyBytes"],
+      "additionalProperties": false,
+      "properties": {
+        "maxBodyBytes": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "auth": {
+      "type": "object",
+      "required": ["required", "scheme", "header", "envVar", "publicRoutes"],
+      "additionalProperties": false,
+      "properties": {
+        "required": { "type": "boolean" },
+        "scheme": { "const": "Bearer" },
+        "header": { "const": "authorization" },
+        "envVar": { "const": "CYPHER_LLM_HTTP_TOKEN" },
+        "publicRoutes": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "audit": {
+      "type": "object",
+      "required": ["enabled", "eventVersion", "redaction", "fields"],
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "eventVersion": { "const": "cypher-llm-http-audit/v1" },
+        "redaction": { "const": "request-response-payloads-omitted" },
+        "fields": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "dataBoundary": {
+      "type": "object",
+      "required": ["storesPayloads", "returnsDatabaseRows", "logsDatabaseCredentials"],
+      "additionalProperties": false,
+      "properties": {
+        "storesPayloads": { "const": false },
+        "returnsDatabaseRows": { "const": false },
+        "logsDatabaseCredentials": { "const": false }
+      }
+    },
+    "routes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["method", "path", "operation", "authRequired"],
+        "additionalProperties": false,
+        "properties": {
+          "method": { "enum": ["GET", "POST"] },
+          "path": { "type": "string" },
+          "operation": { "type": "string" },
+          "authRequired": { "type": "boolean" }
+        }
+      }
+    }
+  }
+}

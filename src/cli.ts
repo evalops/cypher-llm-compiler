@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { appendFile, mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 import type { CypherQuery, CypherSchemaContract, JsonLiteral } from "./ir.js";
@@ -24,6 +24,7 @@ import { buildCypherRepairPlan } from "./repair-plan.js";
 import { evaluateRepairLoop } from "./repair-loop.js";
 import { renderQuery } from "./render.js";
 import { createSafeExecutionPlan } from "./safety.js";
+import { buildCompilerServiceManifest } from "./service-manifest.js";
 import { buildCypherBenchScorecard, renderCypherBenchScorecardMarkdown } from "./scorecard.js";
 import { validateCypherTextWithParser } from "./parser-validation.js";
 import { assessCypherPolicy } from "./policy.js";
@@ -106,6 +107,9 @@ export async function runCli(argv: string[], io: CliIO = defaultIo()): Promise<n
         return 0;
       case "certify-dialects":
         await certifyDialectsCommand(args, io);
+        return 0;
+      case "service-manifest":
+        await serviceManifestCommand(args, io);
         return 0;
       case "mcp":
         await mcpCommand();
@@ -518,6 +522,19 @@ async function certifyDialectsCommand(args: Map<string, string | boolean>, io: C
   }
 }
 
+async function serviceManifestCommand(args: Map<string, string | boolean>, io: CliIO) {
+  const maxBodyBytes = optionalNumber(args.get("max-body-bytes"));
+  const manifest = buildCompilerServiceManifest({
+    ...(maxBodyBytes !== undefined ? { maxBodyBytes } : {}),
+    ...(args.get("require-auth") === true ? { authRequired: true } : {}),
+    ...(args.get("audit-enabled") === true ? { auditEnabled: true } : {})
+  });
+  if (typeof args.get("manifest-out") === "string") {
+    await writeJsonFile(io, args.get("manifest-out") as string, manifest);
+  }
+  writeJson(io, manifest);
+}
+
 async function mcpCommand() {
   const { runMcpServer } = await import("./mcp-server.js");
   await runMcpServer(process.stdin, process.stdout);
@@ -527,7 +544,30 @@ async function serveCommand(args: Map<string, string | boolean>, io: CliIO) {
   const { createCompilerHttpServer } = await import("./http-server.js");
   const host = typeof args.get("host") === "string" ? (args.get("host") as string) : "127.0.0.1";
   const port = optionalNumber(args.get("port")) ?? 8787;
-  const server = createCompilerHttpServer();
+  const maxBodyBytes = optionalNumber(args.get("max-body-bytes"));
+  const authToken = typeof args.get("auth-token") === "string" ? (args.get("auth-token") as string) : undefined;
+  const requireAuth = args.get("require-auth") === true;
+  const auditLog = typeof args.get("audit-log") === "string" ? (args.get("audit-log") as string) : undefined;
+  if (requireAuth && authToken === undefined && !process.env.CYPHER_LLM_HTTP_TOKEN) {
+    throw new Error("--require-auth needs --auth-token or CYPHER_LLM_HTTP_TOKEN.");
+  }
+  const serverOptions: Parameters<typeof createCompilerHttpServer>[0] = {};
+  if (maxBodyBytes !== undefined) {
+    serverOptions.maxBodyBytes = maxBodyBytes;
+  }
+  if (authToken !== undefined) {
+    serverOptions.authToken = authToken;
+  }
+  if (requireAuth) {
+    serverOptions.requireAuth = true;
+  }
+  if (auditLog !== undefined) {
+    serverOptions.auditSink = async (event) => {
+      await mkdir(path.dirname(auditLog), { recursive: true });
+      await appendFile(auditLog, `${JSON.stringify(event)}\n`, "utf8");
+    };
+  }
+  const server = createCompilerHttpServer(serverOptions);
   await new Promise<void>((resolve) => server.listen(port, host, resolve));
   io.stderr.write(`cypher-llm compiler service listening on http://${host}:${port}\n`);
 }
@@ -666,8 +706,9 @@ Commands:
   introspect-neo4j --uri bolt://localhost:7687 --user neo4j --password password [--schema-out schema.json] [--sample-limit 1000] [--no-procedures]
   roadmap    [--format json|markdown] [--integrity] [--roadmap-out path]
   certify-dialects [--format json|markdown] [--report-out path] [--fail-on-fail]
+  service-manifest [--manifest-out path] [--max-body-bytes 1000000] [--require-auth] [--audit-enabled]
   mcp
-  serve      [--host 127.0.0.1] [--port 8787]
+  serve      [--host 127.0.0.1] [--port 8787] [--max-body-bytes 1000000] [--auth-token token] [--require-auth] [--audit-log audit.jsonl]
   import-text2cypher --csv rows.csv --dataset-out dataset.json --attempts-out attempts.json [--summary-out summary.json] [--dataset-name name] [--source name] [--model name] [--limit 10] [--indexes 0,2,39]
   import-functional-cypher --json rows.json --dataset-out dataset.json --attempts-out attempts.json [--summary-out summary.json] [--dataset-name name] [--source name] [--limit 10]
   import-opencypher-tck --feature feature.file --dataset-out dataset.json --attempts-out attempts.json [--summary-out summary.json] [--dataset-name name] [--source name] [--limit 10]

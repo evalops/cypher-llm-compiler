@@ -728,6 +728,35 @@ describe("cli", () => {
     assert.ok(writes.get("out/certification.json")?.includes("\"failedChecks\": 0"));
   });
 
+  it("prints and writes the compiler service manifest", async () => {
+    const writes = new Map<string, string>();
+    let stdout = "";
+    let stderr = "";
+    const io: CliIO = {
+      stdout: { write: (chunk: string | Uint8Array) => ((stdout += String(chunk)), true) },
+      stderr: { write: (chunk: string | Uint8Array) => ((stderr += String(chunk)), true) },
+      readFile: async () => "",
+      writeFile: async (path, data) => {
+        writes.set(path, data);
+      },
+      mkdir: async () => undefined
+    };
+
+    const code = await runCli(
+      ["service-manifest", "--manifest-out", "out/service-manifest.json", "--require-auth", "--audit-enabled", "--max-body-bytes", "2000"],
+      io
+    );
+    const output = JSON.parse(stdout) as { version: string; auth: { required: boolean }; audit: { enabled: boolean }; limits: { maxBodyBytes: number } };
+
+    assert.equal(code, 0);
+    assert.equal(stderr, "");
+    assert.equal(output.version, "cypher-llm-service-manifest/v1");
+    assert.equal(output.auth.required, true);
+    assert.equal(output.audit.enabled, true);
+    assert.equal(output.limits.maxBodyBytes, 2000);
+    assert.ok(writes.get("out/service-manifest.json")?.includes("cypher-llm-service-manifest/v1"));
+  });
+
   it("imports text2cypher CSV fixtures to dataset and attempt files", async () => {
     const files = new Map<string, string>([
       [

@@ -19,7 +19,7 @@ The gap is not "LLMs need a better prompt." The gap is a missing compiler bounda
 
 ## What This Implements
 
-This package implements seventeen concrete improvements:
+This package implements eighteen concrete improvements:
 
 1. **Official JSON IR**: Agents can emit a small, typed Cypher AST instead of brittle text.
 2. **LLM-safe profile**: The renderer emits conservative Cypher with escaped schema identifiers, explicit projections, bounded path recommendations, and deterministic formatting.
@@ -38,6 +38,7 @@ This package implements seventeen concrete improvements:
 15. **CypherBench scorecards**: Eval reports can be published as ranked JSON and markdown scorecards across raw, IR-first, repaired, parser-validated, and mixed lanes.
 16. **Dataset governance reports**: Benchmark datasets can be audited for provenance, split assignment, redaction findings, duplicate ids, and public-release diagnostics.
 17. **Ranked repair plans**: Agents can receive deterministic patches, model-required fixes, and unsafe blockers as separate ranked plan steps.
+18. **Service manifest and controls**: Agent runtimes can discover HTTP routes, auth posture, request limits, audit redaction, and data-boundary guarantees.
 
 ## Quick Start
 
@@ -150,7 +151,9 @@ cypher-llm prove --schema examples/tool-hash.schema.json --query examples/tool-h
 cypher-llm introspect-neo4j --uri bolt://localhost:7687 --user neo4j --password "$NEO4J_PASSWORD" --schema-out schema.json
 cypher-llm roadmap --integrity
 cypher-llm certify-dialects --fail-on-fail
+cypher-llm service-manifest --manifest-out service-manifest.json
 cypher-llm serve --host 127.0.0.1 --port 8787
+cypher-llm serve --host 127.0.0.1 --port 8787 --require-auth --auth-token "$CYPHER_LLM_HTTP_TOKEN" --audit-log audit.jsonl
 cypher-llm import-text2cypher --csv rows.csv --dataset-out dataset.json --attempts-out attempts.json
 cypher-llm mcp
 npm run test:live:neo4j
@@ -197,9 +200,11 @@ npm run test:live:neo4j
 
 `certify-dialects` emits a `cypher-llm-dialect-certification/v1` report that checks profile metadata, renderer behavior, parser acceptance, semantic feature gates, and known rendering limitations.
 
+`service-manifest` emits a `cypher-llm-service-manifest/v1` report covering HTTP routes, auth requirements, body limits, audit redaction, and data-boundary guarantees.
+
 `mcp` starts a stdio MCP server exposing the same render, validate, repair, parse-lossless, parse-check, policy, proof, LSP, and eval operations to agent clients.
 
-`serve` starts a local JSON HTTP service exposing `/healthz`, `/v1/tools`, `/v1/render`, `/v1/validate`, `/v1/repair`, `/v1/repair-plan`, `/v1/parse-lossless`, `/v1/parse-check`, `/v1/policy`, `/v1/lsp-diagnostics`, `/v1/prove`, `/v1/eval`, `/v1/scorecard`, `/v1/dataset-governance`, `/v1/roadmap`, and `/v1/dialect-certification`.
+`serve` starts a local JSON HTTP service exposing `/healthz`, `/v1/service-manifest`, `/v1/tools`, `/v1/render`, `/v1/validate`, `/v1/repair`, `/v1/repair-plan`, `/v1/parse-lossless`, `/v1/parse-check`, `/v1/policy`, `/v1/lsp-diagnostics`, `/v1/prove`, `/v1/eval`, `/v1/scorecard`, `/v1/dataset-governance`, `/v1/roadmap`, and `/v1/dialect-certification`. Set `--require-auth` with `--auth-token` or `CYPHER_LLM_HTTP_TOKEN` to require bearer auth for runtime routes; `--audit-log` writes JSONL audit events without request or response payloads.
 
 `test:live:neo4j` runs the optional Docker-backed Neo4j `EXPLAIN` fixture when `CYPHER_LLM_NEO4J_URI` and `CYPHER_LLM_NEO4J_PASSWORD` are set.
 
@@ -350,6 +355,7 @@ Those are deliberate boundaries. The repo is the missing LLM compiler surface, n
 - `src/tools.ts`: OpenAI/MCP-compatible tool schemas and shared tool dispatcher.
 - `src/mcp-server.ts`: Stdio MCP server for agent clients.
 - `src/http-server.ts`: JSON HTTP compiler service for agent runtimes.
+- `src/service-manifest.ts`: Versioned HTTP service manifest, route list, auth/audit contract, and body-limit defaults.
 - `src/lsp.ts`: LSP-style diagnostics and code actions for editor and agent UIs.
 - `src/langchain.ts`: LangChain-shaped adapter for structured IR repair plus parser validation.
 - `src/cli.ts`: JSON-in/JSON-out CLI for agents and eval harnesses.
@@ -364,8 +370,9 @@ Those are deliberate boundaries. The repo is the missing LLM compiler surface, n
 - `examples/policy/`: Checked-in cost and safety policy report.
 - `examples/proofs/`: Checked-in proof-carrying compile output.
 - `examples/roadmap/`: Machine-readable years-scale roadmap snapshot.
+- `examples/service/`: Checked-in compiler service manifest.
 - `profiles/`: Versioned dialect profiles for Neo4j Cypher 25, openCypher 9, and GQL-oriented output.
-- `schemas/`: JSON Schema contracts for IR, graph schema, repair plans, lossless parse reports, dataset governance, eval datasets, and eval attempts.
+- `schemas/`: JSON Schema contracts for IR, graph schema, repair plans, service manifests, lossless parse reports, dataset governance, eval datasets, and eval attempts.
 - `test/`: Node test-runner coverage for renderer, schema, validation, repair, safety, and corpus behavior.
 
 ## Design Rules

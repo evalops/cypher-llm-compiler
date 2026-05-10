@@ -107,9 +107,16 @@ Run the local JSON service:
 cypher-llm serve --host 127.0.0.1 --port 8787
 ```
 
+For an agent-runtime boundary with bearer auth and redacted JSONL audit events:
+
+```bash
+cypher-llm serve --host 127.0.0.1 --port 8787 --require-auth --auth-token "$CYPHER_LLM_HTTP_TOKEN" --audit-log audit.jsonl
+```
+
 Routes:
 
 - `GET /healthz`
+- `GET /v1/service-manifest`
 - `GET /v1/tools`
 - `POST /v1/render`
 - `POST /v1/validate`
@@ -126,6 +133,8 @@ Routes:
 - `POST /v1/tools/:toolName`
 - `GET /v1/roadmap`
 - `GET /v1/dialect-certification`
+
+`GET /v1/service-manifest` returns `cypher-llm-service-manifest/v1`, including route auth requirements, body limits, audit redaction fields, and data-boundary guarantees. When auth is configured, `/healthz` and `/v1/service-manifest` remain public for discovery and liveness while runtime routes require `Authorization: Bearer <token>`.
 
 Use this when an agent runtime needs a process boundary instead of an in-process TypeScript import or stdio MCP server.
 

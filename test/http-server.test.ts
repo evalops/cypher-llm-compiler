@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import type { AddressInfo } from "node:net";
 import { after, before, describe, it } from "node:test";
 import type { Server } from "node:http";
-import { createCompilerHttpServer } from "../src/http-server.js";
+import { createCompilerHttpServer, type CompilerHttpAuditEvent } from "../src/http-server.js";
 import type { CypherQuery, CypherSchemaContract } from "../src/ir.js";
 
 const schema: CypherSchemaContract = {
@@ -141,6 +141,54 @@ describe("compiler HTTP service", () => {
 
     assert.equal(response.status, 422);
     assert.equal(body.error.code, "compiler-tool-error");
+  });
+
+  it("enforces optional bearer auth and emits redacted audit events", async () => {
+    const events: CompilerHttpAuditEvent[] = [];
+    const secureServer = createCompilerHttpServer({
+      authToken: "secret-token",
+      auditSink: (event) => {
+        events.push(event);
+      },
+      now: () => new Date("2026-05-10T00:00:00.000Z"),
+      requestIdFactory: () => `req-${events.length + 1}`
+    });
+    await new Promise<void>((resolve) => secureServer.listen(0, "127.0.0.1", resolve));
+    const address = secureServer.address() as AddressInfo;
+    const secureBaseUrl = `http://127.0.0.1:${address.port}`;
+
+    try {
+      const manifest = await getJson(`${secureBaseUrl}/v1/service-manifest`) as { auth: { required: boolean }; audit: { enabled: boolean } };
+      const blocked = await fetch(`${secureBaseUrl}/v1/tools`);
+      const rendered = await fetch(`${secureBaseUrl}/v1/render`, {
+        method: "POST",
+        headers: {
+          authorization: "Bearer secret-token",
+          "content-type": "application/json",
+          "x-request-id": "req-secure-render"
+        },
+        body: JSON.stringify({ schema, query, defaultLimit: 25 })
+      });
+      const renderedBody = await rendered.json() as { canExecute: boolean };
+
+      assert.equal(manifest.auth.required, true);
+      assert.equal(manifest.audit.enabled, true);
+      assert.equal(blocked.status, 401);
+      assert.equal(blocked.headers.get("www-authenticate"), "Bearer");
+      assert.equal(rendered.status, 200);
+      assert.equal(renderedBody.canExecute, true);
+      assert.ok(events.some((event) => event.statusCode === 401 && event.errorCode === "unauthorized" && event.authRequired));
+      const renderEvent = events.find((event) => event.requestId === "req-secure-render");
+      assert.ok(renderEvent);
+      assert.equal(renderEvent.authenticated, true);
+      assert.equal(renderEvent.tool, "cypher_render");
+      assert.equal(renderEvent.statusCode, 200);
+      assert.ok(renderEvent.bodyBytes > 0);
+      assert.equal("body" in renderEvent, false);
+      assert.equal("query" in renderEvent, false);
+    } finally {
+      await new Promise<void>((resolve, reject) => secureServer.close((error) => (error ? reject(error) : resolve())));
+    }
   });
 });
 

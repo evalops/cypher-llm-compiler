@@ -1,34 +1,48 @@
+import { randomUUID } from "node:crypto";
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
+import process from "node:process";
 import { certifyDialectProfiles } from "./dialect-certification.js";
 import { CYPHER_COMPILER_TOOLS, executeCypherCompilerTool, type CypherCompilerToolName } from "./tools.js";
 import { getYearsRoadmap } from "./years-roadmap.js";
+import {
+  buildCompilerServiceManifest,
+  COMPILER_HTTP_TOOL_ROUTES,
+  DEFAULT_MAX_BODY_BYTES,
+  isPublicCompilerServiceRoute
+} from "./service-manifest.js";
 
 export interface CompilerHttpServerOptions {
   maxBodyBytes?: number;
+  authToken?: string;
+  requireAuth?: boolean;
+  auditSink?: CompilerHttpAuditSink;
+  now?: () => Date;
+  requestIdFactory?: () => string;
 }
 
 export interface CompilerHttpHealth {
   version: "cypher-llm-compiler-http/v1";
   ok: true;
   tools: number;
+  authRequired: boolean;
 }
 
-const DEFAULT_MAX_BODY_BYTES = 1_000_000;
+export interface CompilerHttpAuditEvent {
+  version: "cypher-llm-http-audit/v1";
+  requestId: string;
+  at: string;
+  method: string;
+  path: string;
+  statusCode: number;
+  durationMs: number;
+  authenticated: boolean;
+  authRequired: boolean;
+  bodyBytes: number;
+  tool?: CypherCompilerToolName;
+  errorCode?: string;
+}
 
-const TOOL_ROUTES: Record<string, CypherCompilerToolName> = {
-  "/v1/render": "cypher_render",
-  "/v1/validate": "cypher_validate",
-  "/v1/repair": "cypher_repair",
-  "/v1/repair-plan": "cypher_repair_plan",
-  "/v1/parse-lossless": "cypher_parse_lossless",
-  "/v1/parse-check": "cypher_parse_check",
-  "/v1/policy": "cypher_policy_check",
-  "/v1/lsp-diagnostics": "cypher_lsp_diagnostics",
-  "/v1/prove": "cypher_prove",
-  "/v1/eval": "cypher_eval",
-  "/v1/scorecard": "cypher_scorecard",
-  "/v1/dataset-governance": "cypher_dataset_governance"
-};
+export type CompilerHttpAuditSink = (event: CompilerHttpAuditEvent) => void | Promise<void>;
 
 export function createCompilerHttpServer(options: CompilerHttpServerOptions = {}): Server {
   return createServer((request, response) => {
@@ -49,75 +63,181 @@ export async function handleCompilerHttpRequest(
   options: CompilerHttpServerOptions = {}
 ): Promise<void> {
   const url = new URL(request.url ?? "/", "http://localhost");
+  const maxBodyBytes = options.maxBodyBytes ?? DEFAULT_MAX_BODY_BYTES;
+  const auth = authSettings(options);
+  const routeAuthRequired = auth.required && !isPublicCompilerServiceRoute(url.pathname);
+  const authenticated = routeAuthRequired ? isAuthorized(request, auth.token) : false;
+  const requestId = requestIdFor(request, options);
+  const startedAt = Date.now();
+  const finish = async (
+    statusCode: number,
+    value: unknown,
+    audit: { tool?: CypherCompilerToolName; bodyBytes?: number; errorCode?: string } = {},
+    headers: Record<string, string> = {}
+  ) => {
+    writeJson(response, statusCode, value, { ...headers, "x-request-id": requestId });
+    await emitAudit(options, {
+      requestId,
+      method: request.method ?? "GET",
+      path: url.pathname,
+      statusCode,
+      durationMs: Date.now() - startedAt,
+      authenticated,
+      authRequired: routeAuthRequired,
+      bodyBytes: audit.bodyBytes ?? 0,
+      ...(audit.tool ? { tool: audit.tool } : {}),
+      ...(audit.errorCode ? { errorCode: audit.errorCode } : {})
+    });
+  };
+
   if (request.method === "GET" && url.pathname === "/healthz") {
     const health: CompilerHttpHealth = {
       version: "cypher-llm-compiler-http/v1",
       ok: true,
-      tools: CYPHER_COMPILER_TOOLS.length
+      tools: CYPHER_COMPILER_TOOLS.length,
+      authRequired: auth.required
     };
-    writeJson(response, 200, health);
+    await finish(200, health);
+    return;
+  }
+
+  if (request.method === "GET" && url.pathname === "/v1/service-manifest") {
+    await finish(
+      200,
+      buildCompilerServiceManifest({
+        maxBodyBytes,
+        authRequired: auth.required,
+        auditEnabled: options.auditSink !== undefined
+      })
+    );
+    return;
+  }
+
+  if (routeAuthRequired && !authenticated) {
+    await finish(
+      401,
+      { error: { code: "unauthorized", message: "Missing or invalid bearer token." } },
+      { errorCode: "unauthorized" },
+      { "www-authenticate": "Bearer" }
+    );
     return;
   }
 
   if (request.method === "GET" && url.pathname === "/v1/tools") {
-    writeJson(response, 200, { tools: CYPHER_COMPILER_TOOLS });
+    await finish(200, { tools: CYPHER_COMPILER_TOOLS });
     return;
   }
 
   if (request.method === "GET" && url.pathname === "/v1/roadmap") {
-    writeJson(response, 200, getYearsRoadmap());
+    await finish(200, getYearsRoadmap());
     return;
   }
 
   if (request.method === "GET" && url.pathname === "/v1/dialect-certification") {
-    writeJson(response, 200, certifyDialectProfiles());
+    await finish(200, certifyDialectProfiles());
     return;
   }
 
   const toolName = toolNameForPath(url.pathname);
   if (!toolName) {
-    writeJson(response, 404, { error: { code: "not-found", message: `Unknown route: ${url.pathname}` } });
+    await finish(404, { error: { code: "not-found", message: `Unknown route: ${url.pathname}` } }, { errorCode: "not-found" });
     return;
   }
 
   if (request.method !== "POST") {
-    writeJson(response, 405, { error: { code: "method-not-allowed", message: "Compiler tool routes require POST." } });
+    await finish(
+      405,
+      { error: { code: "method-not-allowed", message: "Compiler tool routes require POST." } },
+      { tool: toolName, errorCode: "method-not-allowed" }
+    );
     return;
   }
 
   let input: unknown;
+  let bodyBytes = 0;
   try {
-    input = await readJsonBody(request, options.maxBodyBytes ?? DEFAULT_MAX_BODY_BYTES);
+    const body = await readJsonBody(request, maxBodyBytes);
+    input = body.value;
+    bodyBytes = body.bytes;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    writeJson(response, message.includes("too large") ? 413 : 400, {
-      error: { code: "invalid-json-body", message }
-    });
+    await finish(
+      message.includes("too large") ? 413 : 400,
+      {
+        error: { code: "invalid-json-body", message }
+      },
+      { tool: toolName, errorCode: "invalid-json-body" }
+    );
     return;
   }
 
   try {
-    writeJson(response, 200, await executeCypherCompilerTool(toolName, input));
+    await finish(200, await executeCypherCompilerTool(toolName, input), { tool: toolName, bodyBytes });
   } catch (error) {
-    writeJson(response, 422, {
-      error: {
-        code: "compiler-tool-error",
-        message: error instanceof Error ? error.message : String(error)
-      }
+    await finish(
+      422,
+      {
+        error: {
+          code: "compiler-tool-error",
+          message: error instanceof Error ? error.message : String(error)
+        }
+      },
+      { tool: toolName, bodyBytes, errorCode: "compiler-tool-error" }
+    );
+  }
+}
+
+function authSettings(options: CompilerHttpServerOptions): { required: boolean; token?: string } {
+  const token = options.authToken ?? process.env.CYPHER_LLM_HTTP_TOKEN;
+  const hasToken = typeof token === "string" && token.length > 0;
+  const required = options.requireAuth ?? hasToken;
+  return {
+    required,
+    ...(hasToken ? { token } : {})
+  };
+}
+
+function isAuthorized(request: IncomingMessage, token: string | undefined): boolean {
+  return token !== undefined && request.headers.authorization === `Bearer ${token}`;
+}
+
+function requestIdFor(request: IncomingMessage, options: CompilerHttpServerOptions): string {
+  const header = request.headers["x-request-id"];
+  if (typeof header === "string" && header.length > 0) {
+    return header;
+  }
+  return options.requestIdFactory?.() ?? randomUUID();
+}
+
+async function emitAudit(
+  options: CompilerHttpServerOptions,
+  event: Omit<CompilerHttpAuditEvent, "version" | "at">
+): Promise<void> {
+  if (!options.auditSink) {
+    return;
+  }
+  try {
+    await options.auditSink({
+      version: "cypher-llm-http-audit/v1",
+      at: (options.now?.() ?? new Date()).toISOString(),
+      ...event
     });
+  } catch {
+    // Audit sinks should not make the compiler endpoint fail after the response is written.
   }
 }
 
 function toolNameForPath(pathname: string): CypherCompilerToolName | undefined {
-  if (TOOL_ROUTES[pathname]) {
-    return TOOL_ROUTES[pathname];
+  const toolRoutes: Record<string, CypherCompilerToolName> = COMPILER_HTTP_TOOL_ROUTES;
+  if (toolRoutes[pathname]) {
+    return toolRoutes[pathname];
   }
   const match = pathname.match(/^\/v1\/tools\/([a-z_]+)$/);
   const candidate = match?.[1];
   return CYPHER_COMPILER_TOOLS.some((tool) => tool.name === candidate) ? (candidate as CypherCompilerToolName) : undefined;
 }
 
-async function readJsonBody(request: IncomingMessage, maxBodyBytes: number): Promise<unknown> {
+async function readJsonBody(request: IncomingMessage, maxBodyBytes: number): Promise<{ value: unknown; bytes: number }> {
   const chunks: Buffer[] = [];
   let received = 0;
   for await (const chunk of request) {
@@ -129,12 +249,16 @@ async function readJsonBody(request: IncomingMessage, maxBodyBytes: number): Pro
     chunks.push(buffer);
   }
   const text = Buffer.concat(chunks).toString("utf8").trim();
-  return text.length === 0 ? {} : JSON.parse(text);
+  return {
+    value: text.length === 0 ? {} : JSON.parse(text),
+    bytes: received
+  };
 }
 
-function writeJson(response: ServerResponse, statusCode: number, value: unknown) {
+function writeJson(response: ServerResponse, statusCode: number, value: unknown, headers: Record<string, string> = {}) {
   response.writeHead(statusCode, {
-    "content-type": "application/json; charset=utf-8"
+    "content-type": "application/json; charset=utf-8",
+    ...headers
   });
   response.end(`${JSON.stringify(value, null, 2)}\n`);
 }

@@ -26,6 +26,7 @@ export * from "./render.js";
 export * from "./safety.js";
 export * from "./schema.js";
 export * from "./scorecard.js";
+export * from "./service-manifest.js";
 export * from "./tools.js";
 export * from "./validate.js";
 export * from "./years-roadmap.js";

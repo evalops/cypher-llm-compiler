@@ -77,6 +77,13 @@ Ecosystem diagnostics are exported from `src/lsp.ts`, validated by `schemas/lsp-
 cypher-llm lsp-diagnostics --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json
 ```
 
+Compiler service manifests are exported from `src/service-manifest.ts`, validated by `schemas/service-manifest.schema.json`, and checked in at `examples/service/service-manifest.json`.
+
+```bash
+cypher-llm service-manifest --manifest-out examples/service/service-manifest.json
+cypher-llm serve --require-auth --auth-token "$CYPHER_LLM_HTTP_TOKEN" --audit-log audit.jsonl
+```
+
 ## Operating Rule
 
 Years-scale work should still land as small verticals. Each vertical should add at least one of:
