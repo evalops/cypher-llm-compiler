@@ -41,6 +41,12 @@ Compatibility diff gates are exported from `src/compatibility-diff.ts`, validate
 cypher-llm compatibility-diff --baseline examples/governance/compatibility-catalog.json --fail-on-breaking
 ```
 
+Contract conformance reports are exported from `src/contract-conformance.ts`, validated by `schemas/contract-conformance.schema.json`, and checked in at `examples/governance/contract-conformance.json`.
+
+```bash
+cypher-llm contract-conformance --fail-on-error
+```
+
 Lossless parse reports are the first executable parser/AST compatibility lane. They are exported from `src/lossless-parser.ts`, validated by `schemas/lossless-parse.schema.json`, and checked in at `examples/lossless/tool-hash.lossless.json`.
 
 ```bash

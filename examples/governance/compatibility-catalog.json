@@ -383,7 +383,7 @@
         {
           "kind": "example",
           "path": "examples/agent/agent-guide.json",
-          "sha256": "aabcd433c7039cb37f30f3e7ade577f95cabdc7777f7f7df6c8c20a0ca08f5c0"
+          "sha256": "06609a8572878dfd0363deb5a7cc1bb77e76a7dd39c594749ed05707b1973a5d"
         }
       ]
     },
@@ -702,7 +702,7 @@
         {
           "kind": "example",
           "path": "examples/service/service-manifest.json",
-          "sha256": "47148fb856856313f7a98b9dbfb5603646030efc7de2a0b5029638cc1d4c1ab7"
+          "sha256": "8888605da21780f945eb0f4b025d9951dce3ae77a0ff423261e3a5bffd5c62d2"
         }
       ]
     },
@@ -731,7 +731,7 @@
         {
           "kind": "example",
           "path": "examples/roadmap/cypher-llm-years-roadmap.json",
-          "sha256": "03b8ab08ddf63b9e5bfc12292dc6908bce3088d0d25be0bf6d45acf6b9fae4c4"
+          "sha256": "1789fec43f4a335a8e60ff481aa1b43d5ba255e0f5ae50e5d3c3c4a22c1e9280"
         }
       ]
     },
@@ -784,7 +784,36 @@
         {
           "kind": "example",
           "path": "examples/governance/compatibility-diff.json",
-          "sha256": "2e0210df8c3698138e6fbb3e2bfa701327dba275c3d3bfba26a41c37c5c6dbe3"
+          "sha256": "c5cdba324f509497661914e3416b481f4c11df7f870819c631b76a828d21cb8d"
+        }
+      ]
+    },
+    {
+      "id": "contract-conformance",
+      "version": "cypher-llm-contract-conformance/v1",
+      "category": "governance",
+      "level": "stable",
+      "ownerWorkstreamId": "governance-standards",
+      "schemaPath": "schemas/contract-conformance.schema.json",
+      "examplePaths": [
+        "examples/governance/contract-conformance.json"
+      ],
+      "evidencePaths": [
+        "src/contract-conformance.ts",
+        "test/contract-conformance.test.ts"
+      ],
+      "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path.",
+      "fingerprints": [
+        {
+          "kind": "schema",
+          "path": "schemas/contract-conformance.schema.json",
+          "sha256": "4736b3878e98b25220feac740e9a58150e560367f55a6eb7b0bc4cedbd5466ca"
+        },
+        {
+          "kind": "example",
+          "path": "examples/governance/contract-conformance.json",
+          "sha256": "9dbba43085f14e9936ed6e4990e2daea2de0a6ce1f28243c27f3305d7dc15e54"
         }
       ]
     }

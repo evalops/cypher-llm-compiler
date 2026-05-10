@@ -4,6 +4,7 @@ export * from "./agent-guide.js";
 export * from "./benchmark-gate.js";
 export * from "./compatibility-diff.js";
 export * from "./compatibility.js";
+export * from "./contract-conformance.js";
 export * from "./diagnostic-catalog.js";
 export * from "./diagnostics.js";
 export * from "./dataset-governance.js";

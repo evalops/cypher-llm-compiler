@@ -55,6 +55,16 @@ cypher-llm compatibility-diff --baseline examples/governance/compatibility-catal
 
 Compatibility diff reports compare a baseline catalog against a candidate catalog or the current runtime catalog. They classify added, removed, and changed contracts, contract fingerprints, release gates, certification gates, and deprecation-policy fields as `info`, `warning`, or `breaking`. JSON output validates against `schemas/compatibility-diff.schema.json`.
 
+## Contract Conformance
+
+Run:
+
+```bash
+cypher-llm contract-conformance --fail-on-error --report-out examples/governance/contract-conformance.json
+```
+
+Contract conformance reports are the release-agent checklist for public contracts. They verify that schema files, example files, evidence paths, fingerprints, and schema validation all agree with the compatibility catalog. JSON output validates against `schemas/contract-conformance.schema.json`.
+
 ## Agent Guide
 
 Run:

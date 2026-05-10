@@ -208,6 +208,15 @@ export const agentGuide = {
           outputContract: "cypher-llm-compatibility-diff/v1",
           successSignal: "status is passed.",
           failureHandling: "Review warning changes and block breaking changes unless a new contract version and migration plan exist."
+        },
+        {
+          id: "conformance",
+          title: "Audit contract evidence",
+          toolName: "cypher_contract_conformance",
+          cliCommand: "cypher-llm contract-conformance --fail-on-error",
+          outputContract: "cypher-llm-contract-conformance/v1",
+          successSignal: "summary.failures is 0.",
+          failureHandling: "Fix missing files, fingerprint drift, or schema-validation failures before release."
         }
       ]
     }
@@ -279,7 +288,8 @@ export const agentGuide = {
     "cypher-llm-diagnostic-catalog/v1",
     "cypher-llm-policy-report/v1",
     "cypher-llm-compatibility-catalog/v1",
-    "cypher-llm-compatibility-diff/v1"
+    "cypher-llm-compatibility-diff/v1",
+    "cypher-llm-contract-conformance/v1"
   ],
   examplePaths: [
     "examples/tool-hash.query.json",
@@ -288,7 +298,8 @@ export const agentGuide = {
     "examples/proofs/tool-hash.repair-plan.json",
     "examples/diagnostics/diagnostic-catalog.json",
     "examples/governance/compatibility-catalog.json",
-    "examples/governance/compatibility-diff.json"
+    "examples/governance/compatibility-diff.json",
+    "examples/governance/contract-conformance.json"
   ]
 } as const satisfies AgentGuide;
 

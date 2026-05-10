@@ -15,8 +15,9 @@ The compiler exposes the same nineteen operations across OpenAI tool schemas, MC
 - `cypher_agent_feedback`: return proof, repair plan, policy evidence, and the next action an LLM client should take.
 - `cypher_agent_guide`: return LLM-facing authoring rules, tool sequences, execution blockers, and diagnostic playbooks.
 - `cypher_diagnostic_catalog`: return stable diagnostic-code metadata, severity, source, preferred action, and model repair instructions.
-- `cypher_compatibility_catalog`: return public contract versions, compatibility levels, release gates, certification gates, and deprecation policy.
+- `cypher_compatibility_catalog`: return public contract versions, compatibility levels, fingerprints, release gates, certification gates, and deprecation policy.
 - `cypher_compatibility_diff`: compare compatibility catalogs and classify release-impacting contract changes.
+- `cypher_contract_conformance`: verify public schemas, examples, fingerprints, schema validation, and evidence paths.
 - `cypher_eval`: score model attempts against an eval dataset.
 - `cypher_scorecard`: publish ranked CypherBench scorecards from eval reports.
 - `cypher_benchmark_gate`: publish pass/fail CypherBench regression gates for CI.
@@ -143,6 +144,8 @@ Routes:
 - `GET /v1/compatibility`
 - `POST /v1/compatibility`
 - `POST /v1/compatibility-diff`
+- `GET /v1/contract-conformance`
+- `POST /v1/contract-conformance`
 - `POST /v1/eval`
 - `POST /v1/scorecard`
 - `POST /v1/benchmark-gate`

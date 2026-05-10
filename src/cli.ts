@@ -13,6 +13,7 @@ import {
   renderCompatibilityCatalogMarkdown
 } from "./compatibility.js";
 import { buildCompatibilityDiffReport, renderCompatibilityDiffMarkdown } from "./compatibility-diff.js";
+import { buildContractConformanceReport, renderContractConformanceMarkdown } from "./contract-conformance.js";
 import { buildDatasetGovernanceReport } from "./dataset-governance.js";
 import {
   buildDiagnosticCatalog,
@@ -150,6 +151,9 @@ export async function runCli(argv: string[], io: CliIO = defaultIo()): Promise<n
         return 0;
       case "compatibility-diff":
         await compatibilityDiffCommand(args, io);
+        return 0;
+      case "contract-conformance":
+        await contractConformanceCommand(args, io);
         return 0;
       case "certify-dialects":
         await certifyDialectsCommand(args, io);
@@ -712,6 +716,18 @@ async function compatibilityDiffCommand(args: Map<string, string | boolean>, io:
   }
 }
 
+async function contractConformanceCommand(args: Map<string, string | boolean>, io: CliIO) {
+  const report = buildContractConformanceReport();
+  const output = args.get("format") === "markdown" ? renderContractConformanceMarkdown(report) : `${JSON.stringify(report, null, 2)}\n`;
+  if (typeof args.get("report-out") === "string") {
+    await writeTextFile(io, args.get("report-out") as string, output);
+  }
+  io.stdout.write(output);
+  if (args.get("fail-on-error") === true && report.summary.failures > 0) {
+    throw new Error(`Contract conformance found ${report.summary.failures} failing check(s).`);
+  }
+}
+
 async function certifyDialectsCommand(args: Map<string, string | boolean>, io: CliIO) {
   const report = certifyDialectProfiles();
   const format = args.get("format") === "markdown" ? "markdown" : "json";
@@ -1026,6 +1042,7 @@ Commands:
   roadmap    [--format json|markdown] [--integrity] [--roadmap-out path]
   compatibility [--format json|markdown] [--integrity] [--fail-on-error] [--catalog-out path]
   compatibility-diff --baseline catalog.json [--candidate catalog.json] [--format json|markdown] [--diff-out path] [--fail-on-breaking]
+  contract-conformance [--format json|markdown] [--report-out path] [--fail-on-error]
   certify-dialects [--format json|markdown] [--report-out path] [--fail-on-fail]
   service-manifest [--manifest-out path] [--max-body-bytes 1000000] [--require-auth] [--audit-enabled]
   mcp

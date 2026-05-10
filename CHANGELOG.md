@@ -20,6 +20,7 @@
 - Added a machine-readable compatibility catalog with stability levels, public contract evidence, release gates, certification gates, JSON Schema, CLI/tool/service output, and a checked-in governance artifact.
 - Added compatibility diff reports and gates for classifying added, removed, changed, warning, and breaking public contract changes.
 - Added compatibility contract fingerprints so schema and example drift is recorded in catalogs and classified by compatibility diff gates.
+- Added contract conformance reports that verify public schema files, examples, fingerprints, schema validation, and evidence paths for release agents.
 - Added a compiler service manifest plus optional bearer auth, redacted audit events, body-limit reporting, JSON Schema, CLI output, and checked-in service manifest artifact.
 - Added a JSON HTTP compiler service over the shared tool dispatcher with health, metadata, tool, roadmap, and dialect certification routes.
 - Added static cost and safety policy reports for broad scans, traversal risk, high limits, cartesian patterns, and writes, including CLI/tool/service output and checked-in policy artifact.

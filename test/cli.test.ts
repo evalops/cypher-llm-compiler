@@ -1044,6 +1044,31 @@ describe("cli", () => {
     assert.ok(writes.get("out/diff.json")?.includes("\"status\": \"passed\""));
   });
 
+  it("prints and writes the contract conformance report", async () => {
+    const writes = new Map<string, string>();
+    let stdout = "";
+    let stderr = "";
+    const io: CliIO = {
+      stdout: { write: (chunk: string | Uint8Array) => ((stdout += String(chunk)), true) },
+      stderr: { write: (chunk: string | Uint8Array) => ((stderr += String(chunk)), true) },
+      readFile: async () => "",
+      writeFile: async (path, data) => {
+        writes.set(path, data);
+      },
+      mkdir: async () => undefined
+    };
+
+    const jsonCode = await runCli(["contract-conformance", "--fail-on-error", "--report-out", "out/conformance.json"], io);
+    const markdownCode = await runCli(["contract-conformance", "--format", "markdown"], io);
+
+    assert.equal(jsonCode, 0);
+    assert.equal(markdownCode, 0);
+    assert.equal(stderr, "");
+    assert.ok(stdout.includes("cypher-llm-contract-conformance/v1"));
+    assert.ok(stdout.includes("# Contract Conformance"));
+    assert.ok(writes.get("out/conformance.json")?.includes("\"failures\": 0"));
+  });
+
   it("prints and writes the dialect certification report", async () => {
     const writes = new Map<string, string>();
     let stdout = "";

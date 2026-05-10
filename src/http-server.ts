@@ -3,6 +3,7 @@ import { createServer, type IncomingMessage, type Server, type ServerResponse } 
 import process from "node:process";
 import { buildAgentGuide } from "./agent-guide.js";
 import { buildCompatibilityCatalog } from "./compatibility.js";
+import { buildContractConformanceReport } from "./contract-conformance.js";
 import { buildDiagnosticCatalog } from "./diagnostic-catalog.js";
 import { certifyDialectProfiles } from "./dialect-certification.js";
 import { CYPHER_COMPILER_TOOLS, executeCypherCompilerTool, type CypherCompilerToolName } from "./tools.js";
@@ -143,6 +144,11 @@ export async function handleCompilerHttpRequest(
 
   if (request.method === "GET" && url.pathname === "/v1/compatibility") {
     await finish(200, buildCompatibilityCatalog());
+    return;
+  }
+
+  if (request.method === "GET" && url.pathname === "/v1/contract-conformance") {
+    await finish(200, buildContractConformanceReport());
     return;
   }
 

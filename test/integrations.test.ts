@@ -63,6 +63,7 @@ describe("OpenAI tool schemas", () => {
       "cypher_diagnostic_catalog",
       "cypher_compatibility_catalog",
       "cypher_compatibility_diff",
+      "cypher_contract_conformance",
       "cypher_eval",
       "cypher_scorecard",
       "cypher_benchmark_gate",
@@ -254,6 +255,14 @@ describe("OpenAI tool schemas", () => {
 
     assert.equal(compatibilityDiff.version, "cypher-llm-compatibility-diff/v1");
     assert.equal(compatibilityDiff.status, "passed");
+
+    const contractConformance = (await executeCypherCompilerTool("cypher_contract_conformance", {})) as {
+      version: string;
+      summary: { failures: number };
+    };
+
+    assert.equal(contractConformance.version, "cypher-llm-contract-conformance/v1");
+    assert.equal(contractConformance.summary.failures, 0);
 
     const evalReport = (await executeCypherCompilerTool("cypher_eval", {
       dataset: {

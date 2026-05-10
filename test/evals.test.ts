@@ -61,6 +61,7 @@ describe("json schemas", () => {
     const agentGuideSchema = readJson("schemas/agent-guide.schema.json");
     const compatibilityCatalogSchema = readJson("schemas/compatibility-catalog.schema.json");
     const compatibilityDiffSchema = readJson("schemas/compatibility-diff.schema.json");
+    const contractConformanceSchema = readJson("schemas/contract-conformance.schema.json");
     const diagnosticCatalogSchema = readJson("schemas/diagnostic-catalog.schema.json");
     const plannerEstimateSchema = readJson("schemas/planner-estimate.schema.json");
     const policyReportSchema = readJson("schemas/policy-report.schema.json");
@@ -86,6 +87,7 @@ describe("json schemas", () => {
     ajv.addSchema(agentGuideSchema);
     ajv.addSchema(compatibilityCatalogSchema);
     ajv.addSchema(compatibilityDiffSchema);
+    ajv.addSchema(contractConformanceSchema);
     ajv.addSchema(diagnosticCatalogSchema);
     ajv.addSchema(plannerEstimateSchema);
     ajv.addSchema(policyReportSchema);
@@ -112,6 +114,7 @@ describe("json schemas", () => {
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/agent-guide/v1.json", readJson("examples/agent/agent-guide.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/compatibility-catalog/v1.json", readJson("examples/governance/compatibility-catalog.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/compatibility-diff/v1.json", readJson("examples/governance/compatibility-diff.json"));
+    assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/contract-conformance/v1.json", readJson("examples/governance/contract-conformance.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/diagnostic-catalog/v1.json", readJson("examples/diagnostics/diagnostic-catalog.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/planner-estimate/v1.json", readJson("examples/policy/tool-hash.planner-estimate.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/policy-report/v1.json", readJson("examples/policy/tool-hash.policy.json"));

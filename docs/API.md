@@ -224,6 +224,17 @@ The report includes:
 - Deprecation-policy changes.
 - A pass/fail status based on breaking changes.
 
+## `buildContractConformanceReport(catalog?)`
+
+Produces a `cypher-llm-contract-conformance/v1` report for release agents and maintainers.
+
+The report includes:
+
+- One conformance record for each compatibility contract.
+- Checks for schema files, example files, evidence paths, and recorded fingerprints.
+- JSON Schema validation for examples whose contracts declare a schema.
+- Summary counts for failures, missing files, fingerprint mismatches, and schema-validation failures.
+
 ## `assessCypherPolicy(query, schema, options?)`
 
 Produces a `cypher-llm-policy-report/v1` object for static cost, cardinality, and safety checks.
@@ -429,6 +440,7 @@ Returns OpenAI Responses API function-tool definitions for:
 - `cypher_diagnostic_catalog`
 - `cypher_compatibility_catalog`
 - `cypher_compatibility_diff`
+- `cypher_contract_conformance`
 - `cypher_eval`
 - `cypher_scorecard`
 - `cypher_benchmark_gate`
@@ -484,6 +496,8 @@ Routes:
 - `GET /v1/compatibility`
 - `POST /v1/compatibility`
 - `POST /v1/compatibility-diff`
+- `GET /v1/contract-conformance`
+- `POST /v1/contract-conformance`
 - `POST /v1/eval`
 - `POST /v1/scorecard`
 - `POST /v1/benchmark-gate`

@@ -3,6 +3,7 @@ import { buildAgentGuide } from "./agent-guide.js";
 import { buildBenchmarkGateReport } from "./benchmark-gate.js";
 import { buildCompatibilityCatalog, type CompatibilityCatalog } from "./compatibility.js";
 import { buildCompatibilityDiffReport } from "./compatibility-diff.js";
+import { buildContractConformanceReport } from "./contract-conformance.js";
 import { buildDatasetGovernanceReport } from "./dataset-governance.js";
 import { buildDiagnosticCatalog } from "./diagnostic-catalog.js";
 import type { EvalAttemptSet, EvalDataset, EvalOptions, EvalReport } from "./evals.js";
@@ -51,6 +52,7 @@ export type CypherCompilerToolName =
   | "cypher_diagnostic_catalog"
   | "cypher_compatibility_catalog"
   | "cypher_compatibility_diff"
+  | "cypher_contract_conformance"
   | "cypher_eval"
   | "cypher_scorecard"
   | "cypher_benchmark_gate"
@@ -538,6 +540,12 @@ export const CYPHER_COMPILER_TOOLS: readonly CypherCompilerToolDefinition[] = [
     })
   },
   {
+    name: "cypher_contract_conformance",
+    description:
+      "Return a contract conformance report that checks public schemas, examples, fingerprints, schema validation, and evidence paths.",
+    inputSchema: objectSchema([], {})
+  },
+  {
     name: "cypher_eval",
     description: "Score offline text2cypher or IR attempts against a Cypher LLM eval dataset.",
     inputSchema: objectSchema(["dataset", "attempts"], {
@@ -746,6 +754,9 @@ export async function executeCypherCompilerTool(name: string, input: unknown): P
         requiredObject<CompatibilityCatalog>(args, "baseline"),
         optionalObject<CompatibilityCatalog>(args, "candidate") ?? buildCompatibilityCatalog()
       );
+    }
+    case "cypher_contract_conformance": {
+      return buildContractConformanceReport();
     }
     case "cypher_eval": {
       return evaluateAttempts(

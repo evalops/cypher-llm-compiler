@@ -55,6 +55,7 @@ describe("compiler HTTP service", () => {
     const agentGuide = await getJson(`${baseUrl}/v1/agent-guide`) as { version: string; workflows: unknown[] };
     const diagnosticCatalog = await getJson(`${baseUrl}/v1/diagnostic-catalog`) as { version: string; entries: unknown[] };
     const compatibility = await getJson(`${baseUrl}/v1/compatibility`) as { version: string; contracts: unknown[] };
+    const conformance = await getJson(`${baseUrl}/v1/contract-conformance`) as { version: string; summary: { failures: number } };
 
     assert.equal(health.version, "cypher-llm-compiler-http/v1");
     assert.equal(health.tools, tools.tools.length);
@@ -66,6 +67,8 @@ describe("compiler HTTP service", () => {
     assert.ok(diagnosticCatalog.entries.length > 0);
     assert.equal(compatibility.version, "cypher-llm-compatibility-catalog/v1");
     assert.ok(compatibility.contracts.length > 0);
+    assert.equal(conformance.version, "cypher-llm-contract-conformance/v1");
+    assert.equal(conformance.summary.failures, 0);
   });
 
   it("runs compiler tools through stable HTTP routes", async () => {
@@ -100,6 +103,7 @@ describe("compiler HTTP service", () => {
     const compatibilityDiff = await postJson(`${baseUrl}/v1/compatibility-diff`, {
       baseline: compatibility
     }) as { version: string; status: string };
+    const conformance = await postJson(`${baseUrl}/v1/contract-conformance`, {}) as { version: string; summary: { failures: number } };
     const policy = await postJson(`${baseUrl}/v1/policy`, {
       schema,
       query,
@@ -159,6 +163,8 @@ describe("compiler HTTP service", () => {
     assert.equal(compatibility.version, "cypher-llm-compatibility-catalog/v1");
     assert.equal(compatibilityDiff.version, "cypher-llm-compatibility-diff/v1");
     assert.equal(compatibilityDiff.status, "passed");
+    assert.equal(conformance.version, "cypher-llm-contract-conformance/v1");
+    assert.equal(conformance.summary.failures, 0);
     assert.equal(policy.version, "cypher-llm-policy-report/v1");
     assert.equal(policy.policy?.id, "llm-readonly-strict");
     assert.deepEqual(policy.findings.map((finding) => finding.code), ["policy-unfiltered-label-scan", "policy-missing-limit"]);

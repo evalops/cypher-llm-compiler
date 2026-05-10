@@ -532,6 +532,13 @@ export const yearsRoadmap = {
       status: "partial",
       evidence: ["src/compatibility-diff.ts", "schemas/compatibility-diff.schema.json", "test/compatibility.test.ts"],
       workstreamIds: ["governance-standards", "ecosystem-ux"]
+    },
+    {
+      id: "contract-conformance",
+      title: "Public Contract Conformance Reports",
+      status: "partial",
+      evidence: ["src/contract-conformance.ts", "schemas/contract-conformance.schema.json", "test/contract-conformance.test.ts"],
+      workstreamIds: ["governance-standards", "ecosystem-ux", "compiler-service"]
     }
   ]
 } as const satisfies YearsRoadmap;

@@ -90,6 +90,12 @@
       "authRequired": false
     },
     {
+      "method": "GET",
+      "path": "/v1/contract-conformance",
+      "operation": "contract_conformance",
+      "authRequired": false
+    },
+    {
       "method": "POST",
       "path": "/v1/render",
       "operation": "cypher_render",
@@ -177,6 +183,12 @@
       "method": "POST",
       "path": "/v1/compatibility-diff",
       "operation": "cypher_compatibility_diff",
+      "authRequired": false
+    },
+    {
+      "method": "POST",
+      "path": "/v1/contract-conformance",
+      "operation": "cypher_contract_conformance",
       "authRequired": false
     },
     {

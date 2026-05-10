@@ -1,0 +1,1419 @@
+{
+  "version": "cypher-llm-contract-conformance/v1",
+  "generatedAt": "2026-05-10",
+  "compatibilityCatalogVersion": "cypher-llm-compatibility-catalog/v1",
+  "packageName": "@evalops/cypher-llm-compiler",
+  "packageVersion": "0.1.0",
+  "summary": {
+    "contracts": 27,
+    "passedContracts": 27,
+    "warningContracts": 0,
+    "failedContracts": 0,
+    "checks": 197,
+    "warnings": 0,
+    "failures": 0,
+    "missingFiles": 0,
+    "fingerprintMismatches": 0,
+    "schemaValidationFailures": 0
+  },
+  "contracts": [
+    {
+      "id": "cypher-query-ir",
+      "version": "cypher-llm-ir/v1",
+      "level": "stable",
+      "status": "pass",
+      "checks": [
+        {
+          "id": "schema-file",
+          "status": "pass",
+          "path": "schemas/cypher-query.schema.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "schemas/cypher-query.schema.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "example-file",
+          "status": "pass",
+          "path": "examples/tool-hash.query.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "examples/tool-hash.query.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "schema-validation",
+          "status": "pass",
+          "path": "examples/tool-hash.query.json",
+          "message": "Example validates against schema."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "src/ir.ts",
+          "message": "File exists."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "src/render.ts",
+          "message": "File exists."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "test/render.test.ts",
+          "message": "File exists."
+        }
+      ]
+    },
+    {
+      "id": "schema-contract",
+      "version": "cypher-llm-schema/v1",
+      "level": "stable",
+      "status": "pass",
+      "checks": [
+        {
+          "id": "schema-file",
+          "status": "pass",
+          "path": "schemas/cypher-schema-contract.schema.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "schemas/cypher-schema-contract.schema.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "example-file",
+          "status": "pass",
+          "path": "examples/tool-hash.schema.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "examples/tool-hash.schema.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "schema-validation",
+          "status": "pass",
+          "path": "examples/tool-hash.schema.json",
+          "message": "Example validates against schema."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "src/ir.ts",
+          "message": "File exists."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "src/schema.ts",
+          "message": "File exists."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "test/compiler-loop.test.ts",
+          "message": "File exists."
+        }
+      ]
+    },
+    {
+      "id": "diagnostic-shape",
+      "version": "cypher-llm-diagnostic/v1",
+      "level": "stable",
+      "status": "pass",
+      "checks": [
+        {
+          "id": "example-file",
+          "status": "pass",
+          "path": "examples/lsp/tool-hash.lsp.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "examples/lsp/tool-hash.lsp.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "example-file",
+          "status": "pass",
+          "path": "examples/proofs/tool-hash.proof.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "examples/proofs/tool-hash.proof.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "src/diagnostics.ts",
+          "message": "File exists."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "src/validate.ts",
+          "message": "File exists."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "docs/COMPATIBILITY.md",
+          "message": "File exists."
+        }
+      ]
+    },
+    {
+      "id": "diagnostic-catalog",
+      "version": "cypher-llm-diagnostic-catalog/v1",
+      "level": "stable",
+      "status": "pass",
+      "checks": [
+        {
+          "id": "schema-file",
+          "status": "pass",
+          "path": "schemas/diagnostic-catalog.schema.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "schemas/diagnostic-catalog.schema.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "example-file",
+          "status": "pass",
+          "path": "examples/diagnostics/diagnostic-catalog.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "examples/diagnostics/diagnostic-catalog.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "schema-validation",
+          "status": "pass",
+          "path": "examples/diagnostics/diagnostic-catalog.json",
+          "message": "Example validates against schema."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "src/diagnostic-catalog.ts",
+          "message": "File exists."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "test/diagnostic-catalog.test.ts",
+          "message": "File exists."
+        }
+      ]
+    },
+    {
+      "id": "eval-dataset",
+      "version": "cypher-llm-eval-dataset/v1",
+      "level": "stable",
+      "status": "pass",
+      "checks": [
+        {
+          "id": "schema-file",
+          "status": "pass",
+          "path": "schemas/eval-dataset.schema.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "schemas/eval-dataset.schema.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "example-file",
+          "status": "pass",
+          "path": "examples/eval-dataset.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "examples/eval-dataset.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "schema-validation",
+          "status": "pass",
+          "path": "examples/eval-dataset.json",
+          "message": "Example validates against schema."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "src/evals.ts",
+          "message": "File exists."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "test/evals.test.ts",
+          "message": "File exists."
+        }
+      ]
+    },
+    {
+      "id": "eval-attempts",
+      "version": "cypher-llm-eval-attempts/v1",
+      "level": "stable",
+      "status": "pass",
+      "checks": [
+        {
+          "id": "schema-file",
+          "status": "pass",
+          "path": "schemas/eval-attempts.schema.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "schemas/eval-attempts.schema.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "example-file",
+          "status": "pass",
+          "path": "examples/eval-attempts.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "examples/eval-attempts.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "schema-validation",
+          "status": "pass",
+          "path": "examples/eval-attempts.json",
+          "message": "Example validates against schema."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "src/evals.ts",
+          "message": "File exists."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "test/evals.test.ts",
+          "message": "File exists."
+        }
+      ]
+    },
+    {
+      "id": "dialect-profile",
+      "version": "cypher-llm-dialect-profile/v1",
+      "level": "stable",
+      "status": "pass",
+      "checks": [
+        {
+          "id": "schema-file",
+          "status": "pass",
+          "path": "schemas/dialect-profile.schema.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "schemas/dialect-profile.schema.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "example-file",
+          "status": "pass",
+          "path": "profiles/neo4j-cypher-25.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "profiles/neo4j-cypher-25.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "schema-validation",
+          "status": "pass",
+          "path": "profiles/neo4j-cypher-25.json",
+          "message": "Example validates against schema."
+        },
+        {
+          "id": "example-file",
+          "status": "pass",
+          "path": "profiles/opencypher-9.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "profiles/opencypher-9.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "schema-validation",
+          "status": "pass",
+          "path": "profiles/opencypher-9.json",
+          "message": "Example validates against schema."
+        },
+        {
+          "id": "example-file",
+          "status": "pass",
+          "path": "profiles/gql.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "profiles/gql.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "schema-validation",
+          "status": "pass",
+          "path": "profiles/gql.json",
+          "message": "Example validates against schema."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "src/dialects.ts",
+          "message": "File exists."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "test/dialects.test.ts",
+          "message": "File exists."
+        }
+      ]
+    },
+    {
+      "id": "dialect-certification",
+      "version": "cypher-llm-dialect-certification/v1",
+      "level": "stable",
+      "status": "pass",
+      "checks": [
+        {
+          "id": "schema-file",
+          "status": "pass",
+          "path": "schemas/dialect-certification.schema.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "schemas/dialect-certification.schema.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "example-file",
+          "status": "pass",
+          "path": "examples/certification/dialect-certification.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "examples/certification/dialect-certification.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "schema-validation",
+          "status": "pass",
+          "path": "examples/certification/dialect-certification.json",
+          "message": "Example validates against schema."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "src/dialect-certification.ts",
+          "message": "File exists."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "test/dialect-certification.test.ts",
+          "message": "File exists."
+        }
+      ]
+    },
+    {
+      "id": "proof",
+      "version": "cypher-llm-proof/v1",
+      "level": "stable",
+      "status": "pass",
+      "checks": [
+        {
+          "id": "schema-file",
+          "status": "pass",
+          "path": "schemas/cypher-proof.schema.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "schemas/cypher-proof.schema.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "example-file",
+          "status": "pass",
+          "path": "examples/proofs/tool-hash.proof.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "examples/proofs/tool-hash.proof.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "schema-validation",
+          "status": "pass",
+          "path": "examples/proofs/tool-hash.proof.json",
+          "message": "Example validates against schema."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "src/proof.ts",
+          "message": "File exists."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "test/proof.test.ts",
+          "message": "File exists."
+        }
+      ]
+    },
+    {
+      "id": "repair-plan",
+      "version": "cypher-llm-repair-plan/v1",
+      "level": "stable",
+      "status": "pass",
+      "checks": [
+        {
+          "id": "schema-file",
+          "status": "pass",
+          "path": "schemas/repair-plan.schema.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "schemas/repair-plan.schema.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "example-file",
+          "status": "pass",
+          "path": "examples/proofs/tool-hash.repair-plan.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "examples/proofs/tool-hash.repair-plan.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "schema-validation",
+          "status": "pass",
+          "path": "examples/proofs/tool-hash.repair-plan.json",
+          "message": "Example validates against schema."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "src/repair-plan.ts",
+          "message": "File exists."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "test/repair-plan.test.ts",
+          "message": "File exists."
+        }
+      ]
+    },
+    {
+      "id": "agent-feedback",
+      "version": "cypher-llm-agent-feedback/v1",
+      "level": "stable",
+      "status": "pass",
+      "checks": [
+        {
+          "id": "schema-file",
+          "status": "pass",
+          "path": "schemas/agent-feedback.schema.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "schemas/agent-feedback.schema.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "example-file",
+          "status": "pass",
+          "path": "examples/proofs/tool-hash.agent-feedback.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "examples/proofs/tool-hash.agent-feedback.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "schema-validation",
+          "status": "pass",
+          "path": "examples/proofs/tool-hash.agent-feedback.json",
+          "message": "Example validates against schema."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "src/agent-feedback.ts",
+          "message": "File exists."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "test/agent-feedback.test.ts",
+          "message": "File exists."
+        }
+      ]
+    },
+    {
+      "id": "agent-guide",
+      "version": "cypher-llm-agent-guide/v1",
+      "level": "stable",
+      "status": "pass",
+      "checks": [
+        {
+          "id": "schema-file",
+          "status": "pass",
+          "path": "schemas/agent-guide.schema.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "schemas/agent-guide.schema.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "example-file",
+          "status": "pass",
+          "path": "examples/agent/agent-guide.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "examples/agent/agent-guide.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "schema-validation",
+          "status": "pass",
+          "path": "examples/agent/agent-guide.json",
+          "message": "Example validates against schema."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "src/agent-guide.ts",
+          "message": "File exists."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "test/agent-guide.test.ts",
+          "message": "File exists."
+        }
+      ]
+    },
+    {
+      "id": "policy-report",
+      "version": "cypher-llm-policy-report/v1",
+      "level": "stable",
+      "status": "pass",
+      "checks": [
+        {
+          "id": "schema-file",
+          "status": "pass",
+          "path": "schemas/policy-report.schema.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "schemas/policy-report.schema.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "example-file",
+          "status": "pass",
+          "path": "examples/policy/tool-hash.policy.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "examples/policy/tool-hash.policy.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "schema-validation",
+          "status": "pass",
+          "path": "examples/policy/tool-hash.policy.json",
+          "message": "Example validates against schema."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "src/policy.ts",
+          "message": "File exists."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "test/policy.test.ts",
+          "message": "File exists."
+        }
+      ]
+    },
+    {
+      "id": "policy-profile-catalog",
+      "version": "cypher-llm-policy-profile-catalog/v1",
+      "level": "stable",
+      "status": "pass",
+      "checks": [
+        {
+          "id": "schema-file",
+          "status": "pass",
+          "path": "schemas/policy-profile.schema.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "schemas/policy-profile.schema.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "example-file",
+          "status": "pass",
+          "path": "examples/policy/policy-profiles.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "examples/policy/policy-profiles.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "schema-validation",
+          "status": "pass",
+          "path": "examples/policy/policy-profiles.json",
+          "message": "Example validates against schema."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "src/policy-profile.ts",
+          "message": "File exists."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "test/policy-profile.test.ts",
+          "message": "File exists."
+        }
+      ]
+    },
+    {
+      "id": "policy-rules",
+      "version": "cypher-llm-policy-rules/v1",
+      "level": "stable",
+      "status": "pass",
+      "checks": [
+        {
+          "id": "schema-file",
+          "status": "pass",
+          "path": "schemas/policy-rules.schema.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "schemas/policy-rules.schema.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "example-file",
+          "status": "pass",
+          "path": "examples/policy/tool-hash.policy-rules.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "examples/policy/tool-hash.policy-rules.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "schema-validation",
+          "status": "pass",
+          "path": "examples/policy/tool-hash.policy-rules.json",
+          "message": "Example validates against schema."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "src/policy-rules.ts",
+          "message": "File exists."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "test/policy.test.ts",
+          "message": "File exists."
+        }
+      ]
+    },
+    {
+      "id": "planner-estimate",
+      "version": "cypher-llm-planner-estimate/v1",
+      "level": "stable",
+      "status": "pass",
+      "checks": [
+        {
+          "id": "schema-file",
+          "status": "pass",
+          "path": "schemas/planner-estimate.schema.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "schemas/planner-estimate.schema.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "example-file",
+          "status": "pass",
+          "path": "examples/policy/tool-hash.planner-estimate.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "examples/policy/tool-hash.planner-estimate.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "schema-validation",
+          "status": "pass",
+          "path": "examples/policy/tool-hash.planner-estimate.json",
+          "message": "Example validates against schema."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "src/planner-estimate.ts",
+          "message": "File exists."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "test/planner-estimate.test.ts",
+          "message": "File exists."
+        }
+      ]
+    },
+    {
+      "id": "schema-statistics",
+      "version": "cypher-llm-schema-statistics/v1",
+      "level": "stable",
+      "status": "pass",
+      "checks": [
+        {
+          "id": "schema-file",
+          "status": "pass",
+          "path": "schemas/schema-statistics.schema.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "schemas/schema-statistics.schema.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "example-file",
+          "status": "pass",
+          "path": "examples/policy/tool-hash.schema-statistics.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "examples/policy/tool-hash.schema-statistics.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "schema-validation",
+          "status": "pass",
+          "path": "examples/policy/tool-hash.schema-statistics.json",
+          "message": "Example validates against schema."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "src/schema-statistics.ts",
+          "message": "File exists."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "test/schema-statistics.test.ts",
+          "message": "File exists."
+        }
+      ]
+    },
+    {
+      "id": "lsp-diagnostics",
+      "version": "cypher-llm-lsp-diagnostics/v1",
+      "level": "stable",
+      "status": "pass",
+      "checks": [
+        {
+          "id": "schema-file",
+          "status": "pass",
+          "path": "schemas/lsp-diagnostics.schema.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "schemas/lsp-diagnostics.schema.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "example-file",
+          "status": "pass",
+          "path": "examples/lsp/tool-hash.lsp.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "examples/lsp/tool-hash.lsp.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "schema-validation",
+          "status": "pass",
+          "path": "examples/lsp/tool-hash.lsp.json",
+          "message": "Example validates against schema."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "src/lsp.ts",
+          "message": "File exists."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "test/lsp.test.ts",
+          "message": "File exists."
+        }
+      ]
+    },
+    {
+      "id": "lossless-parse",
+      "version": "cypher-llm-lossless-parse/v1",
+      "level": "stable",
+      "status": "pass",
+      "checks": [
+        {
+          "id": "schema-file",
+          "status": "pass",
+          "path": "schemas/lossless-parse.schema.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "schemas/lossless-parse.schema.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "example-file",
+          "status": "pass",
+          "path": "examples/lossless/tool-hash.lossless.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "examples/lossless/tool-hash.lossless.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "schema-validation",
+          "status": "pass",
+          "path": "examples/lossless/tool-hash.lossless.json",
+          "message": "Example validates against schema."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "src/lossless-parser.ts",
+          "message": "File exists."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "test/lossless-parser.test.ts",
+          "message": "File exists."
+        }
+      ]
+    },
+    {
+      "id": "scorecard",
+      "version": "cypher-llm-cypherbench-scorecard/v1",
+      "level": "stable",
+      "status": "pass",
+      "checks": [
+        {
+          "id": "schema-file",
+          "status": "pass",
+          "path": "schemas/cypherbench-scorecard.schema.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "schemas/cypherbench-scorecard.schema.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "example-file",
+          "status": "pass",
+          "path": "examples/benchmarks/tool-hash.scorecard.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "examples/benchmarks/tool-hash.scorecard.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "schema-validation",
+          "status": "pass",
+          "path": "examples/benchmarks/tool-hash.scorecard.json",
+          "message": "Example validates against schema."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "src/scorecard.ts",
+          "message": "File exists."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "test/scorecard.test.ts",
+          "message": "File exists."
+        }
+      ]
+    },
+    {
+      "id": "benchmark-gate",
+      "version": "cypher-llm-benchmark-gate/v1",
+      "level": "stable",
+      "status": "pass",
+      "checks": [
+        {
+          "id": "schema-file",
+          "status": "pass",
+          "path": "schemas/benchmark-gate.schema.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "schemas/benchmark-gate.schema.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "example-file",
+          "status": "pass",
+          "path": "examples/benchmarks/tool-hash.benchmark-gate.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "examples/benchmarks/tool-hash.benchmark-gate.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "schema-validation",
+          "status": "pass",
+          "path": "examples/benchmarks/tool-hash.benchmark-gate.json",
+          "message": "Example validates against schema."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "src/benchmark-gate.ts",
+          "message": "File exists."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "test/benchmark-gate.test.ts",
+          "message": "File exists."
+        }
+      ]
+    },
+    {
+      "id": "dataset-governance",
+      "version": "cypher-llm-dataset-governance/v1",
+      "level": "stable",
+      "status": "pass",
+      "checks": [
+        {
+          "id": "schema-file",
+          "status": "pass",
+          "path": "schemas/dataset-governance.schema.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "schemas/dataset-governance.schema.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "example-file",
+          "status": "pass",
+          "path": "examples/benchmarks/tool-hash.dataset-governance.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "examples/benchmarks/tool-hash.dataset-governance.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "schema-validation",
+          "status": "pass",
+          "path": "examples/benchmarks/tool-hash.dataset-governance.json",
+          "message": "Example validates against schema."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "src/dataset-governance.ts",
+          "message": "File exists."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "test/dataset-governance.test.ts",
+          "message": "File exists."
+        }
+      ]
+    },
+    {
+      "id": "service-manifest",
+      "version": "cypher-llm-service-manifest/v1",
+      "level": "stable",
+      "status": "pass",
+      "checks": [
+        {
+          "id": "schema-file",
+          "status": "pass",
+          "path": "schemas/service-manifest.schema.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "schemas/service-manifest.schema.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "example-file",
+          "status": "pass",
+          "path": "examples/service/service-manifest.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "examples/service/service-manifest.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "schema-validation",
+          "status": "pass",
+          "path": "examples/service/service-manifest.json",
+          "message": "Example validates against schema."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "src/service-manifest.ts",
+          "message": "File exists."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "test/service-manifest.test.ts",
+          "message": "File exists."
+        }
+      ]
+    },
+    {
+      "id": "years-roadmap",
+      "version": "cypher-llm-years-roadmap/v1",
+      "level": "stable",
+      "status": "pass",
+      "checks": [
+        {
+          "id": "schema-file",
+          "status": "pass",
+          "path": "schemas/years-roadmap.schema.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "schemas/years-roadmap.schema.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "example-file",
+          "status": "pass",
+          "path": "examples/roadmap/cypher-llm-years-roadmap.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "examples/roadmap/cypher-llm-years-roadmap.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "schema-validation",
+          "status": "pass",
+          "path": "examples/roadmap/cypher-llm-years-roadmap.json",
+          "message": "Example validates against schema."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "src/years-roadmap.ts",
+          "message": "File exists."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "test/years-roadmap.test.ts",
+          "message": "File exists."
+        }
+      ]
+    },
+    {
+      "id": "compatibility-catalog",
+      "version": "cypher-llm-compatibility-catalog/v1",
+      "level": "stable",
+      "status": "pass",
+      "checks": [
+        {
+          "id": "schema-file",
+          "status": "pass",
+          "path": "schemas/compatibility-catalog.schema.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "schemas/compatibility-catalog.schema.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "example-file",
+          "status": "pass",
+          "path": "examples/governance/compatibility-catalog.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "examples/governance/compatibility-catalog.json",
+          "message": "Self-generated compatibility catalog example intentionally skips a self-referential fingerprint."
+        },
+        {
+          "id": "schema-validation",
+          "status": "pass",
+          "path": "examples/governance/compatibility-catalog.json",
+          "message": "Example validates against schema."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "src/compatibility.ts",
+          "message": "File exists."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "test/compatibility.test.ts",
+          "message": "File exists."
+        }
+      ]
+    },
+    {
+      "id": "compatibility-diff",
+      "version": "cypher-llm-compatibility-diff/v1",
+      "level": "stable",
+      "status": "pass",
+      "checks": [
+        {
+          "id": "schema-file",
+          "status": "pass",
+          "path": "schemas/compatibility-diff.schema.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "schemas/compatibility-diff.schema.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "example-file",
+          "status": "pass",
+          "path": "examples/governance/compatibility-diff.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "examples/governance/compatibility-diff.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "schema-validation",
+          "status": "pass",
+          "path": "examples/governance/compatibility-diff.json",
+          "message": "Example validates against schema."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "src/compatibility-diff.ts",
+          "message": "File exists."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "test/compatibility.test.ts",
+          "message": "File exists."
+        }
+      ]
+    },
+    {
+      "id": "contract-conformance",
+      "version": "cypher-llm-contract-conformance/v1",
+      "level": "stable",
+      "status": "pass",
+      "checks": [
+        {
+          "id": "schema-file",
+          "status": "pass",
+          "path": "schemas/contract-conformance.schema.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "schemas/contract-conformance.schema.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "example-file",
+          "status": "pass",
+          "path": "examples/governance/contract-conformance.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "examples/governance/contract-conformance.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "schema-validation",
+          "status": "pass",
+          "path": "examples/governance/contract-conformance.json",
+          "message": "Example validates against schema."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "src/contract-conformance.ts",
+          "message": "File exists."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "test/contract-conformance.test.ts",
+          "message": "File exists."
+        }
+      ]
+    }
+  ]
+}

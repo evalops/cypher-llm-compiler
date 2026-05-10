@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evalops.dev/schemas/cypher-llm/contract-conformance/v1.json",
+  "title": "Cypher LLM Contract Conformance Report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "generatedAt",
+    "compatibilityCatalogVersion",
+    "packageName",
+    "packageVersion",
+    "summary",
+    "contracts"
+  ],
+  "properties": {
+    "version": { "const": "cypher-llm-contract-conformance/v1" },
+    "generatedAt": { "type": "string", "minLength": 1 },
+    "compatibilityCatalogVersion": { "const": "cypher-llm-compatibility-catalog/v1" },
+    "packageName": { "type": "string", "minLength": 1 },
+    "packageVersion": { "type": "string", "minLength": 1 },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contracts",
+        "passedContracts",
+        "warningContracts",
+        "failedContracts",
+        "checks",
+        "warnings",
+        "failures",
+        "missingFiles",
+        "fingerprintMismatches",
+        "schemaValidationFailures"
+      ],
+      "properties": {
+        "contracts": { "type": "integer", "minimum": 0 },
+        "passedContracts": { "type": "integer", "minimum": 0 },
+        "warningContracts": { "type": "integer", "minimum": 0 },
+        "failedContracts": { "type": "integer", "minimum": 0 },
+        "checks": { "type": "integer", "minimum": 0 },
+        "warnings": { "type": "integer", "minimum": 0 },
+        "failures": { "type": "integer", "minimum": 0 },
+        "missingFiles": { "type": "integer", "minimum": 0 },
+        "fingerprintMismatches": { "type": "integer", "minimum": 0 },
+        "schemaValidationFailures": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "contracts": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/contract" }
+    }
+  },
+  "$defs": {
+    "status": {
+      "enum": ["pass", "warn", "fail"]
+    },
+    "checkId": {
+      "enum": ["schema-file", "example-file", "evidence-file", "fingerprint", "schema-validation"]
+    },
+    "contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version", "level", "status", "checks"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "version": { "type": "string", "minLength": 1 },
+        "level": { "type": "string", "minLength": 1 },
+        "status": { "$ref": "#/$defs/status" },
+        "checks": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/check" }
+        }
+      }
+    },
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "status", "path", "message"],
+      "properties": {
+        "id": { "$ref": "#/$defs/checkId" },
+        "status": { "$ref": "#/$defs/status" },
+        "path": { "type": "string", "minLength": 1 },
+        "message": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

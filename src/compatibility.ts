@@ -194,7 +194,10 @@ const compatibilityCatalogBase = {
     ], ["src/compatibility.ts", "test/compatibility.test.ts"]),
     stableContract("compatibility-diff", "cypher-llm-compatibility-diff/v1", "governance", "governance-standards", "schemas/compatibility-diff.schema.json", [
       "examples/governance/compatibility-diff.json"
-    ], ["src/compatibility-diff.ts", "test/compatibility.test.ts"])
+    ], ["src/compatibility-diff.ts", "test/compatibility.test.ts"]),
+    stableContract("contract-conformance", "cypher-llm-contract-conformance/v1", "governance", "governance-standards", "schemas/contract-conformance.schema.json", [
+      "examples/governance/contract-conformance.json"
+    ], ["src/contract-conformance.ts", "test/contract-conformance.test.ts"])
   ],
   releaseGates: [
     {
