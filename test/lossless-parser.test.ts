@@ -35,6 +35,26 @@ describe("lossless Cypher parser", () => {
     assert.deepEqual(report.statements[0]?.clauses.map((clause) => clause.keyword), ["MATCH", "RETURN"]);
     assert.equal(report.statements[0]?.clauses[0]?.support, "lifted");
     assert.equal(report.statements[0]?.clauses[0]?.irPath, "/clauses/0");
+    assert.ok(report.sourceMap.some((entry) => entry.kind === "fragment" && entry.sourcePath === "/fragments/0"));
+    assert.ok(
+      report.sourceMap.some(
+        (entry) =>
+          entry.kind === "trivia" &&
+          entry.sourceKind === "line-comment" &&
+          entry.sourcePath === "/trivia/1" &&
+          entry.text === "// keep the projection exact"
+      )
+    );
+    assert.ok(
+      report.sourceMap.some(
+        (entry) =>
+          entry.kind === "clause" &&
+          entry.sourcePath === "/statements/0/clauses/1" &&
+          entry.irPath === "/clauses/1" &&
+          entry.support === "lifted" &&
+          entry.keyword === "RETURN"
+      )
+    );
     assert.equal(report.irPreview?.supportedClauses, 2);
     assert.equal(report.irPreview?.rawClauses, 0);
     assert.equal(report.irPreview?.parserOk, true);
@@ -47,6 +67,7 @@ describe("lossless Cypher parser", () => {
     assert.equal(report.roundTrip.ok, true);
     assert.equal(report.statements[0]?.clauses[0]?.keyword, "MATCH");
     assert.equal(report.statements[0]?.clauses[0]?.support, "raw");
+    assert.equal(report.sourceMap.find((entry) => entry.sourcePath === "/statements/0/clauses/0")?.support, "raw");
     assert.equal(report.irPreview?.rawClauses, 1);
     assert.ok(report.irPreview?.diagnostics.some((item) => item.code === "raw-lift-unsupported-clause"));
   });

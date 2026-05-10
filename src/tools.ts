@@ -325,7 +325,7 @@ export const CYPHER_COMPILER_TOOLS: readonly CypherCompilerToolDefinition[] = [
   {
     name: "cypher_parse_lossless",
     description:
-      "Parse raw Cypher into a lossless concrete syntax report with exact round-trip fragments, comments, source spans, parser diagnostics, and an IR preview when supported.",
+      "Parse raw Cypher into a lossless concrete syntax report with exact round-trip fragments, comments, source-map anchors, source spans, parser diagnostics, and an IR preview when supported.",
     inputSchema: objectSchema(["rawCypher"], {
       rawCypher: {
         type: "string",

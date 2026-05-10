@@ -21,6 +21,10 @@
       "type": "array",
       "items": { "$ref": "#/$defs/statement" }
     },
+    "sourceMap": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/sourceMapEntry" }
+    },
     "diagnostics": {
       "type": "array",
       "items": { "$ref": "#/$defs/diagnostic" }
@@ -126,6 +130,22 @@
         "bodySpan": { "$ref": "#/$defs/span" },
         "irPath": { "type": "string" },
         "support": { "enum": ["lifted", "raw", "unknown"] }
+      }
+    },
+    "sourceMapEntry": {
+      "type": "object",
+      "required": ["id", "kind", "sourcePath", "span", "text"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "kind": { "enum": ["fragment", "statement", "clause", "trivia", "terminator"] },
+        "sourcePath": { "type": "string", "pattern": "^/" },
+        "span": { "$ref": "#/$defs/span" },
+        "text": { "type": "string" },
+        "sourceKind": { "type": "string", "minLength": 1 },
+        "keyword": { "type": "string", "minLength": 1 },
+        "support": { "enum": ["lifted", "raw", "unknown"] },
+        "irPath": { "type": "string", "pattern": "^/" }
       }
     },
     "diagnostic": {

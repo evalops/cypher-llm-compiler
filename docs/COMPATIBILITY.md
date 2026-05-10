@@ -199,7 +199,7 @@ Run:
 cypher-llm parse-lossless --schema examples/tool-hash.schema.json --cypher "MATCH (tool:Tool) RETURN tool" --report-out examples/lossless/tool-hash.lossless.json
 ```
 
-Lossless parse reports preserve exact source fragments, comments, statement and clause spans, delimiter diagnostics, optional parser output, and best-effort IR-preview coverage. This is the first compatibility contract for existing Cypher workloads that must not be rewritten just to be inspected by an LLM agent.
+Lossless parse reports preserve exact source fragments, comments, statement and clause spans, source-map anchors, delimiter diagnostics, optional parser output, and best-effort IR-preview coverage. This is the first compatibility contract for existing Cypher workloads that must not be rewritten just to be inspected by an LLM agent.
 
 ## CypherBench Scorecards
 

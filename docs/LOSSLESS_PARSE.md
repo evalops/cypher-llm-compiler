@@ -12,6 +12,7 @@ The first slice is a concrete syntax report, not a grammar-complete semantic AST
 - `fragments`: source slices that reconstruct the input exactly.
 - `trivia`: line and block comments with spans.
 - `statements`: top-level statements with terminators and clause nodes.
+- `sourceMap`: stable JSON-pointer anchors for fragments, trivia, statements, terminators, clauses, and lifted IR paths.
 - `diagnostics`: delimiter and unterminated-token diagnostics with source paths.
 - `parser`: optional Neo4j language-support parser result when a schema is supplied.
 - `irPreview`: best-effort raw-to-IR preview for supported single-statement queries.
@@ -35,6 +36,7 @@ Use lossless reports when an agent needs to:
 
 - Inventory production Cypher without changing bytes.
 - Attach diagnostics and repair plans to exact source spans.
+- Map a source clause or comment back to a stable `sourceMap.sourcePath` and, when lifted, an `irPath`.
 - Preserve comments and unsupported clauses during raw-to-IR migration.
 - Decide whether a query can be lifted into `CypherQuery` IR or should remain raw.
 

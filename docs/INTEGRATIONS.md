@@ -6,7 +6,7 @@ The compiler exposes the same nineteen operations across OpenAI tool schemas, MC
 - `cypher_validate`: return stable compiler diagnostics for IR.
 - `cypher_repair`: repair structured IR or narrow legacy raw Cypher failures.
 - `cypher_repair_plan`: return ranked deterministic, model-required, and unsafe repair plan steps, including optional policy evidence, thresholds, and a compact `policyEvidence` summary.
-- `cypher_parse_lossless`: preserve raw Cypher byte-for-byte while exposing comments, clauses, source spans, parser output, and IR-preview coverage.
+- `cypher_parse_lossless`: preserve raw Cypher byte-for-byte while exposing comments, clauses, source spans, source-map anchors, parser output, and IR-preview coverage.
 - `cypher_parse_check`: run Neo4j language-support parser validation.
 - `cypher_policy_check`: assess static cost, cardinality, schema-statistics, policy-rule, planner-estimate, and safety policy.
 - `cypher_policy_profiles`: list built-in policy profiles for audited autonomous-agent safety settings.

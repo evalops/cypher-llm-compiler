@@ -581,12 +581,12 @@
         {
           "kind": "schema",
           "path": "schemas/lossless-parse.schema.json",
-          "sha256": "8ec9f4f1bf4f23331190a5752d30806d4654471ecbe12039444086035e2f7d9c"
+          "sha256": "87cc294dbe1e6b816140415906f3023f2aa359b5fd03e4d1155625f226d41af1"
         },
         {
           "kind": "example",
           "path": "examples/lossless/tool-hash.lossless.json",
-          "sha256": "718df3ec479bdb9398668b33f3987c5e7d93806a0e8bf6cefd4efe009fc1f69e"
+          "sha256": "0b55b66e96669548346f194133e793f01378e0368bbee70543e32954c4aeb312"
         }
       ]
     },

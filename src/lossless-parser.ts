@@ -53,6 +53,20 @@ export interface LosslessStatementNode {
   clauses: LosslessClauseNode[];
 }
 
+export type LosslessSourceMapKind = "fragment" | "statement" | "clause" | "trivia" | "terminator";
+
+export interface LosslessSourceMapEntry {
+  id: string;
+  kind: LosslessSourceMapKind;
+  sourcePath: string;
+  span: SourceSpan;
+  text: string;
+  sourceKind?: string;
+  keyword?: string;
+  support?: LosslessClauseNode["support"];
+  irPath?: string;
+}
+
 export interface LosslessIrPreview {
   query: CypherQuery;
   renderedCypher: string;
@@ -75,6 +89,7 @@ export interface LosslessParseReport {
   fragments: LosslessFragment[];
   trivia: LosslessTrivia[];
   statements: LosslessStatementNode[];
+  sourceMap: LosslessSourceMapEntry[];
   diagnostics: Diagnostic[];
   roundTrip: LosslessRoundTrip;
   parser?: ParserValidationResult;
@@ -150,6 +165,7 @@ export function parseCypherLosslessly(source: string, options: LosslessParseOpti
     fragments: scanned.fragments,
     trivia: scanned.trivia,
     statements,
+    sourceMap: [],
     diagnostics,
     roundTrip: {
       ok: roundTripLosslessFragments(scanned.fragments) === source,
@@ -179,6 +195,8 @@ export function parseCypherLosslessly(source: string, options: LosslessParseOpti
       report.irPreview = preview;
     }
   }
+
+  report.sourceMap = buildSourceMap(report);
 
   return report;
 }
@@ -512,6 +530,71 @@ function buildIrPreview(statements: LosslessStatementNode[], options: LosslessPa
     ...(lifted.parserOk !== undefined ? { parserOk: lifted.parserOk } : {}),
     diagnostics: lifted.diagnostics
   };
+}
+
+function buildSourceMap(report: Pick<LosslessParseReport, "fragments" | "trivia" | "statements">): LosslessSourceMapEntry[] {
+  const entries: LosslessSourceMapEntry[] = [];
+
+  for (const [index, fragment] of report.fragments.entries()) {
+    entries.push({
+      id: sourceMapId("fragment", fragment.span),
+      kind: "fragment",
+      sourcePath: `/fragments/${index}`,
+      span: fragment.span,
+      text: fragment.text,
+      sourceKind: fragment.kind
+    });
+  }
+
+  for (const [index, trivia] of report.trivia.entries()) {
+    entries.push({
+      id: sourceMapId("trivia", trivia.span),
+      kind: "trivia",
+      sourcePath: `/trivia/${index}`,
+      span: trivia.span,
+      text: trivia.text,
+      sourceKind: trivia.kind
+    });
+  }
+
+  for (const statement of report.statements) {
+    entries.push({
+      id: sourceMapId("statement", statement.span),
+      kind: "statement",
+      sourcePath: `/statements/${statement.index}`,
+      span: statement.span,
+      text: statement.raw
+    });
+    if (statement.terminator) {
+      entries.push({
+        id: sourceMapId("terminator", statement.terminator.span),
+        kind: "terminator",
+        sourcePath: `/statements/${statement.index}/terminator`,
+        span: statement.terminator.span,
+        text: statement.terminator.text,
+        sourceKind: statement.terminator.kind
+      });
+    }
+    for (const clause of statement.clauses) {
+      entries.push({
+        id: sourceMapId("clause", clause.span),
+        kind: "clause",
+        sourcePath: `/statements/${statement.index}/clauses/${clause.index}`,
+        span: clause.span,
+        text: clause.raw,
+        sourceKind: clause.kind,
+        keyword: clause.keyword,
+        support: clause.support,
+        ...(clause.irPath ? { irPath: clause.irPath } : {})
+      });
+    }
+  }
+
+  return entries;
+}
+
+function sourceMapId(kind: LosslessSourceMapKind, span: SourceSpan): string {
+  return `${kind}:${span.start.offset}-${span.end.offset}`;
 }
 
 function hasCypherCode(source: string): boolean {

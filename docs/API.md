@@ -105,6 +105,7 @@ The report includes:
 
 - Exact source fragments that reconstruct the original text.
 - Statement and clause nodes with source spans.
+- A `sourceMap` of stable JSON-pointer anchors for fragments, trivia, statements, terminators, clauses, and lifted IR paths.
 - Preserved line and block comments.
 - Delimiter and unterminated-token diagnostics.
 - Optional Neo4j language-support parser validation when `schema` is supplied.

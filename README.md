@@ -38,7 +38,7 @@ This package implements twenty-eight concrete improvements:
 15. **Schema statistics policy gates**: Cardinality, index, and relationship-fanout metadata can flag expensive graph access before planning.
 16. **Policy rule sets**: Sensitive labels, relationships, returned properties, and tenant scoping requirements can be supplied as versioned policy input.
 17. **LSP-style diagnostics**: Editor and agent UIs can consume compiler diagnostics and code actions in a familiar shape.
-18. **Lossless parse reports**: Existing Cypher can be preserved byte-for-byte while agents inspect statements, clauses, comments, source spans, parser output, and IR-preview coverage.
+18. **Lossless parse reports**: Existing Cypher can be preserved byte-for-byte while agents inspect statements, clauses, comments, source spans, source-map anchors, parser output, and IR-preview coverage.
 19. **CypherBench scorecards**: Eval reports can be published as ranked JSON and markdown scorecards across raw, IR-first, repaired, parser-validated, and mixed lanes.
 20. **Dataset governance reports**: Benchmark datasets can be audited for provenance, split assignment, redaction findings, duplicate ids, and public-release diagnostics.
 21. **Ranked repair plans**: Agents can receive deterministic patches, model-required fixes, and unsafe blockers as separate ranked plan steps.
@@ -205,7 +205,7 @@ npm run test:live:neo4j
 
 `lift-raw-eval` measures raw-to-IR lift coverage across an eval attempt file.
 
-`parse-lossless` emits a `cypher-llm-lossless-parse/v1` report that preserves exact source fragments, comments, statements, clauses, source spans, optional parser diagnostics, and a best-effort IR preview.
+`parse-lossless` emits a `cypher-llm-lossless-parse/v1` report that preserves exact source fragments, comments, statements, clauses, source-map anchors, source spans, optional parser diagnostics, and a best-effort IR preview.
 
 `parse-check` validates rendered IR or raw Cypher against Neo4j's language-support parser and maps parser diagnostics back into this package's `Diagnostic` shape.
 
