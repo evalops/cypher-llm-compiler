@@ -11,9 +11,10 @@
     "cypher-llm": "dist/src/cli.js"
   },
   "files": [
-    "dist",
+    "dist/src",
     "README.md",
-    "docs"
+    "docs",
+    "examples"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
