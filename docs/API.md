@@ -85,6 +85,21 @@ Supported shapes include `MATCH`, `OPTIONAL MATCH`, `WHERE`, `WITH`, `RETURN`, `
 
 When `schema` is supplied, the function validates the lifted rendered Cypher with Neo4j language support and sets `parserOk`.
 
+## `parseCypherLosslessly(source, options?)`
+
+Produces a `cypher-llm-lossless-parse/v1` report for existing Cypher text without changing the source bytes.
+
+The report includes:
+
+- Exact source fragments that reconstruct the original text.
+- Statement and clause nodes with source spans.
+- Preserved line and block comments.
+- Delimiter and unterminated-token diagnostics.
+- Optional Neo4j language-support parser validation when `schema` is supplied.
+- A best-effort IR preview for the supported single-statement subset, with source clauses mapped to `/clauses/{index}` paths where lifting succeeds.
+
+Use `roundTripLosslessParse(report)` to reconstruct the source from report fragments, or inspect `roundTrip.ok` and `sourceHash` in serialized reports.
+
 ## `evaluateRawLiftAttempts(dataset, attempts)`
 
 Runs `liftRawCypherToIr` over raw attempts in an eval attempt file and returns `cypher-llm-raw-lift-eval/v1`.

@@ -1,10 +1,11 @@
 # Agent Integrations
 
-The compiler exposes the same eight operations across OpenAI tool schemas, MCP, HTTP, LangChain-shaped adapters, and the CLI:
+The compiler exposes the same nine operations across OpenAI tool schemas, MCP, HTTP, LangChain-shaped adapters, and the CLI:
 
 - `cypher_render`: repair IR, validate, and return a `SafeExecutionPlan`.
 - `cypher_validate`: return stable compiler diagnostics for IR.
 - `cypher_repair`: repair structured IR or narrow legacy raw Cypher failures.
+- `cypher_parse_lossless`: preserve raw Cypher byte-for-byte while exposing comments, clauses, source spans, parser output, and IR-preview coverage.
 - `cypher_parse_check`: run Neo4j language-support parser validation.
 - `cypher_policy_check`: assess static cost, cardinality, and safety policy.
 - `cypher_lsp_diagnostics`: emit LSP-style diagnostics and code actions for editor and agent UIs.
@@ -27,7 +28,7 @@ const tools = getOpenAiResponsesTools();
 const output = await executeCypherCompilerTool(call.name, JSON.parse(call.arguments));
 ```
 
-The exported tool schemas intentionally ask for `CypherQuery` IR instead of raw Cypher wherever possible. Raw Cypher remains available for migration through `cypher_repair` and `cypher_parse_check`.
+The exported tool schemas intentionally ask for `CypherQuery` IR instead of raw Cypher wherever possible. Raw Cypher remains available for migration and inventory through `cypher_parse_lossless`, `cypher_repair`, and `cypher_parse_check`.
 
 ## MCP
 
@@ -110,6 +111,7 @@ Routes:
 - `POST /v1/render`
 - `POST /v1/validate`
 - `POST /v1/repair`
+- `POST /v1/parse-lossless`
 - `POST /v1/parse-check`
 - `POST /v1/policy`
 - `POST /v1/lsp-diagnostics`

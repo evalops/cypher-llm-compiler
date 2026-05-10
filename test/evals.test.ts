@@ -59,6 +59,7 @@ describe("json schemas", () => {
     const proofSchema = readJson("schemas/cypher-proof.schema.json");
     const policyReportSchema = readJson("schemas/policy-report.schema.json");
     const lspDiagnosticsSchema = readJson("schemas/lsp-diagnostics.schema.json");
+    const losslessParseSchema = readJson("schemas/lossless-parse.schema.json");
     const dialectProfileSchema = readJson("schemas/dialect-profile.schema.json");
     const dialectCertificationSchema = readJson("schemas/dialect-certification.schema.json");
     const yearsRoadmapSchema = readJson("schemas/years-roadmap.schema.json");
@@ -69,6 +70,7 @@ describe("json schemas", () => {
     ajv.addSchema(proofSchema);
     ajv.addSchema(policyReportSchema);
     ajv.addSchema(lspDiagnosticsSchema);
+    ajv.addSchema(losslessParseSchema);
     ajv.addSchema(dialectProfileSchema);
     ajv.addSchema(dialectCertificationSchema);
     ajv.addSchema(yearsRoadmapSchema);
@@ -80,6 +82,7 @@ describe("json schemas", () => {
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/proof/v1.json", readJson("examples/proofs/tool-hash.proof.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/policy-report/v1.json", readJson("examples/policy/tool-hash.policy.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/lsp-diagnostics/v1.json", readJson("examples/lsp/tool-hash.lsp.json"));
+    assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/lossless-parse/v1.json", readJson("examples/lossless/tool-hash.lossless.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/eval-dataset/v1.json", readJson("examples/eval-dataset.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/eval-attempts/v1.json", readJson("examples/eval-attempts.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/dialect-profile/v1.json", readJson("profiles/neo4j-cypher-25.json"));

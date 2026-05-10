@@ -17,6 +17,7 @@ import {
 } from "./fixture-importers.js";
 import { introspectNeo4jSchema } from "./neo4j-introspect.js";
 import { buildLspDiagnostics } from "./lsp.js";
+import { parseCypherLosslessly } from "./lossless-parser.js";
 import { repairQuery, repairRawCypher } from "./repair.js";
 import { evaluateRepairLoop } from "./repair-loop.js";
 import { renderQuery } from "./render.js";
@@ -54,6 +55,9 @@ export async function runCli(argv: string[], io: CliIO = defaultIo()): Promise<n
         return 0;
       case "lift-raw":
         await liftRawCommand(args, io);
+        return 0;
+      case "parse-lossless":
+        await parseLosslessCommand(args, io);
         return 0;
       case "corpus":
         writeJson(io, { results: evaluateFailureCorpus() });
@@ -164,6 +168,24 @@ async function liftRawCommand(args: Map<string, string | boolean>, io: CliIO) {
     await writeJsonFile(io, args.get("summary-out") as string, result);
   }
   writeJson(io, result);
+}
+
+async function parseLosslessCommand(args: Map<string, string | boolean>, io: CliIO) {
+  const schemaPath = args.get("schema");
+  const schema = typeof schemaPath === "string" ? normalizeSchema(await readSchema(args, io)).original : undefined;
+  const parserMode = args.get("parser-mode") === "lint" ? "lint" : "syntax";
+  const options: Parameters<typeof parseCypherLosslessly>[1] = {
+    parserMode,
+    includeIrPreview: args.get("no-ir-preview") !== true
+  };
+  if (schema !== undefined) {
+    options.schema = schema;
+  }
+  const report = parseCypherLosslessly(stringArg(args, "cypher"), options);
+  if (typeof args.get("report-out") === "string") {
+    await writeJsonFile(io, args.get("report-out") as string, report);
+  }
+  writeJson(io, report);
 }
 
 async function evalCommand(args: Map<string, string | boolean>, io: CliIO) {
@@ -550,6 +572,7 @@ Commands:
   validate    --schema schema.json --query query.json
   repair-raw  --schema schema.json --cypher "MATCH ..."
   lift-raw    --cypher "MATCH ..." [--schema schema.json] [--query-out query.json] [--summary-out summary.json] [--profile raw-compatible|llm-safe-readonly] [--mode syntax|lint]
+  parse-lossless --cypher "MATCH ..." [--schema schema.json] [--report-out report.json] [--parser-mode syntax|lint] [--no-ir-preview]
   corpus
   eval        --dataset dataset.json --attempts attempts.json [--report-out report.json] [--raw-cypher-can-execute] [--default-limit 25] [--default-max-hops 5]
   compare-evals --baseline baseline.report.json --candidate candidate.report.json [--comparison-out comparison.json] [--fail-on-regression] [--tolerance 0.0001]

@@ -1,0 +1,144 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evalops.dev/schemas/cypher-llm/lossless-parse/v1.json",
+  "title": "Lossless Cypher Parse Report",
+  "type": "object",
+  "required": ["version", "source", "sourceHash", "fragments", "trivia", "statements", "diagnostics", "roundTrip"],
+  "additionalProperties": true,
+  "properties": {
+    "version": { "const": "cypher-llm-lossless-parse/v1" },
+    "source": { "type": "string" },
+    "sourceHash": { "type": "string", "minLength": 64, "maxLength": 64 },
+    "fragments": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/fragment" }
+    },
+    "trivia": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/trivia" }
+    },
+    "statements": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/statement" }
+    },
+    "diagnostics": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/diagnostic" }
+    },
+    "roundTrip": {
+      "type": "object",
+      "required": ["ok", "bytes", "sourceHash"],
+      "additionalProperties": false,
+      "properties": {
+        "ok": { "type": "boolean" },
+        "bytes": { "type": "integer", "minimum": 0 },
+        "sourceHash": { "type": "string", "minLength": 64, "maxLength": 64 }
+      }
+    },
+    "parser": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "irPreview": {
+      "type": "object",
+      "required": ["query", "renderedCypher", "supportedClauses", "rawClauses", "diagnostics"],
+      "additionalProperties": true,
+      "properties": {
+        "query": { "type": "object", "additionalProperties": true },
+        "renderedCypher": { "type": "string" },
+        "supportedClauses": { "type": "integer", "minimum": 0 },
+        "rawClauses": { "type": "integer", "minimum": 0 },
+        "parserOk": { "type": "boolean" },
+        "diagnostics": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/diagnostic" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "position": {
+      "type": "object",
+      "required": ["offset", "line", "character"],
+      "additionalProperties": false,
+      "properties": {
+        "offset": { "type": "integer", "minimum": 0 },
+        "line": { "type": "integer", "minimum": 0 },
+        "character": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "span": {
+      "type": "object",
+      "required": ["start", "end"],
+      "additionalProperties": false,
+      "properties": {
+        "start": { "$ref": "#/$defs/position" },
+        "end": { "$ref": "#/$defs/position" }
+      }
+    },
+    "fragment": {
+      "type": "object",
+      "required": ["kind", "span", "text"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "enum": ["statement", "terminator", "trivia"] },
+        "span": { "$ref": "#/$defs/span" },
+        "text": { "type": "string" }
+      }
+    },
+    "trivia": {
+      "type": "object",
+      "required": ["kind", "span", "text"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "enum": ["line-comment", "block-comment"] },
+        "span": { "$ref": "#/$defs/span" },
+        "text": { "type": "string" }
+      }
+    },
+    "statement": {
+      "type": "object",
+      "required": ["index", "raw", "span", "clauses"],
+      "additionalProperties": true,
+      "properties": {
+        "index": { "type": "integer", "minimum": 0 },
+        "raw": { "type": "string" },
+        "span": { "$ref": "#/$defs/span" },
+        "terminator": { "$ref": "#/$defs/fragment" },
+        "clauses": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/clause" }
+        }
+      }
+    },
+    "clause": {
+      "type": "object",
+      "required": ["index", "kind", "keyword", "raw", "body", "span", "keywordSpan", "bodySpan", "support"],
+      "additionalProperties": false,
+      "properties": {
+        "index": { "type": "integer", "minimum": 0 },
+        "kind": { "type": "string" },
+        "keyword": { "type": "string" },
+        "raw": { "type": "string" },
+        "body": { "type": "string" },
+        "span": { "$ref": "#/$defs/span" },
+        "keywordSpan": { "$ref": "#/$defs/span" },
+        "bodySpan": { "$ref": "#/$defs/span" },
+        "irPath": { "type": "string" },
+        "support": { "enum": ["lifted", "raw", "unknown"] }
+      }
+    },
+    "diagnostic": {
+      "type": "object",
+      "required": ["code", "severity", "message"],
+      "additionalProperties": true,
+      "properties": {
+        "code": { "type": "string" },
+        "severity": { "enum": ["error", "warning", "info"] },
+        "message": { "type": "string" },
+        "path": { "type": "string" },
+        "suggestion": { "type": "string" }
+      }
+    }
+  }
+}

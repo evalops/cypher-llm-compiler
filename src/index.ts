@@ -9,6 +9,7 @@ export * from "./fixture-importers.js";
 export * from "./http-server.js";
 export * from "./langchain.js";
 export * from "./lsp.js";
+export * from "./lossless-parser.js";
 export * from "./mcp-server.js";
 export * from "./neo4j-explain.js";
 export * from "./neo4j-introspect.js";

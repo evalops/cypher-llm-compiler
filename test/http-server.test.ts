@@ -70,6 +70,10 @@ describe("compiler HTTP service", () => {
       query,
       defaultLimit: 25
     }) as { canExecute: boolean; cypher: string };
+    const lossless = await postJson(`${baseUrl}/v1/parse-lossless`, {
+      schema,
+      rawCypher: "MATCH (tool:Tool)-[:HAS_HASH]->(hash:Hash) RETURN hash"
+    }) as { version: string; roundTrip: { ok: boolean } };
     const policy = await postJson(`${baseUrl}/v1/policy`, {
       schema,
       query
@@ -85,6 +89,8 @@ describe("compiler HTTP service", () => {
     assert.equal(proof.canExecute, true);
     assert.equal(rendered.canExecute, true);
     assert.equal(rendered.cypher, proof.cypher);
+    assert.equal(lossless.version, "cypher-llm-lossless-parse/v1");
+    assert.equal(lossless.roundTrip.ok, true);
     assert.equal(policy.version, "cypher-llm-policy-report/v1");
     assert.deepEqual(policy.findings.map((finding) => finding.code), ["policy-unfiltered-label-scan", "policy-missing-limit"]);
     assert.equal(lsp.version, "cypher-llm-lsp-diagnostics/v1");

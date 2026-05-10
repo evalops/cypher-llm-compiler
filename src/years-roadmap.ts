@@ -68,7 +68,14 @@ export const yearsRoadmap = {
         "Source spans, comments, raw spans, and unsupported constructs survive migration.",
         "Raw Cypher, lifted IR, rendered Cypher, and parser diagnostics can be compared in one loop."
       ],
-      firstArtifacts: ["src/raw-lift.ts", "docs/RAW_LIFT.md", "examples/benchmarks/tool-hash-lifted.summary.json"],
+      firstArtifacts: [
+        "src/lossless-parser.ts",
+        "src/raw-lift.ts",
+        "docs/LOSSLESS_PARSE.md",
+        "docs/RAW_LIFT.md",
+        "examples/lossless/tool-hash.lossless.json",
+        "examples/benchmarks/tool-hash-lifted.summary.json"
+      ],
       acceptanceGates: [
         "Round-trip fixtures preserve source meaning and unsupported spans.",
         "Parser diagnostics point to both source spans and IR JSON pointers.",
@@ -270,6 +277,13 @@ export const yearsRoadmap = {
       status: "partial",
       evidence: ["src/raw-lift.ts", "docs/RAW_LIFT.md", "test/raw-lift.test.ts"],
       workstreamIds: ["lossless-parser-ast"]
+    },
+    {
+      id: "lossless-parse",
+      title: "Lossless Source Round Trip And Clause CST",
+      status: "partial",
+      evidence: ["src/lossless-parser.ts", "schemas/lossless-parse.schema.json", "test/lossless-parser.test.ts"],
+      workstreamIds: ["lossless-parser-ast", "ecosystem-ux"]
     },
     {
       id: "dialect-profiles",

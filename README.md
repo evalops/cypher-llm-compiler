@@ -19,7 +19,7 @@ The gap is not "LLMs need a better prompt." The gap is a missing compiler bounda
 
 ## What This Implements
 
-This package implements thirteen concrete improvements:
+This package implements fourteen concrete improvements:
 
 1. **Official JSON IR**: Agents can emit a small, typed Cypher AST instead of brittle text.
 2. **LLM-safe profile**: The renderer emits conservative Cypher with escaped schema identifiers, explicit projections, bounded path recommendations, and deterministic formatting.
@@ -34,6 +34,7 @@ This package implements thirteen concrete improvements:
 11. **Proof-carrying compile output**: Agents can ask why a query is accepted, repaired, blocked, or approval-gated.
 12. **Cost and safety policy reports**: Broad scans, risky traversals, high limits, cartesian patterns, and writes are surfaced before execution.
 13. **LSP-style diagnostics**: Editor and agent UIs can consume compiler diagnostics and code actions in a familiar shape.
+14. **Lossless parse reports**: Existing Cypher can be preserved byte-for-byte while agents inspect statements, clauses, comments, source spans, parser output, and IR-preview coverage.
 
 ## Quick Start
 
@@ -130,6 +131,7 @@ cypher-llm render --schema schema.json --query query.json --params params.json -
 cypher-llm validate --schema schema.json --query query.json
 cypher-llm repair-raw --schema schema.json --cypher "MATCH (t:Tool)-[:has MD5 hash]->(h:Hash) RETURN h"
 cypher-llm lift-raw --schema schema.json --cypher "MATCH (t:Tool)-[:has MD5 hash]->(h:Hash) RETURN h"
+cypher-llm parse-lossless --schema examples/tool-hash.schema.json --cypher "MATCH (t:Tool) RETURN t"
 cypher-llm corpus
 cypher-llm eval --dataset examples/eval-dataset.json --attempts examples/eval-attempts.json --default-limit 25
 cypher-llm compare-evals --baseline baseline.report.json --candidate candidate.report.json
@@ -167,6 +169,8 @@ npm run test:live:neo4j
 
 `lift-raw-eval` measures raw-to-IR lift coverage across an eval attempt file.
 
+`parse-lossless` emits a `cypher-llm-lossless-parse/v1` report that preserves exact source fragments, comments, statements, clauses, source spans, optional parser diagnostics, and a best-effort IR preview.
+
 `parse-check` validates rendered IR or raw Cypher against Neo4j's language-support parser and maps parser diagnostics back into this package's `Diagnostic` shape.
 
 `policy-check` emits a `cypher-llm-policy-report/v1` report for static cost, cardinality, and safety risks before execution.
@@ -181,9 +185,9 @@ npm run test:live:neo4j
 
 `certify-dialects` emits a `cypher-llm-dialect-certification/v1` report that checks profile metadata, renderer behavior, parser acceptance, semantic feature gates, and known rendering limitations.
 
-`mcp` starts a stdio MCP server exposing the same render, validate, repair, parse-check, and eval operations to agent clients.
+`mcp` starts a stdio MCP server exposing the same render, validate, repair, parse-lossless, parse-check, policy, proof, LSP, and eval operations to agent clients.
 
-`serve` starts a local JSON HTTP service exposing `/healthz`, `/v1/tools`, `/v1/render`, `/v1/validate`, `/v1/repair`, `/v1/parse-check`, `/v1/policy`, `/v1/lsp-diagnostics`, `/v1/prove`, `/v1/eval`, `/v1/roadmap`, and `/v1/dialect-certification`.
+`serve` starts a local JSON HTTP service exposing `/healthz`, `/v1/tools`, `/v1/render`, `/v1/validate`, `/v1/repair`, `/v1/parse-lossless`, `/v1/parse-check`, `/v1/policy`, `/v1/lsp-diagnostics`, `/v1/prove`, `/v1/eval`, `/v1/roadmap`, and `/v1/dialect-certification`.
 
 `test:live:neo4j` runs the optional Docker-backed Neo4j `EXPLAIN` fixture when `CYPHER_LLM_NEO4J_URI` and `CYPHER_LLM_NEO4J_PASSWORD` are set.
 
@@ -299,7 +303,7 @@ The renderer emits ordinary Cypher. The structured layer exists before the text 
 
 ## What This Does Not Do Yet
 
-- It does not embed a full Cypher parser; raw lifting covers common read-query migration shapes only.
+- It does not embed a full grammar-complete Cypher parser; the lossless parser preserves source structure while raw lifting still covers common read-query migration shapes only.
 - It does not execute against a database.
 - It does not claim semantic equivalence beyond canonical rendering of this IR.
 - It does not make regex raw-query repair broad on purpose.
@@ -315,6 +319,7 @@ Those are deliberate boundaries. The repo is the missing LLM compiler surface, n
 - `src/validate.ts`: Semantic type, dialect, and LLM-safe profile diagnostics.
 - `src/repair.ts`: Structured repair actions over IR and limited raw-Cypher bootstrap repair.
 - `src/raw-lift.ts`: Raw Cypher to IR migration bridge and lift-coverage evals.
+- `src/lossless-parser.ts`: Lossless source preservation, comment/span extraction, clause CST, and IR-preview mapping.
 - `src/normalize.ts`: Stable query normalization and equivalence helpers.
 - `src/safety.ts`: Safe execution planning.
 - `src/failure-corpus.ts`: Runnable corpus of LLM failure cases.
@@ -333,18 +338,19 @@ Those are deliberate boundaries. The repo is the missing LLM compiler surface, n
 - `src/lsp.ts`: LSP-style diagnostics and code actions for editor and agent UIs.
 - `src/langchain.ts`: LangChain-shaped adapter for structured IR repair plus parser validation.
 - `src/cli.ts`: JSON-in/JSON-out CLI for agents and eval harnesses.
-- `docs/`: Design notes and LLM integration guidance, including `docs/RAW_LIFT.md` and `docs/YEARS_ROADMAP.md`.
+- `docs/`: Design notes and LLM integration guidance, including `docs/LOSSLESS_PARSE.md`, `docs/RAW_LIFT.md`, and `docs/YEARS_ROADMAP.md`.
 - `docker-compose.neo4j.yml`: Optional local Neo4j fixture for live `EXPLAIN` tests.
 - `examples/`: Small schema/query fixtures for CLI smoke tests and agent onboarding.
 - `examples/benchmarks/`: CypherBench raw-vs-IR reports, comparisons, and repair-loop artifacts.
 - `examples/certification/`: Checked-in dialect certification report.
 - `examples/imported/`: Imported text2cypher/openCypher fixture samples and baseline reports.
+- `examples/lossless/`: Checked-in lossless parse report.
 - `examples/lsp/`: Checked-in LSP diagnostics report.
 - `examples/policy/`: Checked-in cost and safety policy report.
 - `examples/proofs/`: Checked-in proof-carrying compile output.
 - `examples/roadmap/`: Machine-readable years-scale roadmap snapshot.
 - `profiles/`: Versioned dialect profiles for Neo4j Cypher 25, openCypher 9, and GQL-oriented output.
-- `schemas/`: JSON Schema contracts for IR, graph schema, eval datasets, and eval attempts.
+- `schemas/`: JSON Schema contracts for IR, graph schema, lossless parse reports, eval datasets, and eval attempts.
 - `test/`: Node test-runner coverage for renderer, schema, validation, repair, safety, and corpus behavior.
 
 ## Design Rules

@@ -29,6 +29,12 @@ Generate a markdown view:
 cypher-llm roadmap --format markdown
 ```
 
+Lossless parse reports are the first executable parser/AST compatibility lane. They are exported from `src/lossless-parser.ts`, validated by `schemas/lossless-parse.schema.json`, and checked in at `examples/lossless/tool-hash.lossless.json`.
+
+```bash
+cypher-llm parse-lossless --schema examples/tool-hash.schema.json --cypher "MATCH (tool:Tool) RETURN tool"
+```
+
 Dialect certification is the first executable certification lane under this program. It is exported from `src/dialect-certification.ts`, validated by `schemas/dialect-certification.schema.json`, and checked in at `examples/certification/dialect-certification.json`.
 
 ```bash

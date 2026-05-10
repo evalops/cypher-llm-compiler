@@ -36,6 +36,17 @@ Artifacts:
 
 Status: initial implementation exists in `liftRawCypherToIr`, `cypher-llm lift-raw`, `cypher-llm lift-raw-eval`, `docs/RAW_LIFT.md`, and `examples/benchmarks/text2cypher-gpt4o-raw-lift.summary.json`.
 
+## 2.75 Lossless Parse Boundary
+
+Artifacts:
+
+- Exact source-fragment round trip for existing Cypher.
+- Statement and clause CST nodes with comments and source spans.
+- Optional parser validation against schema-aware Neo4j language support.
+- Best-effort IR-preview mapping for supported single-statement read queries.
+
+Status: initial implementation exists in `parseCypherLosslessly`, `cypher-llm parse-lossless`, `schemas/lossless-parse.schema.json`, `examples/lossless/tool-hash.lossless.json`, and `test/lossless-parser.test.ts`.
+
 ## 3. Parser and Database Verification
 
 Artifacts:
@@ -79,10 +90,10 @@ Artifacts:
 - LangChain adapter that replaces regex correction.
 - Migration guide for raw text2cypher chains.
 
-Status: implemented through `src/tools.ts`, `src/mcp-server.ts`, `src/langchain.ts`, `docs/INTEGRATIONS.md`, and `examples/raw-to-ir-migration.md`. The same operation contract now reaches OpenAI function tools, MCP clients, LangChain-style chains, and direct TypeScript callers.
+Status: implemented through `src/tools.ts`, `src/mcp-server.ts`, `src/langchain.ts`, `docs/INTEGRATIONS.md`, and `examples/raw-to-ir-migration.md`. The same operation contract now reaches OpenAI function tools, MCP clients, HTTP clients, LangChain-style chains, and direct TypeScript callers.
 
 ## Beyond: Years-Scale Program
 
-The years-scale program is tracked publicly in issues #10-#17 and in the machine-readable roadmap under `src/years-roadmap.ts`, `schemas/years-roadmap.schema.json`, and `examples/roadmap/cypher-llm-years-roadmap.json`. Dialect certification now has its first executable lane under `src/dialect-certification.ts`, `schemas/dialect-certification.schema.json`, and `examples/certification/dialect-certification.json`. Semantic proof output has its first compact artifact under `src/proof.ts`, `schemas/cypher-proof.schema.json`, and `examples/proofs/tool-hash.proof.json`. Cost and safety policy has its first report lane under `src/policy.ts`, `schemas/policy-report.schema.json`, and `examples/policy/tool-hash.policy.json`. Ecosystem UX has its first editor/agent diagnostics lane under `src/lsp.ts`, `schemas/lsp-diagnostics.schema.json`, and `examples/lsp/tool-hash.lsp.json`. The compiler-service workstream has its first runtime boundary under `src/http-server.ts` and `test/http-server.test.ts`.
+The years-scale program is tracked publicly in issues #10-#17 and in the machine-readable roadmap under `src/years-roadmap.ts`, `schemas/years-roadmap.schema.json`, and `examples/roadmap/cypher-llm-years-roadmap.json`. Lossless parsing now has its first byte-preserving report lane under `src/lossless-parser.ts`, `schemas/lossless-parse.schema.json`, and `examples/lossless/tool-hash.lossless.json`. Dialect certification now has its first executable lane under `src/dialect-certification.ts`, `schemas/dialect-certification.schema.json`, and `examples/certification/dialect-certification.json`. Semantic proof output has its first compact artifact under `src/proof.ts`, `schemas/cypher-proof.schema.json`, and `examples/proofs/tool-hash.proof.json`. Cost and safety policy has its first report lane under `src/policy.ts`, `schemas/policy-report.schema.json`, and `examples/policy/tool-hash.policy.json`. Ecosystem UX has its first editor/agent diagnostics lane under `src/lsp.ts`, `schemas/lsp-diagnostics.schema.json`, and `examples/lsp/tool-hash.lsp.json`. The compiler-service workstream has its first runtime boundary under `src/http-server.ts` and `test/http-server.test.ts`.
 
 See `docs/YEARS_ROADMAP.md` for the larger program: lossless parsing, dialect certification, public CypherBench, proof-carrying repair, compiler service APIs, cost/safety policy planning, ecosystem UX, and governance.

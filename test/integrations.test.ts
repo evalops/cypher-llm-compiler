@@ -50,6 +50,7 @@ describe("OpenAI tool schemas", () => {
       "cypher_render",
       "cypher_validate",
       "cypher_repair",
+      "cypher_parse_lossless",
       "cypher_parse_check",
       "cypher_policy_check",
       "cypher_lsp_diagnostics",
@@ -85,6 +86,16 @@ describe("OpenAI tool schemas", () => {
 
     assert.equal(parsed.ok, true);
     assert.deepEqual(parsed.diagnostics, []);
+
+    const lossless = (await executeCypherCompilerTool("cypher_parse_lossless", {
+      schema,
+      rawCypher: "MATCH (tool:Tool)-[:`has MD5 hash`]->(hash:Hash) RETURN hash.value",
+      parserMode: "syntax"
+    })) as { version: string; roundTrip: { ok: boolean }; irPreview?: { supportedClauses: number } };
+
+    assert.equal(lossless.version, "cypher-llm-lossless-parse/v1");
+    assert.equal(lossless.roundTrip.ok, true);
+    assert.equal(lossless.irPreview?.supportedClauses, 2);
 
     const policy = (await executeCypherCompilerTool("cypher_policy_check", {
       schema,

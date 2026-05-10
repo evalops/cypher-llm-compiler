@@ -4,6 +4,8 @@ Raw lifting is the migration bridge from legacy text2cypher chains into `CypherQ
 
 It is intentionally a subset parser, not a replacement for Neo4j's parser. The goal is to lift common read-query shapes into structured IR, render canonical Cypher, and leave everything else as an explicit `raw` clause with stable diagnostics.
 
+For byte-preserving inventory of existing queries before migration, use `cypher-llm parse-lossless` and `docs/LOSSLESS_PARSE.md`. Lossless parse reports preserve comments, source spans, and unsupported syntax even when raw lifting cannot build IR.
+
 ## Supported Shapes
 
 The first slice supports:

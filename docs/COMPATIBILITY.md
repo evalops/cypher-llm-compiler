@@ -15,6 +15,7 @@ Stable public contracts:
 - `cypher-llm-proof/v1`
 - `cypher-llm-policy-report/v1`
 - `cypher-llm-lsp-diagnostics/v1`
+- `cypher-llm-lossless-parse/v1`
 
 JSON Schema artifacts live under `schemas/` and should be treated as the source of truth for model/tool input validation.
 
@@ -69,6 +70,16 @@ cypher-llm lsp-diagnostics --schema examples/tool-hash.schema.json --query examp
 ```
 
 LSP diagnostic reports adapt compiler, parser, policy, and repair output into the shape expected by editor surfaces and agent UIs: diagnostics carry ranges, severities, codes, and data, while code actions expose quick fixes and deterministic repair previews.
+
+## Lossless Parse Reports
+
+Run:
+
+```bash
+cypher-llm parse-lossless --schema examples/tool-hash.schema.json --cypher "MATCH (tool:Tool) RETURN tool" --report-out examples/lossless/tool-hash.lossless.json
+```
+
+Lossless parse reports preserve exact source fragments, comments, statement and clause spans, delimiter diagnostics, optional parser output, and best-effort IR-preview coverage. This is the first compatibility contract for existing Cypher workloads that must not be rewritten just to be inspected by an LLM agent.
 
 ## Breaking Changes
 

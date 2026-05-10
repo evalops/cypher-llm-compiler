@@ -2,6 +2,7 @@ import type { EvalAttemptSet, EvalDataset, EvalOptions } from "./evals.js";
 import { evaluateAttempts } from "./evals.js";
 import type { CypherQuery, CypherSchemaContract, JsonLiteral } from "./ir.js";
 import { buildLspDiagnostics } from "./lsp.js";
+import { parseCypherLosslessly } from "./lossless-parser.js";
 import type { ParserValidationOptions } from "./parser-validation.js";
 import { validateCypherTextWithParser } from "./parser-validation.js";
 import { assessCypherPolicy } from "./policy.js";
@@ -20,6 +21,7 @@ export type CypherCompilerToolName =
   | "cypher_render"
   | "cypher_validate"
   | "cypher_repair"
+  | "cypher_parse_lossless"
   | "cypher_parse_check"
   | "cypher_policy_check"
   | "cypher_lsp_diagnostics"
@@ -182,6 +184,26 @@ export const CYPHER_COMPILER_TOOLS: readonly CypherCompilerToolDefinition[] = [
         description: "Legacy raw Cypher text to repair during migration. Prefer query for new generation."
       },
       ...repairOptionProperties
+    })
+  },
+  {
+    name: "cypher_parse_lossless",
+    description:
+      "Parse raw Cypher into a lossless concrete syntax report with exact round-trip fragments, comments, source spans, parser diagnostics, and an IR preview when supported.",
+    inputSchema: objectSchema(["rawCypher"], {
+      rawCypher: {
+        type: "string",
+        description: "Raw Cypher source to preserve and inspect without changing bytes."
+      },
+      schema: schemaContractSchema,
+      parserMode: {
+        enum: ["lint", "syntax"],
+        description: "Parser preflight mode when schema is provided."
+      },
+      includeIrPreview: {
+        type: "boolean",
+        description: "Set false to skip raw-to-IR preview generation."
+      }
     })
   },
   {
@@ -365,6 +387,9 @@ export async function executeCypherCompilerTool(name: string, input: unknown): P
         compilerDiagnostics: repaired.diagnostics
       };
     }
+    case "cypher_parse_lossless": {
+      return parseCypherLosslessly(requiredString(args, "rawCypher"), losslessParseOptions(args));
+    }
     case "cypher_policy_check": {
       return assessCypherPolicy(
         requiredObject<CypherQuery>(args, "query"),
@@ -422,6 +447,25 @@ function requiredObject<T>(args: Record<string, unknown>, name: string): T {
     throw new Error(`Missing required object argument '${name}'.`);
   }
   return value as T;
+}
+
+function optionalObject<T>(args: Record<string, unknown>, name: string): T | undefined {
+  const value = args[name];
+  if (value === undefined) {
+    return undefined;
+  }
+  if (!isRecord(value)) {
+    throw new Error(`Expected '${name}' to be an object.`);
+  }
+  return value as T;
+}
+
+function requiredString(args: Record<string, unknown>, name: string): string {
+  const value = optionalString(args, name);
+  if (value === undefined || value.length === 0) {
+    throw new Error(`Missing required string argument '${name}'.`);
+  }
+  return value;
 }
 
 function optionalString(args: Record<string, unknown>, name: string): string | undefined {
@@ -561,6 +605,30 @@ function lspOptions(args: Record<string, unknown>) {
       throw new Error("Expected 'parserMode' to be lint or syntax.");
     }
     options.parserMode = parserMode;
+  }
+  return options;
+}
+
+function losslessParseOptions(args: Record<string, unknown>) {
+  const options: {
+    schema?: CypherSchemaContract;
+    parserMode?: ParserValidationOptions["mode"];
+    includeIrPreview?: boolean;
+  } = {};
+  const schema = optionalObject<CypherSchemaContract>(args, "schema");
+  const parserMode = optionalString(args, "parserMode");
+  const includeIrPreview = optionalBoolean(args, "includeIrPreview");
+  if (schema !== undefined) {
+    options.schema = schema;
+  }
+  if (parserMode !== undefined) {
+    if (parserMode !== "lint" && parserMode !== "syntax") {
+      throw new Error("Expected 'parserMode' to be lint or syntax.");
+    }
+    options.parserMode = parserMode;
+  }
+  if (includeIrPreview !== undefined) {
+    options.includeIrPreview = includeIrPreview;
   }
   return options;
 }

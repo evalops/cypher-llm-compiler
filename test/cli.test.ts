@@ -270,6 +270,52 @@ describe("cli", () => {
     assert.deepEqual(output.diagnostics, []);
   });
 
+  it("emits lossless parse reports from raw Cypher", async () => {
+    const files = new Map<string, string>([
+      [
+        "schema.json",
+        JSON.stringify({
+          version: "cypher-llm-schema/v1",
+          nodes: [{ name: "Tool" }],
+          relationships: []
+        })
+      ]
+    ]);
+    const writes = new Map<string, string>();
+    let stdout = "";
+    let stderr = "";
+    const io: CliIO = {
+      stdout: { write: (chunk: string | Uint8Array) => ((stdout += String(chunk)), true) },
+      stderr: { write: (chunk: string | Uint8Array) => ((stderr += String(chunk)), true) },
+      readFile: async (path) => files.get(String(path)) ?? "",
+      writeFile: async (path, data) => {
+        writes.set(path, data);
+      },
+      mkdir: async () => undefined
+    };
+
+    const code = await runCli(
+      [
+        "parse-lossless",
+        "--schema",
+        "schema.json",
+        "--cypher",
+        "// model\nMATCH (tool:Tool) RETURN tool",
+        "--report-out",
+        "out/lossless.json"
+      ],
+      io
+    );
+    const output = JSON.parse(stdout) as { version: string; roundTrip: { ok: boolean }; trivia: { kind: string }[] };
+
+    assert.equal(code, 0);
+    assert.equal(stderr, "");
+    assert.equal(output.version, "cypher-llm-lossless-parse/v1");
+    assert.equal(output.roundTrip.ok, true);
+    assert.equal(output.trivia[0]?.kind, "line-comment");
+    assert.ok(writes.get("out/lossless.json")?.includes("cypher-llm-lossless-parse/v1"));
+  });
+
   it("emits proof-carrying compile output", async () => {
     const files = new Map<string, string>([
       [
