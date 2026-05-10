@@ -177,6 +177,9 @@ const compatibilityCatalogBase = {
     stableContract("lossless-parse", "cypher-llm-lossless-parse/v1", "integration", "lossless-parser-ast", "schemas/lossless-parse.schema.json", [
       "examples/lossless/tool-hash.lossless.json"
     ], ["src/lossless-parser.ts", "test/lossless-parser.test.ts"]),
+    stableContract("lossless-conformance", "cypher-llm-lossless-conformance/v1", "integration", "lossless-parser-ast", "schemas/lossless-conformance.schema.json", [
+      "examples/lossless/conformance.json"
+    ], ["src/lossless-conformance.ts", "src/lossless-parser.ts", "test/lossless-conformance.test.ts"]),
     stableContract("scorecard", "cypher-llm-cypherbench-scorecard/v1", "benchmark", "public-cypherbench", "schemas/cypherbench-scorecard.schema.json", [
       "examples/benchmarks/tool-hash.scorecard.json"
     ], ["src/scorecard.ts", "test/scorecard.test.ts"]),

@@ -21,6 +21,7 @@ Stable public contracts:
 - `cypher-llm-policy-profile-catalog/v1`
 - `cypher-llm-lsp-diagnostics/v1`
 - `cypher-llm-lossless-parse/v1`
+- `cypher-llm-lossless-conformance/v1`
 - `cypher-llm-cypherbench-scorecard/v1`
 - `cypher-llm-benchmark-gate/v1`
 - `cypher-llm-retry-eval/v1`
@@ -204,6 +205,16 @@ cypher-llm parse-lossless --schema examples/tool-hash.schema.json --cypher "MATC
 ```
 
 Lossless parse reports preserve exact source fragments, comments, statement and clause spans, source-map anchors, delimiter diagnostics, optional parser output, and best-effort IR-preview coverage. This is the first compatibility contract for existing Cypher workloads that must not be rewritten just to be inspected by an LLM agent.
+
+## Lossless Conformance Reports
+
+Run:
+
+```bash
+cypher-llm lossless-conformance --report-out examples/lossless/conformance.json --fail-on-fail
+```
+
+Lossless conformance reports are the public fixture matrix for the lossless parser boundary. JSON reports validate against `schemas/lossless-conformance.schema.json` and classify representative Neo4j, openCypher, GQL-oriented, and text2cypher cases by round-trip status, parser status, IR-preview coverage, source-map coverage, raw clauses, and diagnostics.
 
 ## CypherBench Scorecards
 

@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evalops.dev/schemas/cypher-llm/lossless-conformance/v1.json",
+  "title": "Cypher Lossless Parse Conformance",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "generatedAt", "summary", "cases"],
+  "properties": {
+    "version": { "const": "cypher-llm-lossless-conformance/v1" },
+    "generatedAt": { "type": "string", "minLength": 1 },
+    "summary": { "$ref": "#/$defs/summary" },
+    "cases": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/caseResult" }
+    }
+  },
+  "$defs": {
+    "countMap": {
+      "type": "object",
+      "additionalProperties": { "type": "integer", "minimum": 0 }
+    },
+    "source": {
+      "enum": ["neo4j-example", "opencypher-tck", "gql-oriented", "text2cypher"]
+    },
+    "sourceSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cases", "passed", "warnings", "failed"],
+      "properties": {
+        "cases": { "type": "integer", "minimum": 0 },
+        "passed": { "type": "integer", "minimum": 0 },
+        "warnings": { "type": "integer", "minimum": 0 },
+        "failed": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "totalCases",
+        "passed",
+        "warnings",
+        "failed",
+        "roundTripPassed",
+        "parserPassed",
+        "parserWarnings",
+        "fullIrPreview",
+        "partialIrPreview",
+        "rawClauses",
+        "diagnosticsByCode",
+        "bySource"
+      ],
+      "properties": {
+        "totalCases": { "type": "integer", "minimum": 0 },
+        "passed": { "type": "integer", "minimum": 0 },
+        "warnings": { "type": "integer", "minimum": 0 },
+        "failed": { "type": "integer", "minimum": 0 },
+        "roundTripPassed": { "type": "integer", "minimum": 0 },
+        "parserPassed": { "type": "integer", "minimum": 0 },
+        "parserWarnings": { "type": "integer", "minimum": 0 },
+        "fullIrPreview": { "type": "integer", "minimum": 0 },
+        "partialIrPreview": { "type": "integer", "minimum": 0 },
+        "rawClauses": { "type": "integer", "minimum": 0 },
+        "diagnosticsByCode": { "$ref": "#/$defs/countMap" },
+        "bySource": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["neo4j-example", "opencypher-tck", "gql-oriented", "text2cypher"],
+          "properties": {
+            "neo4j-example": { "$ref": "#/$defs/sourceSummary" },
+            "opencypher-tck": { "$ref": "#/$defs/sourceSummary" },
+            "gql-oriented": { "$ref": "#/$defs/sourceSummary" },
+            "text2cypher": { "$ref": "#/$defs/sourceSummary" }
+          }
+        }
+      }
+    },
+    "caseResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "title",
+        "source",
+        "dialect",
+        "status",
+        "cypherHash",
+        "bytes",
+        "roundTripOk",
+        "irCoverage",
+        "supportedClauses",
+        "rawClauses",
+        "sourceMapEntries",
+        "clauses",
+        "diagnostics"
+      ],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1 },
+        "source": { "$ref": "#/$defs/source" },
+        "dialect": { "type": "string", "minLength": 1 },
+        "status": { "enum": ["passed", "warning", "failed"] },
+        "cypherHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "bytes": { "type": "integer", "minimum": 0 },
+        "roundTripOk": { "type": "boolean" },
+        "parserOk": { "type": "boolean" },
+        "irCoverage": { "enum": ["none", "partial", "full"] },
+        "supportedClauses": { "type": "integer", "minimum": 0 },
+        "rawClauses": { "type": "integer", "minimum": 0 },
+        "sourceMapEntries": { "type": "integer", "minimum": 0 },
+        "clauses": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/clause" }
+        },
+        "diagnostics": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/diagnostic" }
+        }
+      }
+    },
+    "clause": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "keyword", "support"],
+      "properties": {
+        "kind": { "type": "string", "minLength": 1 },
+        "keyword": { "type": "string", "minLength": 1 },
+        "support": { "enum": ["lifted", "raw", "unknown"] },
+        "irPath": { "type": "string", "minLength": 1 }
+      }
+    },
+    "diagnostic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "severity", "message"],
+      "properties": {
+        "code": { "type": "string", "minLength": 1 },
+        "severity": { "enum": ["error", "warning", "info"] },
+        "message": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

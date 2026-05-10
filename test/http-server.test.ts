@@ -90,6 +90,10 @@ describe("compiler HTTP service", () => {
       schema,
       rawCypher: "MATCH (tool:Tool)-[:HAS_HASH]->(hash:Hash) RETURN hash"
     }) as { version: string; roundTrip: { ok: boolean } };
+    const losslessConformance = await postJson(`${baseUrl}/v1/lossless-conformance`, {}) as {
+      version: string;
+      summary: { failed: number };
+    };
     const repairPlan = await postJson(`${baseUrl}/v1/repair-plan`, {
       schema,
       query,
@@ -181,6 +185,8 @@ describe("compiler HTTP service", () => {
     assert.equal(rendered.cypher, proof.cypher);
     assert.equal(lossless.version, "cypher-llm-lossless-parse/v1");
     assert.equal(lossless.roundTrip.ok, true);
+    assert.equal(losslessConformance.version, "cypher-llm-lossless-conformance/v1");
+    assert.equal(losslessConformance.summary.failed, 0);
     assert.equal(repairPlan.version, "cypher-llm-repair-plan/v1");
     assert.equal(repairPlan.deterministic.length, 1);
     assert.equal(feedback.version, "cypher-llm-agent-feedback/v1");

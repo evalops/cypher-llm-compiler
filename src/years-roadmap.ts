@@ -70,9 +70,12 @@ export const yearsRoadmap = {
       ],
       firstArtifacts: [
         "src/lossless-parser.ts",
+        "src/lossless-conformance.ts",
         "src/raw-lift.ts",
+        "schemas/lossless-conformance.schema.json",
         "docs/LOSSLESS_PARSE.md",
         "docs/RAW_LIFT.md",
+        "examples/lossless/conformance.json",
         "examples/lossless/tool-hash.lossless.json",
         "examples/benchmarks/tool-hash-lifted.summary.json"
       ],
@@ -350,9 +353,9 @@ export const yearsRoadmap = {
     },
     {
       id: "lossless-parse",
-      title: "Lossless Source Round Trip And Clause CST",
+      title: "Lossless Source Round Trip Clause CST And Conformance",
       status: "partial",
-      evidence: ["src/lossless-parser.ts", "schemas/lossless-parse.schema.json", "test/lossless-parser.test.ts"],
+      evidence: ["src/lossless-parser.ts", "src/lossless-conformance.ts", "schemas/lossless-parse.schema.json", "schemas/lossless-conformance.schema.json", "test/lossless-conformance.test.ts"],
       workstreamIds: ["lossless-parser-ast", "ecosystem-ux"]
     },
     {

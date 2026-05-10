@@ -1,0 +1,212 @@
+{
+  "version": "cypher-llm-lossless-conformance/v1",
+  "generatedAt": "2026-05-10",
+  "summary": {
+    "totalCases": 4,
+    "passed": 2,
+    "warnings": 2,
+    "failed": 0,
+    "roundTripPassed": 4,
+    "parserPassed": 2,
+    "parserWarnings": 2,
+    "fullIrPreview": 3,
+    "partialIrPreview": 1,
+    "rawClauses": 1,
+    "diagnosticsByCode": {
+      "cypher-parser-error": 2,
+      "cypher-parser-warning": 1,
+      "raw-lift-parser-diagnostic": 1,
+      "raw-lift-unsupported-clause": 1
+    },
+    "bySource": {
+      "neo4j-example": {
+        "cases": 1,
+        "passed": 1,
+        "warnings": 0,
+        "failed": 0
+      },
+      "opencypher-tck": {
+        "cases": 1,
+        "passed": 1,
+        "warnings": 0,
+        "failed": 0
+      },
+      "gql-oriented": {
+        "cases": 1,
+        "passed": 0,
+        "warnings": 1,
+        "failed": 0
+      },
+      "text2cypher": {
+        "cases": 1,
+        "passed": 0,
+        "warnings": 1,
+        "failed": 0
+      }
+    }
+  },
+  "cases": [
+    {
+      "id": "neo4j-cypher25-parameterized-match",
+      "title": "Neo4j Cypher 25 Parameterized Read",
+      "source": "neo4j-example",
+      "dialect": "neo4j-cypher-25",
+      "status": "passed",
+      "cypherHash": "6e7d6d622b74a5c9c98bab794093074c33c44d3648b703c343c114b5819800cd",
+      "bytes": 100,
+      "roundTripOk": true,
+      "parserOk": true,
+      "irCoverage": "full",
+      "supportedClauses": 2,
+      "rawClauses": 0,
+      "sourceMapEntries": 4,
+      "clauses": [
+        {
+          "kind": "match",
+          "keyword": "MATCH",
+          "support": "lifted",
+          "irPath": "/clauses/0"
+        },
+        {
+          "kind": "return",
+          "keyword": "RETURN",
+          "support": "lifted",
+          "irPath": "/clauses/1"
+        }
+      ],
+      "diagnostics": []
+    },
+    {
+      "id": "opencypher-tck-aggregation-with",
+      "title": "openCypher TCK-Style Aggregation",
+      "source": "opencypher-tck",
+      "dialect": "opencypher-9",
+      "status": "passed",
+      "cypherHash": "182fed3a645849a4fad3fe843be4e51ae866c379fab28ffd7ddbf8f66ea1b83e",
+      "bytes": 64,
+      "roundTripOk": true,
+      "parserOk": true,
+      "irCoverage": "full",
+      "supportedClauses": 3,
+      "rawClauses": 0,
+      "sourceMapEntries": 5,
+      "clauses": [
+        {
+          "kind": "match",
+          "keyword": "MATCH",
+          "support": "lifted",
+          "irPath": "/clauses/0"
+        },
+        {
+          "kind": "with",
+          "keyword": "WITH",
+          "support": "lifted",
+          "irPath": "/clauses/1"
+        },
+        {
+          "kind": "return",
+          "keyword": "RETURN",
+          "support": "lifted",
+          "irPath": "/clauses/2"
+        }
+      ],
+      "diagnostics": []
+    },
+    {
+      "id": "gql-let-filter-preview",
+      "title": "GQL-Oriented LET And FILTER Preview",
+      "source": "gql-oriented",
+      "dialect": "gql",
+      "status": "warning",
+      "cypherHash": "4d30919c2d33400950f3356b6dfef787f767dc12fe07a67b9e5404e77dbd2d19",
+      "bytes": 86,
+      "roundTripOk": true,
+      "parserOk": false,
+      "irCoverage": "partial",
+      "supportedClauses": 1,
+      "rawClauses": 1,
+      "sourceMapEntries": 6,
+      "clauses": [
+        {
+          "kind": "match",
+          "keyword": "MATCH",
+          "support": "raw"
+        },
+        {
+          "kind": "let",
+          "keyword": "LET",
+          "support": "raw"
+        },
+        {
+          "kind": "filter",
+          "keyword": "FILTER",
+          "support": "raw"
+        },
+        {
+          "kind": "return",
+          "keyword": "RETURN",
+          "support": "lifted",
+          "irPath": "/clauses/1"
+        }
+      ],
+      "diagnostics": [
+        {
+          "code": "cypher-parser-error",
+          "severity": "error",
+          "message": "Expected any of '(', '<', ARROW_LEFT_HEAD, '-', ARROW_LINE, ',', ';', CALL, CREATE, DELETE, DETACH, FINISH, FOREACH, INSERT, LOAD, MATCH, MERGE, NODETACH, OPTIONAL, REMOVE, RETURN, SET, UNION, UNWIND, USE, USING, WHERE or WITH"
+        },
+        {
+          "code": "raw-lift-unsupported-clause",
+          "severity": "warning",
+          "message": "Raw Cypher clause 0 could not be lifted into structured IR: Unsupported MATCH path shape."
+        },
+        {
+          "code": "raw-lift-parser-diagnostic",
+          "severity": "error",
+          "message": "Expected any of '(', '<', ARROW_LEFT_HEAD, '-', ARROW_LINE, ',', ';', CALL, CREATE, DELETE, DETACH, FINISH, FOREACH, INSERT, LOAD, MATCH, MERGE, NODETACH, OPTIONAL, REMOVE, RETURN, SET, UNION, UNWIND, USE, USING, WHERE or WITH"
+        }
+      ]
+    },
+    {
+      "id": "text2cypher-unescaped-relationship",
+      "title": "text2cypher Unescaped Relationship Type",
+      "source": "text2cypher",
+      "dialect": "neo4j-cypher-25",
+      "status": "warning",
+      "cypherHash": "1a99e200c904fb6b7c0b715306694cf227b4f65b8d313f23d6b786d4c1f2b75f",
+      "bytes": 58,
+      "roundTripOk": true,
+      "parserOk": false,
+      "irCoverage": "full",
+      "supportedClauses": 2,
+      "rawClauses": 0,
+      "sourceMapEntries": 4,
+      "clauses": [
+        {
+          "kind": "match",
+          "keyword": "MATCH",
+          "support": "lifted",
+          "irPath": "/clauses/0"
+        },
+        {
+          "kind": "return",
+          "keyword": "RETURN",
+          "support": "lifted",
+          "irPath": "/clauses/1"
+        }
+      ],
+      "diagnostics": [
+        {
+          "code": "cypher-parser-warning",
+          "severity": "warning",
+          "message": "Relationship type has is not present in the database. Make sure you didn't misspell it or that it is available when you run this statement in your application"
+        },
+        {
+          "code": "cypher-parser-error",
+          "severity": "error",
+          "message": "Expected any of ':', '&', '|', ']', '{', '*', WHERE or a parameter"
+        }
+      ]
+    }
+  ]
+}

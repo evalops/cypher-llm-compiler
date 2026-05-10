@@ -69,6 +69,7 @@ describe("json schemas", () => {
     const policyRulesSchema = readJson("schemas/policy-rules.schema.json");
     const schemaStatisticsSchema = readJson("schemas/schema-statistics.schema.json");
     const lspDiagnosticsSchema = readJson("schemas/lsp-diagnostics.schema.json");
+    const losslessConformanceSchema = readJson("schemas/lossless-conformance.schema.json");
     const losslessParseSchema = readJson("schemas/lossless-parse.schema.json");
     const cypherBenchScorecardSchema = readJson("schemas/cypherbench-scorecard.schema.json");
     const benchmarkGateSchema = readJson("schemas/benchmark-gate.schema.json");
@@ -98,6 +99,7 @@ describe("json schemas", () => {
     ajv.addSchema(policyRulesSchema);
     ajv.addSchema(schemaStatisticsSchema);
     ajv.addSchema(lspDiagnosticsSchema);
+    ajv.addSchema(losslessConformanceSchema);
     ajv.addSchema(losslessParseSchema);
     ajv.addSchema(cypherBenchScorecardSchema);
     ajv.addSchema(benchmarkGateSchema);
@@ -128,6 +130,7 @@ describe("json schemas", () => {
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/policy-rules/v1.json", readJson("examples/policy/tool-hash.policy-rules.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/schema-statistics/v1.json", readJson("examples/policy/tool-hash.schema-statistics.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/lsp-diagnostics/v1.json", readJson("examples/lsp/tool-hash.lsp.json"));
+    assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/lossless-conformance/v1.json", readJson("examples/lossless/conformance.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/lossless-parse/v1.json", readJson("examples/lossless/tool-hash.lossless.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/cypherbench-scorecard/v1.json", readJson("examples/benchmarks/tool-hash.scorecard.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/benchmark-gate/v1.json", readJson("examples/benchmarks/tool-hash.benchmark-gate.json"));

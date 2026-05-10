@@ -10,6 +10,7 @@ import type { EvalAttemptSet, EvalDataset, EvalOptions, EvalReport } from "./eva
 import { evaluateAttempts } from "./evals.js";
 import type { CypherQuery, CypherSchemaContract, JsonLiteral } from "./ir.js";
 import { buildLspDiagnostics } from "./lsp.js";
+import { buildLosslessConformanceReport, type LosslessConformanceCase } from "./lossless-conformance.js";
 import { parseCypherLosslessly } from "./lossless-parser.js";
 import type { ParserValidationOptions } from "./parser-validation.js";
 import { validateCypherTextWithParser } from "./parser-validation.js";
@@ -42,6 +43,7 @@ export type CypherCompilerToolName =
   | "cypher_validate"
   | "cypher_repair"
   | "cypher_repair_plan"
+  | "cypher_lossless_conformance"
   | "cypher_parse_lossless"
   | "cypher_parse_check"
   | "cypher_policy_check"
@@ -321,6 +323,32 @@ export const CYPHER_COMPILER_TOOLS: readonly CypherCompilerToolDefinition[] = [
       parserMode: {
         enum: ["lint", "syntax"],
         description: "Parser preflight mode for the repaired Cypher."
+      }
+    })
+  },
+  {
+    name: "cypher_lossless_conformance",
+    description:
+      "Run the lossless parser conformance matrix over representative Neo4j, openCypher, GQL-oriented, and text2cypher cases.",
+    inputSchema: objectSchema([], {
+      cases: {
+        type: "array",
+        items: {
+          type: "object",
+          additionalProperties: true,
+          required: ["id", "title", "source", "dialect", "cypher"],
+          properties: {
+            id: { type: "string" },
+            title: { type: "string" },
+            source: { enum: ["neo4j-example", "opencypher-tck", "gql-oriented", "text2cypher"] },
+            dialect: { type: "string" },
+            cypher: { type: "string" },
+            tags: { type: "array", items: { type: "string" } },
+            schema: schemaContractSchema,
+            parserMode: { enum: ["lint", "syntax"] },
+            requireParserOk: { type: "boolean" }
+          }
+        }
       }
     })
   },
@@ -717,6 +745,9 @@ export async function executeCypherCompilerTool(name: string, input: unknown): P
         repairPlanOptions(args)
       );
     }
+    case "cypher_lossless_conformance": {
+      return buildLosslessConformanceReport(optionalArray<LosslessConformanceCase>(args, "cases"));
+    }
     case "cypher_parse_check": {
       const schema = requiredObject<CypherSchemaContract>(args, "schema");
       const mode = parseMode(args);
@@ -862,6 +893,17 @@ function requiredArray<T>(args: Record<string, unknown>, name: string): T[] {
   const value = args[name];
   if (!Array.isArray(value)) {
     throw new Error(`Missing required array argument '${name}'.`);
+  }
+  return value as T[];
+}
+
+function optionalArray<T>(args: Record<string, unknown>, name: string): T[] | undefined {
+  const value = args[name];
+  if (value === undefined) {
+    return undefined;
+  }
+  if (!Array.isArray(value)) {
+    throw new Error(`Expected '${name}' to be an array.`);
   }
   return value as T[];
 }

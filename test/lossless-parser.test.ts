@@ -72,6 +72,23 @@ describe("lossless Cypher parser", () => {
     assert.ok(report.irPreview?.diagnostics.some((item) => item.code === "raw-lift-unsupported-clause"));
   });
 
+  it("keeps IR-preview annotations aligned to the original source clauses", () => {
+    const report = parseCypherLosslessly(
+      "MATCH (tool:Tool) LET toolName = tool.name FILTER toolName IS NOT NULL RETURN toolName",
+      { schema }
+    );
+
+    assert.deepEqual(
+      report.statements[0]?.clauses.map((clause) => [clause.keyword, clause.support, clause.irPath ?? null]),
+      [
+        ["MATCH", "raw", null],
+        ["LET", "raw", null],
+        ["FILTER", "raw", null],
+        ["RETURN", "lifted", "/clauses/1"]
+      ]
+    );
+  });
+
   it("reports unmatched delimiters without losing round-trip data", () => {
     const report = parseCypherLosslessly("MATCH (tool:Tool RETURN tool");
 

@@ -117,6 +117,19 @@ The report includes:
 
 Use `roundTripLosslessParse(report)` to reconstruct the source from report fragments, or inspect `roundTrip.ok` and `sourceHash` in serialized reports.
 
+## `buildLosslessConformanceReport(cases?)`
+
+Produces a `cypher-llm-lossless-conformance/v1` report for representative lossless parser fixtures.
+
+The default matrix covers:
+
+- Neo4j Cypher 25 parameterized reads.
+- openCypher TCK-style aggregation with `WITH`.
+- GQL-oriented `LET` and `FILTER` preview syntax.
+- text2cypher output with an unescaped relationship type.
+
+Each case reports byte-preserving round-trip status, parser status, clause keywords, source-map entry counts, IR-preview coverage, raw clause counts, and diagnostics. This backs the `cypher-llm lossless-conformance` CLI command and the `/v1/lossless-conformance` service route.
+
 ## `evaluateRawLiftAttempts(dataset, attempts)`
 
 Runs `liftRawCypherToIr` over raw attempts in an eval attempt file and returns `cypher-llm-raw-lift-eval/v1`.

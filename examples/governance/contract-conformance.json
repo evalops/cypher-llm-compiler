@@ -5,11 +5,11 @@
   "packageName": "@evalops/cypher-llm-compiler",
   "packageVersion": "0.1.0",
   "summary": {
-    "contracts": 30,
-    "passedContracts": 30,
+    "contracts": 31,
+    "passedContracts": 31,
     "warningContracts": 0,
     "failedContracts": 0,
-    "checks": 220,
+    "checks": 228,
     "warnings": 0,
     "failures": 0,
     "missingFiles": 0,
@@ -1067,6 +1067,62 @@
           "id": "evidence-file",
           "status": "pass",
           "path": "test/lossless-parser.test.ts",
+          "message": "File exists."
+        }
+      ]
+    },
+    {
+      "id": "lossless-conformance",
+      "version": "cypher-llm-lossless-conformance/v1",
+      "level": "stable",
+      "status": "pass",
+      "checks": [
+        {
+          "id": "schema-file",
+          "status": "pass",
+          "path": "schemas/lossless-conformance.schema.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "schemas/lossless-conformance.schema.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "example-file",
+          "status": "pass",
+          "path": "examples/lossless/conformance.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "examples/lossless/conformance.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "schema-validation",
+          "status": "pass",
+          "path": "examples/lossless/conformance.json",
+          "message": "Example validates against schema."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "src/lossless-conformance.ts",
+          "message": "File exists."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "src/lossless-parser.ts",
+          "message": "File exists."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "test/lossless-conformance.test.ts",
           "message": "File exists."
         }
       ]

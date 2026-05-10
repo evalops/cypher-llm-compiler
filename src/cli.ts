@@ -40,6 +40,7 @@ import {
 } from "./fixture-importers.js";
 import { introspectNeo4jSchema } from "./neo4j-introspect.js";
 import { buildLspDiagnostics } from "./lsp.js";
+import { buildLosslessConformanceReport } from "./lossless-conformance.js";
 import { parseCypherLosslessly } from "./lossless-parser.js";
 import type { CypherPlannerEstimate } from "./planner-estimate.js";
 import { repairQuery, repairRawCypher } from "./repair.js";
@@ -99,6 +100,9 @@ export async function runCli(argv: string[], io: CliIO = defaultIo()): Promise<n
         return 0;
       case "parse-lossless":
         await parseLosslessCommand(args, io);
+        return 0;
+      case "lossless-conformance":
+        await losslessConformanceCommand(args, io);
         return 0;
       case "corpus":
         writeJson(io, { results: evaluateFailureCorpus() });
@@ -298,6 +302,17 @@ async function parseLosslessCommand(args: Map<string, string | boolean>, io: Cli
     await writeJsonFile(io, args.get("report-out") as string, report);
   }
   writeJson(io, report);
+}
+
+async function losslessConformanceCommand(args: Map<string, string | boolean>, io: CliIO) {
+  const report = buildLosslessConformanceReport();
+  if (typeof args.get("report-out") === "string") {
+    await writeJsonFile(io, args.get("report-out") as string, report);
+  }
+  writeJson(io, report);
+  if (args.get("fail-on-fail") === true && report.summary.failed > 0) {
+    throw new Error(`Lossless conformance found ${report.summary.failed} failing case(s).`);
+  }
 }
 
 async function evalCommand(args: Map<string, string | boolean>, io: CliIO) {
@@ -1095,6 +1110,7 @@ Commands:
   repair-plan --schema schema.json --query query.json [--params params.json] [--plan-out plan.json] [--fail-on-blocked] [--default-limit 25] [--default-max-hops 5] [--planner-estimate estimate.json] [--schema-statistics stats.json] [--policy-rules rules.json] [--no-require-limit] [--max-return-limit 100] [--max-relationship-hops 5] [--allow-writes] [--approved] [--parser-mode syntax|lint]
   lift-raw    --cypher "MATCH ..." [--schema schema.json] [--query-out query.json] [--summary-out summary.json] [--profile raw-compatible|llm-safe-readonly] [--mode syntax|lint]
   parse-lossless --cypher "MATCH ..." [--schema schema.json] [--report-out report.json] [--parser-mode syntax|lint] [--no-ir-preview]
+  lossless-conformance [--report-out report.json] [--fail-on-fail]
   corpus
   eval        --dataset dataset.json --attempts attempts.json [--report-out report.json] [--raw-cypher-can-execute] [--default-limit 25] [--default-max-hops 5]
   compare-evals --baseline baseline.report.json --candidate candidate.report.json [--comparison-out comparison.json] [--fail-on-regression] [--tolerance 0.0001]

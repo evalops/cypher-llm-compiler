@@ -118,6 +118,15 @@
       "goal": "Inspect and repair existing text2cypher outputs without losing source bytes.",
       "steps": [
         {
+          "id": "conformance-boundary",
+          "title": "Check the parser fixture boundary",
+          "toolName": "cypher_lossless_conformance",
+          "cliCommand": "cypher-llm lossless-conformance --fail-on-fail",
+          "outputContract": "cypher-llm-lossless-conformance/v1",
+          "successSignal": "summary.failed is 0 and warning cases are understood.",
+          "failureHandling": "Block parser-boundary changes until failing fixtures round-trip or are explicitly reclassified."
+        },
+        {
           "id": "parse-lossless",
           "title": "Preserve source spans",
           "toolName": "cypher_parse_lossless",
@@ -270,6 +279,7 @@
     "cypher-llm-proof/v1",
     "cypher-llm-diagnostic-catalog/v1",
     "cypher-llm-policy-report/v1",
+    "cypher-llm-lossless-conformance/v1",
     "cypher-llm-compatibility-catalog/v1",
     "cypher-llm-compatibility-diff/v1",
     "cypher-llm-contract-conformance/v1"
@@ -279,6 +289,7 @@
     "examples/tool-hash.schema.json",
     "examples/proofs/tool-hash.agent-feedback.json",
     "examples/proofs/tool-hash.repair-plan.json",
+    "examples/lossless/conformance.json",
     "examples/diagnostics/diagnostic-catalog.json",
     "examples/governance/compatibility-catalog.json",
     "examples/governance/compatibility-diff.json",

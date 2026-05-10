@@ -23,6 +23,9 @@ describe("compiler service manifest", () => {
       manifest.routes.some((route) => route.path === "/v1/agent-feedback" && route.operation === "cypher_agent_feedback")
     );
     assert.ok(
+      manifest.routes.some((route) => route.path === "/v1/lossless-conformance" && route.operation === "cypher_lossless_conformance")
+    );
+    assert.ok(
       manifest.routes.some((route) => route.path === "/v1/agent-guide" && route.operation === "agent_guide" && route.method === "GET")
     );
     assert.ok(

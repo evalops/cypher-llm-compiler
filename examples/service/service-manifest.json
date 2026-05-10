@@ -127,6 +127,12 @@
     },
     {
       "method": "POST",
+      "path": "/v1/lossless-conformance",
+      "operation": "cypher_lossless_conformance",
+      "authRequired": false
+    },
+    {
+      "method": "POST",
       "path": "/v1/parse-lossless",
       "operation": "cypher_parse_lossless",
       "authRequired": false

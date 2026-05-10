@@ -624,6 +624,31 @@ describe("cli", () => {
     assert.ok(writes.get("out/lossless.json")?.includes("cypher-llm-lossless-parse/v1"));
   });
 
+  it("prints and writes lossless conformance reports", async () => {
+    const writes = new Map<string, string>();
+    let stdout = "";
+    let stderr = "";
+    const io: CliIO = {
+      stdout: { write: (chunk: string | Uint8Array) => ((stdout += String(chunk)), true) },
+      stderr: { write: (chunk: string | Uint8Array) => ((stderr += String(chunk)), true) },
+      readFile: async () => "",
+      writeFile: async (path, data) => {
+        writes.set(path, data);
+      },
+      mkdir: async () => undefined
+    };
+
+    const code = await runCli(["lossless-conformance", "--report-out", "out/lossless-conformance.json", "--fail-on-fail"], io);
+    const output = JSON.parse(stdout) as { version: string; summary: { failed: number; totalCases: number } };
+
+    assert.equal(code, 0);
+    assert.equal(stderr, "");
+    assert.equal(output.version, "cypher-llm-lossless-conformance/v1");
+    assert.equal(output.summary.failed, 0);
+    assert.ok(output.summary.totalCases >= 4);
+    assert.ok(writes.get("out/lossless-conformance.json")?.includes("cypher-llm-lossless-conformance/v1"));
+  });
+
   it("emits proof-carrying compile output", async () => {
     const files = new Map<string, string>([
       [

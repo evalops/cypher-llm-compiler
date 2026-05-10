@@ -52,6 +52,7 @@ describe("OpenAI tool schemas", () => {
       "cypher_validate",
       "cypher_repair",
       "cypher_repair_plan",
+      "cypher_lossless_conformance",
       "cypher_parse_lossless",
       "cypher_parse_check",
       "cypher_policy_check",
@@ -79,6 +80,7 @@ describe("OpenAI tool schemas", () => {
     assert.equal("policyRules" in renderProperties, false);
     assert.equal("policyRules" in repairPlanProperties, true);
     assert.equal("maxReturnLimit" in proveProperties, true);
+    assert.ok(toolsByName.cypher_lossless_conformance);
   });
 
   it("executes the render and parse-check tools through the shared dispatcher", async () => {
@@ -106,6 +108,14 @@ describe("OpenAI tool schemas", () => {
 
     assert.equal(parsed.ok, true);
     assert.deepEqual(parsed.diagnostics, []);
+
+    const conformance = (await executeCypherCompilerTool("cypher_lossless_conformance", {})) as {
+      version: string;
+      summary: { failed: number };
+    };
+
+    assert.equal(conformance.version, "cypher-llm-lossless-conformance/v1");
+    assert.equal(conformance.summary.failed, 0);
 
     const lossless = (await executeCypherCompilerTool("cypher_parse_lossless", {
       schema,

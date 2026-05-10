@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { diagnostic, type Diagnostic } from "./diagnostics.js";
-import type { CypherQuery, CypherSchemaContract } from "./ir.js";
+import type { Clause, CypherQuery, CypherSchemaContract } from "./ir.js";
 import type { ParserValidationOptions, ParserValidationResult } from "./parser-validation.js";
 import { validateCypherTextWithParser } from "./parser-validation.js";
 import { liftRawCypherToIr, type RawLiftResult } from "./raw-lift.js";
@@ -119,8 +119,10 @@ const CLAUSE_KEYWORDS = [
   ["LOAD", "CSV"],
   ["UNION", "ALL"],
   ["MATCH"],
+  ["FILTER"],
   ["RETURN"],
   ["WITH"],
+  ["LET"],
   ["CALL"],
   ["UNWIND"],
   ["CREATE"],
@@ -509,19 +511,7 @@ function buildIrPreview(statements: LosslessStatementNode[], options: LosslessPa
     profile: "raw-compatible",
     parserMode: options.parserMode ?? "syntax"
   });
-  for (const [index, clause] of statement.clauses.entries()) {
-    const liftedClause = lifted.query.clauses[index];
-    if (!liftedClause) {
-      clause.support = "unknown";
-      continue;
-    }
-    if (liftedClause.kind === "raw") {
-      clause.support = "raw";
-      continue;
-    }
-    clause.support = "lifted";
-    clause.irPath = `/clauses/${index}`;
-  }
+  annotateIrPreviewSupport(statement.clauses, lifted.query.clauses);
   return {
     query: lifted.query,
     renderedCypher: lifted.renderedCypher,
@@ -530,6 +520,73 @@ function buildIrPreview(statements: LosslessStatementNode[], options: LosslessPa
     ...(lifted.parserOk !== undefined ? { parserOk: lifted.parserOk } : {}),
     diagnostics: lifted.diagnostics
   };
+}
+
+function annotateIrPreviewSupport(clauses: LosslessClauseNode[], liftedClauses: Clause[]) {
+  let cursor = 0;
+  for (const clause of clauses) {
+    clause.support = "unknown";
+    delete clause.irPath;
+  }
+
+  for (const [liftedIndex, liftedClause] of liftedClauses.entries()) {
+    if (liftedClause.kind === "raw") {
+      const nextCursor = markRawCoveredClauses(clauses, cursor, liftedClause.cypher);
+      cursor = Math.max(cursor, nextCursor);
+      continue;
+    }
+
+    const matchIndex = clauses.findIndex(
+      (clause, index) => index >= cursor && clause.support === "unknown" && clauseMatchesLiftedKind(clause, liftedClause.kind)
+    );
+    if (matchIndex >= 0) {
+      const clause = clauses[matchIndex] as LosslessClauseNode;
+      clause.support = "lifted";
+      clause.irPath = `/clauses/${liftedIndex}`;
+      cursor = matchIndex + 1;
+    }
+  }
+}
+
+function markRawCoveredClauses(clauses: LosslessClauseNode[], cursor: number, rawCypher: string): number {
+  const normalizedRaw = normalizeClauseText(rawCypher);
+  let marked = 0;
+  let nextCursor = cursor;
+
+  for (let index = cursor; index < clauses.length; index += 1) {
+    const clause = clauses[index] as LosslessClauseNode;
+    const normalizedClause = normalizeClauseText(clause.raw);
+    if (normalizedClause && normalizedRaw.includes(normalizedClause)) {
+      clause.support = "raw";
+      delete clause.irPath;
+      marked += 1;
+      nextCursor = index + 1;
+      continue;
+    }
+    if (marked > 0) {
+      break;
+    }
+  }
+
+  if (marked === 0) {
+    const fallbackIndex = clauses.findIndex((clause, index) => index >= cursor && clause.support === "unknown");
+    if (fallbackIndex >= 0) {
+      const clause = clauses[fallbackIndex] as LosslessClauseNode;
+      clause.support = "raw";
+      delete clause.irPath;
+      nextCursor = fallbackIndex + 1;
+    }
+  }
+
+  return nextCursor;
+}
+
+function clauseMatchesLiftedKind(clause: LosslessClauseNode, liftedKind: Clause["kind"]): boolean {
+  return clause.kind === liftedKind || (clause.kind === "optional-match" && liftedKind === "match");
+}
+
+function normalizeClauseText(text: string): string {
+  return stripCypherComments(text).replace(/\s+/g, " ").trim();
 }
 
 function buildSourceMap(report: Pick<LosslessParseReport, "fragments" | "trivia" | "statements">): LosslessSourceMapEntry[] {

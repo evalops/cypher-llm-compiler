@@ -21,6 +21,12 @@ describe("agent guide", () => {
     assert.equal(guide.authoringRules.requiredDefaults.defaultLimit, 25);
     assert.ok(guide.workflows.some((workflow) => workflow.id === "author-read-query"));
     assert.ok(guide.workflows.some((workflow) => workflow.id === "release-compatibility"));
+    assert.ok(
+      guide.workflows.some((workflow) =>
+        workflow.steps.some((step) => step.toolName === "cypher_lossless_conformance")
+      )
+    );
+    assert.ok(guide.publicContracts.includes("cypher-llm-lossless-conformance/v1"));
     assert.ok(guide.diagnosticPlaybooks.some((playbook) => playbook.codes.includes("missing-limit")));
     assert.ok(guide.diagnosticPlaybooks.some((playbook) => playbook.preferredAction === "request-approval"));
   });

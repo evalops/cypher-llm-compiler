@@ -37,6 +37,7 @@ describe("compatibility catalog", () => {
     assert.ok(catalog.contracts.some((contract) => contract.id === "service-manifest" && contract.category === "service"));
     assert.ok(catalog.contracts.some((contract) => contract.id === "service-metrics" && contract.category === "service"));
     assert.ok(catalog.contracts.some((contract) => contract.id === "retry-eval" && contract.category === "benchmark"));
+    assert.ok(catalog.contracts.some((contract) => contract.id === "lossless-conformance" && contract.category === "integration"));
     assert.ok(catalog.contracts.some((contract) => contract.id === "dialect-live-evidence" && contract.schemaPath));
     assert.ok(catalog.contracts.some((contract) => contract.id === "compatibility-catalog" && contract.schemaPath));
     assert.ok(

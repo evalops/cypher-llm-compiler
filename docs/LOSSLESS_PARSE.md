@@ -30,6 +30,16 @@ cypher-llm parse-lossless \
 
 Use `--no-ir-preview` when you only need source preservation and do not want the raw-lift bridge to run.
 
+Run the checked-in conformance matrix:
+
+```bash
+cypher-llm lossless-conformance \
+  --report-out examples/lossless/conformance.json \
+  --fail-on-fail
+```
+
+The conformance report validates against `schemas/lossless-conformance.schema.json` and covers representative Neo4j Cypher 25, openCypher TCK-style, GQL-oriented, and text2cypher cases. Each case records round-trip status, parser status, IR-preview coverage, raw clause count, source-map entries, clause keywords, and diagnostics. GQL preview syntax and legacy text2cypher mistakes are allowed to warn while still proving byte preservation.
+
 ## Agent Use
 
 Use lossless reports when an agent needs to:

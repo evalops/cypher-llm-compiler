@@ -7,6 +7,7 @@ export const COMPILER_HTTP_TOOL_ROUTES = {
   "/v1/validate": "cypher_validate",
   "/v1/repair": "cypher_repair",
   "/v1/repair-plan": "cypher_repair_plan",
+  "/v1/lossless-conformance": "cypher_lossless_conformance",
   "/v1/parse-lossless": "cypher_parse_lossless",
   "/v1/parse-check": "cypher_parse_check",
   "/v1/policy": "cypher_policy_check",

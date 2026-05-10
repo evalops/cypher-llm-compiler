@@ -36,6 +36,7 @@
 - Added source-positioned raw repair text edits and LSP code-action edits for exact editor/agent migration patches.
 - Added lossless Cypher parse reports with exact source round-trip fragments, comments, statement/clause spans, optional parser output, IR-preview mapping, JSON Schema, CLI/tool/service output, and checked-in lossless artifact.
 - Added lossless source-map anchors that connect fragments, comments, statements, terminators, clauses, and lifted IR paths for byte-preserving agent repair loops.
+- Added lossless parser conformance reports with representative Neo4j, openCypher, GQL, and text2cypher cases, JSON Schema, CLI/tool/service output, and checked-in conformance artifact.
 - Added CypherBench scorecards with ranked lanes, aggregate diagnostics, baseline comparisons, JSON Schema, markdown rendering, CLI/tool/service output, and checked-in scorecard artifacts.
 - Added CypherBench benchmark gates with pass/fail regression checks, optional metric floors, JSON Schema, CLI/tool/service output, and checked-in gate artifact.
 - Added CypherBench retry eval reports for multi-round model retries, per-task convergence, repair-packet resolution, JSON Schema, CLI/tool/service output, and a checked-in retry artifact.
