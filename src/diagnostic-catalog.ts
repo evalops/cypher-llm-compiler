@@ -9,10 +9,13 @@ export type DiagnosticCatalogSource =
   | "safe-execution"
   | "policy"
   | "neo4j-explain"
+  | "dialect-certification"
   | "dataset-governance"
+  | "eval-runner"
   | "http-service";
 export type DiagnosticCatalogCategory =
   | "aggregation"
+  | "benchmark"
   | "dataset"
   | "dialect"
   | "execution"
@@ -111,6 +114,8 @@ const entries: DiagnosticCatalogEntry[] = [
   rawLift("raw-lift-parser-diagnostic", "Raw Lift Parser Diagnostic", "varies", "use-raw-migration", "cypher_parse_lossless", "The lifted IR produced parser diagnostics."),
   rawLift("raw-lift-unsupported-clause", "Raw Lift Unsupported Clause", "warning", "use-raw-migration", "cypher_parse_lossless", "A raw clause is outside the raw-to-IR migration subset."),
   lossless("lossless-roundtrip-mismatch", "Lossless Roundtrip Mismatch", "error", "block-release-or-request-review", "cypher_parse_lossless", "Lossless fragments did not reconstruct the original source."),
+  lossless("lossless-unterminated-token", "Lossless Unterminated Token", "error", "inspect-source", "cypher_parse_lossless", "Source contains an unterminated comment, quote, or identifier token."),
+  lossless("lossless-unmatched-delimiter", "Lossless Unmatched Delimiter", "error", "inspect-source", "cypher_parse_lossless", "Source contains an unmatched or unclosed delimiter."),
   execution("missing-required-parameter", "Missing Required Parameter", "error", "ask-for-schema", "cypher_render", "A required Cypher parameter value was not supplied."),
   execution("execution-approval-required", "Execution Approval Required", "error", "request-approval", "cypher_agent_feedback", "A write query needs external approval before execution."),
   policy("policy-write-risk", "Write Risk", "error", "request-approval", "cypher_policy_check", "Policy blocked graph mutation without approval."),
@@ -140,12 +145,16 @@ const entries: DiagnosticCatalogEntry[] = [
   dataset("possible-secret", "Possible Secret", "error", "fix-dataset", "cypher_dataset_governance", "Redaction scanner found a secret-like value."),
   dataset("private-key", "Private Key", "error", "fix-dataset", "cypher_dataset_governance", "Redaction scanner found private-key material."),
   dataset("dataset-redaction-*", "Dataset Redaction Finding", "varies", "fix-dataset", "cypher_dataset_governance", "Dataset governance wraps redaction findings as blocking diagnostics."),
+  evalRunner("missing-attempt", "Missing Eval Attempt", "error", "fix-dataset", "cypher_eval", "An eval task has no matching model attempt."),
+  evalRunner("empty-attempt", "Empty Eval Attempt", "error", "fix-dataset", "cypher_eval", "A model attempt did not contain raw Cypher or structured IR."),
   service("internal-error", "Internal Error", "error", "retry-service", "http-service", "The HTTP service hit an unexpected error."),
   service("unauthorized", "Unauthorized", "error", "retry-service", "http-service", "The request missed required bearer authentication."),
   service("not-found", "Not Found", "error", "retry-service", "http-service", "The requested HTTP route is unknown."),
   service("method-not-allowed", "Method Not Allowed", "error", "retry-service", "http-service", "The route was called with the wrong HTTP method."),
   service("invalid-json-body", "Invalid JSON Body", "error", "retry-service", "http-service", "The service could not parse the request JSON body."),
-  service("compiler-tool-error", "Compiler Tool Error", "error", "retry-service", "http-service", "The shared tool dispatcher rejected the request.")
+  service("compiler-tool-error", "Compiler Tool Error", "error", "retry-service", "http-service", "The shared tool dispatcher rejected the request."),
+  certification("profile-metadata-incomplete", "Profile Metadata Incomplete", "error", "block-release-or-request-review", "cypher-llm certify-dialects", "A dialect profile is missing required status, notes, or unsupported-pattern metadata."),
+  certification("unescaped-schema-identifier", "Unescaped Schema Identifier", "error", "block-release-or-request-review", "cypher-llm certify-dialects", "Dialect certification found renderer output that failed to escape schema identifiers.")
 ];
 
 export const diagnosticCatalog = {
@@ -323,6 +332,20 @@ function neo4j(
   ]);
 }
 
+function certification(
+  code: string,
+  title: string,
+  severity: DiagnosticCatalogSeverity,
+  preferredAction: DiagnosticCatalogAction,
+  preferredTool: string,
+  description: string
+): DiagnosticCatalogEntry {
+  return entry(code, "exact", title, severity, "dialect-certification", "dialect", preferredAction, preferredTool, description, [
+    "src/dialect-certification.ts",
+    "test/dialect-certification.test.ts"
+  ]);
+}
+
 function dataset(
   code: string,
   title: string,
@@ -343,6 +366,20 @@ function dataset(
     description,
     ["src/dataset-governance.ts", "test/dataset-governance.test.ts"]
   );
+}
+
+function evalRunner(
+  code: string,
+  title: string,
+  severity: DiagnosticCatalogSeverity,
+  preferredAction: DiagnosticCatalogAction,
+  preferredTool: string,
+  description: string
+): DiagnosticCatalogEntry {
+  return entry(code, "exact", title, severity, "eval-runner", "benchmark", preferredAction, preferredTool, description, [
+    "src/evals.ts",
+    "test/evals.test.ts"
+  ]);
 }
 
 function service(

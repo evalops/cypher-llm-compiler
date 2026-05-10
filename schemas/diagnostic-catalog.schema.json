@@ -59,13 +59,16 @@
             "safe-execution",
             "policy",
             "neo4j-explain",
+            "dialect-certification",
             "dataset-governance",
+            "eval-runner",
             "http-service"
           ]
         },
         "category": {
           "enum": [
             "aggregation",
+            "benchmark",
             "dataset",
             "dialect",
             "execution",

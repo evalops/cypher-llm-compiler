@@ -30,6 +30,9 @@ describe("diagnostic catalog", () => {
     assert.equal(byCode.get("unknown-label")?.preferredAction, "ask-for-schema");
     assert.equal(byCode.get("policy-write-risk")?.preferredAction, "request-approval");
     assert.equal(byCode.get("cypher-parser-error")?.source, "parser-validation");
+    assert.equal(byCode.get("lossless-unmatched-delimiter")?.source, "lossless-parser");
+    assert.equal(byCode.get("profile-metadata-incomplete")?.source, "dialect-certification");
+    assert.equal(byCode.get("missing-attempt")?.source, "eval-runner");
     assert.equal(byCode.get("neo4j-*")?.match, "prefix");
     assert.equal(byCode.get("dataset-redaction-*")?.match, "prefix");
   });
@@ -65,6 +68,9 @@ describe("diagnostic catalog", () => {
     assert.ok(exactCodes.has("policy-unfiltered-label-scan"));
     assert.ok(exactCodes.has("policy-unfiltered-node-scan"));
     assert.ok(exactCodes.has("procedure-argument-mismatch"));
+    assert.ok(exactCodes.has("lossless-unterminated-token"));
+    assert.ok(exactCodes.has("unescaped-schema-identifier"));
+    assert.ok(exactCodes.has("empty-attempt"));
   });
 });
 
@@ -77,6 +83,18 @@ function staticSourceCodes(): Set<string> {
   for (const file of tsFiles(path.join(process.cwd(), "src"))) {
     const source = readFileSync(file, "utf8");
     for (const match of source.matchAll(/\bcode:\s*"([^"]+)"/g)) {
+      const code = match[1];
+      if (code !== undefined) {
+        codes.add(code);
+      }
+    }
+    for (const match of source.matchAll(/tokenDiagnostic\(\s*"([^"]+)"/g)) {
+      const code = match[1];
+      if (code !== undefined) {
+        codes.add(code);
+      }
+    }
+    for (const match of source.matchAll(/diagnostics:[^\n]*\[\s*"([^"]+)"/g)) {
       const code = match[1];
       if (code !== undefined) {
         codes.add(code);

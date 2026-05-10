@@ -175,6 +175,7 @@ The packet includes:
 - `proof`: the full `cypher-llm-proof/v1` object.
 - `repairPlan`: the full `cypher-llm-repair-plan/v1` object.
 - `policyEvidence`: compact policy status and finding-code summary.
+- `diagnosticActions`: catalog-backed model actions for each known diagnostic code.
 - `nextAction`: one of `execute`, `apply-deterministic-repairs`, `regenerate-query`, `request-approval`, or `blocked`.
 
 ## `buildAgentGuide()`

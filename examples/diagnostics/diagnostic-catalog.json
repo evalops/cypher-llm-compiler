@@ -708,6 +708,44 @@
       ]
     },
     {
+      "code": "lossless-unterminated-token",
+      "match": "exact",
+      "title": "Lossless Unterminated Token",
+      "severity": "error",
+      "source": "lossless-parser",
+      "category": "raw-compatibility",
+      "preferredAction": "inspect-source",
+      "preferredTool": "cypher_parse_lossless",
+      "description": "Source contains an unterminated comment, quote, or identifier token.",
+      "modelInstruction": "Source contains an unterminated comment, quote, or identifier token. Inspect the source span and keep the query in review if evidence is incomplete.",
+      "evidencePaths": [
+        "src/lossless-parser.ts",
+        "test/lossless-parser.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "lossless-unmatched-delimiter",
+      "match": "exact",
+      "title": "Lossless Unmatched Delimiter",
+      "severity": "error",
+      "source": "lossless-parser",
+      "category": "raw-compatibility",
+      "preferredAction": "inspect-source",
+      "preferredTool": "cypher_parse_lossless",
+      "description": "Source contains an unmatched or unclosed delimiter.",
+      "modelInstruction": "Source contains an unmatched or unclosed delimiter. Inspect the source span and keep the query in review if evidence is incomplete.",
+      "evidencePaths": [
+        "src/lossless-parser.ts",
+        "test/lossless-parser.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
       "code": "missing-required-parameter",
       "match": "exact",
       "title": "Missing Required Parameter",
@@ -1259,6 +1297,44 @@
       ]
     },
     {
+      "code": "missing-attempt",
+      "match": "exact",
+      "title": "Missing Eval Attempt",
+      "severity": "error",
+      "source": "eval-runner",
+      "category": "benchmark",
+      "preferredAction": "fix-dataset",
+      "preferredTool": "cypher_eval",
+      "description": "An eval task has no matching model attempt.",
+      "modelInstruction": "An eval task has no matching model attempt. Fix benchmark data before publishing or using it as a gate.",
+      "evidencePaths": [
+        "src/evals.ts",
+        "test/evals.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "empty-attempt",
+      "match": "exact",
+      "title": "Empty Eval Attempt",
+      "severity": "error",
+      "source": "eval-runner",
+      "category": "benchmark",
+      "preferredAction": "fix-dataset",
+      "preferredTool": "cypher_eval",
+      "description": "A model attempt did not contain raw Cypher or structured IR.",
+      "modelInstruction": "A model attempt did not contain raw Cypher or structured IR. Fix benchmark data before publishing or using it as a gate.",
+      "evidencePaths": [
+        "src/evals.ts",
+        "test/evals.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
       "code": "internal-error",
       "match": "exact",
       "title": "Internal Error",
@@ -1371,13 +1447,51 @@
       "examplePaths": [
         "examples/agent/agent-guide.json"
       ]
+    },
+    {
+      "code": "profile-metadata-incomplete",
+      "match": "exact",
+      "title": "Profile Metadata Incomplete",
+      "severity": "error",
+      "source": "dialect-certification",
+      "category": "dialect",
+      "preferredAction": "block-release-or-request-review",
+      "preferredTool": "cypher-llm certify-dialects",
+      "description": "A dialect profile is missing required status, notes, or unsupported-pattern metadata.",
+      "modelInstruction": "A dialect profile is missing required status, notes, or unsupported-pattern metadata. Treat this as a compiler or release blocker until reviewed.",
+      "evidencePaths": [
+        "src/dialect-certification.ts",
+        "test/dialect-certification.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
+    },
+    {
+      "code": "unescaped-schema-identifier",
+      "match": "exact",
+      "title": "Unescaped Schema Identifier",
+      "severity": "error",
+      "source": "dialect-certification",
+      "category": "dialect",
+      "preferredAction": "block-release-or-request-review",
+      "preferredTool": "cypher-llm certify-dialects",
+      "description": "Dialect certification found renderer output that failed to escape schema identifiers.",
+      "modelInstruction": "Dialect certification found renderer output that failed to escape schema identifiers. Treat this as a compiler or release blocker until reviewed.",
+      "evidencePaths": [
+        "src/dialect-certification.ts",
+        "test/dialect-certification.test.ts"
+      ],
+      "examplePaths": [
+        "examples/agent/agent-guide.json"
+      ]
     }
   ],
   "summary": {
-    "entries": 72,
-    "exactCodes": 70,
+    "entries": 78,
+    "exactCodes": 76,
     "templates": 2,
-    "errorOrVaries": 44,
+    "errorOrVaries": 50,
     "warningOrInfo": 28
   }
 }

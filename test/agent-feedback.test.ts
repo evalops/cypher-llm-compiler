@@ -52,6 +52,10 @@ describe("agent feedback packets", () => {
     assert.equal(feedback.nextAction.kind, "apply-deterministic-repairs");
     assert.equal(feedback.policyEvidence.ok, true);
     assert.ok(feedback.repairKinds.includes("add-limit"));
+    assert.equal(
+      feedback.diagnosticActions.find((action) => action.code === "missing-limit")?.preferredAction,
+      "apply-deterministic-repair"
+    );
     assert.equal(feedback.proof.status, "repaired");
     assert.equal(feedback.repairPlan.status, "ready");
   });
@@ -70,6 +74,10 @@ describe("agent feedback packets", () => {
     assert.equal(feedback.status, "blocked");
     assert.equal(feedback.nextAction.kind, "request-approval");
     assert.ok(feedback.nextAction.diagnosticCodes.includes("policy-write-risk"));
+    assert.equal(
+      feedback.diagnosticActions.find((action) => action.code === "policy-write-risk")?.preferredAction,
+      "request-approval"
+    );
   });
 
   it("keeps checked-in agent feedback JSON aligned with runtime data and schema", () => {

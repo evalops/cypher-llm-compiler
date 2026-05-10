@@ -1,3 +1,11 @@
+import {
+  buildDiagnosticCatalog,
+  type DiagnosticCatalogAction,
+  type DiagnosticCatalogCategory,
+  type DiagnosticCatalogEntry,
+  type DiagnosticCatalogSeverity,
+  type DiagnosticCatalogSource
+} from "./diagnostic-catalog.js";
 import type { CypherQuery, CypherSchemaContract, JsonLiteral } from "./ir.js";
 import type { CypherPolicyEvidence } from "./policy.js";
 import { buildCypherProof, type CypherProof, type CypherProofOptions } from "./proof.js";
@@ -18,6 +26,18 @@ export interface CypherAgentNextAction {
   diagnosticCodes: string[];
 }
 
+export interface CypherAgentDiagnosticAction {
+  code: string;
+  catalogCode: string;
+  title: string;
+  severity: DiagnosticCatalogSeverity;
+  source: DiagnosticCatalogSource;
+  category: DiagnosticCatalogCategory;
+  preferredAction: DiagnosticCatalogAction;
+  preferredTool?: string;
+  modelInstruction: string;
+}
+
 export interface CypherAgentFeedbackOptions extends CypherProofOptions {}
 
 export interface CypherAgentFeedback {
@@ -26,6 +46,7 @@ export interface CypherAgentFeedback {
   canExecute: boolean;
   nextAction: CypherAgentNextAction;
   diagnosticCodes: string[];
+  diagnosticActions: CypherAgentDiagnosticAction[];
   repairKinds: string[];
   policyEvidence: CypherPolicyEvidence;
   proof: CypherProof;
@@ -55,6 +76,7 @@ export function buildCypherAgentFeedback(
     canExecute: proof.canExecute,
     nextAction: nextActionFor(status, proof, repairPlan, diagnosticCodes),
     diagnosticCodes,
+    diagnosticActions: diagnosticActionsFor(diagnosticCodes),
     repairKinds,
     policyEvidence: proof.policyEvidence,
     proof,
@@ -148,6 +170,34 @@ function nextActionFor(
     reason: "The query has unsafe policy or execution blockers.",
     diagnosticCodes
   };
+}
+
+function diagnosticActionsFor(codes: string[]): CypherAgentDiagnosticAction[] {
+  const entries = buildDiagnosticCatalog().entries;
+  return codes.flatMap((code) => {
+    const entry = catalogEntryForCode(code, entries);
+    if (!entry) {
+      return [];
+    }
+    return [
+      {
+        code,
+        catalogCode: entry.code,
+        title: entry.title,
+        severity: entry.severity,
+        source: entry.source,
+        category: entry.category,
+        preferredAction: entry.preferredAction,
+        ...(entry.preferredTool ? { preferredTool: entry.preferredTool } : {}),
+        modelInstruction: entry.modelInstruction
+      }
+    ];
+  });
+}
+
+function catalogEntryForCode(code: string, entries: DiagnosticCatalogEntry[]): DiagnosticCatalogEntry | undefined {
+  return entries.find((entry) => entry.match === "exact" && entry.code === code)
+    ?? entries.find((entry) => entry.match === "prefix" && code.startsWith(entry.code.replace(/\*$/, "")));
 }
 
 function unique<T>(values: T[]): T[] {

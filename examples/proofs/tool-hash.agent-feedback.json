@@ -15,6 +15,30 @@
     "relationship-direction-mismatch",
     "missing-limit"
   ],
+  "diagnosticActions": [
+    {
+      "code": "relationship-direction-mismatch",
+      "catalogCode": "relationship-direction-mismatch",
+      "title": "Relationship Direction Mismatch",
+      "severity": "warning",
+      "source": "compiler-validation",
+      "category": "schema",
+      "preferredAction": "apply-deterministic-repair",
+      "preferredTool": "cypher_repair_plan",
+      "modelInstruction": "Direction can be flipped only when schema endpoints make it unambiguous. Apply deterministic compiler repair first, then re-run proof or agent feedback."
+    },
+    {
+      "code": "missing-limit",
+      "catalogCode": "missing-limit",
+      "title": "Missing LIMIT",
+      "severity": "warning",
+      "source": "compiler-validation",
+      "category": "policy",
+      "preferredAction": "apply-deterministic-repair",
+      "preferredTool": "cypher_repair_plan",
+      "modelInstruction": "Autonomous reads should add a bounded RETURN LIMIT. Apply deterministic compiler repair first, then re-run proof or agent feedback."
+    }
+  ],
   "repairKinds": [
     "canonicalize-identifier",
     "fix-direction",

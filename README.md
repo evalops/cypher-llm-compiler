@@ -215,7 +215,7 @@ npm run test:live:neo4j
 
 `prove` emits a `cypher-llm-proof/v1` proof object with rendered Cypher, preflight Cypher, repair kinds, diagnostic codes, parser preflight, and execution-policy claims. It can include planner, schema-statistics, policy-threshold, and policy-rule evidence in the cost/safety proof claim, plus a compact `policyEvidence` summary for agent explanations.
 
-`agent-feedback` emits a `cypher-llm-agent-feedback/v1` packet that wraps proof output, repair-plan output, policy evidence, diagnostics, repair kinds, and the next action an LLM client should take.
+`agent-feedback` emits a `cypher-llm-agent-feedback/v1` packet that wraps proof output, repair-plan output, policy evidence, diagnostics, catalog-backed diagnostic actions, repair kinds, and the next action an LLM client should take.
 
 `agent-guide` emits a `cypher-llm-agent-guide/v1` guide covering authoring rules, tool sequences, execution blockers, and diagnostic playbooks for LLM clients.
 

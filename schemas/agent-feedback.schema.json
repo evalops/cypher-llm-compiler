@@ -41,6 +41,10 @@
       "items": { "type": "string", "minLength": 1 },
       "uniqueItems": true
     },
+    "diagnosticActions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/diagnosticAction" }
+    },
     "repairKinds": {
       "type": "array",
       "items": { "type": "string", "minLength": 1 },
@@ -51,6 +55,73 @@
     "repairPlan": { "type": "object", "additionalProperties": true }
   },
   "$defs": {
+    "diagnosticAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "catalogCode",
+        "title",
+        "severity",
+        "source",
+        "category",
+        "preferredAction",
+        "modelInstruction"
+      ],
+      "properties": {
+        "code": { "type": "string", "minLength": 1 },
+        "catalogCode": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1 },
+        "severity": { "enum": ["error", "warning", "info", "varies"] },
+        "source": {
+          "enum": [
+            "compiler-validation",
+            "parser-validation",
+            "raw-repair",
+            "raw-lift",
+            "lossless-parser",
+            "safe-execution",
+            "policy",
+            "neo4j-explain",
+            "dialect-certification",
+            "dataset-governance",
+            "eval-runner",
+            "http-service"
+          ]
+        },
+        "category": {
+          "enum": [
+            "aggregation",
+            "benchmark",
+            "dataset",
+            "dialect",
+            "execution",
+            "policy",
+            "raw-compatibility",
+            "schema",
+            "scope",
+            "service",
+            "syntax",
+            "type"
+          ]
+        },
+        "preferredAction": {
+          "enum": [
+            "apply-deterministic-repair",
+            "ask-for-schema",
+            "block-release-or-request-review",
+            "fix-dataset",
+            "inspect-source",
+            "regenerate-ir",
+            "request-approval",
+            "retry-service",
+            "use-raw-migration"
+          ]
+        },
+        "preferredTool": { "type": "string", "minLength": 1 },
+        "modelInstruction": { "type": "string", "minLength": 1 }
+      }
+    },
     "policyEvidence": {
       "type": "object",
       "additionalProperties": false,

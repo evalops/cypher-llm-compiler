@@ -125,7 +125,7 @@ Run:
 cypher-llm agent-feedback --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json --params examples/tool-hash.params.json --default-limit 25 --feedback-out examples/proofs/tool-hash.agent-feedback.json
 ```
 
-Agent feedback packets are the one-call contract for LLM clients. They include the proof object, repair plan, compact policy evidence, aggregate diagnostic codes, repair kinds, and a `nextAction` field that tells the client whether to execute, apply deterministic repairs, regenerate IR, request approval, or stop.
+Agent feedback packets are the one-call contract for LLM clients. They include the proof object, repair plan, compact policy evidence, aggregate diagnostic codes, catalog-backed diagnostic actions, repair kinds, and a `nextAction` field that tells the client whether to execute, apply deterministic repairs, regenerate IR, request approval, or stop.
 
 ## Service Manifests
 
