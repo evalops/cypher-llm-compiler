@@ -60,6 +60,27 @@ cypher-llm benchmark-gate \
 
 The gate fails when directional benchmark metrics regress. It can also enforce pass-rate and executable-rate floors, and `--fail-on-diagnostic-regression` can make diagnostic-code count increases block a lane when the diagnostic set is stable enough for that to be meaningful.
 
+## Retry Eval
+
+Measure whether model retry rounds actually converge:
+
+```bash
+cypher-llm retry-eval \
+  --dataset examples/eval-dataset.json \
+  --rounds examples/benchmarks/tool-hash-raw-baseline.attempts.json,examples/eval-attempts.json \
+  --report-out examples/benchmarks/tool-hash.retry-eval.json \
+  --default-limit 25 \
+  --default-max-hops 5
+```
+
+Retry eval reports validate against `schemas/retry-eval.schema.json` and cover:
+
+- Per-round eval reports for each attempt set.
+- Per-task statuses such as `already-passed`, `converged`, `improved`, `regressed`, and `unresolved`.
+- Transition metrics for retry packets generated from one round and resolved by the next round.
+- Diagnostic codes addressed or introduced between rounds.
+- Summary metrics for final pass rate, convergence, unresolved tasks, retry-packet resolution rate, and average rounds to pass.
+
 ## Dataset Governance
 
 Audit a dataset before publishing or refreshing a benchmark lane:

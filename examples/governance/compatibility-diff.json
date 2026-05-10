@@ -5,8 +5,8 @@
     "version": "cypher-llm-compatibility-catalog/v1",
     "packageName": "@evalops/cypher-llm-compiler",
     "packageVersion": "0.1.0",
-    "contracts": 29,
-    "stableContracts": 29,
+    "contracts": 30,
+    "stableContracts": 30,
     "previewContracts": 0,
     "experimentalContracts": 0
   },
@@ -14,8 +14,8 @@
     "version": "cypher-llm-compatibility-catalog/v1",
     "packageName": "@evalops/cypher-llm-compiler",
     "packageVersion": "0.1.0",
-    "contracts": 29,
-    "stableContracts": 29,
+    "contracts": 30,
+    "stableContracts": 30,
     "previewContracts": 0,
     "experimentalContracts": 0
   },

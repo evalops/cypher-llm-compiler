@@ -27,6 +27,7 @@ import type { RepairOptions } from "./repair.js";
 import { repairQuery, repairRawCypher } from "./repair.js";
 import { buildCypherRepairPlan } from "./repair-plan.js";
 import { renderQuery } from "./render.js";
+import { evaluateRetryAttempts, type RetryEvalRoundInput } from "./retry-eval.js";
 import type { SafeExecutionOptions } from "./safety.js";
 import { createSafeExecutionPlan } from "./safety.js";
 import type { CypherSchemaStatistics } from "./schema-statistics.js";
@@ -56,6 +57,7 @@ export type CypherCompilerToolName =
   | "cypher_eval"
   | "cypher_scorecard"
   | "cypher_benchmark_gate"
+  | "cypher_retry_eval"
   | "cypher_dataset_governance";
 
 export interface CypherCompilerToolDefinition {
@@ -604,6 +606,33 @@ export const CYPHER_COMPILER_TOOLS: readonly CypherCompilerToolDefinition[] = [
     })
   },
   {
+    name: "cypher_retry_eval",
+    description:
+      "Evaluate multiple model retry rounds over a CypherBench dataset, including per-task convergence, retry-packet resolution, and multi-attempt metrics.",
+    inputSchema: objectSchema(["dataset", "rounds"], {
+      dataset: evalDatasetSchema,
+      rounds: {
+        type: "array",
+        minItems: 1,
+        items: {
+          type: "object",
+          additionalProperties: false,
+          required: ["attempts"],
+          properties: {
+            id: { type: "string" },
+            label: { type: "string" },
+            attempts: evalAttemptSetSchema
+          }
+        }
+      },
+      ...repairOptionProperties,
+      rawCypherCanExecute: {
+        type: "boolean",
+        description: "Count raw Cypher attempts as executable when raw repair did not find blocking diagnostics."
+      }
+    })
+  },
+  {
     name: "cypher_dataset_governance",
     description:
       "Audit a CypherBench eval dataset for machine-readable provenance, split assignment, redaction findings, duplicate ids, and governance diagnostics.",
@@ -770,6 +799,13 @@ export async function executeCypherCompilerTool(name: string, input: unknown): P
     }
     case "cypher_benchmark_gate": {
       return buildBenchmarkGateReport(requiredObject<EvalReport>(args, "baseline"), requiredObject<EvalReport>(args, "candidate"), benchmarkGateOptions(args));
+    }
+    case "cypher_retry_eval": {
+      return evaluateRetryAttempts(
+        requiredObject<EvalDataset>(args, "dataset"),
+        requiredArray<RetryEvalRoundInput>(args, "rounds"),
+        evalOptions(args)
+      );
     }
     case "cypher_dataset_governance": {
       return buildDatasetGovernanceReport(requiredObject<EvalDataset>(args, "dataset"), datasetGovernanceOptions(args));

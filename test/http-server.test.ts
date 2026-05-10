@@ -142,6 +142,30 @@ describe("compiler HTTP service", () => {
       candidate: evalReport,
       minPassRate: 1
     }) as { version: string; status: string };
+    const retryEval = await postJson(`${baseUrl}/v1/retry-eval`, {
+      dataset: {
+        version: "cypher-llm-eval-dataset/v1",
+        name: "http-retry",
+        tasks: [{ id: "one", question: "Return hash.", schema, expected: { canExecute: true } }]
+      },
+      rounds: [
+        {
+          id: "first",
+          attempts: {
+            version: "cypher-llm-eval-attempts/v1",
+            attempts: [{ taskId: "one", noCypher: true }]
+          }
+        },
+        {
+          id: "second",
+          attempts: {
+            version: "cypher-llm-eval-attempts/v1",
+            attempts: [{ taskId: "one", query }]
+          }
+        }
+      ],
+      defaultLimit: 25
+    }) as { version: string; summary: { convergedTasks: number } };
     const governance = await postJson(`${baseUrl}/v1/dataset-governance`, {
       dataset: {
         version: "cypher-llm-eval-dataset/v1",
@@ -179,6 +203,8 @@ describe("compiler HTTP service", () => {
     assert.equal(scorecard.summary.reports, 1);
     assert.equal(gate.version, "cypher-llm-benchmark-gate/v1");
     assert.equal(gate.status, "passed");
+    assert.equal(retryEval.version, "cypher-llm-retry-eval/v1");
+    assert.equal(retryEval.summary.convergedTasks, 1);
     assert.equal(governance.version, "cypher-llm-dataset-governance/v1");
     assert.equal(governance.ok, true);
   });

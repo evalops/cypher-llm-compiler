@@ -183,6 +183,9 @@ const compatibilityCatalogBase = {
     stableContract("benchmark-gate", "cypher-llm-benchmark-gate/v1", "benchmark", "public-cypherbench", "schemas/benchmark-gate.schema.json", [
       "examples/benchmarks/tool-hash.benchmark-gate.json"
     ], ["src/benchmark-gate.ts", "test/benchmark-gate.test.ts"]),
+    stableContract("retry-eval", "cypher-llm-retry-eval/v1", "benchmark", "public-cypherbench", "schemas/retry-eval.schema.json", [
+      "examples/benchmarks/tool-hash.retry-eval.json"
+    ], ["src/retry-eval.ts", "test/retry-eval.test.ts"]),
     stableContract("dataset-governance", "cypher-llm-dataset-governance/v1", "benchmark", "public-cypherbench", "schemas/dataset-governance.schema.json", [
       "examples/benchmarks/tool-hash.dataset-governance.json"
     ], ["src/dataset-governance.ts", "test/dataset-governance.test.ts"]),

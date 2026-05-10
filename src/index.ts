@@ -33,6 +33,7 @@ export * from "./repair.js";
 export * from "./repair-plan.js";
 export * from "./repair-loop.js";
 export * from "./render.js";
+export * from "./retry-eval.js";
 export * from "./safety.js";
 export * from "./schema.js";
 export * from "./schema-statistics.js";

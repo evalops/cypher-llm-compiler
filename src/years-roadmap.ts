@@ -135,13 +135,16 @@ export const yearsRoadmap = {
         "src/benchmark-gate.ts",
         "src/dataset-governance.ts",
         "src/repair-loop.ts",
+        "src/retry-eval.ts",
         "docs/CYPHERBENCH.md",
         "examples/benchmarks/tool-hash.benchmark-gate.json",
         "examples/benchmarks/tool-hash.dataset-governance.json",
+        "examples/benchmarks/tool-hash.retry-eval.json",
         "examples/benchmarks/tool-hash.scorecard.json"
       ],
       acceptanceGates: [
         "Scorecards include syntax, semantic, dialect, safety, and live execution metrics.",
+        "Retry eval reports measure multi-attempt convergence and repair-packet resolution.",
         "CI can fail on benchmark regressions for stable lanes.",
         "Dataset governance is documented and machine-readable."
       ],
@@ -389,9 +392,9 @@ export const yearsRoadmap = {
     },
     {
       id: "repair-loop",
-      title: "Model Retry And Repair Packets",
+      title: "Model Retry Packets And Multi-Attempt Evaluation",
       status: "partial",
-      evidence: ["src/repair-loop.ts", "docs/REPAIR_LOOP.md", "test/eval-compare.test.ts"],
+      evidence: ["src/repair-loop.ts", "src/retry-eval.ts", "schemas/retry-eval.schema.json", "docs/REPAIR_LOOP.md", "test/retry-eval.test.ts"],
       workstreamIds: ["public-cypherbench", "semantic-proof-repair"]
     },
     {

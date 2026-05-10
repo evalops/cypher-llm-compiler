@@ -372,6 +372,70 @@ describe("cli", () => {
     assert.ok(writes.get("out/gate.json")?.includes("cypher-llm-benchmark-gate/v1"));
   });
 
+  it("emits CypherBench retry eval reports from attempt rounds", async () => {
+    const dataset = {
+      version: "cypher-llm-eval-dataset/v1",
+      name: "cli-retry",
+      tasks: [
+        {
+          id: "one",
+          question: "Return one.",
+          schema: { version: "cypher-llm-schema/v1", nodes: [], relationships: [] },
+          expected: { cypherContains: ["RETURN 1"], canExecute: true }
+        }
+      ]
+    };
+    const failed = {
+      version: "cypher-llm-eval-attempts/v1",
+      model: "first",
+      attempts: [{ taskId: "one", noCypher: true }]
+    };
+    const fixed = {
+      version: "cypher-llm-eval-attempts/v1",
+      model: "second",
+      attempts: [
+        {
+          taskId: "one",
+          query: {
+            version: "cypher-llm-ir/v1",
+            profile: "llm-safe-readonly",
+            clauses: [{ kind: "return", items: [{ expression: { kind: "literal", value: 1 } }] }]
+          }
+        }
+      ]
+    };
+    const files = new Map<string, string>([
+      ["dataset.json", JSON.stringify(dataset)],
+      ["first.json", JSON.stringify(failed)],
+      ["second.json", JSON.stringify(fixed)]
+    ]);
+    const writes = new Map<string, string>();
+    let stdout = "";
+    let stderr = "";
+    const io: CliIO = {
+      stdout: { write: (chunk: string | Uint8Array) => ((stdout += String(chunk)), true) },
+      stderr: { write: (chunk: string | Uint8Array) => ((stderr += String(chunk)), true) },
+      readFile: async (path) => files.get(String(path)) ?? "",
+      writeFile: async (path, data) => {
+        writes.set(path, data);
+      },
+      mkdir: async () => undefined
+    };
+
+    const code = await runCli(
+      ["retry-eval", "--dataset", "dataset.json", "--rounds", "first.json,second.json", "--report-out", "out/retry.json", "--fail-on-unresolved"],
+      io
+    );
+    const output = JSON.parse(stdout) as { version: string; summary: { convergedTasks: number; retryPacketResolutionRate: number } };
+
+    assert.equal(code, 0);
+    assert.equal(stderr, "");
+    assert.equal(output.version, "cypher-llm-retry-eval/v1");
+    assert.equal(output.summary.convergedTasks, 1);
+    assert.equal(output.summary.retryPacketResolutionRate, 1);
+    assert.ok(writes.get("out/retry.json")?.includes("cypher-llm-retry-eval/v1"));
+  });
+
   it("audits dataset governance from dataset files", async () => {
     const dataset = {
       version: "cypher-llm-eval-dataset/v1",

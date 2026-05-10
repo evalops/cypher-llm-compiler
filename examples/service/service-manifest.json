@@ -217,6 +217,12 @@
     },
     {
       "method": "POST",
+      "path": "/v1/retry-eval",
+      "operation": "cypher_retry_eval",
+      "authRequired": false
+    },
+    {
+      "method": "POST",
       "path": "/v1/dataset-governance",
       "operation": "cypher_dataset_governance",
       "authRequired": false

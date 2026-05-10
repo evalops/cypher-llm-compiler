@@ -23,6 +23,7 @@ Stable public contracts:
 - `cypher-llm-lossless-parse/v1`
 - `cypher-llm-cypherbench-scorecard/v1`
 - `cypher-llm-benchmark-gate/v1`
+- `cypher-llm-retry-eval/v1`
 - `cypher-llm-dataset-governance/v1`
 - `cypher-llm-repair-plan/v1`
 - `cypher-llm-agent-feedback/v1`
@@ -223,6 +224,16 @@ cypher-llm benchmark-gate --baseline baseline.report.json --candidate candidate.
 ```
 
 Benchmark gates are the CI contract for blocking regressions. They wrap an eval comparison, directional metric regression checks, optional pass-rate and executable-rate floors, optional diagnostic-regression checks, and a pass/fail summary. JSON gates validate against `schemas/benchmark-gate.schema.json`.
+
+## Retry Eval Reports
+
+Run:
+
+```bash
+cypher-llm retry-eval --dataset examples/eval-dataset.json --rounds first.attempts.json,next.attempts.json --report-out retry-eval.json
+```
+
+Retry eval reports are the public benchmark contract for multi-attempt model loops. They include per-round eval reports, per-task convergence status, retry-packet resolution between rounds, diagnostic-code churn, and summary metrics for unresolved tasks and average rounds to pass. JSON reports validate against `schemas/retry-eval.schema.json`.
 
 ## Dataset Governance Reports
 

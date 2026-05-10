@@ -55,6 +55,9 @@ describe("compiler service manifest", () => {
     assert.ok(
       manifest.routes.some((route) => route.path === "/v1/metrics" && route.operation === "service_metrics" && route.method === "GET")
     );
+    assert.ok(
+      manifest.routes.some((route) => route.path === "/v1/retry-eval" && route.operation === "cypher_retry_eval")
+    );
     assert.equal(manifest.dataBoundary.storesPayloads, false);
     assert.equal(manifest.dataBoundary.returnsDatabaseRows, false);
   });

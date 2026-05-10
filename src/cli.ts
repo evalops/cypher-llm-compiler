@@ -46,6 +46,7 @@ import { repairQuery, repairRawCypher } from "./repair.js";
 import { buildCypherRepairPlan } from "./repair-plan.js";
 import { evaluateRepairLoop } from "./repair-loop.js";
 import { renderQuery } from "./render.js";
+import { evaluateRetryAttempts, type RetryEvalRoundInput } from "./retry-eval.js";
 import { createSafeExecutionPlan } from "./safety.js";
 import { buildCompilerServiceManifest } from "./service-manifest.js";
 import { buildEmptyCompilerServiceMetricsReport } from "./service-metrics.js";
@@ -113,6 +114,9 @@ export async function runCli(argv: string[], io: CliIO = defaultIo()): Promise<n
         return 0;
       case "benchmark-gate":
         await benchmarkGateCommand(args, io);
+        return 0;
+      case "retry-eval":
+        await retryEvalCommand(args, io);
         return 0;
       case "dataset-governance":
         await datasetGovernanceCommand(args, io);
@@ -371,6 +375,37 @@ async function benchmarkGateCommand(args: Map<string, string | boolean>, io: Cli
   writeJson(io, gate);
   if (args.get("fail-on-fail") === true && gate.status === "failed") {
     throw new Error(`Benchmark gate failed ${gate.summary.failed} check(s).`);
+  }
+}
+
+async function retryEvalCommand(args: Map<string, string | boolean>, io: CliIO) {
+  const dataset = JSON.parse(await io.readFile(stringArg(args, "dataset"), "utf8")) as EvalDataset;
+  const roundPaths = stringArg(args, "rounds").split(",").map((roundPath) => roundPath.trim()).filter(Boolean);
+  const rounds = await Promise.all(
+    roundPaths.map(async (roundPath, index): Promise<RetryEvalRoundInput> => ({
+      id: retryRoundId(roundPath, index),
+      attempts: JSON.parse(await io.readFile(roundPath, "utf8")) as EvalAttemptSet
+    }))
+  );
+  const defaultLimit = optionalNumber(args.get("default-limit"));
+  const defaultMaxHops = optionalNumber(args.get("default-max-hops"));
+  const evalOptions: Parameters<typeof evaluateRetryAttempts>[2] = {};
+  if (defaultLimit !== undefined) {
+    evalOptions.defaultLimit = defaultLimit;
+  }
+  if (defaultMaxHops !== undefined) {
+    evalOptions.defaultMaxHops = defaultMaxHops;
+  }
+  if (args.get("raw-cypher-can-execute") === true) {
+    evalOptions.rawCypherCanExecute = true;
+  }
+  const report = evaluateRetryAttempts(dataset, rounds, evalOptions);
+  if (typeof args.get("report-out") === "string") {
+    await writeJsonFile(io, args.get("report-out") as string, report);
+  }
+  writeJson(io, report);
+  if (args.get("fail-on-unresolved") === true && report.summary.unresolvedTasks > 0) {
+    throw new Error(`Retry eval left ${report.summary.unresolvedTasks} unresolved task(s).`);
   }
 }
 
@@ -816,6 +851,11 @@ async function readSchema(args: Map<string, string | boolean>, io: CliIO): Promi
   return JSON.parse(await io.readFile(stringArg(args, "schema"), "utf8")) as CypherSchemaContract;
 }
 
+function retryRoundId(roundPath: string, index: number): string {
+  const basename = path.basename(roundPath).replace(/\.json$/, "");
+  return basename || `round-${index + 1}`;
+}
+
 async function readQuery(args: Map<string, string | boolean>, io: CliIO): Promise<CypherQuery> {
   return JSON.parse(await io.readFile(stringArg(args, "query"), "utf8")) as CypherQuery;
 }
@@ -1060,6 +1100,7 @@ Commands:
   compare-evals --baseline baseline.report.json --candidate candidate.report.json [--comparison-out comparison.json] [--fail-on-regression] [--tolerance 0.0001]
   scorecard   --reports report-a.json,report-b.json [--name cypherbench] [--scorecard-out scorecard.json] [--markdown-out scorecard.md] [--format json|markdown]
   benchmark-gate --baseline baseline.report.json --candidate candidate.report.json [--gate-out gate.json] [--fail-on-fail] [--tolerance 0.0001] [--min-pass-rate 0.95] [--min-executable-rate 0.90] [--fail-on-diagnostic-regression]
+  retry-eval --dataset dataset.json --rounds first.attempts.json,next.attempts.json [--report-out retry-eval.json] [--fail-on-unresolved] [--raw-cypher-can-execute] [--default-limit 25] [--default-max-hops 5]
   dataset-governance --dataset dataset.json [--report-out governance.json] [--default-split smoke] [--fail-on-error]
   repair-loop --dataset dataset.json --attempts attempts.json [--feedback-out feedback.json] [--report-out report.json] [--raw-cypher-can-execute] [--default-limit 25] [--default-max-hops 5]
   lift-raw-eval --dataset dataset.json --attempts attempts.json [--summary-out summary.json]

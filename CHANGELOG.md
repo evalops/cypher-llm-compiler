@@ -38,4 +38,5 @@
 - Added lossless source-map anchors that connect fragments, comments, statements, terminators, clauses, and lifted IR paths for byte-preserving agent repair loops.
 - Added CypherBench scorecards with ranked lanes, aggregate diagnostics, baseline comparisons, JSON Schema, markdown rendering, CLI/tool/service output, and checked-in scorecard artifacts.
 - Added CypherBench benchmark gates with pass/fail regression checks, optional metric floors, JSON Schema, CLI/tool/service output, and checked-in gate artifact.
+- Added CypherBench retry eval reports for multi-round model retries, per-task convergence, repair-packet resolution, JSON Schema, CLI/tool/service output, and a checked-in retry artifact.
 - Added CypherBench dataset governance reports with provenance, split assignment, redaction findings, duplicate-id diagnostics, JSON Schema, CLI/tool/service output, and checked-in governance artifact.

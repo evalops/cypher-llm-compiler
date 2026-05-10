@@ -67,6 +67,7 @@ describe("OpenAI tool schemas", () => {
       "cypher_eval",
       "cypher_scorecard",
       "cypher_benchmark_gate",
+      "cypher_retry_eval",
       "cypher_dataset_governance"
     ]);
     assert.equal(chatTools[0]?.function.name, "cypher_render");
@@ -291,6 +292,29 @@ describe("OpenAI tool schemas", () => {
     assert.equal(scorecard.lanes[0]?.id, "1-tool-dispatch");
     assert.equal(gate.version, "cypher-llm-benchmark-gate/v1");
     assert.equal(gate.status, "passed");
+
+    const retryEval = (await executeCypherCompilerTool("cypher_retry_eval", {
+      dataset: {
+        version: "cypher-llm-eval-dataset/v1",
+        name: "tool-dispatch",
+        tasks: [{ id: "one", question: "Return hash.", schema, expected: { canExecute: true } }]
+      },
+      rounds: [
+        {
+          id: "first",
+          attempts: { version: "cypher-llm-eval-attempts/v1", attempts: [{ taskId: "one", noCypher: true }] }
+        },
+        {
+          id: "second",
+          attempts: { version: "cypher-llm-eval-attempts/v1", attempts: [{ taskId: "one", query: repairableQuery }] }
+        }
+      ],
+      defaultLimit: 25,
+      defaultMaxHops: 3
+    })) as { version: string; summary: { convergedTasks: number } };
+
+    assert.equal(retryEval.version, "cypher-llm-retry-eval/v1");
+    assert.equal(retryEval.summary.convergedTasks, 1);
 
     const governance = (await executeCypherCompilerTool("cypher_dataset_governance", {
       dataset: {

@@ -22,6 +22,7 @@ export const COMPILER_HTTP_TOOL_ROUTES = {
   "/v1/eval": "cypher_eval",
   "/v1/scorecard": "cypher_scorecard",
   "/v1/benchmark-gate": "cypher_benchmark_gate",
+  "/v1/retry-eval": "cypher_retry_eval",
   "/v1/dataset-governance": "cypher_dataset_governance"
 } as const satisfies Record<string, CypherCompilerToolName>;
 

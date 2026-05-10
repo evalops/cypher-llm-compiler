@@ -1,0 +1,180 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evalops.dev/schemas/cypher-llm/retry-eval/v1.json",
+  "title": "CypherBench Retry Eval Report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "datasetName", "generatedAt", "summary", "rounds", "transitions", "tasks"],
+  "properties": {
+    "version": { "const": "cypher-llm-retry-eval/v1" },
+    "datasetName": { "type": "string", "minLength": 1 },
+    "generatedAt": { "type": "string", "minLength": 1 },
+    "summary": { "$ref": "#/$defs/summary" },
+    "rounds": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/round" }
+    },
+    "transitions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/transition" }
+    },
+    "tasks": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/task" }
+    }
+  },
+  "$defs": {
+    "countMap": {
+      "type": "object",
+      "additionalProperties": { "type": "integer", "minimum": 0 }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "totalTasks",
+        "rounds",
+        "totalAttempts",
+        "initialPassedTasks",
+        "finalPassedTasks",
+        "deltaPassedTasks",
+        "initialPassRate",
+        "finalPassRate",
+        "deltaPassRate",
+        "finalExecutableRate",
+        "alreadyPassedTasks",
+        "convergedTasks",
+        "improvedTasks",
+        "regressedTasks",
+        "unresolvedTasks",
+        "retryPacketsGenerated",
+        "retryPacketsResolvedNextRound",
+        "retryPacketResolutionRate",
+        "averageRoundsToPass",
+        "diagnosticsRemaining",
+        "models"
+      ],
+      "properties": {
+        "totalTasks": { "type": "integer", "minimum": 0 },
+        "rounds": { "type": "integer", "minimum": 1 },
+        "totalAttempts": { "type": "integer", "minimum": 0 },
+        "initialPassedTasks": { "type": "integer", "minimum": 0 },
+        "finalPassedTasks": { "type": "integer", "minimum": 0 },
+        "deltaPassedTasks": { "type": "integer" },
+        "initialPassRate": { "type": "number" },
+        "finalPassRate": { "type": "number" },
+        "deltaPassRate": { "type": "number" },
+        "finalExecutableRate": { "type": "number" },
+        "alreadyPassedTasks": { "type": "integer", "minimum": 0 },
+        "convergedTasks": { "type": "integer", "minimum": 0 },
+        "improvedTasks": { "type": "integer", "minimum": 0 },
+        "regressedTasks": { "type": "integer", "minimum": 0 },
+        "unresolvedTasks": { "type": "integer", "minimum": 0 },
+        "retryPacketsGenerated": { "type": "integer", "minimum": 0 },
+        "retryPacketsResolvedNextRound": { "type": "integer", "minimum": 0 },
+        "retryPacketResolutionRate": { "type": "number" },
+        "averageRoundsToPass": { "type": "number" },
+        "diagnosticsRemaining": { "$ref": "#/$defs/countMap" },
+        "models": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        }
+      }
+    },
+    "round": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "index", "evalReport"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "label": { "type": "string", "minLength": 1 },
+        "index": { "type": "integer", "minimum": 0 },
+        "model": { "type": "string", "minLength": 1 },
+        "prompt": { "type": "string", "minLength": 1 },
+        "evalReport": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": ["version", "datasetName", "metrics", "results"],
+          "properties": {
+            "version": { "const": "cypher-llm-eval-report/v1" },
+            "datasetName": { "type": "string" },
+            "metrics": { "type": "object", "additionalProperties": true },
+            "results": { "type": "array", "items": { "type": "object", "additionalProperties": true } }
+          }
+        }
+      }
+    },
+    "transition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fromRoundId",
+        "toRoundId",
+        "failedTasksBefore",
+        "passedTasksAfter",
+        "improvedTasks",
+        "regressedTasks",
+        "retryPacketsGenerated",
+        "retryPacketsResolved",
+        "retryPacketResolutionRate",
+        "diagnosticsAddressed",
+        "diagnosticsIntroduced"
+      ],
+      "properties": {
+        "fromRoundId": { "type": "string", "minLength": 1 },
+        "toRoundId": { "type": "string", "minLength": 1 },
+        "failedTasksBefore": { "type": "integer", "minimum": 0 },
+        "passedTasksAfter": { "type": "integer", "minimum": 0 },
+        "improvedTasks": { "type": "integer", "minimum": 0 },
+        "regressedTasks": { "type": "integer", "minimum": 0 },
+        "retryPacketsGenerated": { "type": "integer", "minimum": 0 },
+        "retryPacketsResolved": { "type": "integer", "minimum": 0 },
+        "retryPacketResolutionRate": { "type": "number" },
+        "diagnosticsAddressed": { "$ref": "#/$defs/countMap" },
+        "diagnosticsIntroduced": { "$ref": "#/$defs/countMap" }
+      }
+    },
+    "task": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["taskId", "question", "status", "finalRoundId", "initial", "final", "attempts"],
+      "properties": {
+        "taskId": { "type": "string", "minLength": 1 },
+        "question": { "type": "string", "minLength": 1 },
+        "status": { "enum": ["already-passed", "converged", "improved", "regressed", "unresolved"] },
+        "firstPassingRoundId": { "type": "string", "minLength": 1 },
+        "finalRoundId": { "type": "string", "minLength": 1 },
+        "initial": { "$ref": "#/$defs/taskRoundResult" },
+        "final": { "$ref": "#/$defs/taskRoundResult" },
+        "attempts": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/taskRoundResult" }
+        }
+      }
+    },
+    "taskRoundResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["roundId", "kind", "passed", "canExecute", "diagnostics", "repairs", "failedExpectations", "qualityScore"],
+      "properties": {
+        "roundId": { "type": "string", "minLength": 1 },
+        "kind": { "enum": ["ir", "raw", "no-cypher", "timeout", "missing"] },
+        "passed": { "type": "boolean" },
+        "canExecute": { "type": "boolean" },
+        "diagnostics": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "repairs": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "failedExpectations": { "type": "integer", "minimum": 0 },
+        "qualityScore": { "type": "number" }
+      }
+    }
+  }
+}

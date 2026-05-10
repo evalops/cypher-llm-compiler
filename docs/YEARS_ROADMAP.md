@@ -139,6 +139,12 @@ Benchmark gates are exported from `src/benchmark-gate.ts`, validated by `schemas
 cypher-llm benchmark-gate --baseline examples/benchmarks/tool-hash-raw-baseline.report.json --candidate examples/imported/smoke-ir-vs-raw.report.json --min-pass-rate 1 --min-executable-rate 0.3333
 ```
 
+Retry eval reports are exported from `src/retry-eval.ts`, validated by `schemas/retry-eval.schema.json`, and checked in at `examples/benchmarks/tool-hash.retry-eval.json`.
+
+```bash
+cypher-llm retry-eval --dataset examples/eval-dataset.json --rounds examples/benchmarks/tool-hash-raw-baseline.attempts.json,examples/eval-attempts.json
+```
+
 Dataset governance reports are exported from `src/dataset-governance.ts`, validated by `schemas/dataset-governance.schema.json`, and checked in at `examples/benchmarks/tool-hash.dataset-governance.json`.
 
 ```bash

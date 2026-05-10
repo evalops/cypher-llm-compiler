@@ -72,6 +72,7 @@ describe("json schemas", () => {
     const losslessParseSchema = readJson("schemas/lossless-parse.schema.json");
     const cypherBenchScorecardSchema = readJson("schemas/cypherbench-scorecard.schema.json");
     const benchmarkGateSchema = readJson("schemas/benchmark-gate.schema.json");
+    const retryEvalSchema = readJson("schemas/retry-eval.schema.json");
     const datasetGovernanceSchema = readJson("schemas/dataset-governance.schema.json");
     const repairPlanSchema = readJson("schemas/repair-plan.schema.json");
     const serviceManifestSchema = readJson("schemas/service-manifest.schema.json");
@@ -100,6 +101,7 @@ describe("json schemas", () => {
     ajv.addSchema(losslessParseSchema);
     ajv.addSchema(cypherBenchScorecardSchema);
     ajv.addSchema(benchmarkGateSchema);
+    ajv.addSchema(retryEvalSchema);
     ajv.addSchema(datasetGovernanceSchema);
     ajv.addSchema(repairPlanSchema);
     ajv.addSchema(serviceManifestSchema);
@@ -129,6 +131,7 @@ describe("json schemas", () => {
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/lossless-parse/v1.json", readJson("examples/lossless/tool-hash.lossless.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/cypherbench-scorecard/v1.json", readJson("examples/benchmarks/tool-hash.scorecard.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/benchmark-gate/v1.json", readJson("examples/benchmarks/tool-hash.benchmark-gate.json"));
+    assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/retry-eval/v1.json", readJson("examples/benchmarks/tool-hash.retry-eval.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/dataset-governance/v1.json", readJson("examples/benchmarks/tool-hash.dataset-governance.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/repair-plan/v1.json", readJson("examples/proofs/tool-hash.repair-plan.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/service-manifest/v1.json", readJson("examples/service/service-manifest.json"));

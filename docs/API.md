@@ -406,6 +406,20 @@ The scorecard includes:
 
 Use `renderCypherBenchScorecardMarkdown(scorecard)` to publish the same report as a compact markdown table.
 
+## `evaluateRetryAttempts(dataset, rounds, options?)`
+
+Builds a `cypher-llm-retry-eval/v1` report from multiple attempt rounds over one dataset.
+
+The report includes:
+
+- Per-round eval reports.
+- Per-task convergence status and first passing round.
+- Transition metrics for retry packets generated from one round and resolved in the next round.
+- Diagnostic codes addressed or introduced across retries.
+- Summary metrics for final pass rate, unresolved tasks, retry-packet resolution rate, and average rounds to pass.
+
+This backs the `cypher-llm retry-eval` CLI command and the `/v1/retry-eval` service route.
+
 ## `buildDatasetGovernanceReport(dataset, options?)`
 
 Builds a `cypher-llm-dataset-governance/v1` report for an eval dataset.

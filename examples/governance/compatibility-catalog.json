@@ -679,6 +679,35 @@
       ]
     },
     {
+      "id": "retry-eval",
+      "version": "cypher-llm-retry-eval/v1",
+      "category": "benchmark",
+      "level": "stable",
+      "ownerWorkstreamId": "public-cypherbench",
+      "schemaPath": "schemas/retry-eval.schema.json",
+      "examplePaths": [
+        "examples/benchmarks/tool-hash.retry-eval.json"
+      ],
+      "evidencePaths": [
+        "src/retry-eval.ts",
+        "test/retry-eval.test.ts"
+      ],
+      "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path.",
+      "fingerprints": [
+        {
+          "kind": "schema",
+          "path": "schemas/retry-eval.schema.json",
+          "sha256": "6651ba5bf66c233a9b0e5ec69b34b75eb580d82d09a53efee9524773be41c9a5"
+        },
+        {
+          "kind": "example",
+          "path": "examples/benchmarks/tool-hash.retry-eval.json",
+          "sha256": "d569bde13b7eb0ffb4d3cc4441a9b3f321e937a6165c153fa3f5bde8d63f802d"
+        }
+      ]
+    },
+    {
       "id": "dataset-governance",
       "version": "cypher-llm-dataset-governance/v1",
       "category": "benchmark",
@@ -732,7 +761,7 @@
         {
           "kind": "example",
           "path": "examples/service/service-manifest.json",
-          "sha256": "dc09705c7cdc5f31d96a7b0d2926c76afe51a4aeb6f77a4344a5ba8ee0265067"
+          "sha256": "b0581cf783fdde2bb6cd5b092b5717dff034aa17abf4377341689632ddb57be2"
         }
       ]
     },
@@ -791,7 +820,7 @@
         {
           "kind": "example",
           "path": "examples/roadmap/cypher-llm-years-roadmap.json",
-          "sha256": "b9ced98e8cbc89f65e3c2f6c11fef61c9449c91ef8344ef8f3360ace87dcf795"
+          "sha256": "8843886b40ce9032fbe59b1b676d6f97edf483ac926140adf45c96c677219a19"
         }
       ]
     },
@@ -844,7 +873,7 @@
         {
           "kind": "example",
           "path": "examples/governance/compatibility-diff.json",
-          "sha256": "e56d9af5c8d86505de016b2bac76724025585f86d39069d03677076767a814bd"
+          "sha256": "654c0784864bbf9f018b28d6d42ca5c6df3d405ce8f5cb271c4889d3787a8c6f"
         }
       ]
     },
@@ -873,7 +902,7 @@
         {
           "kind": "example",
           "path": "examples/governance/contract-conformance.json",
-          "sha256": "2aa76674dd673916223a7e559deba53dc3a03f90a1fcb9f052dccd3e49df5640"
+          "sha256": "f89ea4558ca6434b50e7aa121cd0e5efebaa83ef91cff25758dd321637dd8f41"
         }
       ]
     }
