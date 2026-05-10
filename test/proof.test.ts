@@ -93,9 +93,13 @@ describe("proof-carrying Cypher compilation", () => {
 
     assert.equal(proof.status, "blocked");
     assert.equal(policyClaim?.status, "failed");
+    assert.equal(proof.policyEvidence.ok, false);
+    assert.equal(proof.policyEvidence.rules?.id, "proof-rules");
+    assert.equal(proof.policyEvidence.statistics?.source, "fixture");
     assert.ok(proof.diagnosticCodes.includes("policy-missing-tenant-scope"));
     assert.ok(proof.diagnosticCodes.includes("policy-sensitive-label-access"));
     assert.ok(proof.diagnosticCodes.includes("policy-high-fanout-relationship"));
+    assert.ok(proof.policyEvidence.findingCodes.includes("policy-missing-tenant-scope"));
   });
 
   it("keeps checked-in proof JSON aligned with runtime data and schema", () => {

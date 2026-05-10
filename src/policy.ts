@@ -58,6 +58,17 @@ export interface CypherPolicyReport {
   findings: CypherPolicyFinding[];
 }
 
+export interface CypherPolicyEvidence {
+  version: "cypher-llm-policy-evidence/v1";
+  ok: boolean;
+  policy?: CypherPolicyProfileRef;
+  rules?: CypherPolicyRuleSetSummary;
+  planner?: CypherPolicyPlannerSummary;
+  statistics?: CypherPolicyStatisticsSummary;
+  summary: CypherPolicySummary;
+  findingCodes: string[];
+}
+
 export interface CypherPolicyPlannerSummary {
   source: string;
   operators: number;
@@ -152,6 +163,19 @@ export function assessCypherPolicy(
     ...(options.schemaStatistics ? { statistics: statisticsSummary(options.schemaStatistics) } : {}),
     summary,
     findings
+  };
+}
+
+export function summarizePolicyEvidence(report: CypherPolicyReport): CypherPolicyEvidence {
+  return {
+    version: "cypher-llm-policy-evidence/v1",
+    ok: report.ok,
+    ...(report.policy ? { policy: report.policy } : {}),
+    ...(report.rules ? { rules: report.rules } : {}),
+    ...(report.planner ? { planner: report.planner } : {}),
+    ...(report.statistics ? { statistics: report.statistics } : {}),
+    summary: report.summary,
+    findingCodes: [...new Set(report.findings.map((finding) => finding.code))]
   };
 }
 

@@ -13,6 +13,17 @@
     "add-limit"
   ],
   "diagnosticCodes": [],
+  "policyEvidence": {
+    "version": "cypher-llm-policy-evidence/v1",
+    "ok": true,
+    "summary": {
+      "findings": 0,
+      "errors": 0,
+      "warnings": 0,
+      "infos": 0
+    },
+    "findingCodes": []
+  },
   "claims": [
     {
       "id": "deterministic-repair",

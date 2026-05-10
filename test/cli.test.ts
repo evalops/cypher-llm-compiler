@@ -479,6 +479,7 @@ describe("cli", () => {
     assert.equal(stderr, "");
     assert.equal(output.version, "cypher-llm-repair-plan/v1");
     assert.ok(output.deterministic.some((step) => step.patch?.path === "/clauses/1/limit"));
+    assert.ok(stdout.includes("policyEvidence"));
     assert.ok(stdout.includes("policy-high-return-limit"));
     assert.ok(stdout.includes("policy-sensitive-label-access"));
     assert.ok(writes.get("out/repair-plan.json")?.includes("cypher-llm-repair-plan/v1"));
@@ -637,6 +638,7 @@ describe("cli", () => {
     assert.equal(code, 0);
     assert.equal(stderr, "");
     assert.ok(stdout.includes("cypher-llm-proof/v1"));
+    assert.ok(stdout.includes("policyEvidence"));
     assert.ok(stdout.includes("policy-high-return-limit"));
     assert.ok(stdout.includes("policy-sensitive-label-access"));
     assert.ok(writes.get("out/proof.json")?.includes("parser-preflight"));

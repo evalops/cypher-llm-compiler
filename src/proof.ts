@@ -2,8 +2,8 @@ import type { Diagnostic } from "./diagnostics.js";
 import type { CypherQuery, CypherSchemaContract, JsonLiteral } from "./ir.js";
 import type { ParserValidationOptions } from "./parser-validation.js";
 import { validateCypherTextWithParser } from "./parser-validation.js";
-import type { CypherPolicyOptions } from "./policy.js";
-import { assessCypherPolicy } from "./policy.js";
+import type { CypherPolicyEvidence, CypherPolicyOptions } from "./policy.js";
+import { assessCypherPolicy, summarizePolicyEvidence } from "./policy.js";
 import { type SafeExecutionOptions, createSafeExecutionPlan } from "./safety.js";
 
 export type CypherProofStatus = "accepted" | "accepted-with-warnings" | "repaired" | "blocked";
@@ -44,6 +44,7 @@ export interface CypherProof {
   requiresApproval: boolean;
   repairKinds: string[];
   diagnosticCodes: string[];
+  policyEvidence: CypherPolicyEvidence;
   claims: CypherProofClaim[];
 }
 
@@ -121,6 +122,7 @@ export function buildCypherProof(
     requiresApproval: plan.requiresApproval,
     repairKinds,
     diagnosticCodes,
+    policyEvidence: summarizePolicyEvidence(policy),
     claims
   };
 }

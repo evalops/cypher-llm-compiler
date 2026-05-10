@@ -112,8 +112,11 @@ describe("repair plans", () => {
     });
 
     assert.equal(plan.status, "blocked");
+    assert.equal(plan.policyEvidence.ok, false);
+    assert.equal(plan.policyEvidence.rules?.id, "repair-rules");
     assert.ok(plan.unsafe.some((step) => step.diagnostics.some((item) => item.code === "policy-missing-tenant-scope")));
     assert.ok(plan.unsafe.some((step) => step.diagnostics.some((item) => item.code === "policy-sensitive-property-return")));
+    assert.ok(plan.policyEvidence.findingCodes.includes("policy-sensitive-property-return"));
   });
 
   it("keeps checked-in repair plan JSON aligned with runtime data", () => {

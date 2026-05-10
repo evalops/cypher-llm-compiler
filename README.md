@@ -177,7 +177,7 @@ npm run test:live:neo4j
 
 `eval` returns a `cypher-llm-eval-report/v1` report with pass rate, executable rate, repair rate, diagnostic counts, and per-task outcomes.
 
-`repair-plan` emits a `cypher-llm-repair-plan/v1` object that separates deterministic JSON-patch-like repairs, model-required diagnostics, and unsafe or approval-gated blockers. It accepts planner estimates, schema statistics, policy thresholds, and policy rules so blocked policy findings become repair-plan evidence.
+`repair-plan` emits a `cypher-llm-repair-plan/v1` object that separates deterministic JSON-patch-like repairs, model-required diagnostics, and unsafe or approval-gated blockers. It accepts planner estimates, schema statistics, policy thresholds, and policy rules so blocked policy findings become repair-plan evidence. The `policyEvidence` summary records policy status, finding codes, and any planner/statistics/rule summaries used.
 
 `compare-evals` compares two reports and marks directional metric deltas as improvements or regressions.
 
@@ -203,7 +203,7 @@ npm run test:live:neo4j
 
 `lsp-diagnostics` emits a `cypher-llm-lsp-diagnostics/v1` report with LSP-shaped diagnostics and code actions.
 
-`prove` emits a `cypher-llm-proof/v1` proof object with rendered Cypher, preflight Cypher, repair kinds, diagnostic codes, parser preflight, and execution-policy claims. It can include planner, schema-statistics, policy-threshold, and policy-rule evidence in the cost/safety proof claim.
+`prove` emits a `cypher-llm-proof/v1` proof object with rendered Cypher, preflight Cypher, repair kinds, diagnostic codes, parser preflight, and execution-policy claims. It can include planner, schema-statistics, policy-threshold, and policy-rule evidence in the cost/safety proof claim, plus a compact `policyEvidence` summary for agent explanations.
 
 `introspect-neo4j` connects to Neo4j and writes a `CypherSchemaContract` from labels, relationship types, properties, observed endpoints, and procedure yields.
 

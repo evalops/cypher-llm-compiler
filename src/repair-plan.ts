@@ -1,8 +1,8 @@
 import { diagnostic, type Diagnostic } from "./diagnostics.js";
 import type { CypherQuery, CypherSchemaContract, JsonLiteral } from "./ir.js";
 import { validateCypherTextWithParser } from "./parser-validation.js";
-import type { CypherPolicyOptions } from "./policy.js";
-import { assessCypherPolicy } from "./policy.js";
+import type { CypherPolicyEvidence, CypherPolicyOptions } from "./policy.js";
+import { assessCypherPolicy, summarizePolicyEvidence } from "./policy.js";
 import { repairQuery, type RepairAction, type RepairOptions } from "./repair.js";
 import { renderQuery } from "./render.js";
 import { createSafeExecutionPlan } from "./safety.js";
@@ -58,6 +58,7 @@ export interface CypherRepairPlan {
   modelRequired: RepairPlanStep[];
   unsafe: RepairPlanStep[];
   diagnostics: Diagnostic[];
+  policyEvidence: CypherPolicyEvidence;
   summary: {
     deterministic: number;
     modelRequired: number;
@@ -136,6 +137,7 @@ export function buildCypherRepairPlan(
     modelRequired,
     unsafe,
     diagnostics,
+    policyEvidence: summarizePolicyEvidence(policy),
     summary: {
       deterministic: deterministic.length,
       modelRequired: modelRequired.length,

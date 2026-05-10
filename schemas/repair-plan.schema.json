@@ -3,7 +3,18 @@
   "$id": "https://evalops.dev/schemas/cypher-llm/repair-plan/v1.json",
   "title": "Cypher Repair Plan",
   "type": "object",
-  "required": ["version", "status", "cypherBefore", "cypherAfter", "deterministic", "modelRequired", "unsafe", "diagnostics", "summary"],
+  "required": [
+    "version",
+    "status",
+    "cypherBefore",
+    "cypherAfter",
+    "deterministic",
+    "modelRequired",
+    "unsafe",
+    "diagnostics",
+    "policyEvidence",
+    "summary"
+  ],
   "additionalProperties": true,
   "properties": {
     "version": { "const": "cypher-llm-repair-plan/v1" },
@@ -26,6 +37,7 @@
       "type": "array",
       "items": { "$ref": "#/$defs/diagnostic" }
     },
+    "policyEvidence": { "$ref": "#/$defs/policyEvidence" },
     "summary": {
       "type": "object",
       "required": ["deterministic", "modelRequired", "unsafe", "diagnostics"],
@@ -78,6 +90,35 @@
         "message": { "type": "string" },
         "path": { "type": "string" },
         "suggestion": { "type": "string" }
+      }
+    },
+    "policyEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "ok", "summary", "findingCodes"],
+      "properties": {
+        "version": { "const": "cypher-llm-policy-evidence/v1" },
+        "ok": { "type": "boolean" },
+        "policy": { "type": "object", "additionalProperties": true },
+        "rules": { "type": "object", "additionalProperties": true },
+        "planner": { "type": "object", "additionalProperties": true },
+        "statistics": { "type": "object", "additionalProperties": true },
+        "summary": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["findings", "errors", "warnings", "infos"],
+          "properties": {
+            "findings": { "type": "integer", "minimum": 0 },
+            "errors": { "type": "integer", "minimum": 0 },
+            "warnings": { "type": "integer", "minimum": 0 },
+            "infos": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "findingCodes": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        }
       }
     }
   }

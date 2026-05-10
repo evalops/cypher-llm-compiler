@@ -75,7 +75,7 @@ Builds a `cypher-llm-repair-plan/v1` object that separates:
 
 The report includes `cypherBefore`, `cypherAfter`, ranked steps, diagnostics, and a compact summary.
 
-When supplied, `plannerEstimate`, `schemaStatistics`, policy thresholds, and `policyRules` feed the same policy engine used by `assessCypherPolicy`; blocking policy-rule diagnostics are placed in `unsafe` rather than treated as model-editable repairs.
+When supplied, `plannerEstimate`, `schemaStatistics`, policy thresholds, and `policyRules` feed the same policy engine used by `assessCypherPolicy`; blocking policy-rule diagnostics are placed in `unsafe` rather than treated as model-editable repairs. The output includes `policyEvidence` with `ok`, summary counts, stable finding codes, and any rule, planner, or statistics summaries used by the decision.
 
 ## `repairRawCypher(raw, schema)`
 
@@ -163,7 +163,7 @@ Produces a `cypher-llm-proof/v1` object for agent feedback loops:
 }
 ```
 
-Proof claims cover deterministic repairs, compiler diagnostics, execution policy, static cost/safety policy, and parser preflight unless `includeParser` is false. `plannerEstimate`, `schemaStatistics`, policy thresholds, and `policyRules` can be passed into proof options so the cost/safety claim reflects the same evidence used by policy checks.
+Proof claims cover deterministic repairs, compiler diagnostics, execution policy, static cost/safety policy, and parser preflight unless `includeParser` is false. `plannerEstimate`, `schemaStatistics`, policy thresholds, and `policyRules` can be passed into proof options so the cost/safety claim reflects the same evidence used by policy checks. Proofs also include `policyEvidence` so an agent can explain the policy status without issuing a separate policy-check call.
 
 ## `assessCypherPolicy(query, schema, options?)`
 

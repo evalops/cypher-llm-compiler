@@ -120,11 +120,17 @@ describe("OpenAI tool schemas", () => {
         id: "repair-tool-policy",
         sensitiveLabels: [{ label: "Hash", severity: "warning" }]
       }
-    })) as { version: string; deterministic: { patch?: { path: string } }[]; diagnostics: { code: string }[] };
+    })) as {
+      version: string;
+      deterministic: { patch?: { path: string } }[];
+      diagnostics: { code: string }[];
+      policyEvidence: { findingCodes: string[] };
+    };
 
     assert.equal(repairPlan.version, "cypher-llm-repair-plan/v1");
     assert.ok(repairPlan.deterministic.some((step) => step.patch?.path === "/clauses/1/limit"));
     assert.ok(repairPlan.diagnostics.some((diagnostic) => diagnostic.code === "policy-sensitive-label-access"));
+    assert.ok(repairPlan.policyEvidence.findingCodes.includes("policy-sensitive-label-access"));
 
     const policy = (await executeCypherCompilerTool("cypher_policy_check", {
       schema,
@@ -192,11 +198,12 @@ describe("OpenAI tool schemas", () => {
         id: "proof-tool-policy",
         sensitiveLabels: [{ label: "Hash", severity: "warning" }]
       }
-    })) as { status: string; canExecute: boolean; diagnosticCodes: string[]; claims: { id: string }[] };
+    })) as { status: string; canExecute: boolean; diagnosticCodes: string[]; policyEvidence: { findingCodes: string[] }; claims: { id: string }[] };
 
     assert.equal(proof.status, "repaired");
     assert.equal(proof.canExecute, true);
     assert.ok(proof.diagnosticCodes.includes("policy-sensitive-label-access"));
+    assert.ok(proof.policyEvidence.findingCodes.includes("policy-sensitive-label-access"));
     assert.ok(proof.claims.some((claim) => claim.id === "parser-preflight"));
 
     const evalReport = (await executeCypherCompilerTool("cypher_eval", {

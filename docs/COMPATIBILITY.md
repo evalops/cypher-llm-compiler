@@ -58,7 +58,7 @@ Run:
 cypher-llm prove --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json --params examples/tool-hash.params.json --default-limit 25 --proof-out examples/proofs/tool-hash.proof.json
 ```
 
-Proofs are compact compile artifacts for agents. They include the rendered Cypher, `EXPLAIN` preflight, deterministic repair kinds, diagnostic codes, parser preflight status, and execution-policy claims. Planner estimates, schema statistics, policy thresholds, and policy rules can feed the cost/safety proof claim. A blocked proof is not safe to execute without resolving its failed claims.
+Proofs are compact compile artifacts for agents. They include the rendered Cypher, `EXPLAIN` preflight, deterministic repair kinds, diagnostic codes, parser preflight status, execution-policy claims, and `policyEvidence` summary. Planner estimates, schema statistics, policy thresholds, and policy rules can feed the cost/safety proof claim. A blocked proof is not safe to execute without resolving its failed claims.
 
 ## Repair Plans
 
@@ -68,7 +68,7 @@ Run:
 cypher-llm repair-plan --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json --params examples/tool-hash.params.json --default-limit 25 --plan-out examples/proofs/tool-hash.repair-plan.json
 ```
 
-Repair plans are ranked agent feedback objects. Deterministic steps include JSON-patch-like operations that the compiler can apply directly, model-required steps contain diagnostics that need regenerated IR, and unsafe steps hold policy or approval blockers. Planner estimates, schema statistics, policy thresholds, and policy rules can feed the unsafe blocker list so policy failures do not get misclassified as ordinary model edits.
+Repair plans are ranked agent feedback objects. Deterministic steps include JSON-patch-like operations that the compiler can apply directly, model-required steps contain diagnostics that need regenerated IR, and unsafe steps hold policy or approval blockers. Planner estimates, schema statistics, policy thresholds, and policy rules can feed the unsafe blocker list and `policyEvidence` summary so policy failures do not get misclassified as ordinary model edits.
 
 ## Service Manifests
 
