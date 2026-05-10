@@ -27,6 +27,8 @@ export interface EvalExpectation {
   diagnosticCodes?: string[];
   repairKinds?: string[];
   canExecute?: boolean;
+  referenceCypher?: string;
+  expectedAnswer?: JsonLiteral;
 }
 
 export interface EvalAttemptSet {
@@ -43,11 +45,22 @@ export interface EvalAttempt {
   prompt?: string;
   query?: CypherQuery;
   rawCypher?: string;
+  noCypher?: boolean;
+  timeout?: boolean;
   params?: Record<string, JsonLiteral>;
+  observed?: EvalOutcomeLabels;
 }
 
 export interface EvalOptions extends RepairOptions {
   rawCypherCanExecute?: boolean;
+}
+
+export interface EvalOutcomeLabels {
+  syntaxError?: boolean;
+  timeout?: boolean;
+  noCypher?: boolean;
+  returnsResults?: boolean;
+  hasExpectedAnswer?: boolean;
 }
 
 export interface EvalReport {
@@ -67,10 +80,17 @@ export interface EvalMetrics {
   failedTasks: number;
   irAttempts: number;
   rawAttempts: number;
+  noCypherAttempts: number;
+  timeoutAttempts: number;
   executablePlans: number;
   repairApplied: number;
   expectedCypherMatches: number;
   expectedDiagnosticMatches: number;
+  observedSyntaxErrors: number;
+  observedTimeouts: number;
+  observedNoCypher: number;
+  observedReturnsResults: number;
+  expectedAnswerTasks: number;
   diagnosticsByCode: Record<string, number>;
   passRate: number;
   executableRate: number;
@@ -80,12 +100,13 @@ export interface EvalMetrics {
 export interface EvalResult {
   taskId: string;
   question: string;
-  kind: "ir" | "raw" | "missing";
+  kind: "ir" | "raw" | "no-cypher" | "timeout" | "missing";
   passed: boolean;
   cypher?: string;
   canExecute: boolean;
   diagnostics: string[];
   repairs: string[];
+  observed?: EvalOutcomeLabels;
   expectationResults: ExpectationResult[];
 }
 
@@ -126,6 +147,14 @@ function evaluateTask(task: EvalTask, attempt: EvalAttempt | undefined, options:
     };
   }
 
+  if (attempt.timeout) {
+    return evaluateTerminalAttempt(task, attempt, "timeout", "timeout");
+  }
+
+  if (attempt.noCypher) {
+    return evaluateTerminalAttempt(task, attempt, "no-cypher", "no-cypher-output");
+  }
+
   if (attempt.query) {
     return evaluateIrAttempt(task, attempt, options);
   }
@@ -142,7 +171,29 @@ function evaluateTask(task: EvalTask, attempt: EvalAttempt | undefined, options:
     canExecute: false,
     diagnostics: ["empty-attempt"],
     repairs: [],
+    ...(attempt.observed ? { observed: attempt.observed } : {}),
     expectationResults: expectationResults(undefined, false, ["empty-attempt"], [], task.expected)
+  };
+}
+
+function evaluateTerminalAttempt(
+  task: EvalTask,
+  attempt: EvalAttempt,
+  kind: "no-cypher" | "timeout",
+  diagnosticCode: "no-cypher-output" | "timeout"
+): EvalResult {
+  const diagnostics = [diagnosticCode];
+  const expectations = expectationResults(undefined, false, diagnostics, [], task.expected);
+  return {
+    taskId: task.id,
+    question: task.question,
+    kind,
+    passed: expectations.every((item) => item.passed),
+    canExecute: false,
+    diagnostics,
+    repairs: [],
+    ...(attempt.observed ? { observed: attempt.observed } : {}),
+    expectationResults: expectations
   };
 }
 
@@ -170,6 +221,7 @@ function evaluateIrAttempt(task: EvalTask, attempt: EvalAttempt, options: EvalOp
     canExecute: plan.canExecute,
     diagnostics,
     repairs,
+    ...(attempt.observed ? { observed: attempt.observed } : {}),
     expectationResults: expectations
   };
 }
@@ -192,6 +244,7 @@ function evaluateRawAttempt(task: EvalTask, attempt: EvalAttempt, options: EvalO
     canExecute,
     diagnostics,
     repairs,
+    ...(attempt.observed ? { observed: attempt.observed } : {}),
     expectationResults: expectations
   };
 }
@@ -243,11 +296,18 @@ function computeMetrics(results: EvalResult[]): EvalMetrics {
   const failedTasks = totalTasks - passedTasks;
   const irAttempts = results.filter((result) => result.kind === "ir").length;
   const rawAttempts = results.filter((result) => result.kind === "raw").length;
+  const noCypherAttempts = results.filter((result) => result.kind === "no-cypher").length;
+  const timeoutAttempts = results.filter((result) => result.kind === "timeout").length;
   const executablePlans = results.filter((result) => result.canExecute).length;
   const repairApplied = results.filter((result) => result.repairs.length > 0).length;
   const expectedCypherMatches = countExpectationPasses(results, "cypher-contains");
   const expectedDiagnosticMatches = countExpectationPasses(results, "diagnostic-code");
   const diagnosticsByCode = countDiagnostics(results);
+  const observedSyntaxErrors = results.filter((result) => result.observed?.syntaxError).length;
+  const observedTimeouts = results.filter((result) => result.observed?.timeout).length;
+  const observedNoCypher = results.filter((result) => result.observed?.noCypher).length;
+  const observedReturnsResults = results.filter((result) => result.observed?.returnsResults).length;
+  const expectedAnswerTasks = results.filter((result) => result.observed?.hasExpectedAnswer).length;
 
   return {
     totalTasks,
@@ -257,10 +317,17 @@ function computeMetrics(results: EvalResult[]): EvalMetrics {
     failedTasks,
     irAttempts,
     rawAttempts,
+    noCypherAttempts,
+    timeoutAttempts,
     executablePlans,
     repairApplied,
     expectedCypherMatches,
     expectedDiagnosticMatches,
+    observedSyntaxErrors,
+    observedTimeouts,
+    observedNoCypher,
+    observedReturnsResults,
+    expectedAnswerTasks,
     diagnosticsByCode,
     passRate: ratio(passedTasks, totalTasks),
     executableRate: ratio(executablePlans, totalTasks),

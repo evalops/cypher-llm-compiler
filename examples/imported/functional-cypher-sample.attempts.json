@@ -1,0 +1,31 @@
+{
+  "version": "cypher-llm-eval-attempts/v1",
+  "datasetName": "functional-cypher-sample",
+  "model": "reference-cypher",
+  "attempts": [
+    {
+      "taskId": "functional-cypher-sample-0000-find-the-total-number-of-article-in-the-graph",
+      "model": "reference-cypher",
+      "rawCypher": "MATCH (n:Article) RETURN count(n)",
+      "observed": {
+        "hasExpectedAnswer": true
+      }
+    },
+    {
+      "taskId": "functional-cypher-sample-0001-find-the-total-number-of-keyword-in-the-graph",
+      "model": "reference-cypher",
+      "rawCypher": "MATCH (n:Keyword) RETURN count(n)",
+      "observed": {
+        "hasExpectedAnswer": true
+      }
+    },
+    {
+      "taskId": "functional-cypher-sample-0002-find-the-total-number-of-topic-in-the-graph",
+      "model": "reference-cypher",
+      "rawCypher": "MATCH (n:Topic) RETURN count(n)",
+      "observed": {
+        "hasExpectedAnswer": true
+      }
+    }
+  ]
+}

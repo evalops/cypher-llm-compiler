@@ -1,10 +1,18 @@
 #!/usr/bin/env node
-import { readFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import path from "node:path";
 import process from "node:process";
 import type { CypherQuery, CypherSchemaContract, JsonLiteral } from "./ir.js";
 import type { EvalAttemptSet, EvalDataset } from "./evals.js";
 import { evaluateAttempts } from "./evals.js";
 import { evaluateFailureCorpus } from "./failure-corpus.js";
+import {
+  importFunctionalCypherJson,
+  importOpenCypherTckFeature,
+  importText2CypherCsv,
+  type ImportOptions,
+  type ImportedFixtureSet
+} from "./fixture-importers.js";
 import { repairQuery, repairRawCypher } from "./repair.js";
 import { renderQuery } from "./render.js";
 import { createSafeExecutionPlan } from "./safety.js";
@@ -16,6 +24,8 @@ export interface CliIO {
   stdout: Pick<NodeJS.WriteStream, "write">;
   stderr: Pick<NodeJS.WriteStream, "write">;
   readFile: (path: string, encoding: BufferEncoding) => Promise<string>;
+  writeFile?: (path: string, data: string, encoding: BufferEncoding) => Promise<void>;
+  mkdir?: (path: string, options: { recursive: boolean }) => Promise<unknown>;
 }
 
 export async function runCli(argv: string[], io: CliIO = defaultIo()): Promise<number> {
@@ -41,6 +51,15 @@ export async function runCli(argv: string[], io: CliIO = defaultIo()): Promise<n
         return 0;
       case "parse-check":
         await parseCheckCommand(args, io);
+        return 0;
+      case "import-text2cypher":
+        await importText2CypherCommand(args, io);
+        return 0;
+      case "import-functional-cypher":
+        await importFunctionalCypherCommand(args, io);
+        return 0;
+      case "import-opencypher-tck":
+        await importOpenCypherTckCommand(args, io);
         return 0;
       case "help":
       case undefined:
@@ -90,14 +109,21 @@ async function evalCommand(args: Map<string, string | boolean>, io: CliIO) {
   const attempts = JSON.parse(await io.readFile(stringArg(args, "attempts"), "utf8")) as EvalAttemptSet;
   const defaultLimit = optionalNumber(args.get("default-limit"));
   const defaultMaxHops = optionalNumber(args.get("default-max-hops"));
-  const evalOptions: { defaultLimit?: number; defaultMaxHops?: number } = {};
+  const evalOptions: { defaultLimit?: number; defaultMaxHops?: number; rawCypherCanExecute?: boolean } = {};
   if (defaultLimit !== undefined) {
     evalOptions.defaultLimit = defaultLimit;
   }
   if (defaultMaxHops !== undefined) {
     evalOptions.defaultMaxHops = defaultMaxHops;
   }
-  writeJson(io, evaluateAttempts(dataset, attempts, evalOptions));
+  if (args.get("raw-cypher-can-execute") === true) {
+    evalOptions.rawCypherCanExecute = true;
+  }
+  const report = evaluateAttempts(dataset, attempts, evalOptions);
+  if (typeof args.get("report-out") === "string") {
+    await writeJsonFile(io, args.get("report-out") as string, report);
+  }
+  writeJson(io, report);
 }
 
 async function parseCheckCommand(args: Map<string, string | boolean>, io: CliIO) {
@@ -125,6 +151,24 @@ async function parseCheckCommand(args: Map<string, string | boolean>, io: CliIO)
     repairs: repaired.applied,
     compilerDiagnostics: repaired.diagnostics
   });
+}
+
+async function importText2CypherCommand(args: Map<string, string | boolean>, io: CliIO) {
+  const csv = await io.readFile(stringArg(args, "csv"), "utf8");
+  const imported = importText2CypherCsv(csv, importOptions(args, "text2cypher-import"));
+  await writeImportedFixtureSet(args, io, imported);
+}
+
+async function importFunctionalCypherCommand(args: Map<string, string | boolean>, io: CliIO) {
+  const json = await io.readFile(stringArg(args, "json"), "utf8");
+  const imported = importFunctionalCypherJson(json, importOptions(args, "functional-cypher-import"));
+  await writeImportedFixtureSet(args, io, imported);
+}
+
+async function importOpenCypherTckCommand(args: Map<string, string | boolean>, io: CliIO) {
+  const feature = await io.readFile(stringArg(args, "feature"), "utf8");
+  const imported = importOpenCypherTckFeature(feature, importOptions(args, "opencypher-tck-import"));
+  await writeImportedFixtureSet(args, io, imported);
 }
 
 async function readSchema(args: Map<string, string | boolean>, io: CliIO): Promise<CypherSchemaContract> {
@@ -184,6 +228,51 @@ function optionalNumber(value: string | boolean | undefined): number | undefined
   return parsed;
 }
 
+function importOptions(args: Map<string, string | boolean>, fallbackName: string): ImportOptions {
+  const limit = optionalNumber(args.get("limit"));
+  const indexesValue = args.get("indexes");
+  const options: ImportOptions = {
+    datasetName: typeof args.get("dataset-name") === "string" ? (args.get("dataset-name") as string) : fallbackName,
+    source: typeof args.get("source") === "string" ? (args.get("source") as string) : fallbackName
+  };
+  if (typeof args.get("model") === "string") {
+    options.model = args.get("model") as string;
+  }
+  if (typeof args.get("prompt") === "string") {
+    options.prompt = args.get("prompt") as string;
+  }
+  if (limit !== undefined) {
+    options.limit = limit;
+  }
+  if (typeof indexesValue === "string") {
+    options.indexes = indexesValue
+      .split(",")
+      .map((value) => Number(value.trim()))
+      .filter((value) => Number.isInteger(value));
+  }
+  return options;
+}
+
+async function writeImportedFixtureSet(args: Map<string, string | boolean>, io: CliIO, imported: ImportedFixtureSet) {
+  const datasetOut = stringArg(args, "dataset-out");
+  const attemptsOut = stringArg(args, "attempts-out");
+  const summaryOut = typeof args.get("summary-out") === "string" ? (args.get("summary-out") as string) : undefined;
+  await writeJsonFile(io, datasetOut, imported.dataset);
+  await writeJsonFile(io, attemptsOut, imported.attempts);
+  if (summaryOut) {
+    await writeJsonFile(io, summaryOut, imported.summary);
+  }
+  writeJson(io, imported.summary);
+}
+
+async function writeJsonFile(io: CliIO, filepath: string, value: unknown) {
+  if (!io.writeFile || !io.mkdir) {
+    throw new Error("This CLI host does not support writing fixture files.");
+  }
+  await io.mkdir(path.dirname(filepath), { recursive: true });
+  await io.writeFile(filepath, `${JSON.stringify(value, null, 2)}\n`, "utf8");
+}
+
 function writeJson(io: CliIO, value: unknown) {
   io.stdout.write(`${JSON.stringify(value, null, 2)}\n`);
 }
@@ -196,8 +285,11 @@ Commands:
   validate    --schema schema.json --query query.json
   repair-raw  --schema schema.json --cypher "MATCH ..."
   corpus
-  eval        --dataset dataset.json --attempts attempts.json [--default-limit 25] [--default-max-hops 5]
+  eval        --dataset dataset.json --attempts attempts.json [--report-out report.json] [--raw-cypher-can-execute] [--default-limit 25] [--default-max-hops 5]
   parse-check --schema schema.json (--query query.json | --cypher "MATCH ...") [--mode lint|syntax] [--default-limit 25] [--default-max-hops 5]
+  import-text2cypher --csv rows.csv --dataset-out dataset.json --attempts-out attempts.json [--summary-out summary.json] [--dataset-name name] [--source name] [--model name] [--limit 10] [--indexes 0,2,39]
+  import-functional-cypher --json rows.json --dataset-out dataset.json --attempts-out attempts.json [--summary-out summary.json] [--dataset-name name] [--source name] [--limit 10]
+  import-opencypher-tck --feature feature.file --dataset-out dataset.json --attempts-out attempts.json [--summary-out summary.json] [--dataset-name name] [--source name] [--limit 10]
   help
 `;
 }
@@ -206,7 +298,9 @@ function defaultIo(): CliIO {
   return {
     stdout: process.stdout,
     stderr: process.stderr,
-    readFile: (path, encoding) => readFile(path, encoding)
+    readFile: (filepath, encoding) => readFile(filepath, encoding),
+    writeFile: (filepath, data, encoding) => writeFile(filepath, data, encoding),
+    mkdir: (dir, options) => mkdir(dir, options)
   };
 }
 

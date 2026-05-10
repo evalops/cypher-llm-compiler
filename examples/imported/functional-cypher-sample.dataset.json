@@ -1,0 +1,85 @@
+{
+  "version": "cypher-llm-eval-dataset/v1",
+  "name": "functional-cypher-sample",
+  "description": "Imported from neo4j-labs/text2cypher:datasets/functional_cypher/datas/parametric_trainer_with_repeats.json. Rows include reference Cypher as expected-answer fixtures.",
+  "tasks": [
+    {
+      "id": "functional-cypher-sample-0000-find-the-total-number-of-article-in-the-graph",
+      "question": "Find the total number of Article in the graph!",
+      "source": "neo4j-labs/text2cypher:datasets/functional_cypher/datas/parametric_trainer_with_repeats.json#row-0",
+      "tags": [
+        "text2cypher",
+        "functional-cypher",
+        "expected-answer"
+      ],
+      "schema": {
+        "version": "cypher-llm-schema/v1",
+        "nodes": [
+          {
+            "name": "Article"
+          }
+        ],
+        "relationships": []
+      },
+      "expected": {
+        "referenceCypher": "MATCH (n:Article) RETURN count(n)",
+        "cypherContains": [
+          "MATCH"
+        ],
+        "canExecute": true
+      }
+    },
+    {
+      "id": "functional-cypher-sample-0001-find-the-total-number-of-keyword-in-the-graph",
+      "question": "Find the total number of Keyword in the graph!",
+      "source": "neo4j-labs/text2cypher:datasets/functional_cypher/datas/parametric_trainer_with_repeats.json#row-1",
+      "tags": [
+        "text2cypher",
+        "functional-cypher",
+        "expected-answer"
+      ],
+      "schema": {
+        "version": "cypher-llm-schema/v1",
+        "nodes": [
+          {
+            "name": "Keyword"
+          }
+        ],
+        "relationships": []
+      },
+      "expected": {
+        "referenceCypher": "MATCH (n:Keyword) RETURN count(n)",
+        "cypherContains": [
+          "MATCH"
+        ],
+        "canExecute": true
+      }
+    },
+    {
+      "id": "functional-cypher-sample-0002-find-the-total-number-of-topic-in-the-graph",
+      "question": "Find the total number of Topic in the graph!",
+      "source": "neo4j-labs/text2cypher:datasets/functional_cypher/datas/parametric_trainer_with_repeats.json#row-2",
+      "tags": [
+        "text2cypher",
+        "functional-cypher",
+        "expected-answer"
+      ],
+      "schema": {
+        "version": "cypher-llm-schema/v1",
+        "nodes": [
+          {
+            "name": "Topic"
+          }
+        ],
+        "relationships": []
+      },
+      "expected": {
+        "referenceCypher": "MATCH (n:Topic) RETURN count(n)",
+        "cypherContains": [
+          "MATCH"
+        ],
+        "canExecute": true
+      }
+    }
+  ]
+}

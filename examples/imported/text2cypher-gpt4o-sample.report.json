@@ -1,0 +1,164 @@
+{
+  "version": "cypher-llm-eval-report/v1",
+  "datasetName": "text2cypher-gpt4o-sample",
+  "model": "gpt-4o",
+  "metrics": {
+    "totalTasks": 5,
+    "attemptedTasks": 5,
+    "missingAttempts": 0,
+    "passedTasks": 3,
+    "failedTasks": 2,
+    "irAttempts": 0,
+    "rawAttempts": 3,
+    "noCypherAttempts": 1,
+    "timeoutAttempts": 1,
+    "executablePlans": 0,
+    "repairApplied": 0,
+    "expectedCypherMatches": 0,
+    "expectedDiagnosticMatches": 2,
+    "observedSyntaxErrors": 2,
+    "observedTimeouts": 1,
+    "observedNoCypher": 1,
+    "observedReturnsResults": 1,
+    "expectedAnswerTasks": 0,
+    "diagnosticsByCode": {
+      "no-cypher-output": 1,
+      "timeout": 1
+    },
+    "passRate": 0.6,
+    "executableRate": 0,
+    "repairRate": 0
+  },
+  "results": [
+    {
+      "taskId": "text2cypher-gpt4o-sample-0000-find-the-top-3-users-interacted-with-by-sarahp-b",
+      "question": "Find the top 3 users interacted with by 'sarahp.bsky.social'.",
+      "kind": "raw",
+      "passed": true,
+      "cypher": "MATCH (u1:User {label: 'sarahp.bsky.social'})-[:INTERACTED]->(u2:User)\nRETURN u2.label AS interactedUser, COUNT(*) AS interactionCount\nORDER BY interactionCount DESC\nLIMIT 3",
+      "canExecute": false,
+      "diagnostics": [],
+      "repairs": [],
+      "observed": {
+        "syntaxError": false,
+        "timeout": false,
+        "noCypher": false,
+        "returnsResults": true,
+        "hasExpectedAnswer": false
+      },
+      "expectationResults": []
+    },
+    {
+      "taskId": "text2cypher-gpt4o-sample-0002-list-the-top-5-users-having-the-most-interaction",
+      "question": "List the top 5 users having the most interactions with a specific key in 'INTERACTED' relationship.",
+      "kind": "raw",
+      "passed": true,
+      "cypher": "MATCH (u1:User)-[r:INTERACTED]->(u2:User)\nWHERE r.key = 'specific_key'\nWITH u1, COUNT(r) AS interactions\nORDER BY interactions DESC\nLIMIT 5\nRETURN u1.label AS User, interactions",
+      "canExecute": false,
+      "diagnostics": [],
+      "repairs": [],
+      "observed": {
+        "syntaxError": false,
+        "timeout": false,
+        "noCypher": false,
+        "returnsResults": false,
+        "hasExpectedAnswer": false
+      },
+      "expectationResults": []
+    },
+    {
+      "taskId": "text2cypher-gpt4o-sample-0039-list-all-interactions-with-a-size-less-than-2-be",
+      "question": "List all interactions with a size less than 2 between users.",
+      "kind": "timeout",
+      "passed": true,
+      "canExecute": false,
+      "diagnostics": [
+        "timeout"
+      ],
+      "repairs": [],
+      "observed": {
+        "syntaxError": false,
+        "timeout": true,
+        "noCypher": false,
+        "returnsResults": false,
+        "hasExpectedAnswer": false
+      },
+      "expectationResults": [
+        {
+          "kind": "diagnostic-code",
+          "expected": "timeout",
+          "passed": true
+        },
+        {
+          "kind": "can-execute",
+          "expected": false,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "taskId": "text2cypher-gpt4o-sample-0168-what-are-the-first-3-questions-with-the-shortest",
+      "question": "What are the first 3 questions with the shortest title length?",
+      "kind": "raw",
+      "passed": false,
+      "cypher": "MATCH (q:Question)\nWITH q, length(q.title) AS titleLength\nORDER BY titleLength ASC\nLIMIT 3\nRETURN q.title AS title, q.id AS questionId, titleLength",
+      "canExecute": false,
+      "diagnostics": [],
+      "repairs": [],
+      "observed": {
+        "syntaxError": true,
+        "timeout": false,
+        "noCypher": false,
+        "returnsResults": false,
+        "hasExpectedAnswer": false
+      },
+      "expectationResults": [
+        {
+          "kind": "diagnostic-code",
+          "expected": "cypher-parser-error",
+          "passed": false
+        },
+        {
+          "kind": "can-execute",
+          "expected": false,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "taskId": "text2cypher-gpt4o-sample-0185-what-are-the-top-5-questions-with-the-most-comme",
+      "question": "What are the top 5 questions with the most comments, sorted by their creation date?",
+      "kind": "no-cypher",
+      "passed": false,
+      "canExecute": false,
+      "diagnostics": [
+        "no-cypher-output"
+      ],
+      "repairs": [],
+      "observed": {
+        "syntaxError": true,
+        "timeout": false,
+        "noCypher": true,
+        "returnsResults": false,
+        "hasExpectedAnswer": false
+      },
+      "expectationResults": [
+        {
+          "kind": "diagnostic-code",
+          "expected": "cypher-parser-error",
+          "passed": false
+        },
+        {
+          "kind": "diagnostic-code",
+          "expected": "no-cypher-output",
+          "passed": true
+        },
+        {
+          "kind": "can-execute",
+          "expected": false,
+          "passed": true
+        }
+      ]
+    }
+  ]
+}

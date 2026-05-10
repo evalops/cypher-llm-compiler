@@ -1,0 +1,10 @@
+{
+  "source": "neo4j-labs/text2cypher:datasets/synthetic_gpt4o_demodbs/text2cypher_gpt4o.csv",
+  "totalInputRows": 9468,
+  "importedRows": 5,
+  "syntaxErrorRows": 2,
+  "timeoutRows": 1,
+  "noCypherRows": 1,
+  "returnsResultsRows": 1,
+  "expectedAnswerRows": 0
+}

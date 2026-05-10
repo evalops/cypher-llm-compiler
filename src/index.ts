@@ -3,6 +3,7 @@ export * from "./diagnostics.js";
 export * from "./dialects.js";
 export * from "./evals.js";
 export * from "./failure-corpus.js";
+export * from "./fixture-importers.js";
 export * from "./neo4j-explain.js";
 export * from "./normalize.js";
 export * from "./parser-validation.js";

@@ -1,0 +1,106 @@
+{
+  "version": "cypher-llm-eval-report/v1",
+  "datasetName": "functional-cypher-sample",
+  "model": "reference-cypher",
+  "metrics": {
+    "totalTasks": 3,
+    "attemptedTasks": 3,
+    "missingAttempts": 0,
+    "passedTasks": 3,
+    "failedTasks": 0,
+    "irAttempts": 0,
+    "rawAttempts": 3,
+    "noCypherAttempts": 0,
+    "timeoutAttempts": 0,
+    "executablePlans": 3,
+    "repairApplied": 0,
+    "expectedCypherMatches": 3,
+    "expectedDiagnosticMatches": 0,
+    "observedSyntaxErrors": 0,
+    "observedTimeouts": 0,
+    "observedNoCypher": 0,
+    "observedReturnsResults": 0,
+    "expectedAnswerTasks": 3,
+    "diagnosticsByCode": {},
+    "passRate": 1,
+    "executableRate": 1,
+    "repairRate": 0
+  },
+  "results": [
+    {
+      "taskId": "functional-cypher-sample-0000-find-the-total-number-of-article-in-the-graph",
+      "question": "Find the total number of Article in the graph!",
+      "kind": "raw",
+      "passed": true,
+      "cypher": "MATCH (n:Article) RETURN count(n)",
+      "canExecute": true,
+      "diagnostics": [],
+      "repairs": [],
+      "observed": {
+        "hasExpectedAnswer": true
+      },
+      "expectationResults": [
+        {
+          "kind": "cypher-contains",
+          "expected": "MATCH",
+          "passed": true
+        },
+        {
+          "kind": "can-execute",
+          "expected": true,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "taskId": "functional-cypher-sample-0001-find-the-total-number-of-keyword-in-the-graph",
+      "question": "Find the total number of Keyword in the graph!",
+      "kind": "raw",
+      "passed": true,
+      "cypher": "MATCH (n:Keyword) RETURN count(n)",
+      "canExecute": true,
+      "diagnostics": [],
+      "repairs": [],
+      "observed": {
+        "hasExpectedAnswer": true
+      },
+      "expectationResults": [
+        {
+          "kind": "cypher-contains",
+          "expected": "MATCH",
+          "passed": true
+        },
+        {
+          "kind": "can-execute",
+          "expected": true,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "taskId": "functional-cypher-sample-0002-find-the-total-number-of-topic-in-the-graph",
+      "question": "Find the total number of Topic in the graph!",
+      "kind": "raw",
+      "passed": true,
+      "cypher": "MATCH (n:Topic) RETURN count(n)",
+      "canExecute": true,
+      "diagnostics": [],
+      "repairs": [],
+      "observed": {
+        "hasExpectedAnswer": true
+      },
+      "expectationResults": [
+        {
+          "kind": "cypher-contains",
+          "expected": "MATCH",
+          "passed": true
+        },
+        {
+          "kind": "can-execute",
+          "expected": true,
+          "passed": true
+        }
+      ]
+    }
+  ]
+}

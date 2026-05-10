@@ -23,7 +23,7 @@ Artifacts:
 - Eval runner that reports pass rate, executable rate, repair rate, diagnostic counts, and per-task results.
 - CLI command for repeatable local/CI runs.
 
-Status: started through `evaluateAttempts` and `cypher-llm eval`.
+Status: implemented through `evaluateAttempts`, `cypher-llm eval`, importer helpers, checked-in text2cypher/openCypher samples, and baseline reports.
 
 ## 3. Parser and Database Verification
 

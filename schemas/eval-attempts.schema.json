@@ -38,7 +38,9 @@
       "required": ["taskId"],
       "oneOf": [
         { "required": ["query"] },
-        { "required": ["rawCypher"] }
+        { "required": ["rawCypher"] },
+        { "required": ["noCypher"] },
+        { "required": ["timeout"] }
       ],
       "properties": {
         "taskId": { "type": "string", "minLength": 1 },
@@ -46,10 +48,24 @@
         "prompt": { "type": "string" },
         "query": { "$ref": "https://evalops.dev/schemas/cypher-llm/query/v1.json" },
         "rawCypher": { "type": "string", "minLength": 1 },
+        "noCypher": { "type": "boolean" },
+        "timeout": { "type": "boolean" },
         "params": {
           "type": "object",
           "additionalProperties": { "$ref": "#/$defs/jsonLiteral" }
-        }
+        },
+        "observed": { "$ref": "#/$defs/outcomeLabels" }
+      }
+    },
+    "outcomeLabels": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "syntaxError": { "type": "boolean" },
+        "timeout": { "type": "boolean" },
+        "noCypher": { "type": "boolean" },
+        "returnsResults": { "type": "boolean" },
+        "hasExpectedAnswer": { "type": "boolean" }
       }
     }
   }

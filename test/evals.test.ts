@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, it } from "node:test";
 import Ajv2020Module from "ajv/dist/2020.js";
@@ -28,6 +28,27 @@ describe("eval harness", () => {
     assert.equal(report.results[1]?.diagnostics.includes("undefined-variable"), true);
     assert.equal(report.results[2]?.repairs.includes("quote-raw-identifier"), true);
   });
+
+  it("keeps checked-in imported reports reproducible", () => {
+    const importedDir = path.join(process.cwd(), "examples/imported");
+    const datasetFiles = readdirSync(importedDir).filter((file) => file.endsWith(".dataset.json"));
+
+    assert.equal(datasetFiles.length >= 3, true);
+    for (const datasetFile of datasetFiles) {
+      const prefix = datasetFile.replace(/\.dataset\.json$/, "");
+      const dataset = readJson<EvalDataset>(`examples/imported/${prefix}.dataset.json`);
+      const attempts = readJson<EvalAttemptSet>(`examples/imported/${prefix}.attempts.json`);
+      const report = readJson<{ metrics: { totalTasks: number; passedTasks: number } }>(
+        `examples/imported/${prefix}.report.json`
+      );
+      const regenerated = evaluateAttempts(dataset, attempts, {
+        rawCypherCanExecute: prefix !== "text2cypher-gpt4o-sample"
+      });
+
+      assert.equal(regenerated.metrics.totalTasks, report.metrics.totalTasks, prefix);
+      assert.equal(regenerated.metrics.passedTasks, report.metrics.passedTasks, prefix);
+    }
+  });
 });
 
 describe("json schemas", () => {
@@ -49,6 +70,16 @@ describe("json schemas", () => {
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/eval-dataset/v1.json", readJson("examples/eval-dataset.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/eval-attempts/v1.json", readJson("examples/eval-attempts.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/dialect-profile/v1.json", readJson("profiles/neo4j-cypher-25.json"));
+
+    const importedDir = path.join(process.cwd(), "examples/imported");
+    for (const file of readdirSync(importedDir)) {
+      if (file.endsWith(".dataset.json")) {
+        assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/eval-dataset/v1.json", readJson(`examples/imported/${file}`));
+      }
+      if (file.endsWith(".attempts.json")) {
+        assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/eval-attempts/v1.json", readJson(`examples/imported/${file}`));
+      }
+    }
   });
 });
 

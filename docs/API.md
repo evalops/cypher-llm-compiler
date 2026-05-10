@@ -166,3 +166,20 @@ Output:
 ```
 
 This is the main entrypoint for comparing raw text2cypher against compiler-mediated generation.
+
+## Fixture Importers
+
+The package exposes import helpers for building eval datasets from upstream sources:
+
+- `importText2CypherCsv(csvText, options)`
+- `importFunctionalCypherJson(jsonText, options)`
+- `importOpenCypherTckFeature(featureText, options)`
+- `inferSchemaFromCypher(cypher)`
+
+The corresponding CLI commands write dataset, attempt, and summary JSON files:
+
+```bash
+cypher-llm import-text2cypher --csv rows.csv --dataset-out dataset.json --attempts-out attempts.json
+cypher-llm import-functional-cypher --json rows.json --dataset-out dataset.json --attempts-out attempts.json
+cypher-llm import-opencypher-tck --feature feature.file --dataset-out dataset.json --attempts-out attempts.json
+```

@@ -127,6 +127,7 @@ cypher-llm repair-raw --schema schema.json --cypher "MATCH (t:Tool)-[:has MD5 ha
 cypher-llm corpus
 cypher-llm eval --dataset examples/eval-dataset.json --attempts examples/eval-attempts.json --default-limit 25
 cypher-llm parse-check --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json --default-limit 25
+cypher-llm import-text2cypher --csv rows.csv --dataset-out dataset.json --attempts-out attempts.json
 ```
 
 `render` returns a `SafeExecutionPlan`:
@@ -229,6 +230,7 @@ Those are deliberate boundaries. The repo is the missing LLM compiler surface, n
 - `src/cli.ts`: JSON-in/JSON-out CLI for agents and eval harnesses.
 - `docs/`: Design notes and LLM integration guidance.
 - `examples/`: Small schema/query fixtures for CLI smoke tests and agent onboarding.
+- `examples/imported/`: Imported text2cypher/openCypher fixture samples and baseline reports.
 - `profiles/`: Versioned dialect profiles for Neo4j Cypher 25, openCypher 9, and GQL-oriented output.
 - `schemas/`: JSON Schema contracts for IR, graph schema, eval datasets, and eval attempts.
 - `test/`: Node test-runner coverage for renderer, schema, validation, repair, safety, and corpus behavior.

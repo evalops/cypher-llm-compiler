@@ -1,0 +1,51 @@
+{
+  "version": "cypher-llm-eval-dataset/v1",
+  "name": "opencypher-tck-aggregation-sample",
+  "description": "Imported from opencypher/openCypher:tck/features/expressions/aggregation/Aggregation1.feature. TCK queries are preserved as parser-backed syntax fixtures.",
+  "tasks": [
+    {
+      "id": "opencypher-tck-aggregation-sample-0000-1-count-only-non-null-values",
+      "question": "[1] Count only non-null values",
+      "source": "opencypher/openCypher:tck/features/expressions/aggregation/Aggregation1.feature#scenario-0",
+      "tags": [
+        "opencypher-tck",
+        "syntax",
+        "Aggregation1 - Count"
+      ],
+      "schema": {
+        "version": "cypher-llm-schema/v1",
+        "nodes": [],
+        "relationships": []
+      },
+      "expected": {
+        "referenceCypher": "MATCH (n)\n      RETURN n.name, count(n.num)",
+        "cypherContains": [
+          "MATCH"
+        ],
+        "canExecute": true
+      }
+    },
+    {
+      "id": "opencypher-tck-aggregation-sample-0001-2-counting-loop-relationships",
+      "question": "[2] Counting loop relationships",
+      "source": "opencypher/openCypher:tck/features/expressions/aggregation/Aggregation1.feature#scenario-1",
+      "tags": [
+        "opencypher-tck",
+        "syntax",
+        "Aggregation1 - Count"
+      ],
+      "schema": {
+        "version": "cypher-llm-schema/v1",
+        "nodes": [],
+        "relationships": []
+      },
+      "expected": {
+        "referenceCypher": "MATCH ()-[r]-()\n      RETURN count(r)",
+        "cypherContains": [
+          "MATCH"
+        ],
+        "canExecute": true
+      }
+    }
+  ]
+}

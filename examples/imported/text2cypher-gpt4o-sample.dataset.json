@@ -1,0 +1,146 @@
+{
+  "version": "cypher-llm-eval-dataset/v1",
+  "name": "text2cypher-gpt4o-sample",
+  "description": "Imported from neo4j-labs/text2cypher:datasets/synthetic_gpt4o_demodbs/text2cypher_gpt4o.csv. Rows preserve upstream syntax_error, timeout, returns_results, and no_cypher labels.",
+  "tasks": [
+    {
+      "id": "text2cypher-gpt4o-sample-0000-find-the-top-3-users-interacted-with-by-sarahp-b",
+      "question": "Find the top 3 users interacted with by 'sarahp.bsky.social'.",
+      "source": "neo4j-labs/text2cypher:datasets/synthetic_gpt4o_demodbs/text2cypher_gpt4o.csv#row-0",
+      "tags": [
+        "text2cypher",
+        "Complex Retrieval Queries",
+        "bluesky",
+        "returns-results"
+      ],
+      "schema": {
+        "version": "cypher-llm-schema/v1",
+        "nodes": [
+          {
+            "name": "User"
+          }
+        ],
+        "relationships": [
+          {
+            "type": "INTERACTED",
+            "from": "User",
+            "to": "User"
+          }
+        ]
+      },
+      "expected": {}
+    },
+    {
+      "id": "text2cypher-gpt4o-sample-0002-list-the-top-5-users-having-the-most-interaction",
+      "question": "List the top 5 users having the most interactions with a specific key in 'INTERACTED' relationship.",
+      "source": "neo4j-labs/text2cypher:datasets/synthetic_gpt4o_demodbs/text2cypher_gpt4o.csv#row-2",
+      "tags": [
+        "text2cypher",
+        "Complex Retrieval Queries",
+        "bluesky",
+        "no-results"
+      ],
+      "schema": {
+        "version": "cypher-llm-schema/v1",
+        "nodes": [
+          {
+            "name": "User"
+          }
+        ],
+        "relationships": [
+          {
+            "type": "INTERACTED",
+            "from": "User",
+            "to": "User"
+          }
+        ]
+      },
+      "expected": {}
+    },
+    {
+      "id": "text2cypher-gpt4o-sample-0039-list-all-interactions-with-a-size-less-than-2-be",
+      "question": "List all interactions with a size less than 2 between users.",
+      "source": "neo4j-labs/text2cypher:datasets/synthetic_gpt4o_demodbs/text2cypher_gpt4o.csv#row-39",
+      "tags": [
+        "text2cypher",
+        "Pathfinding Queries",
+        "bluesky",
+        "timeout",
+        "no-results"
+      ],
+      "schema": {
+        "version": "cypher-llm-schema/v1",
+        "nodes": [
+          {
+            "name": "User"
+          }
+        ],
+        "relationships": [
+          {
+            "type": "INTERACTED",
+            "from": "User",
+            "to": "User"
+          }
+        ]
+      },
+      "expected": {
+        "diagnosticCodes": [
+          "timeout"
+        ],
+        "canExecute": false
+      }
+    },
+    {
+      "id": "text2cypher-gpt4o-sample-0168-what-are-the-first-3-questions-with-the-shortest",
+      "question": "What are the first 3 questions with the shortest title length?",
+      "source": "neo4j-labs/text2cypher:datasets/synthetic_gpt4o_demodbs/text2cypher_gpt4o.csv#row-168",
+      "tags": [
+        "text2cypher",
+        "Verbose query",
+        "buzzoverflow",
+        "syntax-error",
+        "no-results"
+      ],
+      "schema": {
+        "version": "cypher-llm-schema/v1",
+        "nodes": [
+          {
+            "name": "Question"
+          }
+        ],
+        "relationships": []
+      },
+      "expected": {
+        "diagnosticCodes": [
+          "cypher-parser-error"
+        ],
+        "canExecute": false
+      }
+    },
+    {
+      "id": "text2cypher-gpt4o-sample-0185-what-are-the-top-5-questions-with-the-most-comme",
+      "question": "What are the top 5 questions with the most comments, sorted by their creation date?",
+      "source": "neo4j-labs/text2cypher:datasets/synthetic_gpt4o_demodbs/text2cypher_gpt4o.csv#row-185",
+      "tags": [
+        "text2cypher",
+        "Verbose query",
+        "buzzoverflow",
+        "syntax-error",
+        "no-cypher",
+        "no-results"
+      ],
+      "schema": {
+        "version": "cypher-llm-schema/v1",
+        "nodes": [],
+        "relationships": []
+      },
+      "expected": {
+        "diagnosticCodes": [
+          "cypher-parser-error",
+          "no-cypher-output"
+        ],
+        "canExecute": false
+      }
+    }
+  ]
+}

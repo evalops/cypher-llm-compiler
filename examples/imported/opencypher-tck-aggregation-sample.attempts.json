@@ -1,0 +1,23 @@
+{
+  "version": "cypher-llm-eval-attempts/v1",
+  "datasetName": "opencypher-tck-aggregation-sample",
+  "model": "tck-reference",
+  "attempts": [
+    {
+      "taskId": "opencypher-tck-aggregation-sample-0000-1-count-only-non-null-values",
+      "model": "tck-reference",
+      "rawCypher": "MATCH (n)\n      RETURN n.name, count(n.num)",
+      "observed": {
+        "hasExpectedAnswer": true
+      }
+    },
+    {
+      "taskId": "opencypher-tck-aggregation-sample-0001-2-counting-loop-relationships",
+      "model": "tck-reference",
+      "rawCypher": "MATCH ()-[r]-()\n      RETURN count(r)",
+      "observed": {
+        "hasExpectedAnswer": true
+      }
+    }
+  ]
+}

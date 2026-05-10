@@ -103,19 +103,39 @@ describe("cli", () => {
     ]);
     let stdout = "";
     let stderr = "";
+    const writes = new Map<string, string>();
     const io: CliIO = {
       stdout: { write: (chunk: string | Uint8Array) => ((stdout += String(chunk)), true) },
       stderr: { write: (chunk: string | Uint8Array) => ((stderr += String(chunk)), true) },
-      readFile: async (path) => files.get(String(path)) ?? ""
+      readFile: async (path) => files.get(String(path)) ?? "",
+      writeFile: async (path, data) => {
+        writes.set(path, data);
+      },
+      mkdir: async () => undefined
     };
 
-    const code = await runCli(["eval", "--dataset", "dataset.json", "--attempts", "attempts.json", "--default-limit", "10"], io);
+    const code = await runCli(
+      [
+        "eval",
+        "--dataset",
+        "dataset.json",
+        "--attempts",
+        "attempts.json",
+        "--report-out",
+        "out/report.json",
+        "--raw-cypher-can-execute",
+        "--default-limit",
+        "10"
+      ],
+      io
+    );
     const output = JSON.parse(stdout) as { metrics: { passedTasks: number; passRate: number } };
 
     assert.equal(code, 0);
     assert.equal(stderr, "");
     assert.equal(output.metrics.passedTasks, 1);
     assert.equal(output.metrics.passRate, 1);
+    assert.ok(writes.has("out/report.json"));
   });
 
   it("runs parser-backed validation from raw Cypher", async () => {
@@ -144,5 +164,55 @@ describe("cli", () => {
     assert.equal(stderr, "");
     assert.equal(output.ok, true);
     assert.deepEqual(output.diagnostics, []);
+  });
+
+  it("imports text2cypher CSV fixtures to dataset and attempt files", async () => {
+    const files = new Map<string, string>([
+      [
+        "rows.csv",
+        [
+          "question,cypher,type,database,explanation,syntax_error,timeout,returns_results,no_cypher",
+          '"Find users","MATCH (u:User) RETURN u",Simple,graph,"",False,False,True,False'
+        ].join("\n")
+      ]
+    ]);
+    const writes = new Map<string, string>();
+    let stdout = "";
+    let stderr = "";
+    const io: CliIO = {
+      stdout: { write: (chunk: string | Uint8Array) => ((stdout += String(chunk)), true) },
+      stderr: { write: (chunk: string | Uint8Array) => ((stderr += String(chunk)), true) },
+      readFile: async (path) => files.get(String(path)) ?? "",
+      writeFile: async (path, data) => {
+        writes.set(path, data);
+      },
+      mkdir: async () => undefined
+    };
+
+    const code = await runCli(
+      [
+        "import-text2cypher",
+        "--csv",
+        "rows.csv",
+        "--dataset-out",
+        "out/dataset.json",
+        "--attempts-out",
+        "out/attempts.json",
+        "--summary-out",
+        "out/summary.json",
+        "--dataset-name",
+        "cli-import"
+      ],
+      io
+    );
+    const summary = JSON.parse(stdout) as { importedRows: number; returnsResultsRows: number };
+
+    assert.equal(code, 0);
+    assert.equal(stderr, "");
+    assert.equal(summary.importedRows, 1);
+    assert.equal(summary.returnsResultsRows, 1);
+    assert.ok(writes.has("out/dataset.json"));
+    assert.ok(writes.has("out/attempts.json"));
+    assert.ok(writes.has("out/summary.json"));
   });
 });

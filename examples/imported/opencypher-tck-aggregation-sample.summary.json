@@ -1,0 +1,10 @@
+{
+  "source": "opencypher/openCypher:tck/features/expressions/aggregation/Aggregation1.feature",
+  "totalInputRows": 2,
+  "importedRows": 2,
+  "syntaxErrorRows": 0,
+  "timeoutRows": 0,
+  "noCypherRows": 0,
+  "returnsResultsRows": 0,
+  "expectedAnswerRows": 2
+}

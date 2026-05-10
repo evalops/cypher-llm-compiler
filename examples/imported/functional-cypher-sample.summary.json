@@ -1,0 +1,10 @@
+{
+  "source": "neo4j-labs/text2cypher:datasets/functional_cypher/datas/parametric_trainer_with_repeats.json",
+  "totalInputRows": 30116,
+  "importedRows": 3,
+  "syntaxErrorRows": 0,
+  "timeoutRows": 0,
+  "noCypherRows": 0,
+  "returnsResultsRows": 0,
+  "expectedAnswerRows": 3
+}

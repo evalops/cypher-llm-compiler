@@ -37,6 +37,12 @@ The report includes:
 - `diagnosticsByCode`: stable failure taxonomy counts.
 - per-task canonical Cypher, diagnostics, repairs, and expectation checks.
 
+## Imported Fixtures
+
+`docs/DATASETS.md` documents the import commands and provenance for checked-in samples from `neo4j-labs/text2cypher` and `opencypher/openCypher`.
+
+The importer commands preserve observed model-output labels such as syntax error, timeout, no-Cypher output, result/no-result, and expected-answer availability. These labels appear in eval attempts and aggregate into report metrics.
+
 Recommended external eval loop:
 
 1. Generate `CypherQuery` IR from natural-language tasks.

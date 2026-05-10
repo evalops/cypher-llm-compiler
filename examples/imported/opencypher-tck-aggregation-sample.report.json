@@ -1,0 +1,81 @@
+{
+  "version": "cypher-llm-eval-report/v1",
+  "datasetName": "opencypher-tck-aggregation-sample",
+  "model": "tck-reference",
+  "metrics": {
+    "totalTasks": 2,
+    "attemptedTasks": 2,
+    "missingAttempts": 0,
+    "passedTasks": 2,
+    "failedTasks": 0,
+    "irAttempts": 0,
+    "rawAttempts": 2,
+    "noCypherAttempts": 0,
+    "timeoutAttempts": 0,
+    "executablePlans": 2,
+    "repairApplied": 0,
+    "expectedCypherMatches": 2,
+    "expectedDiagnosticMatches": 0,
+    "observedSyntaxErrors": 0,
+    "observedTimeouts": 0,
+    "observedNoCypher": 0,
+    "observedReturnsResults": 0,
+    "expectedAnswerTasks": 2,
+    "diagnosticsByCode": {},
+    "passRate": 1,
+    "executableRate": 1,
+    "repairRate": 0
+  },
+  "results": [
+    {
+      "taskId": "opencypher-tck-aggregation-sample-0000-1-count-only-non-null-values",
+      "question": "[1] Count only non-null values",
+      "kind": "raw",
+      "passed": true,
+      "cypher": "MATCH (n)\n      RETURN n.name, count(n.num)",
+      "canExecute": true,
+      "diagnostics": [],
+      "repairs": [],
+      "observed": {
+        "hasExpectedAnswer": true
+      },
+      "expectationResults": [
+        {
+          "kind": "cypher-contains",
+          "expected": "MATCH",
+          "passed": true
+        },
+        {
+          "kind": "can-execute",
+          "expected": true,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "taskId": "opencypher-tck-aggregation-sample-0001-2-counting-loop-relationships",
+      "question": "[2] Counting loop relationships",
+      "kind": "raw",
+      "passed": true,
+      "cypher": "MATCH ()-[r]-()\n      RETURN count(r)",
+      "canExecute": true,
+      "diagnostics": [],
+      "repairs": [],
+      "observed": {
+        "hasExpectedAnswer": true
+      },
+      "expectationResults": [
+        {
+          "kind": "cypher-contains",
+          "expected": "MATCH",
+          "passed": true
+        },
+        {
+          "kind": "can-execute",
+          "expected": true,
+          "passed": true
+        }
+      ]
+    }
+  ]
+}
