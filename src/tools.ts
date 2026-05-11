@@ -16,6 +16,7 @@ import type { ParserValidationOptions } from "./parser-validation.js";
 import { validateCypherTextWithParser } from "./parser-validation.js";
 import type { CypherPlannerEstimate } from "./planner-estimate.js";
 import { assessCypherPolicy } from "./policy.js";
+import { evaluatePolicyAttempts, type CypherPolicyEvalOptions } from "./policy-eval.js";
 import type { CypherPolicyRuleSet } from "./policy-rules.js";
 import {
   buildPolicyProfileCatalog,
@@ -47,6 +48,7 @@ export type CypherCompilerToolName =
   | "cypher_parse_lossless"
   | "cypher_parse_check"
   | "cypher_policy_check"
+  | "cypher_policy_eval"
   | "cypher_policy_profiles"
   | "cypher_lsp_diagnostics"
   | "cypher_prove"
@@ -455,6 +457,34 @@ export const CYPHER_COMPILER_TOOLS: readonly CypherCompilerToolDefinition[] = [
     })
   },
   {
+    name: "cypher_policy_eval",
+    description:
+      "Benchmark policy decisions across an eval dataset and attempt set, including risky-but-executable attempts and finding-code counts.",
+    inputSchema: objectSchema(["dataset", "attempts"], {
+      dataset: evalDatasetSchema,
+      attempts: evalAttemptSetSchema,
+      policyProfile: {
+        type: "object",
+        description: "Optional cypher-llm-policy-profile/v1 profile to apply before explicit option overrides.",
+        additionalProperties: true
+      },
+      policyProfileId: {
+        type: "string",
+        description: "Built-in policy profile id, such as llm-readonly-strict."
+      },
+      ...policyEvidenceProperties,
+      allowWrites: {
+        type: "boolean",
+        description: "Allow write clauses in policy assessment."
+      },
+      parserMode: {
+        enum: ["lint", "syntax"],
+        description: "Parser mode used when raw Cypher attempts are lifted for policy assessment."
+      },
+      ...repairOptionProperties
+    })
+  },
+  {
     name: "cypher_policy_profiles",
     description: "List built-in Cypher policy profiles that can be passed to cypher_policy_check.",
     inputSchema: objectSchema([], {})
@@ -771,6 +801,13 @@ export async function executeCypherCompilerTool(name: string, input: unknown): P
         requiredObject<CypherQuery>(args, "query"),
         requiredObject<CypherSchemaContract>(args, "schema"),
         policyOptions(args)
+      );
+    }
+    case "cypher_policy_eval": {
+      return evaluatePolicyAttempts(
+        requiredObject<EvalDataset>(args, "dataset"),
+        requiredObject<EvalAttemptSet>(args, "attempts"),
+        policyEvalOptions(args)
       );
     }
     case "cypher_policy_profiles": {
@@ -1206,6 +1243,26 @@ function policyOptions(args: Record<string, unknown>) {
     return policyOptionsFromProfile(getPolicyProfile(policyProfileId), overrides);
   }
   return overrides;
+}
+
+function policyEvalOptions(args: Record<string, unknown>): CypherPolicyEvalOptions {
+  const options = policyOptions(args) as CypherPolicyEvalOptions;
+  const defaultLimit = optionalNumber(args, "defaultLimit");
+  const defaultMaxHops = optionalNumber(args, "defaultMaxHops");
+  const parserMode = optionalString(args, "parserMode");
+  if (defaultLimit !== undefined) {
+    options.defaultLimit = defaultLimit;
+  }
+  if (defaultMaxHops !== undefined) {
+    options.defaultMaxHops = defaultMaxHops;
+  }
+  if (parserMode !== undefined) {
+    if (parserMode !== "lint" && parserMode !== "syntax") {
+      throw new Error("Expected 'parserMode' to be lint or syntax.");
+    }
+    options.parserMode = parserMode;
+  }
+  return options;
 }
 
 function lspOptions(args: Record<string, unknown>) {

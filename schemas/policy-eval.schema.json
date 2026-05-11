@@ -1,0 +1,186 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evalops.dev/schemas/cypher-llm/policy-eval/v1.json",
+  "title": "Cypher LLM Policy Eval Report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "generatedAt", "datasetName", "summary", "results"],
+  "properties": {
+    "version": { "const": "cypher-llm-policy-eval/v1" },
+    "generatedAt": { "type": "string", "minLength": 1 },
+    "datasetName": { "type": "string", "minLength": 1 },
+    "model": { "type": "string", "minLength": 1 },
+    "prompt": { "type": "string", "minLength": 1 },
+    "policy": { "$ref": "#/$defs/policyRef" },
+    "rules": { "$ref": "#/$defs/ruleSummary" },
+    "planner": { "$ref": "#/$defs/plannerSummary" },
+    "statistics": { "$ref": "#/$defs/statisticsSummary" },
+    "summary": { "$ref": "#/$defs/summary" },
+    "results": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/result" }
+    }
+  },
+  "$defs": {
+    "countMap": {
+      "type": "object",
+      "additionalProperties": { "type": "integer", "minimum": 0 }
+    },
+    "policyRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1 }
+      }
+    },
+    "ruleSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "sensitiveLabels", "sensitiveRelationships", "sensitiveProperties", "tenantScopes"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1 },
+        "sensitiveLabels": { "type": "integer", "minimum": 0 },
+        "sensitiveRelationships": { "type": "integer", "minimum": 0 },
+        "sensitiveProperties": { "type": "integer", "minimum": 0 },
+        "tenantScopes": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "plannerSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "operators"],
+      "properties": {
+        "source": { "type": "string", "minLength": 1 },
+        "operators": { "type": "integer", "minimum": 0 },
+        "estimatedRows": { "type": "number", "minimum": 0 },
+        "dbHits": { "type": "number", "minimum": 0 }
+      }
+    },
+    "statisticsSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "labels", "relationships"],
+      "properties": {
+        "source": { "type": "string", "minLength": 1 },
+        "labels": { "type": "integer", "minimum": 0 },
+        "relationships": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "policySummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["findings", "errors", "warnings", "infos"],
+      "properties": {
+        "findings": { "type": "integer", "minimum": 0 },
+        "errors": { "type": "integer", "minimum": 0 },
+        "warnings": { "type": "integer", "minimum": 0 },
+        "infos": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "totalTasks",
+        "evaluatedAttempts",
+        "missingAttempts",
+        "noCypherAttempts",
+        "timeoutAttempts",
+        "irAttempts",
+        "rawAttempts",
+        "passedAttempts",
+        "warningAttempts",
+        "blockedAttempts",
+        "notEvaluatedAttempts",
+        "compilerExecutableAttempts",
+        "riskyExecutableAttempts",
+        "findings",
+        "errors",
+        "warnings",
+        "infos",
+        "findingsByCode",
+        "diagnosticsByCode",
+        "policyPassRate",
+        "blockedRate"
+      ],
+      "properties": {
+        "totalTasks": { "type": "integer", "minimum": 0 },
+        "evaluatedAttempts": { "type": "integer", "minimum": 0 },
+        "missingAttempts": { "type": "integer", "minimum": 0 },
+        "noCypherAttempts": { "type": "integer", "minimum": 0 },
+        "timeoutAttempts": { "type": "integer", "minimum": 0 },
+        "irAttempts": { "type": "integer", "minimum": 0 },
+        "rawAttempts": { "type": "integer", "minimum": 0 },
+        "passedAttempts": { "type": "integer", "minimum": 0 },
+        "warningAttempts": { "type": "integer", "minimum": 0 },
+        "blockedAttempts": { "type": "integer", "minimum": 0 },
+        "notEvaluatedAttempts": { "type": "integer", "minimum": 0 },
+        "compilerExecutableAttempts": { "type": "integer", "minimum": 0 },
+        "riskyExecutableAttempts": { "type": "integer", "minimum": 0 },
+        "findings": { "type": "integer", "minimum": 0 },
+        "errors": { "type": "integer", "minimum": 0 },
+        "warnings": { "type": "integer", "minimum": 0 },
+        "infos": { "type": "integer", "minimum": 0 },
+        "findingsByCode": { "$ref": "#/$defs/countMap" },
+        "diagnosticsByCode": { "$ref": "#/$defs/countMap" },
+        "policyPassRate": { "type": "number" },
+        "blockedRate": { "type": "number" }
+      }
+    },
+    "result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "taskId",
+        "question",
+        "kind",
+        "status",
+        "canEvaluate",
+        "policyOk",
+        "compilerCanExecute",
+        "repairs",
+        "diagnostics",
+        "summary",
+        "findings"
+      ],
+      "properties": {
+        "taskId": { "type": "string", "minLength": 1 },
+        "question": { "type": "string", "minLength": 1 },
+        "kind": { "enum": ["ir", "raw", "no-cypher", "timeout", "missing"] },
+        "status": { "enum": ["passed", "warning", "blocked", "not-evaluated"] },
+        "canEvaluate": { "type": "boolean" },
+        "policyOk": { "type": "boolean" },
+        "compilerCanExecute": { "type": "boolean" },
+        "cypher": { "type": "string" },
+        "repairs": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "diagnostics": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "summary": { "$ref": "#/$defs/policySummary" },
+        "findings": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/finding" }
+        }
+      }
+    },
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "severity", "message", "path", "suggestion"],
+      "properties": {
+        "code": { "type": "string", "minLength": 1 },
+        "severity": { "enum": ["info", "warning", "error"] },
+        "message": { "type": "string", "minLength": 1 },
+        "path": { "type": "string", "minLength": 1 },
+        "suggestion": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

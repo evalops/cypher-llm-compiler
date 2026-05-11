@@ -26,6 +26,7 @@ export * from "./normalize.js";
 export * from "./parser-validation.js";
 export * from "./planner-estimate.js";
 export * from "./policy.js";
+export * from "./policy-eval.js";
 export * from "./policy-profile.js";
 export * from "./policy-rules.js";
 export * from "./proof.js";

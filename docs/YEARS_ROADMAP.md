@@ -133,6 +133,12 @@ cypher-llm policy-profiles --profiles-out examples/policy/policy-profiles.json
 cypher-llm policy-check --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json --policy-profile-id llm-readonly-strict
 ```
 
+Dataset-level policy eval reports are exported from `src/policy-eval.ts`, validated by `schemas/policy-eval.schema.json`, and checked in at `examples/policy/tool-hash.policy-eval.json`.
+
+```bash
+cypher-llm policy-eval --dataset examples/eval-dataset.json --attempts examples/eval-attempts.json --policy-profile-id llm-readonly-strict --schema-statistics examples/policy/tool-hash.schema-statistics.json --policy-rules examples/policy/tool-hash.policy-rules.json
+```
+
 CypherBench scorecards are exported from `src/scorecard.ts`, validated by `schemas/cypherbench-scorecard.schema.json`, and checked in at `examples/benchmarks/tool-hash.scorecard.json`.
 
 ```bash

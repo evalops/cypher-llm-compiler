@@ -18,6 +18,7 @@ Stable public contracts:
 - `cypher-llm-schema-statistics/v1`
 - `cypher-llm-policy-rules/v1`
 - `cypher-llm-policy-report/v1`
+- `cypher-llm-policy-eval/v1`
 - `cypher-llm-policy-profile-catalog/v1`
 - `cypher-llm-lsp-diagnostics/v1`
 - `cypher-llm-lossless-parse/v1`
@@ -162,6 +163,16 @@ cypher-llm policy-check --schema examples/tool-hash.schema.json --query examples
 ```
 
 Policy reports are static pre-execution checks for broad scans, cartesian pattern risk, missing or high return limits, unbounded or high-hop traversals, schema-statistics risk, policy-rule risk, planner-estimated cost, and write risk. They complement parser and semantic validation: a query can be syntactically valid but still too broad or expensive for an autonomous agent to run.
+
+## Policy Eval Reports
+
+Run:
+
+```bash
+cypher-llm policy-eval --dataset examples/eval-dataset.json --attempts examples/eval-attempts.json --policy-profile-id llm-readonly-strict --schema-statistics examples/policy/tool-hash.schema-statistics.json --policy-rules examples/policy/tool-hash.policy-rules.json --report-out examples/policy/tool-hash.policy-eval.json
+```
+
+Policy eval reports are dataset-level benchmark artifacts for cost and safety decisions. JSON reports validate against `schemas/policy-eval.schema.json` and summarize passed, warning, blocked, not-evaluated, compiler-executable, and risky-but-executable attempts, plus stable policy finding-code and compiler diagnostic-code counts.
 
 ## Planner Estimates
 

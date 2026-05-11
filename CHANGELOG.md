@@ -32,6 +32,7 @@
 - Added planner estimate evidence for policy checks with Neo4j-like summary extraction, live `EXPLAIN` result attachment, estimated-row/db-hit/operator findings, JSON Schema, CLI/tool input, and checked-in planner fixture.
 - Added schema statistics evidence for policy checks with cardinality, index, and fanout metadata, JSON Schema, CLI/tool input, and checked-in statistics fixture.
 - Added policy rule sets for sensitive labels, sensitive relationship types, sensitive returned properties, and tenant scoping requirements, including JSON Schema, CLI/tool input, and checked-in rules fixture.
+- Added dataset-level policy eval reports with blocked, warning, risky-but-executable, finding-code, and diagnostic-code summaries across benchmark attempts.
 - Added LSP-style diagnostics and code actions over compiler, parser, policy, and repair output, including CLI/tool/service output and checked-in LSP artifact.
 - Added source-positioned raw repair text edits and LSP code-action edits for exact editor/agent migration patches.
 - Added lossless Cypher parse reports with exact source round-trip fragments, comments, statement/clause spans, optional parser output, IR-preview mapping, JSON Schema, CLI/tool/service output, and checked-in lossless artifact.

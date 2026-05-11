@@ -413,7 +413,7 @@
         {
           "kind": "example",
           "path": "examples/agent/agent-guide.json",
-          "sha256": "d98dbba2b348ee663562e9388ec5fa507a8fdc799ced54234f64619891cbc84a"
+          "sha256": "8c3e526aa34aac48f3423bd257896b58f4a38185d97363c3eb998eef69528646"
         }
       ]
     },
@@ -443,6 +443,35 @@
           "kind": "example",
           "path": "examples/policy/tool-hash.policy.json",
           "sha256": "f55acb3512377d9fbfa95ff12c899d9d359379ab5f180b83c8ee21aa6b0eaf24"
+        }
+      ]
+    },
+    {
+      "id": "policy-eval",
+      "version": "cypher-llm-policy-eval/v1",
+      "category": "policy",
+      "level": "stable",
+      "ownerWorkstreamId": "cost-safety-policy",
+      "schemaPath": "schemas/policy-eval.schema.json",
+      "examplePaths": [
+        "examples/policy/tool-hash.policy-eval.json"
+      ],
+      "evidencePaths": [
+        "src/policy-eval.ts",
+        "test/policy-eval.test.ts"
+      ],
+      "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path.",
+      "fingerprints": [
+        {
+          "kind": "schema",
+          "path": "schemas/policy-eval.schema.json",
+          "sha256": "eb6b4463b6ad9046f060f504900d9c108111d7ca2351a1ce885f146faa8e13aa"
+        },
+        {
+          "kind": "example",
+          "path": "examples/policy/tool-hash.policy-eval.json",
+          "sha256": "f194517e90af3cd54030cdd9caa6ff7c9fe04910cf83c96f73e31e5e4c1ef07c"
         }
       ]
     },
@@ -791,7 +820,7 @@
         {
           "kind": "example",
           "path": "examples/service/service-manifest.json",
-          "sha256": "0d94beef20bdf3db7c8989fc99b3c7db2421df6d2d4889f5ba535985d2536060"
+          "sha256": "d12a0c8ddc51fe00577066e53864ba08122b88d92593811fec0bfd6e1cbacfa5"
         }
       ]
     },
@@ -850,7 +879,7 @@
         {
           "kind": "example",
           "path": "examples/roadmap/cypher-llm-years-roadmap.json",
-          "sha256": "7f043fdf81b65ce66f8b43aedcc84e4434e0b830aa7b6d223e0f734cb4f8114a"
+          "sha256": "22f5b447a138573fc08df4b5d5ebd9ccf67b31e3c3458ef910c0d6d1c6f9ea7d"
         }
       ]
     },
@@ -903,7 +932,7 @@
         {
           "kind": "example",
           "path": "examples/governance/compatibility-diff.json",
-          "sha256": "b2d15295c16befaa8e90b47a763c1985e7475df5f5856d949d7abba67501bbee"
+          "sha256": "61e00a7fa595e8b966c367ab7e940608c6304a481037ee484485c52a6f8fa229"
         }
       ]
     },
@@ -932,7 +961,7 @@
         {
           "kind": "example",
           "path": "examples/governance/contract-conformance.json",
-          "sha256": "b74411f13c777966d356fb469d1503d8c7be83606aeb1be654d759e2526634f4"
+          "sha256": "f6cbbb474f4d07786e189a3843ad4747ddf42b645e258079085960ede4912fba"
         }
       ]
     }

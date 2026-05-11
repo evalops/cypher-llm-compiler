@@ -56,6 +56,9 @@ describe("compiler service manifest", () => {
       manifest.routes.some((route) => route.path === "/v1/policy-profiles" && route.operation === "cypher_policy_profiles")
     );
     assert.ok(
+      manifest.routes.some((route) => route.path === "/v1/policy-eval" && route.operation === "cypher_policy_eval")
+    );
+    assert.ok(
       manifest.routes.some((route) => route.path === "/v1/metrics" && route.operation === "service_metrics" && route.method === "GET")
     );
     assert.ok(

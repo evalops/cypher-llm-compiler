@@ -64,6 +64,7 @@ describe("json schemas", () => {
     const contractConformanceSchema = readJson("schemas/contract-conformance.schema.json");
     const diagnosticCatalogSchema = readJson("schemas/diagnostic-catalog.schema.json");
     const plannerEstimateSchema = readJson("schemas/planner-estimate.schema.json");
+    const policyEvalSchema = readJson("schemas/policy-eval.schema.json");
     const policyReportSchema = readJson("schemas/policy-report.schema.json");
     const policyProfileSchema = readJson("schemas/policy-profile.schema.json");
     const policyRulesSchema = readJson("schemas/policy-rules.schema.json");
@@ -94,6 +95,7 @@ describe("json schemas", () => {
     ajv.addSchema(contractConformanceSchema);
     ajv.addSchema(diagnosticCatalogSchema);
     ajv.addSchema(plannerEstimateSchema);
+    ajv.addSchema(policyEvalSchema);
     ajv.addSchema(policyReportSchema);
     ajv.addSchema(policyProfileSchema);
     ajv.addSchema(policyRulesSchema);
@@ -125,6 +127,7 @@ describe("json schemas", () => {
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/contract-conformance/v1.json", readJson("examples/governance/contract-conformance.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/diagnostic-catalog/v1.json", readJson("examples/diagnostics/diagnostic-catalog.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/planner-estimate/v1.json", readJson("examples/policy/tool-hash.planner-estimate.json"));
+    assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/policy-eval/v1.json", readJson("examples/policy/tool-hash.policy-eval.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/policy-report/v1.json", readJson("examples/policy/tool-hash.policy.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/policy-profile-catalog/v1.json", readJson("examples/policy/policy-profiles.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/policy-rules/v1.json", readJson("examples/policy/tool-hash.policy-rules.json"));

@@ -56,6 +56,7 @@ describe("OpenAI tool schemas", () => {
       "cypher_parse_lossless",
       "cypher_parse_check",
       "cypher_policy_check",
+      "cypher_policy_eval",
       "cypher_policy_profiles",
       "cypher_lsp_diagnostics",
       "cypher_prove",
@@ -185,6 +186,25 @@ describe("OpenAI tool schemas", () => {
     assert.ok(policy.findings.some((finding) => finding.code === "policy-sensitive-label-access"));
     assert.ok(policy.findings.some((finding) => finding.code === "policy-sensitive-relationship-access"));
     assert.ok(policy.findings.some((finding) => finding.code === "policy-missing-tenant-scope"));
+
+    const policyEval = (await executeCypherCompilerTool("cypher_policy_eval", {
+      dataset: {
+        version: "cypher-llm-eval-dataset/v1",
+        name: "integration-policy",
+        tasks: [{ id: "one", question: "Return hash.", schema }]
+      },
+      attempts: {
+        version: "cypher-llm-eval-attempts/v1",
+        attempts: [{ taskId: "one", query: repairableQuery }]
+      },
+      policyProfileId: "llm-readonly-strict",
+      defaultLimit: 25,
+      defaultMaxHops: 3
+    })) as { version: string; summary: { blockedAttempts: number; riskyExecutableAttempts: number } };
+
+    assert.equal(policyEval.version, "cypher-llm-policy-eval/v1");
+    assert.equal(policyEval.summary.blockedAttempts, 1);
+    assert.equal(policyEval.summary.riskyExecutableAttempts, 1);
 
     const policyProfiles = (await executeCypherCompilerTool("cypher_policy_profiles", {})) as {
       version: string;

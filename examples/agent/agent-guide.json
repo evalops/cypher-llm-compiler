@@ -109,6 +109,15 @@
           "outputContract": "cypher-llm-policy-report/v1",
           "successSignal": "ok is true or only warning findings remain after explicit handling.",
           "failureHandling": "Treat error findings as blockers unless a human approval path exists."
+        },
+        {
+          "id": "policy-eval",
+          "title": "Benchmark policy decisions",
+          "toolName": "cypher_policy_eval",
+          "cliCommand": "cypher-llm policy-eval --dataset dataset.json --attempts attempts.json --policy-profile-id llm-readonly-strict",
+          "outputContract": "cypher-llm-policy-eval/v1",
+          "successSignal": "blockedRate and riskyExecutableAttempts are within the release threshold.",
+          "failureHandling": "Treat risky executable attempts as benchmark regressions until policy findings are resolved or explicitly accepted."
         }
       ]
     },
@@ -279,6 +288,7 @@
     "cypher-llm-proof/v1",
     "cypher-llm-diagnostic-catalog/v1",
     "cypher-llm-policy-report/v1",
+    "cypher-llm-policy-eval/v1",
     "cypher-llm-lossless-conformance/v1",
     "cypher-llm-compatibility-catalog/v1",
     "cypher-llm-compatibility-diff/v1",
@@ -289,6 +299,7 @@
     "examples/tool-hash.schema.json",
     "examples/proofs/tool-hash.agent-feedback.json",
     "examples/proofs/tool-hash.repair-plan.json",
+    "examples/policy/tool-hash.policy-eval.json",
     "examples/lossless/conformance.json",
     "examples/diagnostics/diagnostic-catalog.json",
     "examples/governance/compatibility-catalog.json",

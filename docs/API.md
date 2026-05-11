@@ -270,6 +270,18 @@ Current findings include:
 
 Pass `policyOptionsFromProfile(getPolicyProfile("llm-readonly-strict"))` to apply a named profile and record that policy identity in the report.
 
+## `evaluatePolicyAttempts(dataset, attempts, options?)`
+
+Scores an eval dataset against model attempts using the same policy engine and safe-plan repair loop used by single-query checks.
+
+Inputs:
+
+- `EvalDataset`: task id, question, schema contract, params, and expectations.
+- `EvalAttemptSet`: per-task structured IR, legacy raw Cypher, no-Cypher, timeout, or missing attempts.
+- Policy options: named profiles, planner estimates, schema statistics, policy rules, parser mode, default limits, and default max hops.
+
+Output is `cypher-llm-policy-eval/v1` with dataset/model/prompt metadata, aggregate policy counts, finding-code counts, diagnostic-code counts, per-task status, policy findings, repairs, rendered Cypher when available, and a `riskyExecutableAttempts` metric for attempts that policy blocks but the deterministic safe plan can still execute after repair.
+
 ## `buildPlannerEstimateFromNeo4jSummary(summary, source?)`
 
 Extracts a `cypher-llm-planner-estimate/v1` object from a Neo4j-like `summary.plan` or `summary.profile` tree.
@@ -462,9 +474,11 @@ Returns OpenAI Responses API function-tool definitions for:
 - `cypher_validate`
 - `cypher_repair`
 - `cypher_repair_plan`
+- `cypher_lossless_conformance`
 - `cypher_parse_lossless`
 - `cypher_parse_check`
 - `cypher_policy_check`
+- `cypher_policy_eval`
 - `cypher_policy_profiles`
 - `cypher_lsp_diagnostics`
 - `cypher_prove`
@@ -477,6 +491,7 @@ Returns OpenAI Responses API function-tool definitions for:
 - `cypher_eval`
 - `cypher_scorecard`
 - `cypher_benchmark_gate`
+- `cypher_retry_eval`
 - `cypher_dataset_governance`
 
 ## `getOpenAiChatTools()`
@@ -516,9 +531,11 @@ Routes:
 - `POST /v1/validate`
 - `POST /v1/repair`
 - `POST /v1/repair-plan`
+- `POST /v1/lossless-conformance`
 - `POST /v1/parse-lossless`
 - `POST /v1/parse-check`
 - `POST /v1/policy`
+- `POST /v1/policy-eval`
 - `POST /v1/policy-profiles`
 - `POST /v1/lsp-diagnostics`
 - `POST /v1/prove`
@@ -535,6 +552,7 @@ Routes:
 - `POST /v1/eval`
 - `POST /v1/scorecard`
 - `POST /v1/benchmark-gate`
+- `POST /v1/retry-eval`
 - `POST /v1/dataset-governance`
 - `POST /v1/tools/:toolName`
 - `GET /v1/roadmap`

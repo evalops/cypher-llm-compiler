@@ -1,6 +1,6 @@
 # Agent Integrations
 
-The compiler exposes the same twenty-two operations across OpenAI tool schemas, MCP, HTTP, LangChain-shaped adapters, and the CLI:
+The compiler exposes the same twenty-three operations across OpenAI tool schemas, MCP, HTTP, LangChain-shaped adapters, and the CLI:
 
 - `cypher_render`: repair IR, validate, and return a `SafeExecutionPlan`.
 - `cypher_validate`: return stable compiler diagnostics for IR.
@@ -10,6 +10,7 @@ The compiler exposes the same twenty-two operations across OpenAI tool schemas, 
 - `cypher_parse_lossless`: preserve raw Cypher byte-for-byte while exposing comments, clauses, source spans, source-map anchors, parser output, and IR-preview coverage.
 - `cypher_parse_check`: run Neo4j language-support parser validation.
 - `cypher_policy_check`: assess static cost, cardinality, schema-statistics, policy-rule, planner-estimate, and safety policy.
+- `cypher_policy_eval`: score benchmark attempts for policy status, finding codes, and risky-but-executable outcomes.
 - `cypher_policy_profiles`: list built-in policy profiles for audited autonomous-agent safety settings.
 - `cypher_lsp_diagnostics`: emit LSP-style diagnostics and code actions, including raw-Cypher text edits when repairs can be applied to exact source ranges.
 - `cypher_prove`: return proof-carrying compile output with repairs, diagnostics, parser preflight, execution-policy claims, optional policy evidence and thresholds, and a compact `policyEvidence` summary.
@@ -137,6 +138,7 @@ Routes:
 - `POST /v1/parse-lossless`
 - `POST /v1/parse-check`
 - `POST /v1/policy`
+- `POST /v1/policy-eval`
 - `POST /v1/policy-profiles`
 - `POST /v1/lsp-diagnostics`
 - `POST /v1/prove`

@@ -116,6 +116,19 @@ describe("compiler HTTP service", () => {
       query,
       policyProfileId: "llm-readonly-strict"
     }) as { version: string; policy?: { id: string }; findings: { code: string }[] };
+    const policyEval = await postJson(`${baseUrl}/v1/policy-eval`, {
+      dataset: {
+        version: "cypher-llm-eval-dataset/v1",
+        name: "http-policy",
+        tasks: [{ id: "one", question: "Return hash.", schema }]
+      },
+      attempts: {
+        version: "cypher-llm-eval-attempts/v1",
+        attempts: [{ taskId: "one", query }]
+      },
+      policyProfileId: "llm-readonly-strict",
+      defaultLimit: 25
+    }) as { version: string; summary: { warningAttempts: number; riskyExecutableAttempts: number } };
     const policyProfiles = await postJson(`${baseUrl}/v1/policy-profiles`, {}) as {
       version: string;
       profiles: { id: string }[];
@@ -201,6 +214,9 @@ describe("compiler HTTP service", () => {
     assert.equal(policy.version, "cypher-llm-policy-report/v1");
     assert.equal(policy.policy?.id, "llm-readonly-strict");
     assert.deepEqual(policy.findings.map((finding) => finding.code), ["policy-unfiltered-label-scan", "policy-missing-limit"]);
+    assert.equal(policyEval.version, "cypher-llm-policy-eval/v1");
+    assert.equal(policyEval.summary.warningAttempts, 1);
+    assert.equal(policyEval.summary.riskyExecutableAttempts, 1);
     assert.equal(policyProfiles.version, "cypher-llm-policy-profile-catalog/v1");
     assert.ok(policyProfiles.profiles.some((profile) => profile.id === "llm-readonly-strict"));
     assert.equal(lsp.version, "cypher-llm-lsp-diagnostics/v1");

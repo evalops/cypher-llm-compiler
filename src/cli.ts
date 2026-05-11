@@ -54,7 +54,8 @@ import { buildEmptyCompilerServiceMetricsReport } from "./service-metrics.js";
 import type { CypherSchemaStatistics } from "./schema-statistics.js";
 import { buildCypherBenchScorecard, renderCypherBenchScorecardMarkdown } from "./scorecard.js";
 import { validateCypherTextWithParser } from "./parser-validation.js";
-import { assessCypherPolicy } from "./policy.js";
+import { assessCypherPolicy, type CypherPolicyOptions } from "./policy.js";
+import { evaluatePolicyAttempts, type CypherPolicyEvalOptions } from "./policy-eval.js";
 import type { CypherPolicyRuleSet } from "./policy-rules.js";
 import {
   buildPolicyProfileCatalog,
@@ -136,6 +137,9 @@ export async function runCli(argv: string[], io: CliIO = defaultIo()): Promise<n
         return 0;
       case "policy-check":
         await policyCheckCommand(args, io);
+        return 0;
+      case "policy-eval":
+        await policyEvalCommand(args, io);
         return 0;
       case "policy-profiles":
         await policyProfilesCommand(args, io);
@@ -571,62 +575,38 @@ async function agentFeedbackCommand(args: Map<string, string | boolean>, io: Cli
 async function policyCheckCommand(args: Map<string, string | boolean>, io: CliIO) {
   const schema = normalizeSchema(await readSchema(args, io)).original;
   const query = await readQuery(args, io);
-  const maxReturnLimit = optionalNumber(args.get("max-return-limit"));
-  const maxRelationshipHops = optionalNumber(args.get("max-relationship-hops"));
-  const maxEstimatedRows = optionalNumber(args.get("max-estimated-rows"));
-  const maxDbHits = optionalNumber(args.get("max-db-hits"));
-  const maxLabelScanRows = optionalNumber(args.get("max-label-scan-rows"));
-  const maxRelationshipFanout = optionalNumber(args.get("max-relationship-fanout"));
-  const warnOnPlanOperators = optionalCsv(args.get("warn-on-plan-operators"));
-  const profile = await readPolicyProfile(args, io);
-  const plannerEstimate = await readPlannerEstimate(args, io);
-  const schemaStatistics = await readSchemaStatistics(args, io);
-  const policyRules = await readPolicyRules(args, io);
-  const overrides: Parameters<typeof assessCypherPolicy>[2] = {};
-  if (args.get("allow-writes") === true) {
-    overrides.allowWrites = true;
-  }
-  if (args.get("no-require-limit") === true) {
-    overrides.requireLimit = false;
-  }
-  if (maxReturnLimit !== undefined) {
-    overrides.maxReturnLimit = maxReturnLimit;
-  }
-  if (maxRelationshipHops !== undefined) {
-    overrides.maxRelationshipHops = maxRelationshipHops;
-  }
-  if (maxEstimatedRows !== undefined) {
-    overrides.maxEstimatedRows = maxEstimatedRows;
-  }
-  if (maxDbHits !== undefined) {
-    overrides.maxDbHits = maxDbHits;
-  }
-  if (maxLabelScanRows !== undefined) {
-    overrides.maxLabelScanRows = maxLabelScanRows;
-  }
-  if (maxRelationshipFanout !== undefined) {
-    overrides.maxRelationshipFanout = maxRelationshipFanout;
-  }
-  if (warnOnPlanOperators !== undefined) {
-    overrides.warnOnPlanOperators = warnOnPlanOperators;
-  }
-  if (plannerEstimate !== undefined) {
-    overrides.plannerEstimate = plannerEstimate;
-  }
-  if (schemaStatistics !== undefined) {
-    overrides.schemaStatistics = schemaStatistics;
-  }
-  if (policyRules !== undefined) {
-    overrides.policyRules = policyRules;
-  }
-  const policyOptions = profile ? policyOptionsFromProfile(profile, overrides) : overrides;
-  const report = assessCypherPolicy(query, schema, policyOptions);
+  const report = assessCypherPolicy(query, schema, await readPolicyOptions(args, io));
   if (typeof args.get("report-out") === "string") {
     await writeJsonFile(io, args.get("report-out") as string, report);
   }
   writeJson(io, report);
   if (args.get("fail-on-error") === true && !report.ok) {
     throw new Error(`Cypher policy check found ${report.summary.errors} error(s).`);
+  }
+}
+
+async function policyEvalCommand(args: Map<string, string | boolean>, io: CliIO) {
+  const dataset = JSON.parse(await io.readFile(stringArg(args, "dataset"), "utf8")) as EvalDataset;
+  const attempts = JSON.parse(await io.readFile(stringArg(args, "attempts"), "utf8")) as EvalAttemptSet;
+  const defaultLimit = optionalNumber(args.get("default-limit"));
+  const defaultMaxHops = optionalNumber(args.get("default-max-hops"));
+  const options: CypherPolicyEvalOptions = {
+    ...(await readPolicyOptions(args, io)),
+    parserMode: args.get("parser-mode") === "lint" ? "lint" : "syntax"
+  };
+  if (defaultLimit !== undefined) {
+    options.defaultLimit = defaultLimit;
+  }
+  if (defaultMaxHops !== undefined) {
+    options.defaultMaxHops = defaultMaxHops;
+  }
+  const report = evaluatePolicyAttempts(dataset, attempts, options);
+  if (typeof args.get("report-out") === "string") {
+    await writeJsonFile(io, args.get("report-out") as string, report);
+  }
+  writeJson(io, report);
+  if (args.get("fail-on-blocked") === true && report.summary.blockedAttempts > 0) {
+    throw new Error(`Cypher policy eval found ${report.summary.blockedAttempts} blocked attempt(s).`);
   }
 }
 
@@ -901,6 +881,16 @@ async function readPolicyProfile(args: Map<string, string | boolean>, io: CliIO)
   return undefined;
 }
 
+async function readPolicyOptions(args: Map<string, string | boolean>, io: CliIO): Promise<CypherPolicyOptions> {
+  const profile = await readPolicyProfile(args, io);
+  const overrides: CypherPolicyOptions = {};
+  if (args.get("allow-writes") === true) {
+    overrides.allowWrites = true;
+  }
+  await applyPolicyEvidenceArgs(args, io, overrides);
+  return profile ? policyOptionsFromProfile(profile, overrides) : overrides;
+}
+
 async function readPlannerEstimate(args: Map<string, string | boolean>, io: CliIO): Promise<CypherPlannerEstimate | undefined> {
   const estimatePath = args.get("planner-estimate");
   if (typeof estimatePath !== "string") {
@@ -1122,6 +1112,7 @@ Commands:
   lift-raw-eval --dataset dataset.json --attempts attempts.json [--summary-out summary.json]
   parse-check --schema schema.json (--query query.json | --cypher "MATCH ...") [--mode lint|syntax] [--default-limit 25] [--default-max-hops 5]
   policy-check --schema schema.json --query query.json [--policy-profile-id id | --policy-profile profile.json] [--planner-estimate estimate.json] [--schema-statistics stats.json] [--policy-rules rules.json] [--report-out report.json] [--fail-on-error] [--allow-writes] [--no-require-limit] [--max-return-limit 100] [--max-relationship-hops 5] [--max-estimated-rows 10000] [--max-db-hits 50000] [--max-label-scan-rows 10000] [--max-relationship-fanout 100] [--warn-on-plan-operators CartesianProduct,AllNodesScan]
+  policy-eval --dataset dataset.json --attempts attempts.json [--policy-profile-id id | --policy-profile profile.json] [--planner-estimate estimate.json] [--schema-statistics stats.json] [--policy-rules rules.json] [--report-out report.json] [--fail-on-blocked] [--default-limit 25] [--default-max-hops 5] [--allow-writes] [--no-require-limit] [--max-return-limit 100] [--max-relationship-hops 5] [--max-estimated-rows 10000] [--max-db-hits 50000] [--max-label-scan-rows 10000] [--max-relationship-fanout 100] [--warn-on-plan-operators CartesianProduct,AllNodesScan]
   policy-profiles [--format json|markdown] [--profiles-out profiles.json]
   lsp-diagnostics --schema schema.json (--query query.json | --cypher "MATCH ...") [--uri file:///query.cypher] [--report-out report.json] [--parser-mode syntax|lint] [--default-limit 25] [--default-max-hops 5]
   prove       --schema schema.json --query query.json [--params params.json] [--proof-out proof.json] [--fail-on-blocked] [--default-limit 25] [--default-max-hops 5] [--planner-estimate estimate.json] [--schema-statistics stats.json] [--policy-rules rules.json] [--no-require-limit] [--max-return-limit 100] [--max-relationship-hops 5] [--allow-writes] [--approved] [--parser-mode syntax|lint] [--no-parser]

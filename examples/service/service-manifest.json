@@ -151,6 +151,12 @@
     },
     {
       "method": "POST",
+      "path": "/v1/policy-eval",
+      "operation": "cypher_policy_eval",
+      "authRequired": false
+    },
+    {
+      "method": "POST",
       "path": "/v1/policy-profiles",
       "operation": "cypher_policy_profiles",
       "authRequired": false

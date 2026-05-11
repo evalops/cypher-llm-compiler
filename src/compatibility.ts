@@ -159,6 +159,9 @@ const compatibilityCatalogBase = {
     stableContract("policy-report", "cypher-llm-policy-report/v1", "policy", "cost-safety-policy", "schemas/policy-report.schema.json", [
       "examples/policy/tool-hash.policy.json"
     ], ["src/policy.ts", "test/policy.test.ts"]),
+    stableContract("policy-eval", "cypher-llm-policy-eval/v1", "policy", "cost-safety-policy", "schemas/policy-eval.schema.json", [
+      "examples/policy/tool-hash.policy-eval.json"
+    ], ["src/policy-eval.ts", "test/policy-eval.test.ts"]),
     stableContract("policy-profile-catalog", "cypher-llm-policy-profile-catalog/v1", "policy", "cost-safety-policy", "schemas/policy-profile.schema.json", [
       "examples/policy/policy-profiles.json"
     ], ["src/policy-profile.ts", "test/policy-profile.test.ts"]),

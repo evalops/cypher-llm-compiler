@@ -5,11 +5,11 @@
   "packageName": "@evalops/cypher-llm-compiler",
   "packageVersion": "0.1.0",
   "summary": {
-    "contracts": 31,
-    "passedContracts": 31,
+    "contracts": 32,
+    "passedContracts": 32,
     "warningContracts": 0,
     "failedContracts": 0,
-    "checks": 228,
+    "checks": 235,
     "warnings": 0,
     "failures": 0,
     "missingFiles": 0,
@@ -767,6 +767,56 @@
           "id": "evidence-file",
           "status": "pass",
           "path": "test/policy.test.ts",
+          "message": "File exists."
+        }
+      ]
+    },
+    {
+      "id": "policy-eval",
+      "version": "cypher-llm-policy-eval/v1",
+      "level": "stable",
+      "status": "pass",
+      "checks": [
+        {
+          "id": "schema-file",
+          "status": "pass",
+          "path": "schemas/policy-eval.schema.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "schemas/policy-eval.schema.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "example-file",
+          "status": "pass",
+          "path": "examples/policy/tool-hash.policy-eval.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "examples/policy/tool-hash.policy-eval.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "schema-validation",
+          "status": "pass",
+          "path": "examples/policy/tool-hash.policy-eval.json",
+          "message": "Example validates against schema."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "src/policy-eval.ts",
+          "message": "File exists."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "test/policy-eval.test.ts",
           "message": "File exists."
         }
       ]

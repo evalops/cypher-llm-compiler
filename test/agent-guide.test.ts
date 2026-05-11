@@ -26,6 +26,12 @@ describe("agent guide", () => {
         workflow.steps.some((step) => step.toolName === "cypher_lossless_conformance")
       )
     );
+    assert.ok(
+      guide.workflows.some((workflow) =>
+        workflow.steps.some((step) => step.toolName === "cypher_policy_eval")
+      )
+    );
+    assert.ok(guide.publicContracts.includes("cypher-llm-policy-eval/v1"));
     assert.ok(guide.publicContracts.includes("cypher-llm-lossless-conformance/v1"));
     assert.ok(guide.diagnosticPlaybooks.some((playbook) => playbook.codes.includes("missing-limit")));
     assert.ok(guide.diagnosticPlaybooks.some((playbook) => playbook.preferredAction === "request-approval"));

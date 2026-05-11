@@ -240,16 +240,19 @@ export const yearsRoadmap = {
       firstArtifacts: [
         "src/safety.ts",
         "src/policy.ts",
+        "src/policy-eval.ts",
         "src/planner-estimate.ts",
         "src/policy-profile.ts",
         "src/policy-rules.ts",
         "src/schema-statistics.ts",
         "src/neo4j-explain.ts",
         "schemas/planner-estimate.schema.json",
+        "schemas/policy-eval.schema.json",
         "schemas/policy-profile.schema.json",
         "schemas/policy-rules.schema.json",
         "schemas/schema-statistics.schema.json",
         "examples/policy/tool-hash.planner-estimate.json",
+        "examples/policy/tool-hash.policy-eval.json",
         "examples/policy/policy-profiles.json",
         "examples/policy/tool-hash.policy-rules.json",
         "examples/policy/tool-hash.schema-statistics.json",
@@ -427,6 +430,13 @@ export const yearsRoadmap = {
       status: "partial",
       evidence: ["src/policy.ts", "schemas/policy-report.schema.json", "test/policy.test.ts"],
       workstreamIds: ["cost-safety-policy", "semantic-proof-repair"]
+    },
+    {
+      id: "policy-evals",
+      title: "Dataset-Level Policy Eval Reports",
+      status: "partial",
+      evidence: ["src/policy-eval.ts", "schemas/policy-eval.schema.json", "test/policy-eval.test.ts"],
+      workstreamIds: ["cost-safety-policy", "public-cypherbench", "governance-standards"]
     },
     {
       id: "policy-profiles",

@@ -879,6 +879,90 @@ describe("cli", () => {
     assert.ok(writes.get("out/policy.json")?.includes("policy-unfiltered-label-scan"));
   });
 
+  it("emits policy eval reports from dataset and attempts files", async () => {
+    const schema = {
+      version: "cypher-llm-schema/v1",
+      dialect: "neo4j-cypher-25",
+      nodes: [{ name: "Tool" }],
+      relationships: []
+    };
+    const files = new Map<string, string>([
+      [
+        "dataset.json",
+        JSON.stringify({
+          version: "cypher-llm-eval-dataset/v1",
+          name: "cli-policy-eval",
+          tasks: [{ id: "scan", question: "Return tools.", schema }]
+        })
+      ],
+      [
+        "attempts.json",
+        JSON.stringify({
+          version: "cypher-llm-eval-attempts/v1",
+          datasetName: "cli-policy-eval",
+          attempts: [
+            {
+              taskId: "scan",
+              query: {
+                version: "cypher-llm-ir/v1",
+                clauses: [
+                  { kind: "match", patterns: [{ segments: [{ variable: "tool", labels: ["Tool"] }] }] },
+                  { kind: "return", items: [{ expression: { kind: "var", name: "tool" } }] }
+                ]
+              }
+            }
+          ]
+        })
+      ],
+      [
+        "statistics.json",
+        JSON.stringify({
+          version: "cypher-llm-schema-statistics/v1",
+          source: "fixture",
+          nodes: [{ label: "Tool", count: 25_000 }],
+          relationships: []
+        })
+      ]
+    ]);
+    const writes = new Map<string, string>();
+    let stdout = "";
+    let stderr = "";
+    const io: CliIO = {
+      stdout: { write: (chunk: string | Uint8Array) => ((stdout += String(chunk)), true) },
+      stderr: { write: (chunk: string | Uint8Array) => ((stderr += String(chunk)), true) },
+      readFile: async (path) => files.get(String(path)) ?? "",
+      writeFile: async (path, data) => {
+        writes.set(path, data);
+      },
+      mkdir: async () => undefined
+    };
+
+    const code = await runCli(
+      [
+        "policy-eval",
+        "--dataset",
+        "dataset.json",
+        "--attempts",
+        "attempts.json",
+        "--policy-profile-id",
+        "llm-readonly-strict",
+        "--schema-statistics",
+        "statistics.json",
+        "--report-out",
+        "out/policy-eval.json"
+      ],
+      io
+    );
+    const output = JSON.parse(stdout) as { version: string; summary: { warningAttempts: number; riskyExecutableAttempts: number } };
+
+    assert.equal(code, 0);
+    assert.equal(stderr, "");
+    assert.equal(output.version, "cypher-llm-policy-eval/v1");
+    assert.equal(output.summary.warningAttempts, 1);
+    assert.equal(output.summary.riskyExecutableAttempts, 1);
+    assert.ok(writes.get("out/policy-eval.json")?.includes("policy-high-cardinality-label-scan"));
+  });
+
   it("prints and writes policy profile catalogs", async () => {
     const writes = new Map<string, string>();
     let stdout = "";
