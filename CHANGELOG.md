@@ -24,6 +24,7 @@
 - Added a compiler service manifest plus optional bearer auth, redacted audit events, body-limit reporting, JSON Schema, CLI output, and checked-in service manifest artifact.
 - Added a JSON HTTP compiler service over the shared tool dispatcher with health, metadata, metrics, tool, roadmap, and dialect certification routes.
 - Added service metrics for HTTP requests, tool failures, diagnostics, repairs, retry packets, and live database outcomes.
+- Added an OpenAPI 3.1 service contract generated from the HTTP manifest and shared compiler tool schemas, including CLI/tool/HTTP output and a checked-in artifact.
 - Added live-database evidence lanes to dialect certification so parser, renderer, semantic, and database checks are reported separately.
 - Added a versioned, CI-backed dialect live evidence artifact for Neo4j certification.
 - Added source-anchored repair-plan steps that map deterministic, model-required, and unsafe repairs back to lossless `cypherBefore` clause spans and IR paths.

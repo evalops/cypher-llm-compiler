@@ -1,0 +1,3931 @@
+{
+  "version": "cypher-llm-service-openapi/v1",
+  "generatedAt": "2026-05-10",
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Cypher LLM Compiler HTTP API",
+    "version": "0.1.0",
+    "description": "Machine-readable HTTP contract for the Cypher LLM compiler service. Tool routes use the same schemas as the OpenAI and MCP tool definitions."
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:8787",
+      "description": "Local compiler service"
+    }
+  ],
+  "security": [],
+  "summary": {
+    "routes": 35,
+    "operations": 35,
+    "getRoutes": 11,
+    "postRoutes": 24,
+    "toolRoutes": 24,
+    "publicRoutes": 35,
+    "authenticatedRoutes": 0,
+    "maxBodyBytes": 1000000
+  },
+  "paths": {
+    "/healthz": {
+      "get": {
+        "operationId": "health",
+        "tags": [
+          "service-discovery"
+        ],
+        "summary": "Return service liveness and tool count.",
+        "description": "This discovery route is public for liveness or client bootstrapping.",
+        "responses": {
+          "200": {
+            "description": "Service metadata response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/v1/service-manifest": {
+      "get": {
+        "operationId": "service_manifest",
+        "tags": [
+          "service-discovery"
+        ],
+        "summary": "Return the compiler service manifest.",
+        "description": "This discovery route is public for liveness or client bootstrapping.",
+        "responses": {
+          "200": {
+            "description": "Service metadata response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/v1/openapi": {
+      "get": {
+        "operationId": "service_openapi",
+        "tags": [
+          "service-discovery"
+        ],
+        "summary": "Return the compiler service OpenAPI contract.",
+        "description": "This discovery route is public for liveness or client bootstrapping.",
+        "responses": {
+          "200": {
+            "description": "Service metadata response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/v1/tools": {
+      "get": {
+        "operationId": "tool_metadata",
+        "tags": [
+          "service-discovery"
+        ],
+        "summary": "Return OpenAI/MCP-compatible compiler tool metadata.",
+        "description": "This discovery route is public for liveness or client bootstrapping.",
+        "responses": {
+          "200": {
+            "description": "Service metadata response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/v1/metrics": {
+      "get": {
+        "operationId": "service_metrics",
+        "tags": [
+          "service-discovery"
+        ],
+        "summary": "Return runtime service metrics without payload data.",
+        "description": "This discovery route is public for liveness or client bootstrapping.",
+        "responses": {
+          "200": {
+            "description": "Service metadata response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/v1/roadmap": {
+      "get": {
+        "operationId": "years_roadmap",
+        "tags": [
+          "service-discovery"
+        ],
+        "summary": "Return the public years-scale compiler roadmap.",
+        "description": "This discovery route is public for liveness or client bootstrapping.",
+        "responses": {
+          "200": {
+            "description": "Service metadata response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/v1/dialect-certification": {
+      "get": {
+        "operationId": "dialect_certification",
+        "tags": [
+          "service-discovery"
+        ],
+        "summary": "Return dialect certification results.",
+        "description": "This discovery route is public for liveness or client bootstrapping.",
+        "responses": {
+          "200": {
+            "description": "Service metadata response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/v1/agent-guide": {
+      "get": {
+        "operationId": "agent_guide",
+        "tags": [
+          "service-discovery"
+        ],
+        "summary": "Return the LLM-facing agent guide.",
+        "description": "This discovery route is public for liveness or client bootstrapping.",
+        "responses": {
+          "200": {
+            "description": "Service metadata response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      },
+      "post": {
+        "operationId": "cypher_agent_guide",
+        "tags": [
+          "compiler-tools"
+        ],
+        "summary": "Return the machine-readable agent guide: recommended Cypher IR workflow, tool sequences, execution rules, and diagnostic playbooks for LLM clients.",
+        "description": "Return the machine-readable agent guide: recommended Cypher IR workflow, tool sequences, execution rules, and diagnostic playbooks for LLM clients. Request bodies are JSON and must stay under 1000000 bytes.",
+        "responses": {
+          "200": {
+            "description": "Compiler tool output.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid JSON request body.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request body exceeds the service limit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Compiler tool validation or execution error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [],
+                "properties": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/diagnostic-catalog": {
+      "get": {
+        "operationId": "diagnostic_catalog",
+        "tags": [
+          "service-discovery"
+        ],
+        "summary": "Return stable diagnostic-code metadata.",
+        "description": "This discovery route is public for liveness or client bootstrapping.",
+        "responses": {
+          "200": {
+            "description": "Service metadata response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      },
+      "post": {
+        "operationId": "cypher_diagnostic_catalog",
+        "tags": [
+          "compiler-tools"
+        ],
+        "summary": "Return the machine-readable diagnostic catalog: stable codes, severity, source, category, preferred action, and model repair instructions.",
+        "description": "Return the machine-readable diagnostic catalog: stable codes, severity, source, category, preferred action, and model repair instructions. Request bodies are JSON and must stay under 1000000 bytes.",
+        "responses": {
+          "200": {
+            "description": "Compiler tool output.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid JSON request body.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request body exceeds the service limit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Compiler tool validation or execution error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [],
+                "properties": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/compatibility": {
+      "get": {
+        "operationId": "compatibility_catalog",
+        "tags": [
+          "service-discovery"
+        ],
+        "summary": "Return the compatibility catalog.",
+        "description": "This discovery route is public for liveness or client bootstrapping.",
+        "responses": {
+          "200": {
+            "description": "Service metadata response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      },
+      "post": {
+        "operationId": "cypher_compatibility_catalog",
+        "tags": [
+          "compiler-tools"
+        ],
+        "summary": "Return the machine-readable compatibility catalog: contract versions, stability levels, schema/example fingerprints, release gates, certification gates, and deprecation policy.",
+        "description": "Return the machine-readable compatibility catalog: contract versions, stability levels, schema/example fingerprints, release gates, certification gates, and deprecation policy. Request bodies are JSON and must stay under 1000000 bytes.",
+        "responses": {
+          "200": {
+            "description": "Compiler tool output.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid JSON request body.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request body exceeds the service limit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Compiler tool validation or execution error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [],
+                "properties": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/contract-conformance": {
+      "get": {
+        "operationId": "contract_conformance",
+        "tags": [
+          "service-discovery"
+        ],
+        "summary": "Return public contract conformance results.",
+        "description": "This discovery route is public for liveness or client bootstrapping.",
+        "responses": {
+          "200": {
+            "description": "Service metadata response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      },
+      "post": {
+        "operationId": "cypher_contract_conformance",
+        "tags": [
+          "compiler-tools"
+        ],
+        "summary": "Return a contract conformance report that checks public schemas, examples, fingerprints, schema validation, and evidence paths.",
+        "description": "Return a contract conformance report that checks public schemas, examples, fingerprints, schema validation, and evidence paths. Request bodies are JSON and must stay under 1000000 bytes.",
+        "responses": {
+          "200": {
+            "description": "Compiler tool output.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid JSON request body.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request body exceeds the service limit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Compiler tool validation or execution error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [],
+                "properties": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/render": {
+      "post": {
+        "operationId": "cypher_render",
+        "tags": [
+          "compiler-tools"
+        ],
+        "summary": "Repair structured Cypher IR, validate it against a schema contract, and render a safe execution plan with EXPLAIN preflight text.",
+        "description": "Repair structured Cypher IR, validate it against a schema contract, and render a safe execution plan with EXPLAIN preflight text. Request bodies are JSON and must stay under 1000000 bytes.",
+        "responses": {
+          "200": {
+            "description": "Compiler tool output.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid JSON request body.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request body exceeds the service limit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Compiler tool validation or execution error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "schema",
+                  "query"
+                ],
+                "properties": {
+                  "schema": {
+                    "type": "object",
+                    "description": "CypherSchemaContract JSON describing labels, relationship types, properties, aliases, and parameters.",
+                    "required": [
+                      "version",
+                      "nodes",
+                      "relationships"
+                    ],
+                    "additionalProperties": true,
+                    "properties": {
+                      "version": {
+                        "const": "cypher-llm-schema/v1"
+                      },
+                      "dialect": {
+                        "type": "string"
+                      },
+                      "nodes": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": true
+                        }
+                      },
+                      "relationships": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": true
+                        }
+                      },
+                      "parameters": {
+                        "type": "object",
+                        "additionalProperties": true
+                      },
+                      "procedures": {
+                        "type": "object",
+                        "additionalProperties": true
+                      },
+                      "disallowWritesByDefault": {
+                        "type": "boolean"
+                      }
+                    }
+                  },
+                  "query": {
+                    "type": "object",
+                    "description": "CypherQuery IR JSON. Prefer this over raw Cypher when asking an LLM to author queries.",
+                    "required": [
+                      "version",
+                      "clauses"
+                    ],
+                    "additionalProperties": true,
+                    "properties": {
+                      "version": {
+                        "const": "cypher-llm-ir/v1"
+                      },
+                      "profile": {
+                        "enum": [
+                          "llm-safe-readonly",
+                          "llm-safe-write",
+                          "raw-compatible"
+                        ]
+                      },
+                      "clauses": {
+                        "type": "array",
+                        "minItems": 1,
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": true
+                        }
+                      },
+                      "metadata": {
+                        "type": "object",
+                        "additionalProperties": true
+                      }
+                    }
+                  },
+                  "params": {
+                    "type": "object",
+                    "description": "Cypher parameter values keyed by parameter name without the '$' prefix.",
+                    "additionalProperties": {
+                      "description": "JSON-serializable Cypher parameter value.",
+                      "oneOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "array",
+                          "items": {}
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": true
+                        }
+                      ]
+                    }
+                  },
+                  "defaultLimit": {
+                    "type": "number",
+                    "description": "Add this LIMIT to repaired RETURN clauses that do not already have one."
+                  },
+                  "defaultMaxHops": {
+                    "type": "number",
+                    "description": "Replace unbounded variable-length paths with this maximum hop count."
+                  },
+                  "allowWrites": {
+                    "type": "boolean",
+                    "description": "Allow write clauses to pass validation. Use only after an external approval step."
+                  },
+                  "approved": {
+                    "type": "boolean",
+                    "description": "Mark a write query as externally approved when allowWrites is also true."
+                  },
+                  "mode": {
+                    "enum": [
+                      "explain",
+                      "readonly",
+                      "write-requires-approval"
+                    ],
+                    "description": "Execution mode metadata for the returned SafeExecutionPlan."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/validate": {
+      "post": {
+        "operationId": "cypher_validate",
+        "tags": [
+          "compiler-tools"
+        ],
+        "summary": "Validate structured Cypher IR against schema, scope, parameter, aggregate, path, and write-safety rules.",
+        "description": "Validate structured Cypher IR against schema, scope, parameter, aggregate, path, and write-safety rules. Request bodies are JSON and must stay under 1000000 bytes.",
+        "responses": {
+          "200": {
+            "description": "Compiler tool output.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid JSON request body.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request body exceeds the service limit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Compiler tool validation or execution error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "schema",
+                  "query"
+                ],
+                "properties": {
+                  "schema": {
+                    "type": "object",
+                    "description": "CypherSchemaContract JSON describing labels, relationship types, properties, aliases, and parameters.",
+                    "required": [
+                      "version",
+                      "nodes",
+                      "relationships"
+                    ],
+                    "additionalProperties": true,
+                    "properties": {
+                      "version": {
+                        "const": "cypher-llm-schema/v1"
+                      },
+                      "dialect": {
+                        "type": "string"
+                      },
+                      "nodes": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": true
+                        }
+                      },
+                      "relationships": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": true
+                        }
+                      },
+                      "parameters": {
+                        "type": "object",
+                        "additionalProperties": true
+                      },
+                      "procedures": {
+                        "type": "object",
+                        "additionalProperties": true
+                      },
+                      "disallowWritesByDefault": {
+                        "type": "boolean"
+                      }
+                    }
+                  },
+                  "query": {
+                    "type": "object",
+                    "description": "CypherQuery IR JSON. Prefer this over raw Cypher when asking an LLM to author queries.",
+                    "required": [
+                      "version",
+                      "clauses"
+                    ],
+                    "additionalProperties": true,
+                    "properties": {
+                      "version": {
+                        "const": "cypher-llm-ir/v1"
+                      },
+                      "profile": {
+                        "enum": [
+                          "llm-safe-readonly",
+                          "llm-safe-write",
+                          "raw-compatible"
+                        ]
+                      },
+                      "clauses": {
+                        "type": "array",
+                        "minItems": 1,
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": true
+                        }
+                      },
+                      "metadata": {
+                        "type": "object",
+                        "additionalProperties": true
+                      }
+                    }
+                  },
+                  "requireKnownParameters": {
+                    "type": "boolean"
+                  },
+                  "warnOnMissingLimit": {
+                    "type": "boolean"
+                  },
+                  "warnOnRawCypher": {
+                    "type": "boolean"
+                  },
+                  "disallowWrites": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/repair": {
+      "post": {
+        "operationId": "cypher_repair",
+        "tags": [
+          "compiler-tools"
+        ],
+        "summary": "Repair Cypher. Structured IR gets deterministic AST repairs; raw Cypher gets narrow migration repairs, source-positioned text edits, and diagnostics.",
+        "description": "Repair Cypher. Structured IR gets deterministic AST repairs; raw Cypher gets narrow migration repairs, source-positioned text edits, and diagnostics. Request bodies are JSON and must stay under 1000000 bytes.",
+        "responses": {
+          "200": {
+            "description": "Compiler tool output.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid JSON request body.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request body exceeds the service limit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Compiler tool validation or execution error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "schema"
+                ],
+                "properties": {
+                  "schema": {
+                    "type": "object",
+                    "description": "CypherSchemaContract JSON describing labels, relationship types, properties, aliases, and parameters.",
+                    "required": [
+                      "version",
+                      "nodes",
+                      "relationships"
+                    ],
+                    "additionalProperties": true,
+                    "properties": {
+                      "version": {
+                        "const": "cypher-llm-schema/v1"
+                      },
+                      "dialect": {
+                        "type": "string"
+                      },
+                      "nodes": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": true
+                        }
+                      },
+                      "relationships": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": true
+                        }
+                      },
+                      "parameters": {
+                        "type": "object",
+                        "additionalProperties": true
+                      },
+                      "procedures": {
+                        "type": "object",
+                        "additionalProperties": true
+                      },
+                      "disallowWritesByDefault": {
+                        "type": "boolean"
+                      }
+                    }
+                  },
+                  "query": {
+                    "type": "object",
+                    "description": "CypherQuery IR JSON. Prefer this over raw Cypher when asking an LLM to author queries.",
+                    "required": [
+                      "version",
+                      "clauses"
+                    ],
+                    "additionalProperties": true,
+                    "properties": {
+                      "version": {
+                        "const": "cypher-llm-ir/v1"
+                      },
+                      "profile": {
+                        "enum": [
+                          "llm-safe-readonly",
+                          "llm-safe-write",
+                          "raw-compatible"
+                        ]
+                      },
+                      "clauses": {
+                        "type": "array",
+                        "minItems": 1,
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": true
+                        }
+                      },
+                      "metadata": {
+                        "type": "object",
+                        "additionalProperties": true
+                      }
+                    }
+                  },
+                  "rawCypher": {
+                    "type": "string",
+                    "description": "Legacy raw Cypher text to repair during migration. Prefer query for new generation."
+                  },
+                  "defaultLimit": {
+                    "type": "number",
+                    "description": "Add this LIMIT to repaired RETURN clauses that do not already have one."
+                  },
+                  "defaultMaxHops": {
+                    "type": "number",
+                    "description": "Replace unbounded variable-length paths with this maximum hop count."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/repair-plan": {
+      "post": {
+        "operationId": "cypher_repair_plan",
+        "tags": [
+          "compiler-tools"
+        ],
+        "summary": "Build a source-anchored ranked repair plan for Cypher IR, separating deterministic JSON-patch repairs, model-required fixes, and unsafe or approval-gated blockers.",
+        "description": "Build a source-anchored ranked repair plan for Cypher IR, separating deterministic JSON-patch repairs, model-required fixes, and unsafe or approval-gated blockers. Request bodies are JSON and must stay under 1000000 bytes.",
+        "responses": {
+          "200": {
+            "description": "Compiler tool output.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid JSON request body.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request body exceeds the service limit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Compiler tool validation or execution error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "schema",
+                  "query"
+                ],
+                "properties": {
+                  "schema": {
+                    "type": "object",
+                    "description": "CypherSchemaContract JSON describing labels, relationship types, properties, aliases, and parameters.",
+                    "required": [
+                      "version",
+                      "nodes",
+                      "relationships"
+                    ],
+                    "additionalProperties": true,
+                    "properties": {
+                      "version": {
+                        "const": "cypher-llm-schema/v1"
+                      },
+                      "dialect": {
+                        "type": "string"
+                      },
+                      "nodes": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": true
+                        }
+                      },
+                      "relationships": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": true
+                        }
+                      },
+                      "parameters": {
+                        "type": "object",
+                        "additionalProperties": true
+                      },
+                      "procedures": {
+                        "type": "object",
+                        "additionalProperties": true
+                      },
+                      "disallowWritesByDefault": {
+                        "type": "boolean"
+                      }
+                    }
+                  },
+                  "query": {
+                    "type": "object",
+                    "description": "CypherQuery IR JSON. Prefer this over raw Cypher when asking an LLM to author queries.",
+                    "required": [
+                      "version",
+                      "clauses"
+                    ],
+                    "additionalProperties": true,
+                    "properties": {
+                      "version": {
+                        "const": "cypher-llm-ir/v1"
+                      },
+                      "profile": {
+                        "enum": [
+                          "llm-safe-readonly",
+                          "llm-safe-write",
+                          "raw-compatible"
+                        ]
+                      },
+                      "clauses": {
+                        "type": "array",
+                        "minItems": 1,
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": true
+                        }
+                      },
+                      "metadata": {
+                        "type": "object",
+                        "additionalProperties": true
+                      }
+                    }
+                  },
+                  "params": {
+                    "type": "object",
+                    "description": "Cypher parameter values keyed by parameter name without the '$' prefix.",
+                    "additionalProperties": {
+                      "description": "JSON-serializable Cypher parameter value.",
+                      "oneOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "array",
+                          "items": {}
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": true
+                        }
+                      ]
+                    }
+                  },
+                  "defaultLimit": {
+                    "type": "number",
+                    "description": "Add this LIMIT to repaired RETURN clauses that do not already have one."
+                  },
+                  "defaultMaxHops": {
+                    "type": "number",
+                    "description": "Replace unbounded variable-length paths with this maximum hop count."
+                  },
+                  "requireLimit": {
+                    "type": "boolean",
+                    "description": "Require RETURN clauses to include LIMIT when assessing policy evidence."
+                  },
+                  "maxReturnLimit": {
+                    "type": "number",
+                    "description": "Warn when a RETURN LIMIT exceeds this policy maximum."
+                  },
+                  "maxRelationshipHops": {
+                    "type": "number",
+                    "description": "Block or warn when variable-length relationships exceed this policy maximum."
+                  },
+                  "plannerEstimate": {
+                    "type": "object",
+                    "description": "Optional cypher-llm-planner-estimate/v1 planner evidence from EXPLAIN or a fixture.",
+                    "additionalProperties": true
+                  },
+                  "schemaStatistics": {
+                    "type": "object",
+                    "description": "Optional cypher-llm-schema-statistics/v1 cardinality and index metadata.",
+                    "additionalProperties": true
+                  },
+                  "policyRules": {
+                    "type": "object",
+                    "description": "Optional cypher-llm-policy-rules/v1 sensitivity and tenant-scoping policy rules.",
+                    "additionalProperties": true
+                  },
+                  "maxEstimatedRows": {
+                    "type": "number",
+                    "description": "Warn when planner-estimated rows exceed this value."
+                  },
+                  "maxDbHits": {
+                    "type": "number",
+                    "description": "Warn when planner-estimated db hits exceed this value."
+                  },
+                  "maxLabelScanRows": {
+                    "type": "number",
+                    "description": "Warn when unanchored label scans exceed this schema-statistics row count."
+                  },
+                  "maxRelationshipFanout": {
+                    "type": "number",
+                    "description": "Warn when relationship average fanout exceeds this schema-statistics value."
+                  },
+                  "warnOnPlanOperators": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Planner operator names that should produce warning findings."
+                  },
+                  "allowWrites": {
+                    "type": "boolean",
+                    "description": "Allow write clauses in policy assessment."
+                  },
+                  "approved": {
+                    "type": "boolean",
+                    "description": "Mark write query as externally approved."
+                  },
+                  "parserMode": {
+                    "enum": [
+                      "lint",
+                      "syntax"
+                    ],
+                    "description": "Parser preflight mode for the repaired Cypher."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/lossless-conformance": {
+      "post": {
+        "operationId": "cypher_lossless_conformance",
+        "tags": [
+          "compiler-tools"
+        ],
+        "summary": "Run the lossless parser conformance matrix over representative Neo4j, openCypher, GQL-oriented, and text2cypher cases.",
+        "description": "Run the lossless parser conformance matrix over representative Neo4j, openCypher, GQL-oriented, and text2cypher cases. Request bodies are JSON and must stay under 1000000 bytes.",
+        "responses": {
+          "200": {
+            "description": "Compiler tool output.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid JSON request body.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request body exceeds the service limit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Compiler tool validation or execution error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [],
+                "properties": {
+                  "cases": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": true,
+                      "required": [
+                        "id",
+                        "title",
+                        "source",
+                        "dialect",
+                        "cypher"
+                      ],
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "enum": [
+                            "neo4j-example",
+                            "opencypher-tck",
+                            "gql-oriented",
+                            "text2cypher"
+                          ]
+                        },
+                        "dialect": {
+                          "type": "string"
+                        },
+                        "cypher": {
+                          "type": "string"
+                        },
+                        "tags": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "schema": {
+                          "type": "object",
+                          "description": "CypherSchemaContract JSON describing labels, relationship types, properties, aliases, and parameters.",
+                          "required": [
+                            "version",
+                            "nodes",
+                            "relationships"
+                          ],
+                          "additionalProperties": true,
+                          "properties": {
+                            "version": {
+                              "const": "cypher-llm-schema/v1"
+                            },
+                            "dialect": {
+                              "type": "string"
+                            },
+                            "nodes": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "additionalProperties": true
+                              }
+                            },
+                            "relationships": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "additionalProperties": true
+                              }
+                            },
+                            "parameters": {
+                              "type": "object",
+                              "additionalProperties": true
+                            },
+                            "procedures": {
+                              "type": "object",
+                              "additionalProperties": true
+                            },
+                            "disallowWritesByDefault": {
+                              "type": "boolean"
+                            }
+                          }
+                        },
+                        "parserMode": {
+                          "enum": [
+                            "lint",
+                            "syntax"
+                          ]
+                        },
+                        "requireParserOk": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/parse-lossless": {
+      "post": {
+        "operationId": "cypher_parse_lossless",
+        "tags": [
+          "compiler-tools"
+        ],
+        "summary": "Parse raw Cypher into a lossless concrete syntax report with exact round-trip fragments, comments, source-map anchors, source spans, parser diagnostics, and an IR preview when supported.",
+        "description": "Parse raw Cypher into a lossless concrete syntax report with exact round-trip fragments, comments, source-map anchors, source spans, parser diagnostics, and an IR preview when supported. Request bodies are JSON and must stay under 1000000 bytes.",
+        "responses": {
+          "200": {
+            "description": "Compiler tool output.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid JSON request body.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request body exceeds the service limit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Compiler tool validation or execution error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "rawCypher"
+                ],
+                "properties": {
+                  "rawCypher": {
+                    "type": "string",
+                    "description": "Raw Cypher source to preserve and inspect without changing bytes."
+                  },
+                  "schema": {
+                    "type": "object",
+                    "description": "CypherSchemaContract JSON describing labels, relationship types, properties, aliases, and parameters.",
+                    "required": [
+                      "version",
+                      "nodes",
+                      "relationships"
+                    ],
+                    "additionalProperties": true,
+                    "properties": {
+                      "version": {
+                        "const": "cypher-llm-schema/v1"
+                      },
+                      "dialect": {
+                        "type": "string"
+                      },
+                      "nodes": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": true
+                        }
+                      },
+                      "relationships": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": true
+                        }
+                      },
+                      "parameters": {
+                        "type": "object",
+                        "additionalProperties": true
+                      },
+                      "procedures": {
+                        "type": "object",
+                        "additionalProperties": true
+                      },
+                      "disallowWritesByDefault": {
+                        "type": "boolean"
+                      }
+                    }
+                  },
+                  "parserMode": {
+                    "enum": [
+                      "lint",
+                      "syntax"
+                    ],
+                    "description": "Parser preflight mode when schema is provided."
+                  },
+                  "includeIrPreview": {
+                    "type": "boolean",
+                    "description": "Set false to skip raw-to-IR preview generation."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/parse-check": {
+      "post": {
+        "operationId": "cypher_parse_check",
+        "tags": [
+          "compiler-tools"
+        ],
+        "summary": "Run Neo4j language-support parser validation on rendered IR or raw Cypher and map parser diagnostics to stable compiler diagnostics.",
+        "description": "Run Neo4j language-support parser validation on rendered IR or raw Cypher and map parser diagnostics to stable compiler diagnostics. Request bodies are JSON and must stay under 1000000 bytes.",
+        "responses": {
+          "200": {
+            "description": "Compiler tool output.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid JSON request body.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request body exceeds the service limit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Compiler tool validation or execution error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "schema"
+                ],
+                "properties": {
+                  "schema": {
+                    "type": "object",
+                    "description": "CypherSchemaContract JSON describing labels, relationship types, properties, aliases, and parameters.",
+                    "required": [
+                      "version",
+                      "nodes",
+                      "relationships"
+                    ],
+                    "additionalProperties": true,
+                    "properties": {
+                      "version": {
+                        "const": "cypher-llm-schema/v1"
+                      },
+                      "dialect": {
+                        "type": "string"
+                      },
+                      "nodes": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": true
+                        }
+                      },
+                      "relationships": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": true
+                        }
+                      },
+                      "parameters": {
+                        "type": "object",
+                        "additionalProperties": true
+                      },
+                      "procedures": {
+                        "type": "object",
+                        "additionalProperties": true
+                      },
+                      "disallowWritesByDefault": {
+                        "type": "boolean"
+                      }
+                    }
+                  },
+                  "query": {
+                    "type": "object",
+                    "description": "CypherQuery IR JSON. Prefer this over raw Cypher when asking an LLM to author queries.",
+                    "required": [
+                      "version",
+                      "clauses"
+                    ],
+                    "additionalProperties": true,
+                    "properties": {
+                      "version": {
+                        "const": "cypher-llm-ir/v1"
+                      },
+                      "profile": {
+                        "enum": [
+                          "llm-safe-readonly",
+                          "llm-safe-write",
+                          "raw-compatible"
+                        ]
+                      },
+                      "clauses": {
+                        "type": "array",
+                        "minItems": 1,
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": true
+                        }
+                      },
+                      "metadata": {
+                        "type": "object",
+                        "additionalProperties": true
+                      }
+                    }
+                  },
+                  "rawCypher": {
+                    "type": "string"
+                  },
+                  "mode": {
+                    "enum": [
+                      "lint",
+                      "syntax"
+                    ],
+                    "description": "Use lint for semantic checks or syntax for parser-only checks."
+                  },
+                  "defaultLimit": {
+                    "type": "number",
+                    "description": "Add this LIMIT to repaired RETURN clauses that do not already have one."
+                  },
+                  "defaultMaxHops": {
+                    "type": "number",
+                    "description": "Replace unbounded variable-length paths with this maximum hop count."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/policy": {
+      "post": {
+        "operationId": "cypher_policy_check",
+        "tags": [
+          "compiler-tools"
+        ],
+        "summary": "Assess static cost, cardinality, and safety policy for LLM-generated Cypher IR, including broad scans, missing or high limits, traversal hop risk, cartesian patterns, and writes.",
+        "description": "Assess static cost, cardinality, and safety policy for LLM-generated Cypher IR, including broad scans, missing or high limits, traversal hop risk, cartesian patterns, and writes. Request bodies are JSON and must stay under 1000000 bytes.",
+        "responses": {
+          "200": {
+            "description": "Compiler tool output.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid JSON request body.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request body exceeds the service limit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Compiler tool validation or execution error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "schema",
+                  "query"
+                ],
+                "properties": {
+                  "schema": {
+                    "type": "object",
+                    "description": "CypherSchemaContract JSON describing labels, relationship types, properties, aliases, and parameters.",
+                    "required": [
+                      "version",
+                      "nodes",
+                      "relationships"
+                    ],
+                    "additionalProperties": true,
+                    "properties": {
+                      "version": {
+                        "const": "cypher-llm-schema/v1"
+                      },
+                      "dialect": {
+                        "type": "string"
+                      },
+                      "nodes": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": true
+                        }
+                      },
+                      "relationships": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": true
+                        }
+                      },
+                      "parameters": {
+                        "type": "object",
+                        "additionalProperties": true
+                      },
+                      "procedures": {
+                        "type": "object",
+                        "additionalProperties": true
+                      },
+                      "disallowWritesByDefault": {
+                        "type": "boolean"
+                      }
+                    }
+                  },
+                  "query": {
+                    "type": "object",
+                    "description": "CypherQuery IR JSON. Prefer this over raw Cypher when asking an LLM to author queries.",
+                    "required": [
+                      "version",
+                      "clauses"
+                    ],
+                    "additionalProperties": true,
+                    "properties": {
+                      "version": {
+                        "const": "cypher-llm-ir/v1"
+                      },
+                      "profile": {
+                        "enum": [
+                          "llm-safe-readonly",
+                          "llm-safe-write",
+                          "raw-compatible"
+                        ]
+                      },
+                      "clauses": {
+                        "type": "array",
+                        "minItems": 1,
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": true
+                        }
+                      },
+                      "metadata": {
+                        "type": "object",
+                        "additionalProperties": true
+                      }
+                    }
+                  },
+                  "policyProfile": {
+                    "type": "object",
+                    "description": "Optional cypher-llm-policy-profile/v1 profile to apply before explicit option overrides.",
+                    "additionalProperties": true
+                  },
+                  "policyProfileId": {
+                    "type": "string",
+                    "description": "Built-in policy profile id, such as llm-readonly-strict."
+                  },
+                  "plannerEstimate": {
+                    "type": "object",
+                    "description": "Optional cypher-llm-planner-estimate/v1 planner evidence from EXPLAIN or a fixture.",
+                    "additionalProperties": true
+                  },
+                  "schemaStatistics": {
+                    "type": "object",
+                    "description": "Optional cypher-llm-schema-statistics/v1 cardinality and index metadata.",
+                    "additionalProperties": true
+                  },
+                  "policyRules": {
+                    "type": "object",
+                    "description": "Optional cypher-llm-policy-rules/v1 sensitivity and tenant-scoping policy rules.",
+                    "additionalProperties": true
+                  },
+                  "allowWrites": {
+                    "type": "boolean",
+                    "description": "Allow write clauses in policy assessment."
+                  },
+                  "requireLimit": {
+                    "type": "boolean",
+                    "description": "Require RETURN clauses to include a LIMIT."
+                  },
+                  "maxReturnLimit": {
+                    "type": "number",
+                    "description": "Warn when a literal RETURN limit exceeds this value."
+                  },
+                  "maxRelationshipHops": {
+                    "type": "number",
+                    "description": "Warn when maxHops exceeds this value; unbounded traversals are errors."
+                  },
+                  "maxEstimatedRows": {
+                    "type": "number",
+                    "description": "Warn when planner-estimated rows exceed this value."
+                  },
+                  "maxDbHits": {
+                    "type": "number",
+                    "description": "Warn when planner-estimated db hits exceed this value."
+                  },
+                  "maxLabelScanRows": {
+                    "type": "number",
+                    "description": "Warn when unanchored label scans exceed this schema-statistics row count."
+                  },
+                  "maxRelationshipFanout": {
+                    "type": "number",
+                    "description": "Warn when relationship average fanout exceeds this schema-statistics value."
+                  },
+                  "warnOnPlanOperators": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Planner operator names that should produce warning findings."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/policy-eval": {
+      "post": {
+        "operationId": "cypher_policy_eval",
+        "tags": [
+          "compiler-tools"
+        ],
+        "summary": "Benchmark policy decisions across an eval dataset and attempt set, including risky-but-executable attempts and finding-code counts.",
+        "description": "Benchmark policy decisions across an eval dataset and attempt set, including risky-but-executable attempts and finding-code counts. Request bodies are JSON and must stay under 1000000 bytes.",
+        "responses": {
+          "200": {
+            "description": "Compiler tool output.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid JSON request body.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request body exceeds the service limit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Compiler tool validation or execution error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "dataset",
+                  "attempts"
+                ],
+                "properties": {
+                  "dataset": {
+                    "type": "object",
+                    "description": "EvalDataset JSON containing tasks, schemas, and expectations.",
+                    "required": [
+                      "version",
+                      "name",
+                      "tasks"
+                    ],
+                    "additionalProperties": true,
+                    "properties": {
+                      "version": {
+                        "const": "cypher-llm-eval-dataset/v1"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "tasks": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": true
+                        }
+                      }
+                    }
+                  },
+                  "attempts": {
+                    "type": "object",
+                    "description": "EvalAttemptSet JSON containing model attempts as IR, raw Cypher, timeout, or no-Cypher outputs.",
+                    "required": [
+                      "version",
+                      "attempts"
+                    ],
+                    "additionalProperties": true,
+                    "properties": {
+                      "version": {
+                        "const": "cypher-llm-eval-attempts/v1"
+                      },
+                      "datasetName": {
+                        "type": "string"
+                      },
+                      "model": {
+                        "type": "string"
+                      },
+                      "prompt": {
+                        "type": "string"
+                      },
+                      "attempts": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": true
+                        }
+                      }
+                    }
+                  },
+                  "policyProfile": {
+                    "type": "object",
+                    "description": "Optional cypher-llm-policy-profile/v1 profile to apply before explicit option overrides.",
+                    "additionalProperties": true
+                  },
+                  "policyProfileId": {
+                    "type": "string",
+                    "description": "Built-in policy profile id, such as llm-readonly-strict."
+                  },
+                  "requireLimit": {
+                    "type": "boolean",
+                    "description": "Require RETURN clauses to include LIMIT when assessing policy evidence."
+                  },
+                  "maxReturnLimit": {
+                    "type": "number",
+                    "description": "Warn when a RETURN LIMIT exceeds this policy maximum."
+                  },
+                  "maxRelationshipHops": {
+                    "type": "number",
+                    "description": "Block or warn when variable-length relationships exceed this policy maximum."
+                  },
+                  "plannerEstimate": {
+                    "type": "object",
+                    "description": "Optional cypher-llm-planner-estimate/v1 planner evidence from EXPLAIN or a fixture.",
+                    "additionalProperties": true
+                  },
+                  "schemaStatistics": {
+                    "type": "object",
+                    "description": "Optional cypher-llm-schema-statistics/v1 cardinality and index metadata.",
+                    "additionalProperties": true
+                  },
+                  "policyRules": {
+                    "type": "object",
+                    "description": "Optional cypher-llm-policy-rules/v1 sensitivity and tenant-scoping policy rules.",
+                    "additionalProperties": true
+                  },
+                  "maxEstimatedRows": {
+                    "type": "number",
+                    "description": "Warn when planner-estimated rows exceed this value."
+                  },
+                  "maxDbHits": {
+                    "type": "number",
+                    "description": "Warn when planner-estimated db hits exceed this value."
+                  },
+                  "maxLabelScanRows": {
+                    "type": "number",
+                    "description": "Warn when unanchored label scans exceed this schema-statistics row count."
+                  },
+                  "maxRelationshipFanout": {
+                    "type": "number",
+                    "description": "Warn when relationship average fanout exceeds this schema-statistics value."
+                  },
+                  "warnOnPlanOperators": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Planner operator names that should produce warning findings."
+                  },
+                  "allowWrites": {
+                    "type": "boolean",
+                    "description": "Allow write clauses in policy assessment."
+                  },
+                  "parserMode": {
+                    "enum": [
+                      "lint",
+                      "syntax"
+                    ],
+                    "description": "Parser mode used when raw Cypher attempts are lifted for policy assessment."
+                  },
+                  "defaultLimit": {
+                    "type": "number",
+                    "description": "Add this LIMIT to repaired RETURN clauses that do not already have one."
+                  },
+                  "defaultMaxHops": {
+                    "type": "number",
+                    "description": "Replace unbounded variable-length paths with this maximum hop count."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/policy-profiles": {
+      "post": {
+        "operationId": "cypher_policy_profiles",
+        "tags": [
+          "compiler-tools"
+        ],
+        "summary": "List built-in Cypher policy profiles that can be passed to cypher_policy_check.",
+        "description": "List built-in Cypher policy profiles that can be passed to cypher_policy_check. Request bodies are JSON and must stay under 1000000 bytes.",
+        "responses": {
+          "200": {
+            "description": "Compiler tool output.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid JSON request body.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request body exceeds the service limit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Compiler tool validation or execution error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [],
+                "properties": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/lsp-diagnostics": {
+      "post": {
+        "operationId": "cypher_lsp_diagnostics",
+        "tags": [
+          "compiler-tools"
+        ],
+        "summary": "Build LSP-style diagnostics and code actions for structured Cypher IR or raw Cypher using compiler, parser, policy, repair outputs, and exact text edits when available.",
+        "description": "Build LSP-style diagnostics and code actions for structured Cypher IR or raw Cypher using compiler, parser, policy, repair outputs, and exact text edits when available. Request bodies are JSON and must stay under 1000000 bytes.",
+        "responses": {
+          "200": {
+            "description": "Compiler tool output.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid JSON request body.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request body exceeds the service limit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Compiler tool validation or execution error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "schema"
+                ],
+                "properties": {
+                  "schema": {
+                    "type": "object",
+                    "description": "CypherSchemaContract JSON describing labels, relationship types, properties, aliases, and parameters.",
+                    "required": [
+                      "version",
+                      "nodes",
+                      "relationships"
+                    ],
+                    "additionalProperties": true,
+                    "properties": {
+                      "version": {
+                        "const": "cypher-llm-schema/v1"
+                      },
+                      "dialect": {
+                        "type": "string"
+                      },
+                      "nodes": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": true
+                        }
+                      },
+                      "relationships": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": true
+                        }
+                      },
+                      "parameters": {
+                        "type": "object",
+                        "additionalProperties": true
+                      },
+                      "procedures": {
+                        "type": "object",
+                        "additionalProperties": true
+                      },
+                      "disallowWritesByDefault": {
+                        "type": "boolean"
+                      }
+                    }
+                  },
+                  "query": {
+                    "type": "object",
+                    "description": "CypherQuery IR JSON. Prefer this over raw Cypher when asking an LLM to author queries.",
+                    "required": [
+                      "version",
+                      "clauses"
+                    ],
+                    "additionalProperties": true,
+                    "properties": {
+                      "version": {
+                        "const": "cypher-llm-ir/v1"
+                      },
+                      "profile": {
+                        "enum": [
+                          "llm-safe-readonly",
+                          "llm-safe-write",
+                          "raw-compatible"
+                        ]
+                      },
+                      "clauses": {
+                        "type": "array",
+                        "minItems": 1,
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": true
+                        }
+                      },
+                      "metadata": {
+                        "type": "object",
+                        "additionalProperties": true
+                      }
+                    }
+                  },
+                  "rawCypher": {
+                    "type": "string"
+                  },
+                  "uri": {
+                    "type": "string",
+                    "description": "Document URI to attach to the diagnostic report."
+                  },
+                  "parserMode": {
+                    "enum": [
+                      "lint",
+                      "syntax"
+                    ],
+                    "description": "Parser preflight mode for diagnostics."
+                  },
+                  "defaultLimit": {
+                    "type": "number",
+                    "description": "Add this LIMIT to repaired RETURN clauses that do not already have one."
+                  },
+                  "defaultMaxHops": {
+                    "type": "number",
+                    "description": "Replace unbounded variable-length paths with this maximum hop count."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/prove": {
+      "post": {
+        "operationId": "cypher_prove",
+        "tags": [
+          "compiler-tools"
+        ],
+        "summary": "Compile Cypher IR into proof-carrying output: rendered Cypher, repairs, diagnostics, parser preflight, execution-policy status, and blocking reasons.",
+        "description": "Compile Cypher IR into proof-carrying output: rendered Cypher, repairs, diagnostics, parser preflight, execution-policy status, and blocking reasons. Request bodies are JSON and must stay under 1000000 bytes.",
+        "responses": {
+          "200": {
+            "description": "Compiler tool output.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid JSON request body.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request body exceeds the service limit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Compiler tool validation or execution error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "schema",
+                  "query"
+                ],
+                "properties": {
+                  "schema": {
+                    "type": "object",
+                    "description": "CypherSchemaContract JSON describing labels, relationship types, properties, aliases, and parameters.",
+                    "required": [
+                      "version",
+                      "nodes",
+                      "relationships"
+                    ],
+                    "additionalProperties": true,
+                    "properties": {
+                      "version": {
+                        "const": "cypher-llm-schema/v1"
+                      },
+                      "dialect": {
+                        "type": "string"
+                      },
+                      "nodes": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": true
+                        }
+                      },
+                      "relationships": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": true
+                        }
+                      },
+                      "parameters": {
+                        "type": "object",
+                        "additionalProperties": true
+                      },
+                      "procedures": {
+                        "type": "object",
+                        "additionalProperties": true
+                      },
+                      "disallowWritesByDefault": {
+                        "type": "boolean"
+                      }
+                    }
+                  },
+                  "query": {
+                    "type": "object",
+                    "description": "CypherQuery IR JSON. Prefer this over raw Cypher when asking an LLM to author queries.",
+                    "required": [
+                      "version",
+                      "clauses"
+                    ],
+                    "additionalProperties": true,
+                    "properties": {
+                      "version": {
+                        "const": "cypher-llm-ir/v1"
+                      },
+                      "profile": {
+                        "enum": [
+                          "llm-safe-readonly",
+                          "llm-safe-write",
+                          "raw-compatible"
+                        ]
+                      },
+                      "clauses": {
+                        "type": "array",
+                        "minItems": 1,
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": true
+                        }
+                      },
+                      "metadata": {
+                        "type": "object",
+                        "additionalProperties": true
+                      }
+                    }
+                  },
+                  "params": {
+                    "type": "object",
+                    "description": "Cypher parameter values keyed by parameter name without the '$' prefix.",
+                    "additionalProperties": {
+                      "description": "JSON-serializable Cypher parameter value.",
+                      "oneOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "array",
+                          "items": {}
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": true
+                        }
+                      ]
+                    }
+                  },
+                  "defaultLimit": {
+                    "type": "number",
+                    "description": "Add this LIMIT to repaired RETURN clauses that do not already have one."
+                  },
+                  "defaultMaxHops": {
+                    "type": "number",
+                    "description": "Replace unbounded variable-length paths with this maximum hop count."
+                  },
+                  "requireLimit": {
+                    "type": "boolean",
+                    "description": "Require RETURN clauses to include LIMIT when assessing policy evidence."
+                  },
+                  "maxReturnLimit": {
+                    "type": "number",
+                    "description": "Warn when a RETURN LIMIT exceeds this policy maximum."
+                  },
+                  "maxRelationshipHops": {
+                    "type": "number",
+                    "description": "Block or warn when variable-length relationships exceed this policy maximum."
+                  },
+                  "plannerEstimate": {
+                    "type": "object",
+                    "description": "Optional cypher-llm-planner-estimate/v1 planner evidence from EXPLAIN or a fixture.",
+                    "additionalProperties": true
+                  },
+                  "schemaStatistics": {
+                    "type": "object",
+                    "description": "Optional cypher-llm-schema-statistics/v1 cardinality and index metadata.",
+                    "additionalProperties": true
+                  },
+                  "policyRules": {
+                    "type": "object",
+                    "description": "Optional cypher-llm-policy-rules/v1 sensitivity and tenant-scoping policy rules.",
+                    "additionalProperties": true
+                  },
+                  "maxEstimatedRows": {
+                    "type": "number",
+                    "description": "Warn when planner-estimated rows exceed this value."
+                  },
+                  "maxDbHits": {
+                    "type": "number",
+                    "description": "Warn when planner-estimated db hits exceed this value."
+                  },
+                  "maxLabelScanRows": {
+                    "type": "number",
+                    "description": "Warn when unanchored label scans exceed this schema-statistics row count."
+                  },
+                  "maxRelationshipFanout": {
+                    "type": "number",
+                    "description": "Warn when relationship average fanout exceeds this schema-statistics value."
+                  },
+                  "warnOnPlanOperators": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Planner operator names that should produce warning findings."
+                  },
+                  "allowWrites": {
+                    "type": "boolean",
+                    "description": "Allow write clauses to pass validation. Use only after an external approval step."
+                  },
+                  "approved": {
+                    "type": "boolean",
+                    "description": "Mark a write query as externally approved when allowWrites is also true."
+                  },
+                  "mode": {
+                    "enum": [
+                      "explain",
+                      "readonly",
+                      "write-requires-approval"
+                    ],
+                    "description": "Execution mode metadata for the returned proof."
+                  },
+                  "parserMode": {
+                    "enum": [
+                      "lint",
+                      "syntax"
+                    ],
+                    "description": "Parser preflight mode for the rendered Cypher."
+                  },
+                  "includeParser": {
+                    "type": "boolean",
+                    "description": "Set false to skip parser preflight in constrained environments."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/agent-feedback": {
+      "post": {
+        "operationId": "cypher_agent_feedback",
+        "tags": [
+          "compiler-tools"
+        ],
+        "summary": "Return one agent-facing feedback packet with proof, repair plan, policy evidence, and the next action an LLM client should take.",
+        "description": "Return one agent-facing feedback packet with proof, repair plan, policy evidence, and the next action an LLM client should take. Request bodies are JSON and must stay under 1000000 bytes.",
+        "responses": {
+          "200": {
+            "description": "Compiler tool output.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid JSON request body.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request body exceeds the service limit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Compiler tool validation or execution error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "schema",
+                  "query"
+                ],
+                "properties": {
+                  "schema": {
+                    "type": "object",
+                    "description": "CypherSchemaContract JSON describing labels, relationship types, properties, aliases, and parameters.",
+                    "required": [
+                      "version",
+                      "nodes",
+                      "relationships"
+                    ],
+                    "additionalProperties": true,
+                    "properties": {
+                      "version": {
+                        "const": "cypher-llm-schema/v1"
+                      },
+                      "dialect": {
+                        "type": "string"
+                      },
+                      "nodes": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": true
+                        }
+                      },
+                      "relationships": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": true
+                        }
+                      },
+                      "parameters": {
+                        "type": "object",
+                        "additionalProperties": true
+                      },
+                      "procedures": {
+                        "type": "object",
+                        "additionalProperties": true
+                      },
+                      "disallowWritesByDefault": {
+                        "type": "boolean"
+                      }
+                    }
+                  },
+                  "query": {
+                    "type": "object",
+                    "description": "CypherQuery IR JSON. Prefer this over raw Cypher when asking an LLM to author queries.",
+                    "required": [
+                      "version",
+                      "clauses"
+                    ],
+                    "additionalProperties": true,
+                    "properties": {
+                      "version": {
+                        "const": "cypher-llm-ir/v1"
+                      },
+                      "profile": {
+                        "enum": [
+                          "llm-safe-readonly",
+                          "llm-safe-write",
+                          "raw-compatible"
+                        ]
+                      },
+                      "clauses": {
+                        "type": "array",
+                        "minItems": 1,
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": true
+                        }
+                      },
+                      "metadata": {
+                        "type": "object",
+                        "additionalProperties": true
+                      }
+                    }
+                  },
+                  "params": {
+                    "type": "object",
+                    "description": "Cypher parameter values keyed by parameter name without the '$' prefix.",
+                    "additionalProperties": {
+                      "description": "JSON-serializable Cypher parameter value.",
+                      "oneOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "array",
+                          "items": {}
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": true
+                        }
+                      ]
+                    }
+                  },
+                  "defaultLimit": {
+                    "type": "number",
+                    "description": "Add this LIMIT to repaired RETURN clauses that do not already have one."
+                  },
+                  "defaultMaxHops": {
+                    "type": "number",
+                    "description": "Replace unbounded variable-length paths with this maximum hop count."
+                  },
+                  "requireLimit": {
+                    "type": "boolean",
+                    "description": "Require RETURN clauses to include LIMIT when assessing policy evidence."
+                  },
+                  "maxReturnLimit": {
+                    "type": "number",
+                    "description": "Warn when a RETURN LIMIT exceeds this policy maximum."
+                  },
+                  "maxRelationshipHops": {
+                    "type": "number",
+                    "description": "Block or warn when variable-length relationships exceed this policy maximum."
+                  },
+                  "plannerEstimate": {
+                    "type": "object",
+                    "description": "Optional cypher-llm-planner-estimate/v1 planner evidence from EXPLAIN or a fixture.",
+                    "additionalProperties": true
+                  },
+                  "schemaStatistics": {
+                    "type": "object",
+                    "description": "Optional cypher-llm-schema-statistics/v1 cardinality and index metadata.",
+                    "additionalProperties": true
+                  },
+                  "policyRules": {
+                    "type": "object",
+                    "description": "Optional cypher-llm-policy-rules/v1 sensitivity and tenant-scoping policy rules.",
+                    "additionalProperties": true
+                  },
+                  "maxEstimatedRows": {
+                    "type": "number",
+                    "description": "Warn when planner-estimated rows exceed this value."
+                  },
+                  "maxDbHits": {
+                    "type": "number",
+                    "description": "Warn when planner-estimated db hits exceed this value."
+                  },
+                  "maxLabelScanRows": {
+                    "type": "number",
+                    "description": "Warn when unanchored label scans exceed this schema-statistics row count."
+                  },
+                  "maxRelationshipFanout": {
+                    "type": "number",
+                    "description": "Warn when relationship average fanout exceeds this schema-statistics value."
+                  },
+                  "warnOnPlanOperators": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Planner operator names that should produce warning findings."
+                  },
+                  "allowWrites": {
+                    "type": "boolean",
+                    "description": "Allow write clauses to pass validation. Use only after an external approval step."
+                  },
+                  "approved": {
+                    "type": "boolean",
+                    "description": "Mark a write query as externally approved when allowWrites is also true."
+                  },
+                  "mode": {
+                    "enum": [
+                      "explain",
+                      "readonly",
+                      "write-requires-approval"
+                    ],
+                    "description": "Execution mode metadata for the nested proof."
+                  },
+                  "parserMode": {
+                    "enum": [
+                      "lint",
+                      "syntax"
+                    ],
+                    "description": "Parser preflight mode for the rendered Cypher."
+                  },
+                  "includeParser": {
+                    "type": "boolean",
+                    "description": "Set false to skip parser preflight in constrained environments."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/compatibility-diff": {
+      "post": {
+        "operationId": "cypher_compatibility_diff",
+        "tags": [
+          "compiler-tools"
+        ],
+        "summary": "Compare two compatibility catalogs and classify added, removed, changed, fingerprint, warning, and breaking public contract changes.",
+        "description": "Compare two compatibility catalogs and classify added, removed, changed, fingerprint, warning, and breaking public contract changes. Request bodies are JSON and must stay under 1000000 bytes.",
+        "responses": {
+          "200": {
+            "description": "Compiler tool output.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid JSON request body.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request body exceeds the service limit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Compiler tool validation or execution error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "baseline"
+                ],
+                "properties": {
+                  "baseline": {
+                    "type": "object",
+                    "description": "cypher-llm-compatibility-catalog/v1 catalog JSON.",
+                    "required": [
+                      "version",
+                      "contracts",
+                      "releaseGates",
+                      "certificationGates",
+                      "deprecationPolicy"
+                    ],
+                    "additionalProperties": true,
+                    "properties": {
+                      "version": {
+                        "const": "cypher-llm-compatibility-catalog/v1"
+                      },
+                      "packageName": {
+                        "type": "string"
+                      },
+                      "packageVersion": {
+                        "type": "string"
+                      },
+                      "contracts": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": true
+                        }
+                      },
+                      "releaseGates": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": true
+                        }
+                      },
+                      "certificationGates": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": true
+                        }
+                      },
+                      "deprecationPolicy": {
+                        "type": "object",
+                        "additionalProperties": true
+                      }
+                    }
+                  },
+                  "candidate": {
+                    "type": "object",
+                    "description": "cypher-llm-compatibility-catalog/v1 catalog JSON.",
+                    "required": [
+                      "version",
+                      "contracts",
+                      "releaseGates",
+                      "certificationGates",
+                      "deprecationPolicy"
+                    ],
+                    "additionalProperties": true,
+                    "properties": {
+                      "version": {
+                        "const": "cypher-llm-compatibility-catalog/v1"
+                      },
+                      "packageName": {
+                        "type": "string"
+                      },
+                      "packageVersion": {
+                        "type": "string"
+                      },
+                      "contracts": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": true
+                        }
+                      },
+                      "releaseGates": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": true
+                        }
+                      },
+                      "certificationGates": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": true
+                        }
+                      },
+                      "deprecationPolicy": {
+                        "type": "object",
+                        "additionalProperties": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/eval": {
+      "post": {
+        "operationId": "cypher_eval",
+        "tags": [
+          "compiler-tools"
+        ],
+        "summary": "Score offline text2cypher or IR attempts against a Cypher LLM eval dataset.",
+        "description": "Score offline text2cypher or IR attempts against a Cypher LLM eval dataset. Request bodies are JSON and must stay under 1000000 bytes.",
+        "responses": {
+          "200": {
+            "description": "Compiler tool output.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid JSON request body.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request body exceeds the service limit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Compiler tool validation or execution error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "dataset",
+                  "attempts"
+                ],
+                "properties": {
+                  "dataset": {
+                    "type": "object",
+                    "description": "EvalDataset JSON containing tasks, schemas, and expectations.",
+                    "required": [
+                      "version",
+                      "name",
+                      "tasks"
+                    ],
+                    "additionalProperties": true,
+                    "properties": {
+                      "version": {
+                        "const": "cypher-llm-eval-dataset/v1"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "tasks": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": true
+                        }
+                      }
+                    }
+                  },
+                  "attempts": {
+                    "type": "object",
+                    "description": "EvalAttemptSet JSON containing model attempts as IR, raw Cypher, timeout, or no-Cypher outputs.",
+                    "required": [
+                      "version",
+                      "attempts"
+                    ],
+                    "additionalProperties": true,
+                    "properties": {
+                      "version": {
+                        "const": "cypher-llm-eval-attempts/v1"
+                      },
+                      "datasetName": {
+                        "type": "string"
+                      },
+                      "model": {
+                        "type": "string"
+                      },
+                      "prompt": {
+                        "type": "string"
+                      },
+                      "attempts": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": true
+                        }
+                      }
+                    }
+                  },
+                  "defaultLimit": {
+                    "type": "number",
+                    "description": "Add this LIMIT to repaired RETURN clauses that do not already have one."
+                  },
+                  "defaultMaxHops": {
+                    "type": "number",
+                    "description": "Replace unbounded variable-length paths with this maximum hop count."
+                  },
+                  "rawCypherCanExecute": {
+                    "type": "boolean",
+                    "description": "Count raw Cypher attempts as executable when raw repair did not find blocking diagnostics."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/scorecard": {
+      "post": {
+        "operationId": "cypher_scorecard",
+        "tags": [
+          "compiler-tools"
+        ],
+        "summary": "Build a publishable CypherBench scorecard from one or more eval reports, including lane rankings, diagnostics, and baseline comparisons.",
+        "description": "Build a publishable CypherBench scorecard from one or more eval reports, including lane rankings, diagnostics, and baseline comparisons. Request bodies are JSON and must stay under 1000000 bytes.",
+        "responses": {
+          "200": {
+            "description": "Compiler tool output.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid JSON request body.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request body exceeds the service limit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Compiler tool validation or execution error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "reports"
+                ],
+                "properties": {
+                  "reports": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "type": "object",
+                      "description": "EvalReport JSON produced by cypher_eval or the eval CLI.",
+                      "required": [
+                        "version",
+                        "datasetName",
+                        "metrics",
+                        "results"
+                      ],
+                      "additionalProperties": true,
+                      "properties": {
+                        "version": {
+                          "const": "cypher-llm-eval-report/v1"
+                        },
+                        "datasetName": {
+                          "type": "string"
+                        },
+                        "model": {
+                          "type": "string"
+                        },
+                        "prompt": {
+                          "type": "string"
+                        },
+                        "metrics": {
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        "results": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": true
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "Human-readable scorecard name."
+                  },
+                  "baselineIndex": {
+                    "type": "number",
+                    "description": "Zero-based report index to use as the comparison baseline."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/benchmark-gate": {
+      "post": {
+        "operationId": "cypher_benchmark_gate",
+        "tags": [
+          "compiler-tools"
+        ],
+        "summary": "Build a CI-friendly CypherBench gate report that fails on directional metric regressions and optional pass/executable-rate floors.",
+        "description": "Build a CI-friendly CypherBench gate report that fails on directional metric regressions and optional pass/executable-rate floors. Request bodies are JSON and must stay under 1000000 bytes.",
+        "responses": {
+          "200": {
+            "description": "Compiler tool output.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid JSON request body.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request body exceeds the service limit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Compiler tool validation or execution error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "baseline",
+                  "candidate"
+                ],
+                "properties": {
+                  "baseline": {
+                    "type": "object",
+                    "description": "EvalReport JSON produced by cypher_eval or the eval CLI.",
+                    "required": [
+                      "version",
+                      "datasetName",
+                      "metrics",
+                      "results"
+                    ],
+                    "additionalProperties": true,
+                    "properties": {
+                      "version": {
+                        "const": "cypher-llm-eval-report/v1"
+                      },
+                      "datasetName": {
+                        "type": "string"
+                      },
+                      "model": {
+                        "type": "string"
+                      },
+                      "prompt": {
+                        "type": "string"
+                      },
+                      "metrics": {
+                        "type": "object",
+                        "additionalProperties": true
+                      },
+                      "results": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": true
+                        }
+                      }
+                    }
+                  },
+                  "candidate": {
+                    "type": "object",
+                    "description": "EvalReport JSON produced by cypher_eval or the eval CLI.",
+                    "required": [
+                      "version",
+                      "datasetName",
+                      "metrics",
+                      "results"
+                    ],
+                    "additionalProperties": true,
+                    "properties": {
+                      "version": {
+                        "const": "cypher-llm-eval-report/v1"
+                      },
+                      "datasetName": {
+                        "type": "string"
+                      },
+                      "model": {
+                        "type": "string"
+                      },
+                      "prompt": {
+                        "type": "string"
+                      },
+                      "metrics": {
+                        "type": "object",
+                        "additionalProperties": true
+                      },
+                      "results": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": true
+                        }
+                      }
+                    }
+                  },
+                  "tolerance": {
+                    "type": "number",
+                    "description": "Numeric tolerance for metric deltas and floors."
+                  },
+                  "minPassRate": {
+                    "type": "number",
+                    "description": "Optional minimum candidate pass rate."
+                  },
+                  "minExecutableRate": {
+                    "type": "number",
+                    "description": "Optional minimum candidate executable rate."
+                  },
+                  "failOnDiagnosticRegression": {
+                    "type": "boolean",
+                    "description": "Fail when diagnostic-code counts increase."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/retry-eval": {
+      "post": {
+        "operationId": "cypher_retry_eval",
+        "tags": [
+          "compiler-tools"
+        ],
+        "summary": "Evaluate multiple model retry rounds over a CypherBench dataset, including per-task convergence, retry-packet resolution, and multi-attempt metrics.",
+        "description": "Evaluate multiple model retry rounds over a CypherBench dataset, including per-task convergence, retry-packet resolution, and multi-attempt metrics. Request bodies are JSON and must stay under 1000000 bytes.",
+        "responses": {
+          "200": {
+            "description": "Compiler tool output.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid JSON request body.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request body exceeds the service limit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Compiler tool validation or execution error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "dataset",
+                  "rounds"
+                ],
+                "properties": {
+                  "dataset": {
+                    "type": "object",
+                    "description": "EvalDataset JSON containing tasks, schemas, and expectations.",
+                    "required": [
+                      "version",
+                      "name",
+                      "tasks"
+                    ],
+                    "additionalProperties": true,
+                    "properties": {
+                      "version": {
+                        "const": "cypher-llm-eval-dataset/v1"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "tasks": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": true
+                        }
+                      }
+                    }
+                  },
+                  "rounds": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "attempts"
+                      ],
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "label": {
+                          "type": "string"
+                        },
+                        "attempts": {
+                          "type": "object",
+                          "description": "EvalAttemptSet JSON containing model attempts as IR, raw Cypher, timeout, or no-Cypher outputs.",
+                          "required": [
+                            "version",
+                            "attempts"
+                          ],
+                          "additionalProperties": true,
+                          "properties": {
+                            "version": {
+                              "const": "cypher-llm-eval-attempts/v1"
+                            },
+                            "datasetName": {
+                              "type": "string"
+                            },
+                            "model": {
+                              "type": "string"
+                            },
+                            "prompt": {
+                              "type": "string"
+                            },
+                            "attempts": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "additionalProperties": true
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "defaultLimit": {
+                    "type": "number",
+                    "description": "Add this LIMIT to repaired RETURN clauses that do not already have one."
+                  },
+                  "defaultMaxHops": {
+                    "type": "number",
+                    "description": "Replace unbounded variable-length paths with this maximum hop count."
+                  },
+                  "rawCypherCanExecute": {
+                    "type": "boolean",
+                    "description": "Count raw Cypher attempts as executable when raw repair did not find blocking diagnostics."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/dataset-governance": {
+      "post": {
+        "operationId": "cypher_dataset_governance",
+        "tags": [
+          "compiler-tools"
+        ],
+        "summary": "Audit a CypherBench eval dataset for machine-readable provenance, split assignment, redaction findings, duplicate ids, and governance diagnostics.",
+        "description": "Audit a CypherBench eval dataset for machine-readable provenance, split assignment, redaction findings, duplicate ids, and governance diagnostics. Request bodies are JSON and must stay under 1000000 bytes.",
+        "responses": {
+          "200": {
+            "description": "Compiler tool output.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid JSON request body.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request body exceeds the service limit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Compiler tool validation or execution error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "dataset"
+                ],
+                "properties": {
+                  "dataset": {
+                    "type": "object",
+                    "description": "EvalDataset JSON containing tasks, schemas, and expectations.",
+                    "required": [
+                      "version",
+                      "name",
+                      "tasks"
+                    ],
+                    "additionalProperties": true,
+                    "properties": {
+                      "version": {
+                        "const": "cypher-llm-eval-dataset/v1"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "tasks": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": true
+                        }
+                      }
+                    }
+                  },
+                  "defaultSplit": {
+                    "type": "string",
+                    "description": "Fallback split for tasks without a split:* tag."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/tools/{toolName}": {
+      "post": {
+        "operationId": "cypher_tool_by_name",
+        "tags": [
+          "compiler-tools"
+        ],
+        "summary": "Call a compiler tool by name.",
+        "description": "Dynamic route for compiler tools. Request bodies must match the selected tool schema and stay under 1000000 bytes.",
+        "parameters": [
+          {
+            "name": "toolName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "cypher_render",
+                "cypher_validate",
+                "cypher_repair",
+                "cypher_repair_plan",
+                "cypher_lossless_conformance",
+                "cypher_parse_lossless",
+                "cypher_parse_check",
+                "cypher_policy_check",
+                "cypher_policy_eval",
+                "cypher_policy_profiles",
+                "cypher_lsp_diagnostics",
+                "cypher_prove",
+                "cypher_agent_feedback",
+                "cypher_agent_guide",
+                "cypher_diagnostic_catalog",
+                "cypher_compatibility_catalog",
+                "cypher_compatibility_diff",
+                "cypher_contract_conformance",
+                "cypher_service_openapi",
+                "cypher_eval",
+                "cypher_scorecard",
+                "cypher_benchmark_gate",
+                "cypher_retry_eval",
+                "cypher_dataset_governance"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Compiler tool output.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid JSON request body.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid bearer token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request body exceeds the service limit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Compiler tool validation or execution error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    },
+    "schemas": {
+      "JsonObject": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "error"
+        ],
+        "properties": {
+          "error": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "code",
+              "message"
+            ],
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

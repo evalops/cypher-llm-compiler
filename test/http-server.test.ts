@@ -56,6 +56,7 @@ describe("compiler HTTP service", () => {
     const diagnosticCatalog = await getJson(`${baseUrl}/v1/diagnostic-catalog`) as { version: string; entries: unknown[] };
     const compatibility = await getJson(`${baseUrl}/v1/compatibility`) as { version: string; contracts: unknown[] };
     const conformance = await getJson(`${baseUrl}/v1/contract-conformance`) as { version: string; summary: { failures: number } };
+    const openapi = await getJson(`${baseUrl}/v1/openapi`) as { version: string; openapi: string; paths: Record<string, unknown> };
     const metrics = await getJson(`${baseUrl}/v1/metrics`) as { version: string; requests: { total: number } };
 
     assert.equal(health.version, "cypher-llm-compiler-http/v1");
@@ -70,6 +71,9 @@ describe("compiler HTTP service", () => {
     assert.ok(compatibility.contracts.length > 0);
     assert.equal(conformance.version, "cypher-llm-contract-conformance/v1");
     assert.equal(conformance.summary.failures, 0);
+    assert.equal(openapi.version, "cypher-llm-service-openapi/v1");
+    assert.equal(openapi.openapi, "3.1.0");
+    assert.ok(openapi.paths["/v1/render"]);
     assert.equal(metrics.version, "cypher-llm-service-metrics/v1");
     assert.ok(metrics.requests.total >= 1);
   });

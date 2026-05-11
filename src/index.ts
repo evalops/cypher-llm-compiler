@@ -42,6 +42,7 @@ export * from "./schema-statistics.js";
 export * from "./scorecard.js";
 export * from "./service-manifest.js";
 export * from "./service-metrics.js";
+export * from "./service-openapi.js";
 export * from "./tools.js";
 export * from "./validate.js";
 export * from "./years-roadmap.js";

@@ -207,10 +207,13 @@ export const yearsRoadmap = {
         "src/http-server.ts",
         "src/service-manifest.ts",
         "src/service-metrics.ts",
+        "src/service-openapi.ts",
         "schemas/service-manifest.schema.json",
         "schemas/service-metrics.schema.json",
+        "schemas/service-openapi.schema.json",
         "examples/service/service-manifest.json",
         "examples/service/service-metrics.json",
+        "examples/service/service-openapi.json",
         "src/cli.ts",
         "docs/INTEGRATIONS.md"
       ],
@@ -476,12 +479,21 @@ export const yearsRoadmap = {
         "src/http-server.ts",
         "src/service-manifest.ts",
         "src/service-metrics.ts",
+        "src/service-openapi.ts",
         "schemas/service-manifest.schema.json",
         "schemas/service-metrics.schema.json",
+        "schemas/service-openapi.schema.json",
         "test/http-server.test.ts",
         "docs/INTEGRATIONS.md"
       ],
       workstreamIds: ["compiler-service", "ecosystem-ux"]
+    },
+    {
+      id: "service-openapi",
+      title: "OpenAPI Contract For Compiler Service Routes",
+      status: "partial",
+      evidence: ["src/service-openapi.ts", "schemas/service-openapi.schema.json", "test/service-openapi.test.ts"],
+      workstreamIds: ["compiler-service", "ecosystem-ux", "governance-standards"]
     },
     {
       id: "service-operational-controls",

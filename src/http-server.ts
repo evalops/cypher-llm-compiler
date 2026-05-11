@@ -21,6 +21,7 @@ import {
   DEFAULT_MAX_BODY_BYTES,
   isPublicCompilerServiceRoute
 } from "./service-manifest.js";
+import { buildCompilerServiceOpenApi } from "./service-openapi.js";
 
 export interface CompilerHttpServerOptions {
   maxBodyBytes?: number;
@@ -129,6 +130,18 @@ export async function handleCompilerHttpRequest(
     await finish(
       200,
       buildCompilerServiceManifest({
+        maxBodyBytes,
+        authRequired: auth.required,
+        auditEnabled: options.auditSink !== undefined
+      })
+    );
+    return;
+  }
+
+  if (request.method === "GET" && url.pathname === "/v1/openapi") {
+    await finish(
+      200,
+      buildCompilerServiceOpenApi(CYPHER_COMPILER_TOOLS, {
         maxBodyBytes,
         authRequired: auth.required,
         auditEnabled: options.auditSink !== undefined

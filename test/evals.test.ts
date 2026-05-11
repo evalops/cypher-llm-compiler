@@ -79,6 +79,7 @@ describe("json schemas", () => {
     const repairPlanSchema = readJson("schemas/repair-plan.schema.json");
     const serviceManifestSchema = readJson("schemas/service-manifest.schema.json");
     const serviceMetricsSchema = readJson("schemas/service-metrics.schema.json");
+    const serviceOpenApiSchema = readJson("schemas/service-openapi.schema.json");
     const dialectProfileSchema = readJson("schemas/dialect-profile.schema.json");
     const dialectCertificationSchema = readJson("schemas/dialect-certification.schema.json");
     const dialectLiveEvidenceSchema = readJson("schemas/dialect-live-evidence.schema.json");
@@ -110,6 +111,7 @@ describe("json schemas", () => {
     ajv.addSchema(repairPlanSchema);
     ajv.addSchema(serviceManifestSchema);
     ajv.addSchema(serviceMetricsSchema);
+    ajv.addSchema(serviceOpenApiSchema);
     ajv.addSchema(dialectProfileSchema);
     ajv.addSchema(dialectCertificationSchema);
     ajv.addSchema(dialectLiveEvidenceSchema);
@@ -142,6 +144,7 @@ describe("json schemas", () => {
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/repair-plan/v1.json", readJson("examples/proofs/tool-hash.repair-plan.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/service-manifest/v1.json", readJson("examples/service/service-manifest.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/service-metrics/v1.json", readJson("examples/service/service-metrics.json"));
+    assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/service-openapi/v1.json", readJson("examples/service/service-openapi.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/eval-dataset/v1.json", readJson("examples/eval-dataset.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/eval-attempts/v1.json", readJson("examples/eval-attempts.json"));
     assertValid(ajv, "https://evalops.dev/schemas/cypher-llm/dialect-profile/v1.json", readJson("profiles/neo4j-cypher-25.json"));

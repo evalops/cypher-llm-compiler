@@ -34,6 +34,7 @@ import type { SafeExecutionOptions } from "./safety.js";
 import { createSafeExecutionPlan } from "./safety.js";
 import type { CypherSchemaStatistics } from "./schema-statistics.js";
 import { buildCypherBenchScorecard } from "./scorecard.js";
+import { buildCompilerServiceOpenApi } from "./service-openapi.js";
 import type { ValidationOptions } from "./validate.js";
 import { validateQuery } from "./validate.js";
 
@@ -58,6 +59,7 @@ export type CypherCompilerToolName =
   | "cypher_compatibility_catalog"
   | "cypher_compatibility_diff"
   | "cypher_contract_conformance"
+  | "cypher_service_openapi"
   | "cypher_eval"
   | "cypher_scorecard"
   | "cypher_benchmark_gate"
@@ -606,6 +608,29 @@ export const CYPHER_COMPILER_TOOLS: readonly CypherCompilerToolDefinition[] = [
     inputSchema: objectSchema([], {})
   },
   {
+    name: "cypher_service_openapi",
+    description:
+      "Return the OpenAPI 3.1 HTTP service contract generated from the shared compiler tool schemas and service manifest.",
+    inputSchema: objectSchema([], {
+      serverUrl: {
+        type: "string",
+        description: "Optional server URL to place in the OpenAPI servers list."
+      },
+      maxBodyBytes: {
+        type: "number",
+        description: "Maximum JSON request body size advertised by the service."
+      },
+      authRequired: {
+        type: "boolean",
+        description: "Whether non-public runtime routes require bearer authentication."
+      },
+      auditEnabled: {
+        type: "boolean",
+        description: "Whether the service advertises redacted audit events."
+      }
+    })
+  },
+  {
     name: "cypher_eval",
     description: "Score offline text2cypher or IR attempts against a Cypher LLM eval dataset.",
     inputSchema: objectSchema(["dataset", "attempts"], {
@@ -854,6 +879,9 @@ export async function executeCypherCompilerTool(name: string, input: unknown): P
     }
     case "cypher_contract_conformance": {
       return buildContractConformanceReport();
+    }
+    case "cypher_service_openapi": {
+      return buildCompilerServiceOpenApi(CYPHER_COMPILER_TOOLS, serviceOpenApiOptions(args));
     }
     case "cypher_eval": {
       return evaluateAttempts(
@@ -1261,6 +1289,27 @@ function policyEvalOptions(args: Record<string, unknown>): CypherPolicyEvalOptio
       throw new Error("Expected 'parserMode' to be lint or syntax.");
     }
     options.parserMode = parserMode;
+  }
+  return options;
+}
+
+function serviceOpenApiOptions(args: Record<string, unknown>): Parameters<typeof buildCompilerServiceOpenApi>[1] {
+  const options: Parameters<typeof buildCompilerServiceOpenApi>[1] = {};
+  const serverUrl = optionalString(args, "serverUrl");
+  const maxBodyBytes = optionalNumber(args, "maxBodyBytes");
+  const authRequired = optionalBoolean(args, "authRequired");
+  const auditEnabled = optionalBoolean(args, "auditEnabled");
+  if (serverUrl !== undefined) {
+    options.serverUrl = serverUrl;
+  }
+  if (maxBodyBytes !== undefined) {
+    options.maxBodyBytes = maxBodyBytes;
+  }
+  if (authRequired !== undefined) {
+    options.authRequired = authRequired;
+  }
+  if (auditEnabled !== undefined) {
+    options.auditEnabled = auditEnabled;
   }
   return options;
 }

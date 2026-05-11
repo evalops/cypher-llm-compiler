@@ -169,11 +169,12 @@ Ecosystem diagnostics are exported from `src/lsp.ts`, validated by `schemas/lsp-
 cypher-llm lsp-diagnostics --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json
 ```
 
-Compiler service manifests are exported from `src/service-manifest.ts`, validated by `schemas/service-manifest.schema.json`, and checked in at `examples/service/service-manifest.json`. Runtime metrics are exported from `src/service-metrics.ts`, validated by `schemas/service-metrics.schema.json`, checked in at `examples/service/service-metrics.json`, and exposed by the HTTP service at `/v1/metrics`.
+Compiler service manifests are exported from `src/service-manifest.ts`, validated by `schemas/service-manifest.schema.json`, and checked in at `examples/service/service-manifest.json`. Runtime metrics are exported from `src/service-metrics.ts`, validated by `schemas/service-metrics.schema.json`, checked in at `examples/service/service-metrics.json`, and exposed by the HTTP service at `/v1/metrics`. OpenAPI service contracts are exported from `src/service-openapi.ts`, validated by `schemas/service-openapi.schema.json`, checked in at `examples/service/service-openapi.json`, and exposed by the HTTP service at `/v1/openapi`.
 
 ```bash
 cypher-llm service-manifest --manifest-out examples/service/service-manifest.json
 cypher-llm service-metrics --metrics-out examples/service/service-metrics.json
+cypher-llm service-openapi --openapi-out examples/service/service-openapi.json
 cypher-llm serve --require-auth --auth-token "$CYPHER_LLM_HTTP_TOKEN" --audit-log audit.jsonl
 ```
 

@@ -1351,6 +1351,44 @@ describe("cli", () => {
     assert.ok(writes.get("out/service-metrics.json")?.includes("cypher-llm-service-metrics/v1"));
   });
 
+  it("prints and writes the compiler service OpenAPI contract", async () => {
+    const writes = new Map<string, string>();
+    let stdout = "";
+    let stderr = "";
+    const io: CliIO = {
+      stdout: { write: (chunk: string | Uint8Array) => ((stdout += String(chunk)), true) },
+      stderr: { write: (chunk: string | Uint8Array) => ((stderr += String(chunk)), true) },
+      readFile: async () => "",
+      writeFile: async (path, data) => {
+        writes.set(path, data);
+      },
+      mkdir: async () => undefined
+    };
+
+    const code = await runCli(
+      [
+        "service-openapi",
+        "--openapi-out",
+        "out/service-openapi.json",
+        "--server-url",
+        "https://compiler.example.test",
+        "--require-auth",
+        "--max-body-bytes",
+        "2000"
+      ],
+      io
+    );
+    const output = JSON.parse(stdout) as { version: string; openapi: string; servers: { url: string }[]; summary: { maxBodyBytes: number } };
+
+    assert.equal(code, 0);
+    assert.equal(stderr, "");
+    assert.equal(output.version, "cypher-llm-service-openapi/v1");
+    assert.equal(output.openapi, "3.1.0");
+    assert.equal(output.servers[0]?.url, "https://compiler.example.test");
+    assert.equal(output.summary.maxBodyBytes, 2000);
+    assert.ok(writes.get("out/service-openapi.json")?.includes("/v1/render"));
+  });
+
   it("imports text2cypher CSV fixtures to dataset and attempt files", async () => {
     const files = new Map<string, string>([
       [

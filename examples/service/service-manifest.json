@@ -14,7 +14,8 @@
     "envVar": "CYPHER_LLM_HTTP_TOKEN",
     "publicRoutes": [
       "/healthz",
-      "/v1/service-manifest"
+      "/v1/service-manifest",
+      "/v1/openapi"
     ]
   },
   "audit": {
@@ -51,6 +52,12 @@
       "method": "GET",
       "path": "/v1/service-manifest",
       "operation": "service_manifest",
+      "authRequired": false
+    },
+    {
+      "method": "GET",
+      "path": "/v1/openapi",
+      "operation": "service_openapi",
       "authRequired": false
     },
     {

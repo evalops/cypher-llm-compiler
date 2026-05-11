@@ -488,6 +488,7 @@ Returns OpenAI Responses API function-tool definitions for:
 - `cypher_compatibility_catalog`
 - `cypher_compatibility_diff`
 - `cypher_contract_conformance`
+- `cypher_service_openapi`
 - `cypher_eval`
 - `cypher_scorecard`
 - `cypher_benchmark_gate`
@@ -525,6 +526,7 @@ Routes:
 
 - `GET /healthz`
 - `GET /v1/service-manifest`
+- `GET /v1/openapi`
 - `GET /v1/tools`
 - `GET /v1/metrics`
 - `POST /v1/render`
@@ -559,6 +561,16 @@ Routes:
 - `GET /v1/dialect-certification`
 
 The CLI equivalent is `cypher-llm serve --host 127.0.0.1 --port 8787`.
+
+## `buildCompilerServiceOpenApi(tools, options?)`
+
+Produces a `cypher-llm-service-openapi/v1` OpenAPI 3.1 contract for the HTTP compiler service.
+
+The report is generated from the service manifest and the shared compiler tool definitions, so HTTP routes, auth posture, body limits, tool request schemas, JSON responses, and the dynamic `/v1/tools/{toolName}` route stay aligned with OpenAI/MCP tool metadata. The CLI equivalent is:
+
+```bash
+cypher-llm service-openapi --openapi-out examples/service/service-openapi.json
+```
 
 ## `createLangChainCypherAdapter(schema, options?)`
 

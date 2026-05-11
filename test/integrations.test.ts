@@ -66,6 +66,7 @@ describe("OpenAI tool schemas", () => {
       "cypher_compatibility_catalog",
       "cypher_compatibility_diff",
       "cypher_contract_conformance",
+      "cypher_service_openapi",
       "cypher_eval",
       "cypher_scorecard",
       "cypher_benchmark_gate",
@@ -294,6 +295,15 @@ describe("OpenAI tool schemas", () => {
 
     assert.equal(contractConformance.version, "cypher-llm-contract-conformance/v1");
     assert.equal(contractConformance.summary.failures, 0);
+
+    const serviceOpenApi = (await executeCypherCompilerTool("cypher_service_openapi", {
+      serverUrl: "http://compiler.test",
+      authRequired: true
+    })) as { version: string; paths: Record<string, unknown>; servers: { url: string }[] };
+
+    assert.equal(serviceOpenApi.version, "cypher-llm-service-openapi/v1");
+    assert.equal(serviceOpenApi.servers[0]?.url, "http://compiler.test");
+    assert.ok(serviceOpenApi.paths["/v1/render"]);
 
     const evalReport = (await executeCypherCompilerTool("cypher_eval", {
       dataset: {

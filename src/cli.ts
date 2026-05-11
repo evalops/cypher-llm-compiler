@@ -51,8 +51,10 @@ import { evaluateRetryAttempts, type RetryEvalRoundInput } from "./retry-eval.js
 import { createSafeExecutionPlan } from "./safety.js";
 import { buildCompilerServiceManifest } from "./service-manifest.js";
 import { buildEmptyCompilerServiceMetricsReport } from "./service-metrics.js";
+import { buildCompilerServiceOpenApi } from "./service-openapi.js";
 import type { CypherSchemaStatistics } from "./schema-statistics.js";
 import { buildCypherBenchScorecard, renderCypherBenchScorecardMarkdown } from "./scorecard.js";
+import { CYPHER_COMPILER_TOOLS } from "./tools.js";
 import { validateCypherTextWithParser } from "./parser-validation.js";
 import { assessCypherPolicy, type CypherPolicyOptions } from "./policy.js";
 import { evaluatePolicyAttempts, type CypherPolicyEvalOptions } from "./policy-eval.js";
@@ -182,6 +184,9 @@ export async function runCli(argv: string[], io: CliIO = defaultIo()): Promise<n
         return 0;
       case "service-metrics":
         await serviceMetricsCommand(args, io);
+        return 0;
+      case "service-openapi":
+        await serviceOpenApiCommand(args, io);
         return 0;
       case "mcp":
         await mcpCommand();
@@ -805,6 +810,28 @@ async function serviceMetricsCommand(args: Map<string, string | boolean>, io: Cl
   writeJson(io, metrics);
 }
 
+async function serviceOpenApiCommand(args: Map<string, string | boolean>, io: CliIO) {
+  const maxBodyBytes = optionalNumber(args.get("max-body-bytes"));
+  const options: Parameters<typeof buildCompilerServiceOpenApi>[1] = {};
+  if (maxBodyBytes !== undefined) {
+    options.maxBodyBytes = maxBodyBytes;
+  }
+  if (args.get("require-auth") === true) {
+    options.authRequired = true;
+  }
+  if (args.get("audit-enabled") === true) {
+    options.auditEnabled = true;
+  }
+  if (typeof args.get("server-url") === "string") {
+    options.serverUrl = args.get("server-url") as string;
+  }
+  const openapi = buildCompilerServiceOpenApi(CYPHER_COMPILER_TOOLS, options);
+  if (typeof args.get("openapi-out") === "string") {
+    await writeJsonFile(io, args.get("openapi-out") as string, openapi);
+  }
+  writeJson(io, openapi);
+}
+
 async function mcpCommand() {
   const { runMcpServer } = await import("./mcp-server.js");
   await runMcpServer(process.stdin, process.stdout);
@@ -1127,6 +1154,7 @@ Commands:
   certify-dialects [--format json|markdown] [--report-out path] [--live-evidence evidence.json] [--fail-on-fail]
   service-manifest [--manifest-out path] [--max-body-bytes 1000000] [--require-auth] [--audit-enabled]
   service-metrics [--metrics-out path]
+  service-openapi [--openapi-out path] [--server-url http://127.0.0.1:8787] [--max-body-bytes 1000000] [--require-auth] [--audit-enabled]
   mcp
   serve      [--host 127.0.0.1] [--port 8787] [--max-body-bytes 1000000] [--auth-token token] [--require-auth] [--audit-log audit.jsonl]
   import-text2cypher --csv rows.csv --dataset-out dataset.json --attempts-out attempts.json [--summary-out summary.json] [--dataset-name name] [--source name] [--model name] [--limit 10] [--indexes 0,2,39]

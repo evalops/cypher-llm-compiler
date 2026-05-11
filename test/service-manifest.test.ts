@@ -18,6 +18,10 @@ describe("compiler service manifest", () => {
     assert.equal(manifest.audit.enabled, true);
     assert.equal(manifest.limits.maxBodyBytes, 2_000);
     assert.ok(manifest.routes.some((route) => route.path === "/healthz" && route.authRequired === false));
+    assert.ok(manifest.auth.publicRoutes.includes("/v1/openapi"));
+    assert.ok(
+      manifest.routes.some((route) => route.path === "/v1/openapi" && route.operation === "service_openapi" && route.authRequired === false)
+    );
     assert.ok(manifest.routes.some((route) => route.path === "/v1/render" && route.operation === "cypher_render" && route.authRequired === true));
     assert.ok(
       manifest.routes.some((route) => route.path === "/v1/agent-feedback" && route.operation === "cypher_agent_feedback")

@@ -1,6 +1,6 @@
 # Agent Integrations
 
-The compiler exposes the same twenty-three operations across OpenAI tool schemas, MCP, HTTP, LangChain-shaped adapters, and the CLI:
+The compiler exposes the same twenty-four operations across OpenAI tool schemas, MCP, HTTP, LangChain-shaped adapters, and the CLI:
 
 - `cypher_render`: repair IR, validate, and return a `SafeExecutionPlan`.
 - `cypher_validate`: return stable compiler diagnostics for IR.
@@ -20,6 +20,7 @@ The compiler exposes the same twenty-three operations across OpenAI tool schemas
 - `cypher_compatibility_catalog`: return public contract versions, compatibility levels, fingerprints, release gates, certification gates, and deprecation policy.
 - `cypher_compatibility_diff`: compare compatibility catalogs and classify release-impacting contract changes.
 - `cypher_contract_conformance`: verify public schemas, examples, fingerprints, schema validation, and evidence paths.
+- `cypher_service_openapi`: return the OpenAPI 3.1 service contract generated from HTTP routes and tool schemas.
 - `cypher_eval`: score model attempts against an eval dataset.
 - `cypher_scorecard`: publish ranked CypherBench scorecards from eval reports.
 - `cypher_benchmark_gate`: publish pass/fail CypherBench regression gates for CI.
@@ -128,6 +129,7 @@ Routes:
 
 - `GET /healthz`
 - `GET /v1/service-manifest`
+- `GET /v1/openapi`
 - `GET /v1/tools`
 - `GET /v1/metrics`
 - `POST /v1/render`
@@ -161,7 +163,7 @@ Routes:
 - `GET /v1/roadmap`
 - `GET /v1/dialect-certification`
 
-`GET /v1/service-manifest` returns `cypher-llm-service-manifest/v1`, including route auth requirements, body limits, audit redaction fields, metrics routes, and data-boundary guarantees. `GET /v1/metrics` returns `cypher-llm-service-metrics/v1` counters for requests, tool failures, diagnostics, repairs, retry packets, and live database outcomes. When auth is configured, `/healthz` and `/v1/service-manifest` remain public for discovery and liveness while runtime routes require `Authorization: Bearer <token>`.
+`GET /v1/service-manifest` returns `cypher-llm-service-manifest/v1`, including route auth requirements, body limits, audit redaction fields, metrics routes, and data-boundary guarantees. `GET /v1/openapi` returns `cypher-llm-service-openapi/v1`, an OpenAPI 3.1 contract generated from the same manifest and tool schemas. `GET /v1/metrics` returns `cypher-llm-service-metrics/v1` counters for requests, tool failures, diagnostics, repairs, retry packets, and live database outcomes. When auth is configured, `/healthz`, `/v1/service-manifest`, and `/v1/openapi` remain public for discovery and liveness while runtime routes require `Authorization: Bearer <token>`.
 
 Use this when an agent runtime needs a process boundary instead of an in-process TypeScript import or stdio MCP server.
 

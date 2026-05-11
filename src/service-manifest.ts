@@ -71,7 +71,7 @@ export interface CompilerServiceManifest {
   routes: CompilerServiceRoute[];
 }
 
-const PUBLIC_ROUTES = ["/healthz", "/v1/service-manifest"] as const;
+const PUBLIC_ROUTES = ["/healthz", "/v1/service-manifest", "/v1/openapi"] as const;
 
 export function buildCompilerServiceManifest(options: CompilerServiceManifestOptions = {}): CompilerServiceManifest {
   const authRequired = options.authRequired ?? false;
@@ -118,6 +118,7 @@ export function buildCompilerServiceManifest(options: CompilerServiceManifestOpt
     routes: [
       { method: "GET", path: "/healthz", operation: "health", authRequired: false },
       { method: "GET", path: "/v1/service-manifest", operation: "service_manifest", authRequired: false },
+      { method: "GET", path: "/v1/openapi", operation: "service_openapi", authRequired: false },
       { method: "GET", path: "/v1/tools", operation: "tool_metadata", authRequired },
       { method: "GET", path: "/v1/metrics", operation: "service_metrics", authRequired },
       { method: "GET", path: "/v1/roadmap", operation: "years_roadmap", authRequired },

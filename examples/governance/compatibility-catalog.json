@@ -413,7 +413,7 @@
         {
           "kind": "example",
           "path": "examples/agent/agent-guide.json",
-          "sha256": "8c3e526aa34aac48f3423bd257896b58f4a38185d97363c3eb998eef69528646"
+          "sha256": "bf2106eacd8f2dd0083f427bbfd6df03a0566f54b305ebc4cefde22f0a7c9ca5"
         }
       ]
     },
@@ -820,7 +820,7 @@
         {
           "kind": "example",
           "path": "examples/service/service-manifest.json",
-          "sha256": "d12a0c8ddc51fe00577066e53864ba08122b88d92593811fec0bfd6e1cbacfa5"
+          "sha256": "8d3b0ec6a7dfcfbf00b3d9dbc3b70e732243fd7b92d1e519dcaae8ee2d4668ce"
         }
       ]
     },
@@ -855,6 +855,35 @@
       ]
     },
     {
+      "id": "service-openapi",
+      "version": "cypher-llm-service-openapi/v1",
+      "category": "service",
+      "level": "stable",
+      "ownerWorkstreamId": "compiler-service",
+      "schemaPath": "schemas/service-openapi.schema.json",
+      "examplePaths": [
+        "examples/service/service-openapi.json"
+      ],
+      "evidencePaths": [
+        "src/service-openapi.ts",
+        "test/service-openapi.test.ts"
+      ],
+      "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path.",
+      "fingerprints": [
+        {
+          "kind": "schema",
+          "path": "schemas/service-openapi.schema.json",
+          "sha256": "97f40756aebd6ec2adc439d43901a8f52f42ffc59adbcc5c3106f30b2ff9fcbd"
+        },
+        {
+          "kind": "example",
+          "path": "examples/service/service-openapi.json",
+          "sha256": "9148e007c767cb3b8750eaa330d589403839e68027cd07802f5cdb2b8bc8312e"
+        }
+      ]
+    },
+    {
       "id": "years-roadmap",
       "version": "cypher-llm-years-roadmap/v1",
       "category": "governance",
@@ -879,7 +908,7 @@
         {
           "kind": "example",
           "path": "examples/roadmap/cypher-llm-years-roadmap.json",
-          "sha256": "22f5b447a138573fc08df4b5d5ebd9ccf67b31e3c3458ef910c0d6d1c6f9ea7d"
+          "sha256": "79408e4a1100235887f28b9fe64efa8c05f8116d732afacc16c88bfee15ba26c"
         }
       ]
     },
@@ -932,7 +961,7 @@
         {
           "kind": "example",
           "path": "examples/governance/compatibility-diff.json",
-          "sha256": "61e00a7fa595e8b966c367ab7e940608c6304a481037ee484485c52a6f8fa229"
+          "sha256": "bca83e0de99050402f23c7921366d7e2c6d0a632771bf5c33c4210417c9e68da"
         }
       ]
     },
@@ -961,7 +990,7 @@
         {
           "kind": "example",
           "path": "examples/governance/contract-conformance.json",
-          "sha256": "f6cbbb474f4d07786e189a3843ad4747ddf42b645e258079085960ede4912fba"
+          "sha256": "56590debd70a9eaad459362b22ff125e92e4bcb15b4d267e3248dfc4f645d650"
         }
       ]
     }

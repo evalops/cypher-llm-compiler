@@ -5,11 +5,11 @@
   "packageName": "@evalops/cypher-llm-compiler",
   "packageVersion": "0.1.0",
   "summary": {
-    "contracts": 32,
-    "passedContracts": 32,
+    "contracts": 33,
+    "passedContracts": 33,
     "warningContracts": 0,
     "failedContracts": 0,
-    "checks": 235,
+    "checks": 242,
     "warnings": 0,
     "failures": 0,
     "missingFiles": 0,
@@ -1479,6 +1479,56 @@
           "id": "evidence-file",
           "status": "pass",
           "path": "test/http-server.test.ts",
+          "message": "File exists."
+        }
+      ]
+    },
+    {
+      "id": "service-openapi",
+      "version": "cypher-llm-service-openapi/v1",
+      "level": "stable",
+      "status": "pass",
+      "checks": [
+        {
+          "id": "schema-file",
+          "status": "pass",
+          "path": "schemas/service-openapi.schema.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "schemas/service-openapi.schema.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "example-file",
+          "status": "pass",
+          "path": "examples/service/service-openapi.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "examples/service/service-openapi.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "schema-validation",
+          "status": "pass",
+          "path": "examples/service/service-openapi.json",
+          "message": "Example validates against schema."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "src/service-openapi.ts",
+          "message": "File exists."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "test/service-openapi.test.ts",
           "message": "File exists."
         }
       ]

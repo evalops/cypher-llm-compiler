@@ -168,6 +168,15 @@
           "failureHandling": "Block the release until duplicate or incomplete contract metadata is fixed."
         },
         {
+          "id": "service-openapi",
+          "title": "Fetch service route contract",
+          "toolName": "cypher_service_openapi",
+          "cliCommand": "cypher-llm service-openapi --openapi-out service-openapi.json",
+          "outputContract": "cypher-llm-service-openapi/v1",
+          "successSignal": "Every advertised route has an operationId and JSON response schema.",
+          "failureHandling": "Do not integrate HTTP clients against undocumented or schema-less routes."
+        },
+        {
           "id": "diff",
           "title": "Compare baseline and candidate catalogs",
           "toolName": "cypher_compatibility_diff",
@@ -289,6 +298,7 @@
     "cypher-llm-diagnostic-catalog/v1",
     "cypher-llm-policy-report/v1",
     "cypher-llm-policy-eval/v1",
+    "cypher-llm-service-openapi/v1",
     "cypher-llm-lossless-conformance/v1",
     "cypher-llm-compatibility-catalog/v1",
     "cypher-llm-compatibility-diff/v1",
@@ -300,6 +310,7 @@
     "examples/proofs/tool-hash.agent-feedback.json",
     "examples/proofs/tool-hash.repair-plan.json",
     "examples/policy/tool-hash.policy-eval.json",
+    "examples/service/service-openapi.json",
     "examples/lossless/conformance.json",
     "examples/diagnostics/diagnostic-catalog.json",
     "examples/governance/compatibility-catalog.json",
