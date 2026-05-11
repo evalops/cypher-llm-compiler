@@ -5,11 +5,11 @@
   "packageName": "@evalops/cypher-llm-compiler",
   "packageVersion": "0.1.0",
   "summary": {
-    "contracts": 33,
-    "passedContracts": 33,
+    "contracts": 34,
+    "passedContracts": 34,
     "warningContracts": 0,
     "failedContracts": 0,
-    "checks": 242,
+    "checks": 251,
     "warnings": 0,
     "failures": 0,
     "missingFiles": 0,
@@ -667,6 +667,68 @@
           "id": "evidence-file",
           "status": "pass",
           "path": "test/agent-feedback.test.ts",
+          "message": "File exists."
+        }
+      ]
+    },
+    {
+      "id": "agent-workspace",
+      "version": "cypher-llm-agent-workspace/v1",
+      "level": "stable",
+      "status": "pass",
+      "checks": [
+        {
+          "id": "schema-file",
+          "status": "pass",
+          "path": "schemas/agent-workspace.schema.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "schemas/agent-workspace.schema.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "example-file",
+          "status": "pass",
+          "path": "examples/agent/tool-hash.workspace.json",
+          "message": "File exists."
+        },
+        {
+          "id": "fingerprint",
+          "status": "pass",
+          "path": "examples/agent/tool-hash.workspace.json",
+          "message": "Fingerprint matches."
+        },
+        {
+          "id": "schema-validation",
+          "status": "pass",
+          "path": "examples/agent/tool-hash.workspace.json",
+          "message": "Example validates against schema."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "src/agent-workspace.ts",
+          "message": "File exists."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "src/lsp.ts",
+          "message": "File exists."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "src/agent-feedback.ts",
+          "message": "File exists."
+        },
+        {
+          "id": "evidence-file",
+          "status": "pass",
+          "path": "test/agent-workspace.test.ts",
           "message": "File exists."
         }
       ]

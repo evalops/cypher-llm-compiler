@@ -1,0 +1,152 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evalops.dev/schemas/cypher-llm/agent-workspace/v1.json",
+  "title": "Cypher LLM Agent Workspace",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "generatedAt",
+    "uri",
+    "status",
+    "canExecute",
+    "renderedCypher",
+    "nextAction",
+    "summary",
+    "diagnosticCodes",
+    "modelInstructions",
+    "editor",
+    "contracts",
+    "lsp",
+    "agentFeedback"
+  ],
+  "properties": {
+    "version": { "const": "cypher-llm-agent-workspace/v1" },
+    "generatedAt": { "type": "string", "minLength": 1 },
+    "uri": { "type": "string", "minLength": 1 },
+    "status": { "enum": ["ready", "repaired", "needs-model", "blocked"] },
+    "canExecute": { "type": "boolean" },
+    "renderedCypher": { "type": "string" },
+    "nextAction": { "$ref": "#/$defs/nextAction" },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "diagnostics",
+        "errors",
+        "warnings",
+        "infos",
+        "codeActions",
+        "deterministicRepairs",
+        "modelRequired",
+        "unsafe",
+        "sourceAnchored",
+        "policyOk"
+      ],
+      "properties": {
+        "diagnostics": { "type": "integer", "minimum": 0 },
+        "errors": { "type": "integer", "minimum": 0 },
+        "warnings": { "type": "integer", "minimum": 0 },
+        "infos": { "type": "integer", "minimum": 0 },
+        "codeActions": { "type": "integer", "minimum": 0 },
+        "deterministicRepairs": { "type": "integer", "minimum": 0 },
+        "modelRequired": { "type": "integer", "minimum": 0 },
+        "unsafe": { "type": "integer", "minimum": 0 },
+        "sourceAnchored": { "type": "integer", "minimum": 0 },
+        "policyOk": { "type": "boolean" }
+      }
+    },
+    "diagnosticCodes": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "modelInstructions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/modelInstruction" }
+    },
+    "editor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["languageId", "quickFixes", "sourceAnchors"],
+      "properties": {
+        "languageId": { "enum": ["cypher", "cypher-ir"] },
+        "quickFixes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/quickFix" }
+        },
+        "sourceAnchors": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/sourceAnchor" }
+        }
+      }
+    },
+    "contracts": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "lsp": { "type": "object", "additionalProperties": true },
+    "agentFeedback": { "type": "object", "additionalProperties": true }
+  },
+  "$defs": {
+    "nextAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "title", "reason", "diagnosticCodes"],
+      "properties": {
+        "kind": {
+          "enum": ["execute", "apply-deterministic-repairs", "regenerate-query", "request-approval", "blocked"]
+        },
+        "title": { "type": "string", "minLength": 1 },
+        "reason": { "type": "string", "minLength": 1 },
+        "diagnosticCodes": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        }
+      }
+    },
+    "modelInstruction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "title", "instruction", "diagnosticCodes"],
+      "properties": {
+        "source": { "enum": ["next-action", "diagnostic-catalog", "repair-plan"] },
+        "title": { "type": "string", "minLength": 1 },
+        "instruction": { "type": "string", "minLength": 1 },
+        "diagnosticCodes": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "code": { "type": "string", "minLength": 1 }
+      }
+    },
+    "quickFix": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "kind", "diagnosticCodes"],
+      "properties": {
+        "title": { "type": "string", "minLength": 1 },
+        "kind": { "enum": ["quickfix", "refactor.rewrite", "source.fixAll"] },
+        "diagnosticCodes": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        }
+      }
+    },
+    "sourceAnchor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "class", "sourceAnchor"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "class": { "enum": ["deterministic", "model-required", "unsafe"] },
+        "path": { "type": "string", "minLength": 1 },
+        "sourceAnchor": { "type": "object", "additionalProperties": true }
+      }
+    }
+  }
+}

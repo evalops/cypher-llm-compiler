@@ -63,6 +63,7 @@ describe("compiler HTTP service", () => {
     assert.equal(health.tools, tools.tools.length);
     assert.ok(tools.tools.some((tool) => tool.name === "cypher_prove"));
     assert.ok(tools.tools.some((tool) => tool.name === "cypher_agent_feedback"));
+    assert.ok(tools.tools.some((tool) => tool.name === "cypher_agent_workspace"));
     assert.equal(agentGuide.version, "cypher-llm-agent-guide/v1");
     assert.ok(agentGuide.workflows.length > 0);
     assert.equal(diagnosticCatalog.version, "cypher-llm-diagnostic-catalog/v1");
@@ -108,6 +109,12 @@ describe("compiler HTTP service", () => {
       query,
       defaultLimit: 25
     }) as { version: string; nextAction: { kind: string } };
+    const workspace = await postJson(`${baseUrl}/v1/agent-workspace`, {
+      schema,
+      query,
+      defaultLimit: 25,
+      uri: "file:///query.json"
+    }) as { version: string; editor: { quickFixes: { title: string }[] } };
     const agentGuide = await postJson(`${baseUrl}/v1/agent-guide`, {}) as { version: string };
     const diagnosticCatalog = await postJson(`${baseUrl}/v1/diagnostic-catalog`, {}) as { version: string };
     const compatibility = await postJson(`${baseUrl}/v1/compatibility`, {}) as { version: string; contracts: unknown[] };
@@ -208,6 +215,8 @@ describe("compiler HTTP service", () => {
     assert.equal(repairPlan.deterministic.length, 1);
     assert.equal(feedback.version, "cypher-llm-agent-feedback/v1");
     assert.equal(feedback.nextAction.kind, "apply-deterministic-repairs");
+    assert.equal(workspace.version, "cypher-llm-agent-workspace/v1");
+    assert.ok(workspace.editor.quickFixes.some((fix) => fix.title.includes("add-limit")));
     assert.equal(agentGuide.version, "cypher-llm-agent-guide/v1");
     assert.equal(diagnosticCatalog.version, "cypher-llm-diagnostic-catalog/v1");
     assert.equal(compatibility.version, "cypher-llm-compatibility-catalog/v1");

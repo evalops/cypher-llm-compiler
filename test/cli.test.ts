@@ -1389,6 +1389,82 @@ describe("cli", () => {
     assert.ok(writes.get("out/service-openapi.json")?.includes("/v1/render"));
   });
 
+  it("prints and writes agent workspace packets", async () => {
+    const files = new Map<string, string>([
+      [
+        "schema.json",
+        JSON.stringify({
+          version: "cypher-llm-schema/v1",
+          nodes: [
+            { name: "Tool", aliases: ["tool"], properties: { name: { type: "STRING" } } },
+            { name: "Hash", properties: { value: { type: "STRING" } } }
+          ],
+          relationships: [{ type: "has MD5 hash", aliases: ["md5"], from: "Tool", to: "Hash" }]
+        })
+      ],
+      [
+        "query.json",
+        JSON.stringify({
+          version: "cypher-llm-ir/v1",
+          profile: "llm-safe-readonly",
+          clauses: [
+            {
+              kind: "match",
+              patterns: [
+                {
+                  segments: [
+                    { variable: "tool", labels: ["tool"] },
+                    { rel: { types: ["md5"], direction: "in", minHops: 1, maxHops: null }, node: { variable: "hash", labels: ["Hash"] } }
+                  ]
+                }
+              ]
+            },
+            { kind: "return", items: [{ expression: { kind: "var", name: "hash" } }] }
+          ]
+        })
+      ]
+    ]);
+    const writes = new Map<string, string>();
+    let stdout = "";
+    let stderr = "";
+    const io: CliIO = {
+      stdout: { write: (chunk: string | Uint8Array) => ((stdout += String(chunk)), true) },
+      stderr: { write: (chunk: string | Uint8Array) => ((stderr += String(chunk)), true) },
+      readFile: async (path) => files.get(String(path)) ?? "",
+      writeFile: async (path, data) => {
+        writes.set(path, data);
+      },
+      mkdir: async () => undefined
+    };
+
+    const code = await runCli(
+      [
+        "agent-workspace",
+        "--schema",
+        "schema.json",
+        "--query",
+        "query.json",
+        "--workspace-out",
+        "out/workspace.json",
+        "--uri",
+        "file:///query.json",
+        "--default-limit",
+        "25",
+        "--default-max-hops",
+        "3"
+      ],
+      io
+    );
+    const output = JSON.parse(stdout) as { version: string; nextAction: { kind: string }; editor: { quickFixes: { title: string }[] } };
+
+    assert.equal(code, 0);
+    assert.equal(stderr, "");
+    assert.equal(output.version, "cypher-llm-agent-workspace/v1");
+    assert.equal(output.nextAction.kind, "apply-deterministic-repairs");
+    assert.ok(output.editor.quickFixes.some((fix) => fix.title.includes("add-limit")));
+    assert.ok(writes.get("out/workspace.json")?.includes("cypher-llm-agent-workspace/v1"));
+  });
+
   it("imports text2cypher CSV fixtures to dataset and attempt files", async () => {
     const files = new Map<string, string>([
       [

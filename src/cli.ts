@@ -5,6 +5,7 @@ import process from "node:process";
 import type { CypherQuery, CypherSchemaContract, JsonLiteral } from "./ir.js";
 import { buildCypherAgentFeedback } from "./agent-feedback.js";
 import { buildAgentGuide, renderAgentGuideMarkdown } from "./agent-guide.js";
+import { buildCypherAgentWorkspace } from "./agent-workspace.js";
 import { buildBenchmarkGateReport } from "./benchmark-gate.js";
 import {
   buildCompatibilityCatalog,
@@ -154,6 +155,9 @@ export async function runCli(argv: string[], io: CliIO = defaultIo()): Promise<n
         return 0;
       case "agent-feedback":
         await agentFeedbackCommand(args, io);
+        return 0;
+      case "agent-workspace":
+        await agentWorkspaceCommand(args, io);
         return 0;
       case "agent-guide":
         await agentGuideCommand(args, io);
@@ -574,6 +578,43 @@ async function agentFeedbackCommand(args: Map<string, string | boolean>, io: Cli
   writeJson(io, feedback);
   if (args.get("fail-on-blocked") === true && feedback.status === "blocked") {
     throw new Error("Cypher agent feedback is blocked.");
+  }
+}
+
+async function agentWorkspaceCommand(args: Map<string, string | boolean>, io: CliIO) {
+  const schema = normalizeSchema(await readSchema(args, io)).original;
+  const query = await readQuery(args, io);
+  const params = await readParams(args, io);
+  const defaultLimit = optionalNumber(args.get("default-limit"));
+  const defaultMaxHops = optionalNumber(args.get("default-max-hops"));
+  const workspaceOptions: Parameters<typeof buildCypherAgentWorkspace>[3] = {};
+  if (defaultLimit !== undefined) {
+    workspaceOptions.defaultLimit = defaultLimit;
+  }
+  if (defaultMaxHops !== undefined) {
+    workspaceOptions.defaultMaxHops = defaultMaxHops;
+  }
+  if (args.get("allow-writes") === true) {
+    workspaceOptions.allowWrites = true;
+  }
+  if (args.get("approved") === true) {
+    workspaceOptions.approved = true;
+  }
+  if (args.get("no-parser") === true) {
+    workspaceOptions.includeParser = false;
+  }
+  if (typeof args.get("uri") === "string") {
+    workspaceOptions.uri = args.get("uri") as string;
+  }
+  await applyPolicyEvidenceArgs(args, io, workspaceOptions);
+  workspaceOptions.parserMode = args.get("parser-mode") === "lint" ? "lint" : "syntax";
+  const workspace = buildCypherAgentWorkspace(query, schema, params, workspaceOptions);
+  if (typeof args.get("workspace-out") === "string") {
+    await writeJsonFile(io, args.get("workspace-out") as string, workspace);
+  }
+  writeJson(io, workspace);
+  if (args.get("fail-on-blocked") === true && workspace.status === "blocked") {
+    throw new Error("Cypher agent workspace is blocked.");
   }
 }
 
@@ -1144,6 +1185,7 @@ Commands:
   lsp-diagnostics --schema schema.json (--query query.json | --cypher "MATCH ...") [--uri file:///query.cypher] [--report-out report.json] [--parser-mode syntax|lint] [--default-limit 25] [--default-max-hops 5]
   prove       --schema schema.json --query query.json [--params params.json] [--proof-out proof.json] [--fail-on-blocked] [--default-limit 25] [--default-max-hops 5] [--planner-estimate estimate.json] [--schema-statistics stats.json] [--policy-rules rules.json] [--no-require-limit] [--max-return-limit 100] [--max-relationship-hops 5] [--allow-writes] [--approved] [--parser-mode syntax|lint] [--no-parser]
   agent-feedback --schema schema.json --query query.json [--params params.json] [--feedback-out feedback.json] [--fail-on-blocked] [--default-limit 25] [--default-max-hops 5] [--planner-estimate estimate.json] [--schema-statistics stats.json] [--policy-rules rules.json] [--no-require-limit] [--max-return-limit 100] [--max-relationship-hops 5] [--allow-writes] [--approved] [--parser-mode syntax|lint] [--no-parser]
+  agent-workspace --schema schema.json --query query.json [--params params.json] [--uri file:///query.json] [--workspace-out workspace.json] [--fail-on-blocked] [--default-limit 25] [--default-max-hops 5] [--planner-estimate estimate.json] [--schema-statistics stats.json] [--policy-rules rules.json] [--no-require-limit] [--max-return-limit 100] [--max-relationship-hops 5] [--allow-writes] [--approved] [--parser-mode syntax|lint] [--no-parser]
   agent-guide [--format json|markdown] [--guide-out path]
   diagnostic-catalog [--format json|markdown] [--integrity] [--fail-on-error] [--catalog-out path]
   introspect-neo4j --uri bolt://localhost:7687 --user neo4j --password password [--schema-out schema.json] [--sample-limit 1000] [--no-procedures]

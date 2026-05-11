@@ -61,6 +61,7 @@ describe("OpenAI tool schemas", () => {
       "cypher_lsp_diagnostics",
       "cypher_prove",
       "cypher_agent_feedback",
+      "cypher_agent_workspace",
       "cypher_agent_guide",
       "cypher_diagnostic_catalog",
       "cypher_compatibility_catalog",
@@ -256,6 +257,19 @@ describe("OpenAI tool schemas", () => {
     assert.equal(feedback.nextAction.kind, "apply-deterministic-repairs");
     assert.equal(feedback.proof.version, "cypher-llm-proof/v1");
     assert.equal(feedback.repairPlan.version, "cypher-llm-repair-plan/v1");
+
+    const workspace = (await executeCypherCompilerTool("cypher_agent_workspace", {
+      schema,
+      query: repairableQuery,
+      defaultLimit: 25,
+      defaultMaxHops: 3,
+      uri: "file:///query.json"
+    })) as { version: string; nextAction: { kind: string }; lsp: { version: string }; editor: { quickFixes: { title: string }[] } };
+
+    assert.equal(workspace.version, "cypher-llm-agent-workspace/v1");
+    assert.equal(workspace.nextAction.kind, "apply-deterministic-repairs");
+    assert.equal(workspace.lsp.version, "cypher-llm-lsp-diagnostics/v1");
+    assert.ok(workspace.editor.quickFixes.some((fix) => fix.title.includes("add-limit")));
 
     const agentGuide = (await executeCypherCompilerTool("cypher_agent_guide", {})) as {
       version: string;

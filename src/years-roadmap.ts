@@ -288,11 +288,13 @@ export const yearsRoadmap = {
         "src/tools.ts",
         "src/lsp.ts",
         "src/agent-feedback.ts",
+        "src/agent-workspace.ts",
         "src/agent-guide.ts",
         "src/diagnostic-catalog.ts",
         "schemas/agent-guide.schema.json",
         "schemas/diagnostic-catalog.schema.json",
         "schemas/agent-feedback.schema.json",
+        "schemas/agent-workspace.schema.json",
         "docs/INTEGRATIONS.md",
         "examples/raw-to-ir-migration.md"
       ],
@@ -537,6 +539,13 @@ export const yearsRoadmap = {
       status: "partial",
       evidence: ["src/agent-feedback.ts", "schemas/agent-feedback.schema.json", "test/agent-feedback.test.ts"],
       workstreamIds: ["semantic-proof-repair", "ecosystem-ux", "compiler-service"]
+    },
+    {
+      id: "agent-workspace-packets",
+      title: "One-Call IDE And Agent Workspace Packets",
+      status: "partial",
+      evidence: ["src/agent-workspace.ts", "schemas/agent-workspace.schema.json", "test/agent-workspace.test.ts"],
+      workstreamIds: ["ecosystem-ux", "semantic-proof-repair", "compiler-service", "governance-standards"]
     },
     {
       id: "agent-guide-bundle",

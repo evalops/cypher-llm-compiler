@@ -113,6 +113,30 @@ export const agentGuide = {
       ]
     },
     {
+      id: "editor-agent-workspace",
+      title: "Drive an IDE or chat repair loop",
+      goal: "Give an LLM client one packet with diagnostics, code actions, repair plan, proof, and next model instructions.",
+      steps: [
+        {
+          id: "workspace",
+          title: "Build the agent workspace packet",
+          toolName: "cypher_agent_workspace",
+          cliCommand: "cypher-llm agent-workspace --schema schema.json --query query.json --default-limit 25",
+          inputContract: "cypher-llm-ir/v1",
+          outputContract: "cypher-llm-agent-workspace/v1",
+          successSignal: "The packet includes nextAction, editor.quickFixes, modelInstructions, and nested LSP plus agent-feedback reports.",
+          failureHandling: "Use modelInstructions as the compact regeneration target and editor.quickFixes for deterministic changes."
+        },
+        {
+          id: "apply-or-regenerate",
+          title: "Apply the next action",
+          outputContract: "cypher-llm-agent-workspace/v1",
+          successSignal: "nextAction.kind is execute after deterministic repairs or targeted regeneration.",
+          failureHandling: "Stop when nextAction.kind is request-approval or blocked."
+        }
+      ]
+    },
+    {
       id: "repair-compiler-feedback",
       title: "Repair compiler feedback",
       goal: "Convert diagnostics into deterministic edits or a targeted model regeneration.",
@@ -310,6 +334,7 @@ export const agentGuide = {
     "cypher-llm-ir/v1",
     "cypher-llm-schema/v1",
     "cypher-llm-agent-feedback/v1",
+    "cypher-llm-agent-workspace/v1",
     "cypher-llm-repair-plan/v1",
     "cypher-llm-proof/v1",
     "cypher-llm-diagnostic-catalog/v1",
@@ -325,6 +350,7 @@ export const agentGuide = {
     "examples/tool-hash.query.json",
     "examples/tool-hash.schema.json",
     "examples/proofs/tool-hash.agent-feedback.json",
+    "examples/agent/tool-hash.workspace.json",
     "examples/proofs/tool-hash.repair-plan.json",
     "examples/policy/tool-hash.policy-eval.json",
     "examples/service/service-openapi.json",

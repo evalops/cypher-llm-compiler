@@ -20,6 +20,7 @@ describe("agent guide", () => {
     assert.equal(guide.authoringRules.preferredInput, "cypher-llm-ir/v1");
     assert.equal(guide.authoringRules.requiredDefaults.defaultLimit, 25);
     assert.ok(guide.workflows.some((workflow) => workflow.id === "author-read-query"));
+    assert.ok(guide.workflows.some((workflow) => workflow.id === "editor-agent-workspace"));
     assert.ok(guide.workflows.some((workflow) => workflow.id === "release-compatibility"));
     assert.ok(
       guide.workflows.some((workflow) =>
@@ -37,6 +38,7 @@ describe("agent guide", () => {
       )
     );
     assert.ok(guide.publicContracts.includes("cypher-llm-policy-eval/v1"));
+    assert.ok(guide.publicContracts.includes("cypher-llm-agent-workspace/v1"));
     assert.ok(guide.publicContracts.includes("cypher-llm-service-openapi/v1"));
     assert.ok(guide.publicContracts.includes("cypher-llm-lossless-conformance/v1"));
     assert.ok(guide.diagnosticPlaybooks.some((playbook) => playbook.codes.includes("missing-limit")));
@@ -48,6 +50,7 @@ describe("agent guide", () => {
 
     assert.ok(markdown.includes("# Cypher LLM Agent Guide"));
     assert.ok(markdown.includes("cypher_agent_feedback"));
+    assert.ok(markdown.includes("cypher_agent_workspace"));
     assert.ok(markdown.includes("missing-limit"));
   });
 

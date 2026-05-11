@@ -1,6 +1,7 @@
 export * from "./ir.js";
 export * from "./agent-feedback.js";
 export * from "./agent-guide.js";
+export * from "./agent-workspace.js";
 export * from "./benchmark-gate.js";
 export * from "./compatibility-diff.js";
 export * from "./compatibility.js";

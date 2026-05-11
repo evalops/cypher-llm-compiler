@@ -1,0 +1,597 @@
+{
+  "version": "cypher-llm-agent-workspace/v1",
+  "generatedAt": "2026-05-10",
+  "uri": "file:///examples/tool-hash.query.json",
+  "status": "repaired",
+  "canExecute": true,
+  "renderedCypher": "MATCH (tool:`Tool` {`name`: $toolName})-[:`has MD5 hash`]->(hash:`Hash`)\nRETURN hash.`value` AS md5\nLIMIT 25",
+  "nextAction": {
+    "kind": "apply-deterministic-repairs",
+    "title": "Apply deterministic repairs, then execute",
+    "reason": "The compiler produced a safe repaired query without requiring another model call.",
+    "diagnosticCodes": [
+      "relationship-direction-mismatch",
+      "missing-limit"
+    ]
+  },
+  "summary": {
+    "diagnostics": 0,
+    "errors": 0,
+    "warnings": 0,
+    "infos": 0,
+    "codeActions": 4,
+    "deterministicRepairs": 4,
+    "modelRequired": 0,
+    "unsafe": 0,
+    "sourceAnchored": 4,
+    "policyOk": true
+  },
+  "diagnosticCodes": [
+    "relationship-direction-mismatch",
+    "missing-limit"
+  ],
+  "modelInstructions": [
+    {
+      "source": "next-action",
+      "title": "Apply deterministic repairs, then execute",
+      "instruction": "The compiler produced a safe repaired query without requiring another model call.",
+      "diagnosticCodes": [
+        "relationship-direction-mismatch",
+        "missing-limit"
+      ]
+    },
+    {
+      "source": "diagnostic-catalog",
+      "title": "Relationship Direction Mismatch",
+      "instruction": "Direction can be flipped only when schema endpoints make it unambiguous. Apply deterministic compiler repair first, then re-run proof or agent feedback.",
+      "diagnosticCodes": [
+        "relationship-direction-mismatch"
+      ],
+      "code": "relationship-direction-mismatch"
+    },
+    {
+      "source": "diagnostic-catalog",
+      "title": "Missing LIMIT",
+      "instruction": "Autonomous reads should add a bounded RETURN LIMIT. Apply deterministic compiler repair first, then re-run proof or agent feedback.",
+      "diagnosticCodes": [
+        "missing-limit"
+      ],
+      "code": "missing-limit"
+    }
+  ],
+  "editor": {
+    "languageId": "cypher-ir",
+    "quickFixes": [
+      {
+        "title": "Preview compiler repair: canonicalize-identifier",
+        "kind": "refactor.rewrite",
+        "diagnosticCodes": []
+      },
+      {
+        "title": "Preview compiler repair: canonicalize-identifier",
+        "kind": "refactor.rewrite",
+        "diagnosticCodes": []
+      },
+      {
+        "title": "Preview compiler repair: fix-direction",
+        "kind": "refactor.rewrite",
+        "diagnosticCodes": []
+      },
+      {
+        "title": "Preview compiler repair: add-limit",
+        "kind": "refactor.rewrite",
+        "diagnosticCodes": []
+      }
+    ],
+    "sourceAnchors": [
+      {
+        "id": "deterministic-1-canonicalize-identifier",
+        "class": "deterministic",
+        "path": "/clauses/0/patterns/0/segments/0/labels/0",
+        "sourceAnchor": {
+          "sourcePath": "/statements/0/clauses/0",
+          "span": {
+            "start": {
+              "offset": 0,
+              "line": 0,
+              "character": 0
+            },
+            "end": {
+              "offset": 64,
+              "line": 1,
+              "character": 0
+            }
+          },
+          "text": "MATCH (tool:`tool` {`name`: $toolName})<-[:`md5`]-(hash:`Hash`)\n",
+          "kind": "clause",
+          "sourceKind": "match",
+          "keyword": "MATCH",
+          "support": "lifted",
+          "irPath": "/clauses/0"
+        }
+      },
+      {
+        "id": "deterministic-2-canonicalize-identifier",
+        "class": "deterministic",
+        "path": "/clauses/0/patterns/0/segments/1/rel/types/0",
+        "sourceAnchor": {
+          "sourcePath": "/statements/0/clauses/0",
+          "span": {
+            "start": {
+              "offset": 0,
+              "line": 0,
+              "character": 0
+            },
+            "end": {
+              "offset": 64,
+              "line": 1,
+              "character": 0
+            }
+          },
+          "text": "MATCH (tool:`tool` {`name`: $toolName})<-[:`md5`]-(hash:`Hash`)\n",
+          "kind": "clause",
+          "sourceKind": "match",
+          "keyword": "MATCH",
+          "support": "lifted",
+          "irPath": "/clauses/0"
+        }
+      },
+      {
+        "id": "deterministic-3-fix-direction",
+        "class": "deterministic",
+        "path": "/clauses/0/patterns/0/segments/1/rel/direction",
+        "sourceAnchor": {
+          "sourcePath": "/statements/0/clauses/0",
+          "span": {
+            "start": {
+              "offset": 0,
+              "line": 0,
+              "character": 0
+            },
+            "end": {
+              "offset": 64,
+              "line": 1,
+              "character": 0
+            }
+          },
+          "text": "MATCH (tool:`tool` {`name`: $toolName})<-[:`md5`]-(hash:`Hash`)\n",
+          "kind": "clause",
+          "sourceKind": "match",
+          "keyword": "MATCH",
+          "support": "lifted",
+          "irPath": "/clauses/0"
+        }
+      },
+      {
+        "id": "deterministic-4-add-limit",
+        "class": "deterministic",
+        "path": "/clauses/1/limit",
+        "sourceAnchor": {
+          "sourcePath": "/statements/0/clauses/1",
+          "span": {
+            "start": {
+              "offset": 64,
+              "line": 1,
+              "character": 0
+            },
+            "end": {
+              "offset": 90,
+              "line": 1,
+              "character": 26
+            }
+          },
+          "text": "RETURN hash.`value` AS md5",
+          "kind": "clause",
+          "sourceKind": "return",
+          "keyword": "RETURN",
+          "support": "lifted",
+          "irPath": "/clauses/1"
+        }
+      }
+    ]
+  },
+  "contracts": [
+    "cypher-llm-agent-workspace/v1",
+    "cypher-llm-agent-feedback/v1",
+    "cypher-llm-lsp-diagnostics/v1",
+    "cypher-llm-repair-plan/v1",
+    "cypher-llm-proof/v1"
+  ],
+  "lsp": {
+    "version": "cypher-llm-lsp-diagnostics/v1",
+    "uri": "file:///examples/tool-hash.query.json",
+    "languageId": "cypher-ir",
+    "renderedCypher": "MATCH (tool:`Tool` {`name`: $toolName})-[:`has MD5 hash`]->(hash:`Hash`)\nRETURN hash.`value` AS md5\nLIMIT 25",
+    "diagnostics": [],
+    "codeActions": [
+      {
+        "title": "Preview compiler repair: canonicalize-identifier",
+        "kind": "refactor.rewrite",
+        "diagnostics": [],
+        "data": {
+          "repair": {
+            "kind": "canonicalize-identifier",
+            "path": "/clauses/0/patterns/0/segments/0/labels/0",
+            "before": "tool",
+            "after": "Tool"
+          }
+        }
+      },
+      {
+        "title": "Preview compiler repair: canonicalize-identifier",
+        "kind": "refactor.rewrite",
+        "diagnostics": [],
+        "data": {
+          "repair": {
+            "kind": "canonicalize-identifier",
+            "path": "/clauses/0/patterns/0/segments/1/rel/types/0",
+            "before": "md5",
+            "after": "has MD5 hash"
+          }
+        }
+      },
+      {
+        "title": "Preview compiler repair: fix-direction",
+        "kind": "refactor.rewrite",
+        "diagnostics": [],
+        "data": {
+          "repair": {
+            "kind": "fix-direction",
+            "path": "/clauses/0/patterns/0/segments/1/rel/direction",
+            "before": "in",
+            "after": "out"
+          }
+        }
+      },
+      {
+        "title": "Preview compiler repair: add-limit",
+        "kind": "refactor.rewrite",
+        "diagnostics": [],
+        "data": {
+          "repair": {
+            "kind": "add-limit",
+            "path": "/clauses/1/limit",
+            "after": 25
+          }
+        }
+      }
+    ]
+  },
+  "agentFeedback": {
+    "version": "cypher-llm-agent-feedback/v1",
+    "status": "repaired",
+    "canExecute": true,
+    "nextAction": {
+      "kind": "apply-deterministic-repairs",
+      "title": "Apply deterministic repairs, then execute",
+      "reason": "The compiler produced a safe repaired query without requiring another model call.",
+      "diagnosticCodes": [
+        "relationship-direction-mismatch",
+        "missing-limit"
+      ]
+    },
+    "diagnosticCodes": [
+      "relationship-direction-mismatch",
+      "missing-limit"
+    ],
+    "diagnosticActions": [
+      {
+        "code": "relationship-direction-mismatch",
+        "catalogCode": "relationship-direction-mismatch",
+        "title": "Relationship Direction Mismatch",
+        "severity": "warning",
+        "source": "compiler-validation",
+        "category": "schema",
+        "preferredAction": "apply-deterministic-repair",
+        "preferredTool": "cypher_repair_plan",
+        "modelInstruction": "Direction can be flipped only when schema endpoints make it unambiguous. Apply deterministic compiler repair first, then re-run proof or agent feedback."
+      },
+      {
+        "code": "missing-limit",
+        "catalogCode": "missing-limit",
+        "title": "Missing LIMIT",
+        "severity": "warning",
+        "source": "compiler-validation",
+        "category": "policy",
+        "preferredAction": "apply-deterministic-repair",
+        "preferredTool": "cypher_repair_plan",
+        "modelInstruction": "Autonomous reads should add a bounded RETURN LIMIT. Apply deterministic compiler repair first, then re-run proof or agent feedback."
+      }
+    ],
+    "repairKinds": [
+      "canonicalize-identifier",
+      "fix-direction",
+      "add-limit"
+    ],
+    "policyEvidence": {
+      "version": "cypher-llm-policy-evidence/v1",
+      "ok": true,
+      "summary": {
+        "findings": 0,
+        "errors": 0,
+        "warnings": 0,
+        "infos": 0
+      },
+      "findingCodes": []
+    },
+    "proof": {
+      "version": "cypher-llm-proof/v1",
+      "status": "repaired",
+      "dialect": "neo4j-cypher-25",
+      "mode": "explain",
+      "cypher": "MATCH (tool:`Tool` {`name`: $toolName})-[:`has MD5 hash`]->(hash:`Hash`)\nRETURN hash.`value` AS md5\nLIMIT 25",
+      "preflightCypher": "EXPLAIN\nMATCH (tool:`Tool` {`name`: $toolName})-[:`has MD5 hash`]->(hash:`Hash`)\nRETURN hash.`value` AS md5\nLIMIT 25",
+      "canExecute": true,
+      "requiresApproval": false,
+      "repairKinds": [
+        "canonicalize-identifier",
+        "fix-direction",
+        "add-limit"
+      ],
+      "diagnosticCodes": [],
+      "policyEvidence": {
+        "version": "cypher-llm-policy-evidence/v1",
+        "ok": true,
+        "summary": {
+          "findings": 0,
+          "errors": 0,
+          "warnings": 0,
+          "infos": 0
+        },
+        "findingCodes": []
+      },
+      "claims": [
+        {
+          "id": "deterministic-repair",
+          "title": "Deterministic compiler repairs are recorded before rendering",
+          "status": "warning",
+          "evidence": [
+            "src/repair.ts",
+            "src/safety.ts"
+          ],
+          "diagnostics": []
+        },
+        {
+          "id": "compiler-diagnostics",
+          "title": "Compiler diagnostics have no blocking errors",
+          "status": "passed",
+          "evidence": [
+            "src/validate.ts",
+            "src/safety.ts"
+          ],
+          "diagnostics": []
+        },
+        {
+          "id": "execution-policy",
+          "title": "Execution policy allows this plan to run",
+          "status": "passed",
+          "evidence": [
+            "src/safety.ts",
+            "docs/LLM_SAFE_PROFILE.md"
+          ],
+          "diagnostics": []
+        },
+        {
+          "id": "cost-safety-policy",
+          "title": "Static cost, cardinality, and rule policy finds no blocking risk",
+          "status": "passed",
+          "evidence": [
+            "src/policy.ts",
+            "src/policy-rules.ts",
+            "docs/LLM_SAFE_PROFILE.md"
+          ],
+          "diagnostics": []
+        },
+        {
+          "id": "parser-preflight",
+          "title": "Rendered Cypher is accepted by parser preflight",
+          "status": "passed",
+          "evidence": [
+            "src/parser-validation.ts"
+          ],
+          "diagnostics": []
+        }
+      ]
+    },
+    "repairPlan": {
+      "version": "cypher-llm-repair-plan/v1",
+      "status": "ready",
+      "cypherBefore": "MATCH (tool:`tool` {`name`: $toolName})<-[:`md5`]-(hash:`Hash`)\nRETURN hash.`value` AS md5",
+      "cypherAfter": "MATCH (tool:`Tool` {`name`: $toolName})-[:`has MD5 hash`]->(hash:`Hash`)\nRETURN hash.`value` AS md5\nLIMIT 25",
+      "deterministic": [
+        {
+          "id": "deterministic-1-canonicalize-identifier",
+          "class": "deterministic",
+          "rank": 1,
+          "title": "Canonicalize schema identifier",
+          "path": "/clauses/0/patterns/0/segments/0/labels/0",
+          "sourceAnchor": {
+            "sourcePath": "/statements/0/clauses/0",
+            "span": {
+              "start": {
+                "offset": 0,
+                "line": 0,
+                "character": 0
+              },
+              "end": {
+                "offset": 64,
+                "line": 1,
+                "character": 0
+              }
+            },
+            "text": "MATCH (tool:`tool` {`name`: $toolName})<-[:`md5`]-(hash:`Hash`)\n",
+            "kind": "clause",
+            "sourceKind": "match",
+            "keyword": "MATCH",
+            "support": "lifted",
+            "irPath": "/clauses/0"
+          },
+          "diagnostics": [],
+          "patch": {
+            "op": "replace",
+            "path": "/clauses/0/patterns/0/segments/0/labels/0",
+            "value": "Tool"
+          },
+          "before": "tool",
+          "after": "Tool",
+          "rationale": "Compiler can apply this repair without another model call."
+        },
+        {
+          "id": "deterministic-2-canonicalize-identifier",
+          "class": "deterministic",
+          "rank": 2,
+          "title": "Canonicalize schema identifier",
+          "path": "/clauses/0/patterns/0/segments/1/rel/types/0",
+          "sourceAnchor": {
+            "sourcePath": "/statements/0/clauses/0",
+            "span": {
+              "start": {
+                "offset": 0,
+                "line": 0,
+                "character": 0
+              },
+              "end": {
+                "offset": 64,
+                "line": 1,
+                "character": 0
+              }
+            },
+            "text": "MATCH (tool:`tool` {`name`: $toolName})<-[:`md5`]-(hash:`Hash`)\n",
+            "kind": "clause",
+            "sourceKind": "match",
+            "keyword": "MATCH",
+            "support": "lifted",
+            "irPath": "/clauses/0"
+          },
+          "diagnostics": [],
+          "patch": {
+            "op": "replace",
+            "path": "/clauses/0/patterns/0/segments/1/rel/types/0",
+            "value": "has MD5 hash"
+          },
+          "before": "md5",
+          "after": "has MD5 hash",
+          "rationale": "Compiler can apply this repair without another model call."
+        },
+        {
+          "id": "deterministic-3-fix-direction",
+          "class": "deterministic",
+          "rank": 3,
+          "title": "Repair relationship direction",
+          "path": "/clauses/0/patterns/0/segments/1/rel/direction",
+          "sourceAnchor": {
+            "sourcePath": "/statements/0/clauses/0",
+            "span": {
+              "start": {
+                "offset": 0,
+                "line": 0,
+                "character": 0
+              },
+              "end": {
+                "offset": 64,
+                "line": 1,
+                "character": 0
+              }
+            },
+            "text": "MATCH (tool:`tool` {`name`: $toolName})<-[:`md5`]-(hash:`Hash`)\n",
+            "kind": "clause",
+            "sourceKind": "match",
+            "keyword": "MATCH",
+            "support": "lifted",
+            "irPath": "/clauses/0"
+          },
+          "diagnostics": [],
+          "patch": {
+            "op": "replace",
+            "path": "/clauses/0/patterns/0/segments/1/rel/direction",
+            "value": "out"
+          },
+          "before": "in",
+          "after": "out",
+          "rationale": "Compiler can apply this repair without another model call."
+        },
+        {
+          "id": "deterministic-4-add-limit",
+          "class": "deterministic",
+          "rank": 4,
+          "title": "Add bounded LIMIT",
+          "path": "/clauses/1/limit",
+          "sourceAnchor": {
+            "sourcePath": "/statements/0/clauses/1",
+            "span": {
+              "start": {
+                "offset": 64,
+                "line": 1,
+                "character": 0
+              },
+              "end": {
+                "offset": 90,
+                "line": 1,
+                "character": 26
+              }
+            },
+            "text": "RETURN hash.`value` AS md5",
+            "kind": "clause",
+            "sourceKind": "return",
+            "keyword": "RETURN",
+            "support": "lifted",
+            "irPath": "/clauses/1"
+          },
+          "diagnostics": [],
+          "patch": {
+            "op": "add",
+            "path": "/clauses/1/limit",
+            "value": 25
+          },
+          "after": 25,
+          "rationale": "Compiler can apply this repair without another model call."
+        }
+      ],
+      "modelRequired": [],
+      "unsafe": [],
+      "diagnostics": [
+        {
+          "code": "relationship-direction-mismatch",
+          "severity": "warning",
+          "message": "Relationship 'has MD5 hash' direction does not match declared endpoints.",
+          "path": "/clauses/0/patterns/0/segments/1/rel",
+          "suggestion": "Use direction 'out' for this pattern.",
+          "repair": {
+            "kind": "fix-direction",
+            "description": "Change direction to 'out'.",
+            "replacement": "out"
+          }
+        },
+        {
+          "code": "missing-limit",
+          "severity": "warning",
+          "message": "RETURN has no LIMIT in an LLM-safe read profile.",
+          "path": "/clauses/1",
+          "suggestion": "Add a bounded LIMIT or let repairQuery add the configured default.",
+          "repair": {
+            "kind": "add-limit",
+            "description": "Add a default LIMIT to the RETURN clause."
+          }
+        }
+      ],
+      "policyEvidence": {
+        "version": "cypher-llm-policy-evidence/v1",
+        "ok": true,
+        "summary": {
+          "findings": 0,
+          "errors": 0,
+          "warnings": 0,
+          "infos": 0
+        },
+        "findingCodes": []
+      },
+      "summary": {
+        "deterministic": 4,
+        "modelRequired": 0,
+        "unsafe": 0,
+        "sourceAnchored": 4,
+        "diagnostics": 2
+      }
+    }
+  }
+}

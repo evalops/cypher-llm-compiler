@@ -29,6 +29,7 @@ Stable public contracts:
 - `cypher-llm-dataset-governance/v1`
 - `cypher-llm-repair-plan/v1`
 - `cypher-llm-agent-feedback/v1`
+- `cypher-llm-agent-workspace/v1`
 - `cypher-llm-agent-guide/v1`
 - `cypher-llm-diagnostic-catalog/v1`
 - `cypher-llm-service-manifest/v1`
@@ -142,6 +143,16 @@ cypher-llm agent-feedback --schema examples/tool-hash.schema.json --query exampl
 ```
 
 Agent feedback packets are the one-call contract for LLM clients. They include the proof object, repair plan, compact policy evidence, aggregate diagnostic codes, catalog-backed diagnostic actions, repair kinds, and a `nextAction` field that tells the client whether to execute, apply deterministic repairs, regenerate IR, request approval, or stop.
+
+## Agent Workspaces
+
+Run:
+
+```bash
+cypher-llm agent-workspace --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json --params examples/tool-hash.params.json --uri file:///examples/tool-hash.query.json --default-limit 25 --workspace-out examples/agent/tool-hash.workspace.json
+```
+
+Agent workspace packets are the IDE/chat repair-loop contract. They combine nested LSP diagnostics, editor quick fixes, proof, repair plan, policy evidence, next action, source anchors, and model instructions in a single `cypher-llm-agent-workspace/v1` object.
 
 ## Service Manifests
 

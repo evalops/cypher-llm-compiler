@@ -153,6 +153,9 @@ const compatibilityCatalogBase = {
     stableContract("agent-feedback", "cypher-llm-agent-feedback/v1", "agent-feedback", "ecosystem-ux", "schemas/agent-feedback.schema.json", [
       "examples/proofs/tool-hash.agent-feedback.json"
     ], ["src/agent-feedback.ts", "test/agent-feedback.test.ts"]),
+    stableContract("agent-workspace", "cypher-llm-agent-workspace/v1", "agent-feedback", "ecosystem-ux", "schemas/agent-workspace.schema.json", [
+      "examples/agent/tool-hash.workspace.json"
+    ], ["src/agent-workspace.ts", "src/lsp.ts", "src/agent-feedback.ts", "test/agent-workspace.test.ts"]),
     stableContract("agent-guide", "cypher-llm-agent-guide/v1", "agent-feedback", "ecosystem-ux", "schemas/agent-guide.schema.json", [
       "examples/agent/agent-guide.json"
     ], ["src/agent-guide.ts", "test/agent-guide.test.ts"]),

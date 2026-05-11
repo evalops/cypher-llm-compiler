@@ -1,6 +1,6 @@
 # Agent Integrations
 
-The compiler exposes the same twenty-four operations across OpenAI tool schemas, MCP, HTTP, LangChain-shaped adapters, and the CLI:
+The compiler exposes the same twenty-five operations across OpenAI tool schemas, MCP, HTTP, LangChain-shaped adapters, and the CLI:
 
 - `cypher_render`: repair IR, validate, and return a `SafeExecutionPlan`.
 - `cypher_validate`: return stable compiler diagnostics for IR.
@@ -15,6 +15,7 @@ The compiler exposes the same twenty-four operations across OpenAI tool schemas,
 - `cypher_lsp_diagnostics`: emit LSP-style diagnostics and code actions, including raw-Cypher text edits when repairs can be applied to exact source ranges.
 - `cypher_prove`: return proof-carrying compile output with repairs, diagnostics, parser preflight, execution-policy claims, optional policy evidence and thresholds, and a compact `policyEvidence` summary.
 - `cypher_agent_feedback`: return proof, repair plan, policy evidence, and the next action an LLM client should take.
+- `cypher_agent_workspace`: return one IDE/chat repair packet with LSP diagnostics, quick fixes, proof, repair plan, policy evidence, next action, and model instructions.
 - `cypher_agent_guide`: return LLM-facing authoring rules, tool sequences, execution blockers, and diagnostic playbooks.
 - `cypher_diagnostic_catalog`: return stable diagnostic-code metadata, severity, source, preferred action, and model repair instructions.
 - `cypher_compatibility_catalog`: return public contract versions, compatibility levels, fingerprints, release gates, certification gates, and deprecation policy.
@@ -145,6 +146,7 @@ Routes:
 - `POST /v1/lsp-diagnostics`
 - `POST /v1/prove`
 - `POST /v1/agent-feedback`
+- `POST /v1/agent-workspace`
 - `GET /v1/agent-guide`
 - `POST /v1/agent-guide`
 - `GET /v1/diagnostic-catalog`

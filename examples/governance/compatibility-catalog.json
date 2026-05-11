@@ -389,6 +389,37 @@
       ]
     },
     {
+      "id": "agent-workspace",
+      "version": "cypher-llm-agent-workspace/v1",
+      "category": "agent-feedback",
+      "level": "stable",
+      "ownerWorkstreamId": "ecosystem-ux",
+      "schemaPath": "schemas/agent-workspace.schema.json",
+      "examplePaths": [
+        "examples/agent/tool-hash.workspace.json"
+      ],
+      "evidencePaths": [
+        "src/agent-workspace.ts",
+        "src/lsp.ts",
+        "src/agent-feedback.ts",
+        "test/agent-workspace.test.ts"
+      ],
+      "breakingChangePolicy": "Requires a new versioned contract or an explicit migration note before release.",
+      "deprecationPolicy": "Stable consumers receive at least one minor release of notice plus a replacement or migration path.",
+      "fingerprints": [
+        {
+          "kind": "schema",
+          "path": "schemas/agent-workspace.schema.json",
+          "sha256": "ecafd0e1ead1e3d6bbcfb621bf6e8e16bb8f459f2826933d3731b9f755737f48"
+        },
+        {
+          "kind": "example",
+          "path": "examples/agent/tool-hash.workspace.json",
+          "sha256": "758018dccca6629b129dc0fd8ebf9ef3e3ca80212aacc0b4fc717c25c17808d1"
+        }
+      ]
+    },
+    {
       "id": "agent-guide",
       "version": "cypher-llm-agent-guide/v1",
       "category": "agent-feedback",
@@ -413,7 +444,7 @@
         {
           "kind": "example",
           "path": "examples/agent/agent-guide.json",
-          "sha256": "bf2106eacd8f2dd0083f427bbfd6df03a0566f54b305ebc4cefde22f0a7c9ca5"
+          "sha256": "7a92751118368bb711997b4de7c92939cd5cc4e152a843033a7b36bf2b1f47a3"
         }
       ]
     },
@@ -820,7 +851,7 @@
         {
           "kind": "example",
           "path": "examples/service/service-manifest.json",
-          "sha256": "8d3b0ec6a7dfcfbf00b3d9dbc3b70e732243fd7b92d1e519dcaae8ee2d4668ce"
+          "sha256": "ec5adaa95cdc56bbb2eb4cdd009e554d7d3401d258d8063439e3d850fb38aa05"
         }
       ]
     },
@@ -879,7 +910,7 @@
         {
           "kind": "example",
           "path": "examples/service/service-openapi.json",
-          "sha256": "9148e007c767cb3b8750eaa330d589403839e68027cd07802f5cdb2b8bc8312e"
+          "sha256": "a6fbcb992dcdb69129edf14d137c2dedf2798d6b7c9fabc55e09249b84429125"
         }
       ]
     },
@@ -908,7 +939,7 @@
         {
           "kind": "example",
           "path": "examples/roadmap/cypher-llm-years-roadmap.json",
-          "sha256": "79408e4a1100235887f28b9fe64efa8c05f8116d732afacc16c88bfee15ba26c"
+          "sha256": "6128b84f3c7e7f95912495d4e5b7bfb0147cc2f7f1aeb112d2560218e3ff10b8"
         }
       ]
     },
@@ -961,7 +992,7 @@
         {
           "kind": "example",
           "path": "examples/governance/compatibility-diff.json",
-          "sha256": "bca83e0de99050402f23c7921366d7e2c6d0a632771bf5c33c4210417c9e68da"
+          "sha256": "3e83c9a1bbd2335670ea9c6f3e3f6f8f4672f3a00f2e8545df0b6099bfdbe99c"
         }
       ]
     },
@@ -990,7 +1021,7 @@
         {
           "kind": "example",
           "path": "examples/governance/contract-conformance.json",
-          "sha256": "56590debd70a9eaad459362b22ff125e92e4bcb15b4d267e3248dfc4f645d650"
+          "sha256": "12dd9026403ccded83d592208540efab13aae7967a61ef9720a1dbd84a78d6a8"
         }
       ]
     }

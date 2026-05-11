@@ -90,6 +90,12 @@ Agent feedback packets wrap proof, repair-plan, policy evidence, and next-action
 cypher-llm agent-feedback --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json --params examples/tool-hash.params.json --default-limit 25
 ```
 
+Agent workspace packets combine agent feedback with LSP diagnostics, editor quick fixes, source anchors, and model instructions for IDE/chat repair loops. They are exported from `src/agent-workspace.ts`, validated by `schemas/agent-workspace.schema.json`, and checked in at `examples/agent/tool-hash.workspace.json`.
+
+```bash
+cypher-llm agent-workspace --schema examples/tool-hash.schema.json --query examples/tool-hash.query.json --params examples/tool-hash.params.json --uri file:///examples/tool-hash.query.json --default-limit 25
+```
+
 Agent guides publish stable LLM-facing workflow rules, tool sequences, execution blockers, and diagnostic playbooks. They are exported from `src/agent-guide.ts`, validated by `schemas/agent-guide.schema.json`, and checked in at `examples/agent/agent-guide.json`.
 
 ```bash

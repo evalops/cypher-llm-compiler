@@ -16,6 +16,7 @@ export const COMPILER_HTTP_TOOL_ROUTES = {
   "/v1/lsp-diagnostics": "cypher_lsp_diagnostics",
   "/v1/prove": "cypher_prove",
   "/v1/agent-feedback": "cypher_agent_feedback",
+  "/v1/agent-workspace": "cypher_agent_workspace",
   "/v1/agent-guide": "cypher_agent_guide",
   "/v1/diagnostic-catalog": "cypher_diagnostic_catalog",
   "/v1/compatibility": "cypher_compatibility_catalog",

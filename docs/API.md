@@ -196,6 +196,16 @@ The packet includes:
 - `diagnosticActions`: catalog-backed model actions for each known diagnostic code.
 - `nextAction`: one of `execute`, `apply-deterministic-repairs`, `regenerate-query`, `request-approval`, or `blocked`.
 
+## `buildCypherAgentWorkspace(query, schema, params?, options?)`
+
+Produces a `cypher-llm-agent-workspace/v1` packet for IDEs, chat repair loops, and agent clients that want one response with both editor and model guidance.
+
+The packet nests the full `cypher-llm-lsp-diagnostics/v1` and `cypher-llm-agent-feedback/v1` reports, then adds a compact summary, editor quick fixes, source anchors, public contract ids, and model instructions derived from the diagnostic catalog and repair plan. The CLI equivalent is:
+
+```bash
+cypher-llm agent-workspace --schema schema.json --query query.json --workspace-out workspace.json
+```
+
 ## `buildAgentGuide()`
 
 Produces a `cypher-llm-agent-guide/v1` object for LLM clients and agent runtimes.
@@ -483,6 +493,7 @@ Returns OpenAI Responses API function-tool definitions for:
 - `cypher_lsp_diagnostics`
 - `cypher_prove`
 - `cypher_agent_feedback`
+- `cypher_agent_workspace`
 - `cypher_agent_guide`
 - `cypher_diagnostic_catalog`
 - `cypher_compatibility_catalog`
@@ -542,6 +553,7 @@ Routes:
 - `POST /v1/lsp-diagnostics`
 - `POST /v1/prove`
 - `POST /v1/agent-feedback`
+- `POST /v1/agent-workspace`
 - `GET /v1/agent-guide`
 - `POST /v1/agent-guide`
 - `GET /v1/diagnostic-catalog`

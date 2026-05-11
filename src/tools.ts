@@ -1,5 +1,6 @@
 import { buildCypherAgentFeedback } from "./agent-feedback.js";
 import { buildAgentGuide } from "./agent-guide.js";
+import { buildCypherAgentWorkspace } from "./agent-workspace.js";
 import { buildBenchmarkGateReport } from "./benchmark-gate.js";
 import { buildCompatibilityCatalog, type CompatibilityCatalog } from "./compatibility.js";
 import { buildCompatibilityDiffReport } from "./compatibility-diff.js";
@@ -54,6 +55,7 @@ export type CypherCompilerToolName =
   | "cypher_lsp_diagnostics"
   | "cypher_prove"
   | "cypher_agent_feedback"
+  | "cypher_agent_workspace"
   | "cypher_agent_guide"
   | "cypher_diagnostic_catalog"
   | "cypher_compatibility_catalog"
@@ -575,6 +577,42 @@ export const CYPHER_COMPILER_TOOLS: readonly CypherCompilerToolDefinition[] = [
     })
   },
   {
+    name: "cypher_agent_workspace",
+    description:
+      "Return one IDE/agent workspace packet that combines LSP diagnostics, code actions, proof, repair plan, policy evidence, next action, and model instructions.",
+    inputSchema: objectSchema(["schema", "query"], {
+      schema: schemaContractSchema,
+      query: cypherQuerySchema,
+      params: paramsSchema,
+      uri: {
+        type: "string",
+        description: "Document URI to attach to nested LSP diagnostics and editor hints."
+      },
+      ...repairOptionProperties,
+      ...policyEvidenceProperties,
+      allowWrites: {
+        type: "boolean",
+        description: "Allow write clauses to pass validation. Use only after an external approval step."
+      },
+      approved: {
+        type: "boolean",
+        description: "Mark a write query as externally approved when allowWrites is also true."
+      },
+      mode: {
+        enum: ["explain", "readonly", "write-requires-approval"],
+        description: "Execution mode metadata for the nested proof."
+      },
+      parserMode: {
+        enum: ["lint", "syntax"],
+        description: "Parser preflight mode for the rendered Cypher."
+      },
+      includeParser: {
+        type: "boolean",
+        description: "Set false to skip parser preflight in constrained environments."
+      }
+    })
+  },
+  {
     name: "cypher_agent_guide",
     description:
       "Return the machine-readable agent guide: recommended Cypher IR workflow, tool sequences, execution rules, and diagnostic playbooks for LLM clients.",
@@ -860,6 +898,14 @@ export async function executeCypherCompilerTool(name: string, input: unknown): P
         requiredObject<CypherSchemaContract>(args, "schema"),
         optionalParams(args),
         proofOptions(args)
+      );
+    }
+    case "cypher_agent_workspace": {
+      return buildCypherAgentWorkspace(
+        requiredObject<CypherQuery>(args, "query"),
+        requiredObject<CypherSchemaContract>(args, "schema"),
+        optionalParams(args),
+        workspaceOptions(args)
       );
     }
     case "cypher_compatibility_catalog": {
@@ -1310,6 +1356,15 @@ function serviceOpenApiOptions(args: Record<string, unknown>): Parameters<typeof
   }
   if (auditEnabled !== undefined) {
     options.auditEnabled = auditEnabled;
+  }
+  return options;
+}
+
+function workspaceOptions(args: Record<string, unknown>): NonNullable<Parameters<typeof buildCypherAgentWorkspace>[3]> {
+  const options = proofOptions(args) as NonNullable<Parameters<typeof buildCypherAgentWorkspace>[3]>;
+  const uri = optionalString(args, "uri");
+  if (uri !== undefined) {
+    options.uri = uri;
   }
   return options;
 }

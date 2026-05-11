@@ -188,6 +188,12 @@
     },
     {
       "method": "POST",
+      "path": "/v1/agent-workspace",
+      "operation": "cypher_agent_workspace",
+      "authRequired": false
+    },
+    {
+      "method": "POST",
       "path": "/v1/agent-guide",
       "operation": "cypher_agent_guide",
       "authRequired": false
